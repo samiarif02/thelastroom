@@ -35,6 +35,7 @@ const fixture = ContentBundle(
       scene: [SceneLine(speakerId: 'priya', text: 'Thanks for coming in.')],
       question: SceneLine(speakerId: 'priya', text: 'Why this role?'),
       hinted: false,
+      timed: false,
       isBaseline: true,
       beats: [
         Beat(

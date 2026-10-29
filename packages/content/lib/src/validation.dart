@@ -91,6 +91,11 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
       if (lessonId != null && !lessonIds.contains(lessonId)) {
         issue(option.id, 'lesson $lessonId does not exist');
       }
+      // A flagged line can be the costliest one, and the debrief must then teach something
+      // (FR-15) and schedule a recall card for it (FR-16).
+      if (option.flags.isNotEmpty && lessonId == null) {
+        issue(option.id, 'is flagged but teaches no lesson');
+      }
     }
   }
 
@@ -148,6 +153,9 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
       checkOptions(followUp.id, followUp.replies);
     }
 
+    if (mission.isBaseline && (mission.hinted || mission.timed)) {
+      issue(mission.id, 'the baseline must be unhinted and untimed');
+    }
     if (mission.hinted && mission.skillRequirements.isNotEmpty) {
       issue(mission.id, 'a hinted mission can never unlock a skill');
     }

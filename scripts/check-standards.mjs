@@ -45,11 +45,17 @@ export const REQUIRED_SCRIPTS = {
 	'check:secrets': /check-secrets\.mjs/,
 	'check:standards': /check-standards\.mjs/,
 	'check:events': /check-events\.mjs/,
-	'check:env': /check-env\.mjs/
+	'check:env': /check-env\.mjs/,
+	'check:rls': /check-rls\.mjs/,
+	'test:db': /supabase test db/
 }
 
 // Gates CI must run on every PR (format runs as format:check).
 export const CI_GATES = [...Object.keys(REQUIRED_SCRIPTS), 'build:web']
+
+// The CI jobs whose `npm run` gates local-review runs too, in this order: the gates job, then
+// the database job (migrations replayed + pgTAP RLS tests, which needs Docker).
+export const CI_MIRRORED_JOBS = ['check', 'db']
 
 export const HANDOFF_SECTIONS = [
 	'Current goal',
@@ -268,11 +274,12 @@ export const CHECKS = [
 		run: (c) => {
 			const skill = '.claude/skills/local-review/SKILL.md'
 			if (!c.exists(skill)) return [`${skill} is missing`]
-			const ciRuns = npmRuns(ciJob(c.read('.github/workflows/ci.yml'), 'check'))
+			const ci = c.read('.github/workflows/ci.yml')
+			const ciRuns = CI_MIRRORED_JOBS.flatMap((job) => npmRuns(ciJob(ci, job)))
 			const reviewRuns = npmRuns(fencedBlocks(c.read(skill)))
 			if (ciRuns.length === 0) return ["found no `npm run` gates in CI's check job"]
 			if (reviewRuns.join(' ') !== ciRuns.join(' '))
-				return [`local-review runs [${reviewRuns.join(', ')}] but CI's check job runs [${ciRuns.join(', ')}]; same gates, same order`]
+				return [`local-review runs [${reviewRuns.join(', ')}] but CI's ${CI_MIRRORED_JOBS.join(' + ')} jobs run [${ciRuns.join(', ')}]; same gates, same order`]
 			return []
 		}
 	},

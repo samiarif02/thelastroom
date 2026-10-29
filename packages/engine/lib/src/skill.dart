@@ -40,4 +40,12 @@ Set<Skill> newlyUnlockedSkills({
   required bool hinted,
   required List<SkillRequirement> requirements,
   required Set<Skill> alreadyUnlocked,
-}) => throw UnimplementedError();
+}) {
+  if (hinted) return const {};
+  return {
+    for (final requirement in requirements)
+      if (score.dimensions[requirement.dimension]! >= requirement.minScore &&
+          !alreadyUnlocked.contains(requirement.skill))
+        requirement.skill,
+  };
+}

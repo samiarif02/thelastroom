@@ -21,7 +21,13 @@ class BaselineComparison {
 BaselineComparison compareToBaseline({
   required MissionScore baseline,
   required MissionScore latest,
-}) => throw UnimplementedError();
+}) => BaselineComparison(
+  dimensionDeltas: {
+    for (final d in Dimension.values)
+      d: latest.dimensions[d]! - baseline.dimensions[d]!,
+  },
+  totalDelta: latest.total - baseline.total,
+);
 
 /// A mission score in a coarse band, for analytics: raw scores are never sent
 /// (docs/rules/analytics.md). Bands are [scoreBucketWidth] points wide.
@@ -32,8 +38,13 @@ enum ScoreBucket {
   from60,
   from80;
 
-  /// The band [total] (0–100) falls in; 100 is in [from80].
-  static ScoreBucket of(int total) => throw UnimplementedError();
+  /// The band [total] (0–100) falls in; 100 is in [from80]. Throws a [RangeError] outside
+  /// 0–100.
+  static ScoreBucket of(int total) {
+    RangeError.checkValueInInterval(total, 0, maxMissionScore, 'total');
+    final band = total ~/ scoreBucketWidth;
+    return band < values.length ? values[band] : values.last;
+  }
 }
 
 /// The width of one [ScoreBucket] band, in points.
@@ -56,5 +67,11 @@ enum ScoreDeltaBucket {
   static const int flatBand = 5;
   static const int bigGain = 20;
 
-  static ScoreDeltaBucket of(int delta) => throw UnimplementedError();
+  /// The band a change of [delta] points (latest minus baseline) falls in.
+  static ScoreDeltaBucket of(int delta) {
+    if (delta < -flatBand) return down;
+    if (delta <= flatBand) return flat;
+    if (delta < bigGain) return up;
+    return upALot;
+  }
 }

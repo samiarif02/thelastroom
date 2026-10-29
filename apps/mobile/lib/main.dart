@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -29,13 +30,25 @@ void main() {
 
   log.info('app started', {'env': env.appEnv, 'supabase': env.hasSupabase});
 
+  final container = ProviderContainer(
+    overrides: [
+      envProvider.overrideWithValue(env),
+      logProvider.overrideWithValue(log),
+    ],
+  );
+  startBackendAfterFirstFrame(container);
   runApp(
-    ProviderScope(
-      overrides: [
-        envProvider.overrideWithValue(env),
-        logProvider.overrideWithValue(log),
-      ],
+    UncontrolledProviderScope(
+      container: container,
       child: const TheLastRoomApp(),
     ),
   );
+}
+
+/// The backend is optional (ADR 0005): the guest sign-in starts only once the first frame is on
+/// screen, runs in the background, and is never awaited. With no keys it does nothing.
+void startBackendAfterFirstFrame(ProviderContainer container) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    unawaited(container.read(sessionProvider.notifier).start());
+  });
 }

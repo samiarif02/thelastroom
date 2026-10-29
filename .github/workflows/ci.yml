@@ -75,6 +75,10 @@ jobs:
       - name: Check env
         run: npm run check:env
 
+      # Every create table in supabase/migrations/ enables RLS and has a policy, in that file.
+      - name: Check RLS
+        run: npm run check:rls
+
       # Gate-script tests, then every workspace package (flutter test or dart test).
       - name: Tests
         run: npm run test
@@ -82,3 +86,27 @@ jobs:
       # Build check: the web build is the reviewers' demo link, so it must always build.
       - name: Build web
         run: npm run build:web
+
+  # The database, for real: replay every migration on a fresh local Postgres (the Supabase
+  # image, so auth.users and the API roles exist), then the pgTAP RLS tests in supabase/tests/.
+  # Only the database container starts; no hosted project and no secrets are involved.
+  db:
+    name: Migrations & RLS tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Pinned, so a CLI release can't change the stack under a green branch.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+
+      - name: Start the local database
+        run: supabase db start
+
+      - name: Replay migrations and run the RLS tests
+        run: npm run test:db
