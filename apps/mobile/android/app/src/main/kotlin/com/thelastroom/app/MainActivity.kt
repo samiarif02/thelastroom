@@ -1,4 +1,4 @@
-package com.thelastroom.the_last_room
+package com.thelastroom.app
 
 import io.flutter.embedding.android.FlutterActivity
 
