@@ -12,6 +12,7 @@ void main() {
     List<Beat>? beats,
     List<FollowUp>? followUps,
     bool? hinted,
+    bool? timed,
     List<SceneLine>? scene,
   }) => ContentBundle(
     interviewers: fixture.interviewers,
@@ -27,6 +28,7 @@ void main() {
         beats: beats ?? base.beats,
         followUps: followUps ?? base.followUps,
         hinted: hinted ?? base.hinted,
+        timed: timed ?? base.timed,
         isBaseline: base.isBaseline,
         skillRequirements: base.skillRequirements,
       ),
@@ -167,6 +169,28 @@ void main() {
     expect(
       problems(withMission(hinted: true)),
       contains('m_fixture: a hinted mission can never unlock a skill'),
+    );
+  });
+
+  test('the baseline is unhinted and untimed', () {
+    const issue = 'm_fixture: the baseline must be unhinted and untimed';
+    expect(problems(withMission(timed: true)), contains(issue));
+    expect(problems(withMission(hinted: true)), contains(issue));
+  });
+
+  test('a flagged option must teach a lesson', () {
+    final beats = [...base.beats];
+    beats[0] = Beat(
+      kind: BeatKind.open,
+      options: [
+        option('o1', score: 1, flags: {Flag.vague}),
+        option('o2'),
+        option('o3'),
+      ],
+    );
+    expect(
+      problems(withMission(beats: beats)),
+      contains('o1: is flagged but teaches no lesson'),
     );
   });
 
