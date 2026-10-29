@@ -14,3 +14,5 @@ from 8x's template (client never touches tables) and is recorded in AGENTS.md.
 **Why:** plays anywhere; the server only stores progress; guest play from second one.
 **How to apply:** write locally first, never await the network in the UI, test RLS like code
 (`docs/rules/migrations.md`, `docs/rules/state-management.md`).
+
+Full record, with alternatives: [ADR 0002](../decisions/0002-offline-first-outbox.md).

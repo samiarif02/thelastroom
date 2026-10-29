@@ -6,7 +6,15 @@ The analytics registry (brief §11). The source of truth is the `AnalyticsEvent`
 building the feature that fires it. Rules: `docs/rules/analytics.md`.
 
 Properties are ids, enums, numbers and booleans. **No personal data, never any answer text.**
+The type enforces it: `track` takes `Map<String, EventValue>`, and `EventValue` has no
+constructor that accepts a `String` (`apps/mobile/lib/core/analytics/event_value.dart`). An id
+comes from a content item (`EventValue.id(mission)`), anything else that varies is an enum.
 Property values below are planned; they're fixed when each feature's spec is written.
+
+**The Mission 1 slice (milestone 05)** fires `intro_completed`, `mission_started`,
+`draft_completed`, `answer_timer_expired`, `follow_up_answered`, `mission_completed`,
+`baseline_recorded` and `user_activated`. `draft_completed` and `answer_timer_expired` were
+added in brief 02 because the slice couldn't be measured without them (`docs/v1-plan.md`).
 
 | Event | Fired when | Properties |
 | --- | --- | --- |
@@ -17,6 +25,8 @@ Property values below are planned; they're fixed when each feature's spec is wri
 | `mission_started` | A mission scene starts | `mission_id`, `chapter`, `attempt_number` |
 | `mission_completed` | A mission's debrief is shown | `mission_id`, `chapter`, `score_bucket`, `attempt_number` |
 | `baseline_recorded` | Mission 1's first completion stores the baseline | `score_bucket` |
+| `draft_completed` | The player leaves the "draft first" step, by sending a draft or skipping | `mission_id`, `skipped` |
+| `answer_timer_expired` | The soft 60-second timer runs out on a beat (never fires in calm mode) | `mission_id`, `beat` |
 | `follow_up_answered` | The player answers the interviewer's follow-up | `mission_id`, `follow_up_id` |
 | `recall_session_completed` | A Recall Room session ends | `cards`, `correct`, `box_moves` |
 | `skill_unlocked` | A skill is demonstrated in an unhinted mission | `skill_id` |

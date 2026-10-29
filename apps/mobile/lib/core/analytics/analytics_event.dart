@@ -13,6 +13,8 @@ enum AnalyticsEvent {
   missionStarted('mission_started'),
   missionCompleted('mission_completed'),
   baselineRecorded('baseline_recorded'),
+  draftCompleted('draft_completed'),
+  answerTimerExpired('answer_timer_expired'),
   followUpAnswered('follow_up_answered'),
   recallSessionCompleted('recall_session_completed'),
   skillUnlocked('skill_unlocked'),

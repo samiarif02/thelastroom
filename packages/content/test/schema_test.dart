@@ -2,12 +2,177 @@ import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 import 'package:test/test.dart';
 
+import 'fixture.dart';
+
 void main() {
+  final base = fixture.missions.single;
+
+  /// The fixture with its one mission rebuilt, so each test breaks exactly one rule.
+  ContentBundle withMission({
+    List<Beat>? beats,
+    List<FollowUp>? followUps,
+    bool? hinted,
+    List<SceneLine>? scene,
+  }) => ContentBundle(
+    interviewers: fixture.interviewers,
+    lessons: fixture.lessons,
+    missions: [
+      Mission(
+        id: base.id,
+        chapter: base.chapter,
+        number: base.number,
+        title: base.title,
+        scene: scene ?? base.scene,
+        question: base.question,
+        beats: beats ?? base.beats,
+        followUps: followUps ?? base.followUps,
+        hinted: hinted ?? base.hinted,
+        isBaseline: base.isBaseline,
+        skillRequirements: base.skillRequirements,
+      ),
+    ],
+  );
+
+  AnswerOption option(
+    String id, {
+    int score = 2,
+    Set<Flag> flags = const {},
+    String? lessonId,
+  }) => AnswerOption(
+    id: id,
+    text: 'A line.',
+    scores: DimensionScores(
+      relevance: score,
+      specificity: score,
+      structure: score,
+      adaptability: score,
+    ),
+    flags: flags,
+    lessonId: lessonId,
+  );
+
+  List<String> problems(ContentBundle bundle) =>
+      validateContent(bundle).map((i) => i.toString()).toList();
+
   test('the content schema version is positive', () {
     expect(contentSchemaVersion, greaterThan(0));
   });
 
-  test('content resolves the engine through the workspace', () {
-    expect(Dimension.values, hasLength(4));
+  test('the fixture is valid', () {
+    expect(problems(fixture), isEmpty);
+  });
+
+  test('ids must be unique', () {
+    final beats = [...base.beats];
+    beats[2] = Beat(
+      kind: BeatKind.land,
+      options: [option('o1'), option('l2'), option('l3')],
+    );
+    expect(
+      problems(withMission(beats: beats)),
+      contains('o1: id is used more than once'),
+    );
+  });
+
+  test('ids must be snake_case, so they are safe to send as analytics ids', () {
+    final beats = [...base.beats];
+    beats[0] = Beat(
+      kind: BeatKind.open,
+      options: [option('Open One'), option('o2'), option('o3')],
+    );
+    expect(
+      problems(withMission(beats: beats)),
+      contains('Open One: id is not snake_case'),
+    );
+  });
+
+  test('every dimension score is within 0–3', () {
+    final beats = [...base.beats];
+    beats[0] = Beat(
+      kind: BeatKind.open,
+      options: [option('o1', score: 4), option('o2'), option('o3')],
+    );
+    expect(
+      problems(withMission(beats: beats)),
+      contains('o1: a dimension score is outside 0–3'),
+    );
+  });
+
+  test('a flag caps the dimension it lowers', () {
+    final beats = [...base.beats];
+    beats[0] = Beat(
+      kind: BeatKind.open,
+      options: [
+        option('o1', score: 3, flags: {Flag.vague}),
+        option('o2'),
+        option('o3'),
+      ],
+    );
+    expect(
+      problems(withMission(beats: beats)),
+      contains('o1: flagged vague but scores above 1 on specificity'),
+    );
+  });
+
+  test('beats are open, evidence, land, with 3–4 options each', () {
+    final reversed = base.beats.reversed.toList();
+    expect(
+      problems(withMission(beats: reversed)),
+      contains('m_fixture: beats must be open, evidence, land, in that order'),
+    );
+    final beats = [...base.beats];
+    beats[1] = Beat(
+      kind: BeatKind.evidence,
+      options: [option('e1'), option('e2')],
+    );
+    expect(
+      problems(withMission(beats: beats)),
+      contains('m_fixture evidence beat: has 2 options, needs 3–4'),
+    );
+  });
+
+  test('a mission has exactly one default follow-up', () {
+    final noDefault = base.followUps.where((f) => f.trigger != null).toList();
+    expect(
+      problems(withMission(followUps: noDefault)),
+      contains('m_fixture: needs exactly one default follow-up, has 0'),
+    );
+  });
+
+  test('references to lessons and speakers resolve', () {
+    final beats = [...base.beats];
+    beats[0] = Beat(
+      kind: BeatKind.open,
+      options: [
+        option('o1', lessonId: 'lesson_missing'),
+        option('o2'),
+        option('o3'),
+      ],
+    );
+    expect(
+      problems(withMission(beats: beats)),
+      contains('o1: lesson lesson_missing does not exist'),
+    );
+    expect(
+      problems(
+        withMission(
+          scene: const [SceneLine(speakerId: 'nobody', text: 'Hi.')],
+        ),
+      ),
+      contains('m_fixture: speaker nobody is not an interviewer'),
+    );
+  });
+
+  test('a hinted mission cannot unlock a skill', () {
+    expect(
+      problems(withMission(hinted: true)),
+      contains('m_fixture: a hinted mission can never unlock a skill'),
+    );
+  });
+
+  test('an option exposes only points and flags to the engine', () {
+    final weak = base.beats.first.options[1];
+    expect(weak.scored.optionId, weak.id);
+    expect(weak.scored.flags, {Flag.weNotI, Flag.vague});
   });
 }

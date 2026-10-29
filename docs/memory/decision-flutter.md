@@ -14,3 +14,5 @@ drift, supabase_flutter. Dart pub workspace monorepo mirroring 8x's folder layou
 (AGENTS.md "Where this repo differs from 8x's templates").
 **How to apply:** don't add Next.js/Expo/Prisma-isms; map each 8x standard to its Dart
 equivalent. Related: [[decision-offline-first-outbox]].
+
+Full record, with alternatives: [ADR 0001](../decisions/0001-flutter-widgets-not-flame.md).
