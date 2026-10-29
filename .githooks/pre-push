@@ -6,6 +6,12 @@
 # A gate missing from package.json is reported as a failure, not skipped: a repo that
 # quietly lost a gate must not pass. Genuine exception (a check that can only run in a
 # real CI runner): git push --no-verify, and say why in the PR.
+
+# In a worktree git hands hooks an absolute GIT_DIR. Left set, every git call below it points
+# at this repo: flutter reads it as its own SDK checkout (version 0.0.0-unknown, pub get fails)
+# and the gate scripts' temp-dir tests think they're inside a repo. The gates need none of them.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX
+
 if ! node -e 'require("./package.json")' 2>/dev/null; then
   echo "pre-push: package.json can't be read, so no gate can run. Push blocked."
   exit 1

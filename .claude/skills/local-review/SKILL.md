@@ -1,6 +1,6 @@
 ---
 name: local-review
-description: 'Run the full local pre-push gate: exactly the commands CI runs, in CI''s order (secrets, standards, format, analyze, events, env, tests, web build), then the commit-message range check and a manual review pass against AGENTS.md and docs/rules. Use when the person says "/local-review", "review this before I push", "is this ready", or has finished a change and wants it validated before CI sees it.'
+description: 'Run the full local pre-push gate: exactly the commands CI runs, in CI''s order (secrets, standards, format, analyze, events, env, RLS, tests, web build, then migrations + RLS tests), then the commit-message range check and a manual review pass against AGENTS.md and docs/rules. Use when the person says "/local-review", "review this before I push", "is this ready", or has finished a change and wants it validated before CI sees it.'
 ---
 
 # Local review
@@ -14,8 +14,8 @@ broken web build is found.
 
 ## 1. Automated gates, in CI's order
 
-These are exactly the `npm run` commands in the `check` job of `.github/workflows/ci.yml`, in
-the same order. A gate added to one is added to the other in the same PR;
+These are exactly the `npm run` commands in the `check` job of `.github/workflows/ci.yml`, then
+the `db` job, in the same order. A gate added to one is added to the other in the same PR;
 `check:standards` (`local-review-mirrors-ci`) reads both files and fails if they drift.
 
 Stop at the first failure and fix it (or report it) before continuing. Report each command's
@@ -30,6 +30,7 @@ npm run format:check     # on failure run the "format" script: always safe, neve
 npm run analyze          # flutter analyze --fatal-infos: zero errors, warnings AND infos
 npm run check:events     # enum ↔ docs/EVENTS.md, no string event names; unfired ones only warn
 npm run check:env        # env.dart ↔ env/dev.example.json ↔ .env.example ↔ Edge Functions
+npm run check:rls        # every create table enables RLS and has a policy, in the same migration
 npm run test             # gate-script tests, then every workspace package's Dart tests
 npm run build:web        # flutter build web --release: a compile check only, nothing is deployed
 ```
@@ -41,8 +42,15 @@ git fetch origin main
 node scripts/check-commit-message.mjs --range origin/main..HEAD
 ```
 
-If `supabase/migrations/` changed, also replay them locally (Docker must be running):
-`supabase db reset`, then run the RLS tests (`docs/rules/migrations.md`).
+Then CI's `db` job: replay every migration on a fresh local database and run the pgTAP RLS
+tests in `supabase/tests/` (`docs/rules/migrations.md`). Docker must be running. Start only the
+database (not the whole stack) and stop it afterwards: other worktrees share this machine.
+
+```bash
+supabase db start
+npm run test:db          # supabase db reset && supabase test db
+supabase stop
+```
 
 ## 2. Manual review pass
 
