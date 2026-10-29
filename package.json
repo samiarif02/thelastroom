@@ -13,6 +13,8 @@
     "check:standards": "node scripts/check-standards.mjs",
     "check:events": "node scripts/check-events.mjs",
     "check:env": "node scripts/check-env.mjs",
+    "check:rls": "node scripts/check-rls.mjs",
+    "test:db": "supabase db reset && supabase test db",
     "build:web": "cd apps/mobile && flutter build web --release",
     "prepare": "git config core.hooksPath .githooks || true"
   },
