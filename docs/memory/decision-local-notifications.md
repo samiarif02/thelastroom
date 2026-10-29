@@ -14,3 +14,5 @@ ladder after 3 ignored, permission asked after Mission 2 behind a custom pre-pro
 **Why:** works offline, no server, still shows retention thinking (brief §8).
 **How to apply:** full design in `docs/product-brief.md` §8; events `notification_*` are
 already registered.
+
+Full record, with alternatives: [ADR 0004](../decisions/0004-local-notifications.md).

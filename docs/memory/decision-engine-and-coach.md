@@ -15,3 +15,5 @@ only, never accent, grammar polish or style**.
 **Why:** fair, explainable and offline; the AI does only what needs AI.
 **How to apply:** no network or clock in the engine; pick the coach model with the claude-api
 skill when building it. Related: [[decision-offline-first-outbox]].
+
+Full record, with alternatives: [ADR 0003](../decisions/0003-deterministic-scoring-and-ai-coach.md).
