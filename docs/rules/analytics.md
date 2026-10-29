@@ -5,12 +5,15 @@ Product analytics is PostHog (brief §10), wired in a later session. Until then
 
 ```dart
 ref.read(analyticsProvider).track(AnalyticsEvent.missionCompleted, {
-  'mission_id': mission.id,
-  'chapter': 1,
-  'score_bucket': bucket.name,
-  'attempt_number': attempt,
+  'mission_id': EventValue.id(mission),
+  'chapter': EventValue.count(mission.chapter),
+  'score_bucket': EventValue.name(ScoreBucket.of(score.total)),
+  'attempt_number': EventValue.count(attempt),
 });
 ```
+
+Property values are `EventValue`s: `.id` (a content item), `.name` (an enum), `.count`,
+`.number`, `.flag`. There is no `String` constructor, so free text is a compile error.
 
 ## Register before you build
 
