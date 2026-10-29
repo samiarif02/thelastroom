@@ -52,7 +52,54 @@ including text over imagery with scrims), the font pair, the illustration style 
 interviewers (3 expressions each, animated idle via Rive), grain/vignette intensity, the tower
 and elevator art direction, and golden tests for every key screen.
 
-## Prototype directions (brief 03): pick one
+## Chosen direction: C, The Boardroom (owner, 2026-10-30)
+
+The owner picked **C · The Boardroom** after comparing all three on a phone (PR #6). This
+settles **D4**: **Cormorant Garamond** (display) + **Manrope** (body). The palette, grades,
+type ramp and set pieces are exactly as written in "C · The Boardroom" below; that section is
+now the spec, not a proposal.
+
+**Motion principles**
+
+- Slow, weighty glides (ease-out, no overshoot, nothing bouncy). The default camera cut is the
+  2.2 s dolly push with parallax; the window layer moves less than the people.
+- One deliberate exception, borrowed from B: the **follow-up question** lands on a hard cut
+  through one black frame, so pressure reads as an edit, not a fade.
+- Reduced motion: every push, parallax and tracking-in becomes a cross-fade.
+- On low-end Android, if parallax costs frames, fall back to A's rack focus (blur the back
+  layer only).
+
+**What brief 06 builds**
+
+1. The real tokens in `packages/brand` from `directions/boardroom.dart` (palette, three grades,
+   type ramp with tabular lining figures, motion durations and curves), replacing the
+   foundation placeholders; `ThemeData` from them.
+2. Fonts: keep `cormorant_garamond/` and `manrope/`; **delete** `instrument_serif/`, `geist/`,
+   `big_shoulders_display/`, `inter_tight/`, their pubspec entries, and
+   `directions/night_glass.dart` and `directions/concrete_noir.dart`. `/dev/directions` goes
+   once `/dev/catalog` replaces it.
+3. The film kit promoted from `features/dev_directions/shared/` into reusable components
+   (grain + vignette, letterbox, typewriter subtitle, camera rig, stamp/seal, pen note, bokeh),
+   each in `/dev/catalog` in every state, with goldens.
+4. Branded native launch screens and app icons in this look (brass monogram on walnut).
+5. Web: no runtime fetch at all (`fontFallbackBaseUrl` to a local path in `web/index.html` so
+   the engine stops fetching Roboto, and `--no-web-resources-cdn` for CanvasKit).
+6. Edge to edge on Android: the scene draws under the status and navigation bars (today they
+   show as flat black bands on the realme 8).
+
+**Known issues from the phone review (fix in 06)**
+
+- The Boardroom title's tracking-in starts wide enough that "THROUGH" breaks mid-word
+  ("THROU / GH") for the first moments of the animation. Lay out at the final tracking and
+  animate a transform, or forbid breaks inside a word.
+
+**D2, portrait art (proposal, owner to confirm):** keep the **rim-lit silhouettes drawn in
+code** that the prototype already uses, with a code-driven idle (breath, a slow head turn,
+lamp flicker on the rim). It's original, needs no rights, costs no build days and suits the
+Boardroom's low-key light. Painterly portraits (commissioned or AI-generated with commercial
+rights) are a stretch goal after Chapter 1 is polished, credited in the README if they land.
+
+## Prototype directions (brief 03): the three that were compared
 
 Three throwaway directions for Mission 1 ("The Opportunity", Priya), built at `/dev/directions`
 (debug and profile builds only). Run `cd apps/mobile && flutter run -d chrome`, then open
