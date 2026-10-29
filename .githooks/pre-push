@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+# Pre-push gate: the fast, required half of /local-review, run BEFORE a push spends a CI run
+# (docs/rules/commits.md: "don't push to find out whether it compiles"). The full list,
+# including `flutter build web` and the manual rule pass, lives in the local-review skill.
+#
+# A gate missing from package.json is reported as a failure, not skipped: a repo that
+# quietly lost a gate must not pass. Genuine exception (a check that can only run in a
+# real CI runner): git push --no-verify, and say why in the PR.
+if ! node -e 'require("./package.json")' 2>/dev/null; then
+  echo "pre-push: package.json can't be read, so no gate can run. Push blocked."
+  exit 1
+fi
+echo "pre-push: running format:check, analyze, check:events, check:env, test…"
+fail=0
+ran=""
+for gate in format:check analyze check:events check:env test; do
+  if ! node -e 'process.exit(require("./package.json").scripts?.[process.argv[1]] ? 0 : 1)' "$gate"; then
+    echo "  ✗ $gate is not defined in package.json"
+    fail=1
+    continue
+  fi
+  if out=$(npm run --silent "$gate" 2>&1); then ran="$ran $gate"; else echo "  ✗ $gate"; printf '%s\n' "$out" | tail -25; fail=1; fi
+done
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "Push blocked. Fix the above (for formatting run 'npm run format'), then re-push."
+  exit 1
+fi
+echo "pre-push: passed:$ran"
+echo "Before making a PR reviewable, run /local-review (it adds the web build and a manual rule pass)."
+exit 0

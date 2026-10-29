@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# A new push to the same PR cancels the run it supersedes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # The commit-msg hook checks each commit as it's made; this re-checks every commit on the
+  # PR, so one made with --no-verify, or before the hook was installed, still fails the
+  # branch. The synthetic merge commit a pull_request checkout sits on starts "Merge " and
+  # is exempt.
+  commits:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-commit-message.mjs --range origin/${{ github.base_ref }}..HEAD
+
+  # Every gate, in this order. .claude/skills/local-review runs exactly these `npm run`
+  # commands in the same order before a push; check:standards (local-review-mirrors-ci)
+  # fails if the two lists drift.
+  check:
+    name: Gates, tests & web build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Pinned: the same version README.md states (check:standards flutter-version-pinned).
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.8
+          cache: true
+
+      # One resolution for the whole Dart pub workspace.
+      - name: Install Dart dependencies
+        run: flutter pub get
+
+      # Re-scans every tracked file (session logs included); the pre-commit hook only sees
+      # staged blobs, and --no-verify skips it.
+      - name: Check secrets
+        run: npm run check:secrets
+
+      - name: Check standards
+        run: npm run check:standards
+
+      - name: Format check
+        run: npm run format:check
+
+      # Strict analysis (strict-casts/inference/raw-types); --fatal-infos fails on every lint.
+      - name: Analyze
+        run: npm run analyze
+
+      - name: Check events
+        run: npm run check:events
+
+      - name: Check env
+        run: npm run check:env
+
+      # Gate-script tests, then every workspace package (flutter test or dart test).
+      - name: Tests
+        run: npm run test
+
+      # Build check: the web build is the reviewers' demo link, so it must always build.
+      - name: Build web
+        run: npm run build:web
