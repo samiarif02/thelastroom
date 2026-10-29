@@ -1,6 +1,6 @@
 # HANDOFF: live state
 
-Last updated: 2026-10-29 17:45, claude-geo profile, LEAD session (after merging PR #1).
+Last updated: 2026-10-29 18:05, claude-geo profile, LEAD session (after merging PR #2).
 Read `docs/memory/MEMORY.md` first. Update this file after every meaningful step.
 
 ## How work flows
@@ -8,7 +8,10 @@ Read `docs/memory/MEMORY.md` first. Update this file after every meaningful step
 - One long-lived **LEAD session** reviews PRs (in the worktree `../thelastroom-review`), merges
   only when the owner says "merge #N", then writes the next brief in `docs/briefs/NN-slug.md`.
 - **Worker sessions** build one brief each: own branch, local-review, PR, green CI, never merge.
-- Lead docs (this file, briefs) land through a small `docs/lead-NN` PR, never a push to `main`.
+- Lead docs (this file, briefs) are left **uncommitted on `main`**; the next worker commits them
+  first on its own branch ([[workflow-lead-and-workers]]). No separate docs PRs.
+- **Previews:** every PR gets a Vercel preview URL (from 02b on); lead reviews and outside
+  reviewers play that link.
 
 ## Current goal
 
@@ -16,13 +19,16 @@ Brief 02: spec v1 (`docs/briefs/02-spec.md`), done tonight.
 
 ## Branch
 
-`main` = merge of PR #1 (`ddfc597`). Lead docs branch: `docs/lead-02` (this file + brief 02).
+`main` = merge of PR #2 (`489d9e6`). Uncommitted on `main`: this file, `docs/briefs/02-spec.md`,
+`docs/memory/workflow-lead-and-workers.md` and `MEMORY.md` (the 02 worker commits them first).
 No worker branch open.
 
 ## Plan to 5 Nov (lead ticks these after each merge)
 
 - [x] Wed 29: 01 foundation (PR #1, merged)
-- [ ] Wed 29: 02 spec + plan + ADRs + types
+- [x] Wed 29: lead docs (PR #2, merged)
+- [ ] Wed 29: 02 spec + plan + ADRs + types (plans Vercel)
+- [ ] Thu 30 (morning): 02b Vercel deploy: preview per PR, production from `main`
 - [ ] Thu 30 (noon): 03a cinematic direction picked
 - [ ] Thu 30: 03b design system + cinematic layer
 - [ ] Fri 31: 04 content + engine
@@ -45,7 +51,7 @@ polish → skill tree visuals (keep the radar) → notifications on iOS (keep An
 | Architecture (15) | 8x standards ported (25/25), pure engine gate, strict analysis, logger with redaction, event registry, env check | Low now; outbox + RLS tests are still promises (06) |
 | Comms (15) | PR #1 description is strong (gates, screenshots ×3, gaps, deviations) | Med: README, SUBMISSION.md and video don't exist yet |
 | Initiative (15) | Decisions D1–D5 surfaced, ADR topics chosen, brief challenge requested in 02 | Med: draft-first, Recall Room and kind notifications are all unbuilt |
-| Demos (10) | Web build boots; release APK runs on a OnePlus 9 | **High**: no public URL yet (D3 undecided); must be live Fri 31 |
+| Demos (10) | Web build boots; release APK runs on a OnePlus 9; D3 decided: Vercel | Med: no public URL until 02b (Thu morning); needs the owner's Vercel secrets |
 | Shipping speed (10) | 1 PR on day 1 | **High**: PR #1 was 176 files. From here: small PRs, more than one a day |
 | Design (10) | Brand tokens, AA contrast tests, no-ripple theme, branded web loader | **High**: no direction yet; fonts and CanvasKit still on the CDN; stock launch screens |
 | Completeness (10) | CI green | High: nothing playable yet |
@@ -56,20 +62,25 @@ polish → skill tree visuals (keep the radar) → notifications on iOS (keep An
 
 - PR #1 foundation merged (merge commit `ddfc597`, 2026-10-29). Lead review: all 8 gates green
   locally, web build boots to the title screen.
+- PR #2 lead docs merged (`489d9e6`): plan, cut order, scoreboard, brief 02.
+- Owner decisions (2026-10-29): no separate lead docs PRs; **D3 = Vercel**, built in GitHub
+  Actions, preview per PR, production from `main`. Added to brief 02 (item 10).
 
 ## In progress
 
-- Nothing. Waiting on the owner to merge `docs/lead-02` and start the brief 02 worker.
+- Nothing. Waiting on the owner to start the brief 02 worker.
 
 ## Next steps
 
-1. Owner merges `docs/lead-02` (or says "merge" to the lead).
-2. Start a worker on `docs/briefs/02-spec.md`.
-3. Lead reviews the spec PR tonight; then writes `docs/briefs/03a-direction.md`.
+1. Start a worker on `docs/briefs/02-spec.md`; its first commit is the lead's uncommitted docs.
+2. Owner, ready for 02b: create the Vercel project and a token, add `VERCEL_TOKEN`,
+   `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` as GitHub Actions secrets.
+3. Lead reviews the spec PR tonight; then writes `docs/briefs/02b-vercel.md`.
 
 ## Open decisions for the owner
 
-- D1–D5 in `docs/requirements.md`. D1 gets argued in brief 02; D3 (web host) is needed by Fri 31.
+- D1, D2, D4, D5 in `docs/requirements.md`. D1 gets argued in brief 02. D3 is decided (Vercel).
+- Vercel project, token and the three GitHub secrets (needed for 02b, Thu morning).
 - Accept the Android SDK licenses (`flutter doctor --android-licenses`, interactive).
 - Optional: install the iOS 27 simulator runtime; iOS 26.3 is used meanwhile.
 
