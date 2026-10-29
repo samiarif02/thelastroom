@@ -52,6 +52,25 @@ including text over imagery with scrims), the font pair, the illustration style 
 interviewers (3 expressions each, animated idle via Rive), grain/vignette intensity, the tower
 and elevator art direction, and golden tests for every key screen.
 
+## Design session brief: must-dos carried from the foundation
+
+Found while booting the foundation build, and agreed by the owner (2026-10-29) to be fixed in the
+design session:
+
+1. **Bundle the fonts.** Choose the OFL display serif and body sans (decision D4), add the files
+   to `packages/brand`, and set `fontFamily` on every `BrandType` style. Today the web build has
+   no font, so Flutter downloads Roboto from fonts.gstatic.com at runtime, against brief §9
+   ("bundled, offline-safe, no runtime fetch").
+2. **Serve CanvasKit ourselves.** Build the web app with `--no-web-resources-cdn` (in
+   `package.json` `build:web` and the deploy) so the renderer isn't fetched from Google's CDN.
+   Check the first-frame budget (< 3 s) afterwards.
+3. **Brand the native launch screens.** Android 12+ shows the Flutter logo on white
+   (`android/app/src/main/res/values*/styles.xml`, `drawable*/launch_background.xml`); iOS shows a
+   white `LaunchScreen.storyboard`. Both become `BrandColors.void_` with the title mark, so the
+   jump from launch to the first Flutter frame is invisible. The web loading screen in
+   `web/index.html` already does this.
+4. **App icons** for Android, iOS and the web manifest (currently Flutter defaults).
+
 ## Rules that already hold
 
 - **Tokens only.** No raw colours outside `packages/brand` (`check:standards`).
