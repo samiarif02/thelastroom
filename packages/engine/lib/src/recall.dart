@@ -46,7 +46,17 @@ final class Retired extends RecallOutcome {
 
 /// A new card for a lesson missed [today]: box one, due tomorrow.
 RecallCard newRecallCard(String lessonId, {required CalendarDay today}) =>
-    throw UnimplementedError();
+    _inBox(lessonId, LeitnerBox.one, today: today);
+
+RecallCard _inBox(
+  String lessonId,
+  LeitnerBox box, {
+  required CalendarDay today,
+}) => RecallCard(
+  lessonId: lessonId,
+  box: box,
+  due: today.addDays(box.intervalDays),
+);
 
 /// Reviews [card] on [today].
 ///
@@ -57,7 +67,14 @@ RecallOutcome reviewRecallCard(
   RecallCard card, {
   required bool correct,
   required CalendarDay today,
-}) => throw UnimplementedError();
+}) {
+  if (!correct) return Rescheduled(newRecallCard(card.lessonId, today: today));
+  final next = card.box.index + 1;
+  if (next == LeitnerBox.values.length) return Retired(card.lessonId);
+  return Rescheduled(
+    _inBox(card.lessonId, LeitnerBox.values[next], today: today),
+  );
+}
 
 /// The cards due on or before [today], most overdue first, then lowest box first (the
 /// shakiest lessons), then by lesson id so the order is stable. At most [limit] of them: the
@@ -66,7 +83,17 @@ List<RecallCard> dueRecallCards(
   List<RecallCard> cards, {
   required CalendarDay today,
   int limit = recallSessionCardLimit,
-}) => throw UnimplementedError();
+}) {
+  RangeError.checkNotNegative(limit, 'limit');
+  final due = cards.where((c) => !today.isBefore(c.due)).toList()
+    ..sort((a, b) {
+      final byDue = a.due.compareTo(b.due);
+      if (byDue != 0) return byDue;
+      final byBox = a.box.index.compareTo(b.box.index);
+      return byBox != 0 ? byBox : a.lessonId.compareTo(b.lessonId);
+    });
+  return due.take(limit).toList();
+}
 
 /// Cards per Recall Room session. About 20 seconds a card keeps it near two minutes (FR-40).
 const int recallSessionCardLimit = 6;

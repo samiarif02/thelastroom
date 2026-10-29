@@ -34,6 +34,7 @@ class Mission implements Identified {
     required this.beats,
     required this.followUps,
     required this.hinted,
+    this.timed = true,
     this.isBaseline = false,
     this.skillRequirements = const [],
   });
@@ -59,6 +60,11 @@ class Mission implements Identified {
   /// Whether hint cards are offered. Mission 1 (baseline), Mission 3 (recall checkpoint) and
   /// Mission 7 (review) are unhinted (FR-30).
   final bool hinted;
+
+  /// Whether the soft 60-second answer timer runs (FR-13). Mission 1 is untimed (owner,
+  /// 2026-10-29): the baseline measures the answer, not reading speed. Calm mode turns the
+  /// timer off on any mission; that's a player setting, not content.
+  final bool timed;
 
   /// Mission 1: its first completion is stored as the baseline every later score is compared
   /// with.
