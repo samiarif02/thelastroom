@@ -31,7 +31,7 @@ npm run analyze          # flutter analyze --fatal-infos: zero errors, warnings 
 npm run check:events     # enum ↔ docs/EVENTS.md, no string event names; unfired ones only warn
 npm run check:env        # env.dart ↔ env/dev.example.json ↔ .env.example ↔ Edge Functions
 npm run test             # gate-script tests, then every workspace package's Dart tests
-npm run build:web        # flutter build web --release: the demo link must always build
+npm run build:web        # flutter build web --release: a compile check only, nothing is deployed
 ```
 
 Then the commit messages, the same check CI's `commits` job runs over the branch:

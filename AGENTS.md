@@ -4,7 +4,7 @@ The one file every coding agent reads (Claude Code, Codex, Cursor, Gemini). Per-
 (`CLAUDE.md`) only import it. Rules live here and in `docs/rules/`, nowhere else.
 
 **What this repo is:** a cinematic interview-practice game in Flutter (Android, iOS, plus a web
-build as the playable demo). The full design is `docs/product-brief.md`; the testable version is
+build run locally; nothing is hosted). The full design is `docs/product-brief.md`; the testable version is
 `docs/requirements.md`; the visual direction is `DESIGN.md`.
 
 ## Start of every session (both Claude profiles, any agent)
@@ -47,7 +47,8 @@ scripts/            the gate scripts (Node, zero dependencies)
 | What | Command |
 | --- | --- |
 | Install deps + git hooks | `flutter pub get && npm install` |
-| Run the app | `cd apps/mobile && flutter run --dart-define-from-file=env/dev.json` (`-d chrome` for web) |
+| Run the app | `cd apps/mobile && flutter run` (`-d chrome` for web). No keys, works offline. |
+| Run with the optional backend | `cd apps/mobile && flutter run --dart-define-from-file=env/dev.json` |
 | All gates, in CI's order | the `local-review` skill |
 | Format | `npm run format` (always safe, never ask first) |
 
@@ -58,7 +59,7 @@ Read the rule file for every area a change touches, before writing the change.
 - [Code quality](docs/rules/code-quality.md): strict analysis, no `dynamic`, no god files, named constants.
 - [Commits](docs/rules/commits.md): Conventional Commits, curated scopes, don't over-commit, `Changelog:` line.
 - [Pull requests](docs/rules/pull-requests.md): branch → finished → real description → green CI. Never merge on your own.
-- [Deployment](docs/rules/deployment.md): web demo, APK, store builds, Edge Functions, what ships how.
+- [Deployment](docs/rules/deployment.md): zero setup, APK, store builds, Edge Functions, what ships how (the web isn't hosted).
 - [Logging](docs/rules/logging.md): the structured `log` wrapper, never `print`.
 - [Error handling](docs/rules/error-handling.md): typed failures, Sentry for the unexpected, cinematic error states.
 - [Migrations](docs/rules/migrations.md): Supabase SQL migrations, RLS in the same migration, never edit a merged one.
@@ -76,6 +77,8 @@ Read the rule file for every area a change touches, before writing the change.
    unit-tested. Scores must be explainable and reproducible offline.
 4. **No secret ever ships in the app.** The Supabase anon key is the only key the app holds.
 5. **An agent never merges a PR and never pushes to `main`.**
+6. **Zero setup.** Clone → `flutter run` works with no keys and fully offline; the backend is
+   optional at runtime (ADR 0005).
 
 ## Where this repo differs from 8x's templates
 
@@ -88,11 +91,11 @@ conventions are replaced.
 | TypeScript strict, ESLint `--max-warnings=0`, `no-explicit-any`, `no-console` | `analysis_options.yaml`: `strict-casts`, `strict-inference`, `strict-raw-types`, `avoid_dynamic_calls`, `avoid_print`; `flutter analyze --fatal-infos` | The Dart equivalents of the same rules. `--fatal-infos` makes every lint fail the build. |
 | `typecheck` + `lint` scripts | one `analyze` script | The Dart analyzer is both the type checker and the linter. |
 | Prettier + `.prettierignore` | `dart format --set-exit-if-changed` | Dart has one canonical formatter. There's no JS to format besides the zero-dependency gate scripts. |
-| Zod env schema in `src/lib/env.ts` | `Env` class reading `String.fromEnvironment` (`--dart-define-from-file`), `apps/mobile/env/dev.example.json`; `.env.example` for Edge Function secrets | Dart compile-time defines are how Flutter gets config. `check:env` keeps the three in step. |
+| Zod env schema in `src/lib/env.ts` | `Env` class reading `String.fromEnvironment` (`--dart-define-from-file`), `apps/mobile/env/dev.example.json`; `.env.example` for Edge Function secrets. Every app value is optional: with none, the backend is off (ADR 0005) | Dart compile-time defines are how Flutter gets config. `check:env` keeps the three in step. |
 | Pino logger | `lib/core/logging` wrapper over `dart:developer` with redaction, plus Sentry later | Same contract (structured, levelled, redacted, one wrapper), Dart runtime. |
 | Client never touches tables; Prisma is the only data path; RLS with **no** policies | The app reads/writes its **own rows** through `supabase_flutter`, guarded by **owner-only RLS policies** (tested) | Offline-first with an outbox needs the device to sync directly. There's no server of ours in the middle, so RLS policies *are* the authorization layer. |
 | Prisma-generated migrations, CI drift check | Hand-written SQL in `supabase/migrations/` via `supabase migration new` | Supabase CLI is the migration tool. A local `supabase db reset` replays them. |
-| Expo OTA-first releases, EAS | Store builds (Flutter has no first-party OTA); web demo redeploys on merge; APK on a GitHub Release | Stack difference. |
+| Expo OTA-first releases, EAS | Store builds (Flutter has no first-party OTA); the web is not hosted (CI compile check only); APK on a GitHub Release | Stack difference. |
 | npm workspaces | Dart pub workspace (root `pubspec.yaml` with `workspace:`); root `package.json` only for gates and `prepare` | Dart's own monorepo tool. |
 | `check:events` against `/api/track` | `check:events`: the Dart enum is the registry (unregistered names don't compile), the check bans string event names and keeps the enum and `docs/EVENTS.md` in step | The compiler already does half the job. |
 | `check:store`, `check:rls`, `check:template` | Not ported yet | Store readiness lands with the store build; the RLS test lands with the first migration (Prompt 6). |

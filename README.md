@@ -8,7 +8,8 @@ build an answer under light time pressure, the interviewer reacts and pushes bac
 follow-up, and a debrief shows exactly what made your answer stronger or weaker. Built in Flutter
 for Android, iOS and the web.
 
-**▶ Play the demo:** _web link coming soon_ (placeholder until the first deploy)
+**▶ Watch the demo:** _video coming soon_. To play, clone and run it (below): no keys, no setup,
+fully offline.
 
 ## Why
 
@@ -39,12 +40,21 @@ flutter pub get        # resolves the whole Dart workspace
 npm install            # no dependencies; installs the git hooks (core.hooksPath)
 
 cd apps/mobile
-cp env/dev.example.json env/dev.json          # public config only; every key is optional
-flutter run -d chrome --dart-define-from-file=env/dev.json
-flutter run           --dart-define-from-file=env/dev.json   # a running emulator/simulator
+flutter run -d chrome  # the web, locally
+flutter run            # a running emulator/simulator or a connected phone
 ```
 
-The game plays fully offline; with no Supabase keys it simply doesn't sync.
+No env file, no keys, no network needed: the game plays fully offline.
+
+**Optional backend.** To turn on sign-in and sync, give it public Supabase config:
+
+```bash
+cp env/dev.example.json env/dev.json          # public config only; every key is optional
+flutter run --dart-define-from-file=env/dev.json
+```
+
+With no keys, or keys but no network, every backend feature is silently off and the game is
+unaffected ([ADR 0005](docs/decisions/0005-zero-setup-offline-backend-optional.md)).
 
 ### Gates (what CI runs on every PR)
 

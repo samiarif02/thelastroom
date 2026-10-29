@@ -17,6 +17,11 @@ type: project
 | Design | 10 | The cinematic film language (brief §9); no Material defaults; goldens, a component catalog, every state designed. |
 | Completeness | 10 | Chapter 1 end to end, offline/error/empty states, no dead buttons, CI green. |
 
+The kit's Demos and Shipping rows assume a public web link. The owner dropped it on 2026-10-29
+([ADR 0005](../decisions/0005-zero-setup-offline-backend-optional.md)): Demos rests on the video,
+the APK and a zero-setup clone-and-run; Shipping speed on Mission 1 playable from a fresh clone
+early.
+
 **Why:** these are the only things that count; effort outside them is wasted.
 **How to apply:** in every PR description and session, make the evidence for these visible.
 Related: [[project-and-deadline]].

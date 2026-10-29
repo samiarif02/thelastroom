@@ -4,7 +4,7 @@
 
 | Value | Where | In git? |
 | --- | --- | --- |
-| Public app config (Supabase URL + anon key, PostHog key, Sentry DSN) | `apps/mobile/env/<flavor>.json`, passed with `--dart-define-from-file` | **No.** Only `env/*.example.json` (empty values) is committed. |
+| Public app config (Supabase URL + anon key, PostHog key, Sentry DSN) | `apps/mobile/env/<flavor>.json`, passed with `--dart-define-from-file`. The file is optional: without it the app runs with the backend off (ADR 0005). | **No.** Only `env/*.example.json` (empty values) is committed. |
 | Server secrets (Anthropic API key, any service-role key) | Supabase Edge Function secrets (`supabase secrets set`); locally `.env` | **No.** Only `.env.example` is committed. |
 | Signing (Android keystore, `key.properties`, Apple `.p8`/`.p12`) | Your machine / a password manager; CI secrets if CI ever signs | **Never.** |
 

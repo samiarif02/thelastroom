@@ -39,7 +39,7 @@ Already pushed: never rewrite it; merge `origin/main` in if you must.
 List what changed (`git diff --name-only origin/main...HEAD` plus the working tree) and say, in
 the report and the PR:
 
-- **Ships how?** Web demo (redeploys from `main`), a new APK/store build (anything under
+- **Ships how?** A new APK/store build (anything under
   `android/`, `ios/`, a new plugin, permissions, icons, version), an Edge Function deploy, or a
   migration. See `docs/rules/deployment.md`.
 - **Events**: a user-visible change has its events registered first.
