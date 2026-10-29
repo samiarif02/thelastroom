@@ -62,6 +62,14 @@ void main() {
       expect(today.isBefore(today.addDays(1)), isTrue);
       expect(today.compareTo(today.addDays(-1)), greaterThan(0));
     });
+
+    test('equal days are equal keys', () {
+      final days = {
+        CalendarDay(2026, 10, 29),
+        CalendarDay(2026, 10, 28).addDays(1),
+      };
+      expect(days, hasLength(1));
+    });
   });
 
   test('Leitner intervals are 1, 3 and 7 days (FR-40)', () {
