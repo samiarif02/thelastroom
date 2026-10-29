@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# Scans the staged blobs (session logs included) for credentials. CI re-scans every tracked file.
+node scripts/check-secrets.mjs --staged

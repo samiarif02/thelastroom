@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Replaced by the value of `flutter build web --base-href`. -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The Last Room: an interview-practice game that looks like a film. One room left between you and the offer.">
+  <meta name="theme-color" content="#07070A">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="The Last Room">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="manifest" href="manifest.json">
+
+  <title>The Last Room</title>
+
+  <!-- Branded loading screen (brief §9: first frame < 3 s, no white flash). Colours mirror
+       packages/brand BrandColors.void_ / textSecondary; this file can't import Dart tokens. -->
+  <style>
+    html, body { margin: 0; height: 100%; background: #07070A; }
+    #loading {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at 50% -10%, rgba(233, 169, 75, 0.18), transparent 60%), #07070A;
+      color: #B4AC9E; font: 600 12px/1.3 Georgia, 'Times New Roman', serif; letter-spacing: 0.4em;
+      transition: opacity 400ms ease;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      #loading span { animation: breathe 2.4s ease-in-out infinite; }
+      @keyframes breathe { 50% { opacity: 0.45; } }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading" aria-label="Loading The Last Room"><span>THE LAST ROOM</span></div>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine();
+        await appRunner.runApp();
+        const loading = document.getElementById('loading');
+        loading.style.opacity = '0';
+        setTimeout(function () { loading.remove(); }, 400);
+      },
+    });
+  </script>
+</body>
+</html>

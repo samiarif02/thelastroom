@@ -1,0 +1,8 @@
+{
+  "APP_ENV": "dev",
+  "SUPABASE_URL": "",
+  "SUPABASE_ANON_KEY": "",
+  "SENTRY_DSN": "",
+  "POSTHOG_API_KEY": "",
+  "POSTHOG_HOST": "https://eu.i.posthog.com"
+}

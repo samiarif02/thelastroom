@@ -1,0 +1,16 @@
+# Dart pub workspace root. One resolution, one lockfile and one .dart_tool for every package.
+# Run `flutter pub get` here, never inside a package.
+name: thelastroom_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.13.0
+
+workspace:
+  - apps/mobile
+  - packages/brand
+  - packages/content
+  - packages/engine
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

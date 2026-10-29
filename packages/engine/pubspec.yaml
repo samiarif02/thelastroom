@@ -1,0 +1,11 @@
+name: engine
+description: "Pure-Dart game engine for The Last Room: scoring, follow-ups, unlocks, Leitner recall, baseline compare. No Flutter, no I/O, no clock reads."
+publish_to: none
+version: 0.1.0
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dev_dependencies:
+  test: ^1.25.6

@@ -1,0 +1,17 @@
+name: brand
+description: "The Last Room's design tokens (colour, chapter grades, type, spacing, radii, motion) and ThemeData. The only place a raw colour value may be written."
+publish_to: none
+version: 0.1.0
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.47.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

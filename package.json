@@ -1,0 +1,22 @@
+{
+  "name": "thelastroom",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Last Room: a cinematic interview-practice game (Flutter). This file holds only the gate scripts and the hooks install; the app is a Dart pub workspace (pubspec.yaml).",
+  "scripts": {
+    "bootstrap": "flutter pub get",
+    "format": "dart format apps packages",
+    "format:check": "dart format --output=none --set-exit-if-changed apps packages",
+    "analyze": "flutter analyze --fatal-infos",
+    "test": "node --test scripts/*.test.mjs && node scripts/test-packages.mjs",
+    "check:secrets": "node scripts/check-secrets.mjs --all",
+    "check:standards": "node scripts/check-standards.mjs",
+    "check:events": "node scripts/check-events.mjs",
+    "check:env": "node scripts/check-env.mjs",
+    "build:web": "cd apps/mobile && flutter build web --release",
+    "prepare": "git config core.hooksPath .githooks || true"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
