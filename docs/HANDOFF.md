@@ -57,6 +57,10 @@ polish → skill tree visuals (keep the radar) → notifications on iOS (keep An
 - PR #1 foundation merged (merge commit `ddfc597`, 2026-10-29). Lead review: all 8 gates green
   locally, web build boots to the title screen.
 
+## In progress
+
+- Nothing. Waiting on the owner to merge `docs/lead-02` and start the brief 02 worker.
+
 ## Next steps
 
 1. Owner merges `docs/lead-02` (or says "merge" to the lead).
