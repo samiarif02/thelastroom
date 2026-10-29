@@ -14,13 +14,13 @@ The first thing that must exist end to end is **Mission 1, playable offline from
 clone**: splash → intro → scene → draft → three beats → follow-up → dossier, with the attempt
 stored on the device, and no keys or network needed. It touches every layer (brand, content,
 engine, local database, analytics) once, so every later milestone is "more of the same" rather
-than "first of its kind". Everything before it (03, 04, 06) exists to make that slice good;
-everything after it widens it. The slice is brief 09.
+than "first of its kind". Everything before it (03, 04, 06, 09) exists to make that slice good;
+everything after it widens it. The slice is brief 10.
 
 ## Waves
 
 The plan runs in **parallel waves** (kit README §4c). Briefs in a wave run at the same time, each
-in its own worktree (w1, w2, w3), and each is one PR merged by the owner. A wave starts when the
+in its own worktree (w1 to w4), and each is one PR merged by the owner. A wave starts when the
 briefs it needs have merged. Sizes: **S** under half a day, **M** about half a day, **L** most
 of a day.
 
@@ -33,27 +33,32 @@ of a day.
 | 05 | 1 | w3 | M | Fri 30 Oct | **Supabase**: migrations, owner-only RLS + tests, anonymous auth, all optional at runtime. FR-2 (server), FR-62, D1 column, NFR-8 | 02 |
 | 06 | 2 | w1 | L | Sat 31 Oct | **Design system + cinematic layer**: tokens, bundled fonts, letterbox, spotlight, grain/vignette, subtitle text, icons, launch screens, `/dev/catalog`, first goldens. NFR-1, NFR-2, NFR-7 | 03 |
 | 07 | 2 | w2 | M | Sat 31 Oct | **Missions 2–7 content**, scored and reviewed (text only). FR-30 | 04 |
-| 08 | 2 | w3 | L | Sat 31 Oct | **App-side auth + drift outbox sync**: anonymous sign-in, link email/Google, onboarding, outbox flush, restore; silently off with no keys or network. FR-2–4, FR-60 (sync), FR-61 | 05 |
-| 09 | 3 | w1 | L | **Sun 1 Nov** | **Mission player**: scene → draft → beats → follow-up → dossier, local attempt storage, events. FR-1, FR-10–16, FR-60 (local), NFR-4 (M1) | 04, 06 |
-| 10 | 3 | w2 | M | Sun 1 Nov | **Notifications** (Android first, then iOS). FR-50–53 | 06 |
-| 11 | 3 | w3 | M | Sun 1 Nov | **AI coach** Edge Function (optional, first to cut). FR-11 (grading), FR-15 ("Say it your way"), FR-24, FR-63 | 05 |
-| 12 | 4 | w1 | L | Mon 2 Nov | **Tower home, elevator, Recall Room, Chapter 1 report**, skill radar, Chapter 2 teaser + waitlist. FR-5, FR-16, FR-31, FR-32, FR-40–42, D1 | 07, 08, 09 |
-| 13 | 4 | w2 | M | Wed 4 Nov | **Dogfood fixes, APK, GitHub Release**: a full Chapter 1 playthrough on the OnePlus 9 and the web, fixes, profile pass. NFR-3, FR-71 | everything |
-| 14 | 4 | w3 | S | **Thu 5 Nov, early** | **Submission**: write-up (scoring hypothesis, multiple-choice limits), `SUBMISSION.md` with the paywall mock, demo video script, reviewer run guide. FR-23, NFR-6 | 13 |
+| 08 | 2 | w3 | L | Sat 31 Oct | **App-side auth + drift outbox sync**: anonymous sign-in, link an email address (Google sign-in is v2), onboarding, outbox flush, restore; silently off with no keys or network. FR-2–4, FR-60 (sync), FR-61 | 05 |
+| 09 | 2 | w4 | M | Sat 31 Oct | **Sound design**: audio engine on `flutter_soloud`, named cues, typing voices per interviewer, ambience per chapter, licensed sounds only, a `/dev/sound` board; spec in `docs/sound-design.md`. FR-17, D5 | 03 |
+| 10 | 3 | w1 | L | **Sun 1 Nov** | **Mission player**: scene → draft → beats → follow-up → dossier, local attempt storage, events, sound cues. FR-1, FR-10–16, FR-60 (local), NFR-4 (M1) | 04, 06, 09 |
+| 11 | 3 | w2 | M | Mon 2 Nov | **Notifications** (Android first, then iOS). FR-50–53 | 06 |
+| 12 | 3 | w3 | M | Mon 2 Nov | **AI coach** Edge Function (optional, first to cut). FR-11 (grading), FR-15 ("Say it your way"), FR-24, FR-63 | 05 |
+| 13 | 4 | w1 | L | Tue 3 Nov | **Tower home, elevator, Recall Room, Chapter 1 report**, skill radar, Chapter 2 teaser + waitlist. FR-5, FR-16, FR-31, FR-32, FR-40–42, D1 | 07, 08, 10 |
+| 14 | 4 | w2 | M | Wed 4 Nov | **Dogfood fixes, APK, GitHub Release**: a full Chapter 1 playthrough on the OnePlus 9 and the web, fixes, profile pass. NFR-3, FR-71 | everything |
+| 15 | 4 | w3 | S | **Thu 5 Nov, early** | **Submission**: write-up (scoring hypothesis, multiple-choice limits), `SUBMISSION.md` with the paywall mock, demo video script, reviewer run guide. FR-23, NFR-6 | 14 |
 
-Target dates: wave 1 Thu 29–Fri 30 Oct, wave 2 Fri 30–Sat 31 Oct, wave 3 Sat 31 Oct–Sun 1 Nov,
-wave 4 Mon 2–Wed 4 Nov, submit Thu 5 Nov early.
+The kit README caps a wave at 3 workers; the owner raised it to 4 for wave 2 (2026-10-30), so
+sound (09) runs beside 06, 07 and 08.
 
-**The briefs that must not slip:** 04 and 06 (09 needs both), 09 (Mission 1 is the demo), 14
-(submitting late is the only unrecoverable failure).
+Target dates: wave 1 Thu 29–Fri 30 Oct, wave 2 merged by Sat 31 Oct evening, wave 3 Sun 1–Mon
+2 Nov, wave 4 Mon 2–Wed 4 Nov, submit Thu 5 Nov early.
+
+**The briefs that must not slip:** 04 and 06 (10 needs both, plus 09's core cues), 10 (Mission 1
+is the demo), 15 (submitting late is the only unrecoverable failure).
 
 ## Cut line
 
 If we slip, drop in this order (first to go first). Each cut is announced in `docs/HANDOFF.md`
 and explained in the README, never silently skipped.
 
-1. **11 AI coach.** The draft is still stored for "then vs. now"; the README says grading is v2.
-2. **Sound** (D5).
+1. **12 AI coach.** The draft is still stored for "then vs. now"; the README says grading is v2.
+2. **09's cue sheet**: trim it to the core cues (typing, question lands, stamp, ambience). Sound
+   still ships (D5).
 3. **Chapter 2–3 teaser polish**: plain locked floors with their mission titles.
 4. **Skill tree visuals**: keep the radar, show unlocked skills as a list.
 5. **Notifications on iOS**: keep Android.
@@ -74,8 +79,8 @@ D3).
   host secrets, no deploy job and no cross-origin headers to get right. `flutter run -d chrome`
   stays a local run target.
 - **Reviewers clone and run** (on Chrome, an emulator or a phone), or install the APK from the
-  GitHub Release (13). The README's run guide is those three commands (14).
-- **The demo video is the public face.** The owner records it; brief 14 writes its script.
+  GitHub Release (14). The README's run guide is those three commands (15).
+- **The demo video is the public face.** The owner records it; brief 15 writes its script.
 
 ## Where the brief is wrong or risky
 
@@ -115,7 +120,9 @@ Each point names what we'd change. The owner decides; brief 02 adopts none of th
    (brief §5, §9), and D2 (who makes the art) is still open. A beautiful scene with placeholder
    portraits fails the Design criterion. **Change:** decide D2 in 03a at the latest. Fallback
    that still looks filmic: one painterly still per expression with the idle done in code
-   (a slow scale "breath", the spotlight flicker, a parallax shift), no Rive.
+   (a slow scale "breath", the spotlight flicker, a parallax shift), no Rive. **Resolved:** D2
+   was decided on 2026-10-30: rim-lit silhouettes drawn in code with a code-driven idle for v1;
+   painterly portraits are a stretch goal.
 6. **"Skills unlock only when demonstrated in an unhinted mission".** In Chapter 1 only
    Missions 1, 3 and 7 are unhinted, and Mission 1 is the baseline where players should
    struggle, so Chapter 1 can realistically unlock one or two of the four skills. A skill tree

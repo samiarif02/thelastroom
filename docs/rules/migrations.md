@@ -17,14 +17,18 @@ supabase db reset                                  # replays every migration + s
    it.** `using (auth.uid() = user_id)` for select/update/delete, `with check (auth.uid() =
    user_id)` for insert/update. No table is ever briefly open.
 2. **Every policy has a test** that proves a second user can't read or write the first user's
-   rows (pgTAP via `supabase test db`, or a script against the local stack). CI runs it once
-   the first migration lands.
+   rows (pgTAP via `supabase test db`). CI's `db` job runs `supabase test db` on every PR, and
+   `check:rls` (in the `check` job) fails a migration that creates a table without RLS and a
+   policy in the same file.
 3. **Never edit a migration that's merged.** Write a new one.
 4. **Additive first.** Adding a column or table is safe. Renaming or dropping one breaks app
    builds already installed on phones (they can't be force-updated): add the new shape, ship an
    app that uses it, and only then remove the old one in a later migration.
 5. **Idempotent sync.** `mission_attempts.attempt_id` is a client-generated UUID with a unique
-   constraint; the outbox upserts on it, so a retried sync never duplicates an attempt.
+   constraint; the outbox inserts with `on conflict (attempt_id) do nothing` (supabase-dart:
+   `upsert(..., ignoreDuplicates: true)`), so a retried sync never duplicates an attempt.
+   Attempts are append-only and have no update policy, so a plain upsert (which updates on
+   conflict) would be refused.
 6. **Server-controlled columns** (`created_at`, usage counters in `coach_usage`) are set by
    defaults or the Edge Function, never trusted from the client; policies or triggers enforce it.
 7. **Seed data** (`supabase/seed.sql`) is for local development only and contains no real
