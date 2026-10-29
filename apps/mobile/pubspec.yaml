@@ -1,0 +1,25 @@
+name: the_last_room
+description: "The Last Room, a cinematic interview-practice game (Android, iOS, web demo)."
+publish_to: none
+version: 0.1.0+1
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.47.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  brand:
+  content:
+  engine:
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: false

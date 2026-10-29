@@ -1,0 +1,76 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/doc/api/
+coverage/
+*.iml
+
+# Node (only the gate scripts use it; there are no npm dependencies)
+node_modules/
+
+# Native build artifacts (the platform folders themselves ARE committed:
+# Flutter generates them once and we edit them by hand, unlike Expo prebuild)
+**/android/.gradle/
+**/android/app/build/
+**/android/local.properties
+**/android/key.properties
+**/android/.kotlin/
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/xcuserdata/
+**/DerivedData/
+
+# Signing / provisioning (NEVER commit)
+*.keystore
+!debug.keystore
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Env files (NEVER commit; the *.example files are the committed templates).
+# The same names .claude/settings.json denies reading.
+.env
+.env.local
+.env.*.local
+.env.dev
+.env.development
+.env.staging
+.env.prod
+.env.production
+!.env.example
+**/env/*.json
+!**/env/*.example.json
+
+# Supabase local dev state, at any depth
+**/supabase/.branches/
+**/supabase/.temp/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors (shared run configs, if any, are added deliberately with -f)
+.idea/
+.vscode/
+*.swp
+
+# Agent worktrees and personal Claude settings. The shared .claude/settings.json IS committed.
+.claude/worktrees/
+.claude/settings.local.json
+
+# NOTE: .claude-logs/ is intentionally COMMITTED (session transcripts ship with every PR).

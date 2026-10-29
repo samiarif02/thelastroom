@@ -1,0 +1,1 @@
+-- Local development seed data only (supabase db reset). Never real people's data.
