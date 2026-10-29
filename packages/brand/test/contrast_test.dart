@@ -50,4 +50,66 @@ void main() {
       }
     },
   );
+
+  // Brief 03: every text pair in every prototype direction, at AA for body text. The grade key
+  // is used for small labels (the speaker's name, eyebrows), so it is held to 4.5 too, not 3.
+  for (final direction in cinematicDirections) {
+    group(
+      'direction ${direction.letter} (${direction.name}) meets WCAG AA',
+      () {
+        final p = direction.palette;
+        final grounds = {
+          'void': p.void_,
+          'surface': p.surface,
+          'raised': p.raised,
+        };
+        final texts = {
+          'textPrimary': p.textPrimary,
+          'textSecondary': p.textSecondary,
+          for (final g in direction.grades) '${g.name} key': g.key,
+        };
+        for (final ground in grounds.entries) {
+          for (final text in texts.entries) {
+            test('${text.key} on ${ground.key}', () {
+              expect(
+                contrastRatio(text.value, ground.value),
+                greaterThanOrEqualTo(wcagAaNormalText),
+              );
+            });
+          }
+        }
+        for (final ink in {
+          'ink': p.ink,
+          'inkSoft': p.inkSoft,
+          'redPen': p.redPen,
+        }.entries) {
+          test('${ink.key} on the dossier paper', () {
+            expect(
+              contrastRatio(ink.value, p.paper),
+              greaterThanOrEqualTo(wcagAaNormalText),
+            );
+          });
+        }
+        test('every type style uses a colour from a tested pair', () {
+          final type = direction.type;
+          final tested = {...texts.values, p.ink, p.inkSoft, p.redPen};
+          for (final style in [
+            type.eyebrow,
+            type.titleCard,
+            type.display,
+            type.body,
+            type.subtitle,
+            type.speaker,
+            type.choice,
+            type.label,
+            type.score,
+            type.stamp,
+            type.note,
+          ]) {
+            expect(tested, contains(style.color));
+          }
+        });
+      },
+    );
+  }
 }

@@ -3,6 +3,7 @@ library;
 
 export 'src/colors.dart';
 export 'src/contrast.dart';
+export 'src/directions/directions.dart';
 export 'src/layout.dart';
 export 'src/motion.dart';
 export 'src/theme.dart';
