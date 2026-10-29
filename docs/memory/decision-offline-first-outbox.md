@@ -16,3 +16,4 @@ from 8x's template (client never touches tables) and is recorded in AGENTS.md.
 (`docs/rules/migrations.md`, `docs/rules/state-management.md`).
 
 Full record, with alternatives: [ADR 0002](../decisions/0002-offline-first-outbox.md).
+The backend is optional at runtime (no keys or no network: sync is silently off): [ADR 0005](../decisions/0005-zero-setup-offline-backend-optional.md).

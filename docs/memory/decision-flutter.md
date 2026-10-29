@@ -1,11 +1,11 @@
 ---
 name: decision-flutter
-description: Flutter (no Flame) for Android, iOS and a web demo build; 8x's discipline ported, not their stack
+description: Flutter (no Flame) for Android, iOS and a web build run locally; 8x's discipline ported, not their stack
 type: project
 ---
 
-**Flutter 3.47.8** (pinned in README and CI) for Android and iOS, plus a **Flutter web build as
-the reviewers' demo link**. No Flame: this is a narrative card-choice game, so widgets,
+**Flutter 3.47.8** (pinned in README and CI) for Android and iOS, plus a **Flutter web build**,
+run locally (not hosted; ADR 0005). No Flame: this is a narrative card-choice game, so widgets,
 CustomPainter, fragment shaders, flutter_animate and Rive cover it. Riverpod 3, go_router,
 drift, supabase_flutter. Dart pub workspace monorepo mirroring 8x's folder layout.
 

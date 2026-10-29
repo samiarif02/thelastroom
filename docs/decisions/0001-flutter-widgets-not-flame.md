@@ -7,8 +7,8 @@
 
 The Last Room is a narrative card-choice game whose headline is how it looks (brief §9): letterbox
 bars, a spotlight with dust, film grain, an elevator transition, a dossier with stamps. It must
-run on Android, iOS and the web (the reviewers' demo link), at 60 fps on a mid-range Android,
-with text that survives 2x scaling and a screen reader.
+run on Android, iOS and the web (run locally; ADR 0005 dropped the hosted demo), at 60 fps on a
+mid-range Android, with text that survives 2x scaling and a screen reader.
 
 Almost every screen is text, buttons and layered images. There are no sprites, physics,
 collisions or a game loop.

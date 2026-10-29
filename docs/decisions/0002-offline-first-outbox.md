@@ -1,6 +1,7 @@
 # 0002. Offline-first, with an idempotent outbox
 
 - **Status:** accepted (2026-10-29)
+- Amended by [0005](0005-zero-setup-offline-backend-optional.md): the backend is optional at runtime.
 - **Memory:** [`docs/memory/decision-offline-first-outbox.md`](../memory/decision-offline-first-outbox.md)
 
 ## Context
@@ -33,7 +34,8 @@ the player has an account (FR-61). We have no server of our own; Supabase is the
 - Two sources of truth to keep honest: tests cover "flush twice, one row" and "offline then
   online".
 - drift on the web wants cross-origin isolation (COOP/COEP headers) for its fastest storage
-  mode. We measure before turning those on (`docs/v1-plan.md`, 02b).
+  mode. That's moot now: there's no hosted web build to set headers on (ADR 0005), and
+  `flutter run -d chrome` falls back to IndexedDB-backed storage, which is fast enough.
 
 ## Alternatives considered
 

@@ -12,5 +12,5 @@ week. `check:standards` (`shared-brain`) fails on a dangling or unindexed file.
 - [Decision: Chapter 1 scope](decision-scope-chapter-1.md): Chapter 1 complete, 2–3 locked
 - [Decision: local notifications](decision-local-notifications.md): local in v1, remote push v2
 - [Two profiles, one brain](workflow-two-profiles.md): how the claude / claude-geo handoff works
-- [Lead and workers](workflow-lead-and-workers.md): briefs, lead docs left uncommitted on main, preview links
+- [Lead and workers](workflow-lead-and-workers.md): parallel worktrees, file ownership, status files, one lead docs PR per wave
 - [Gotcha: env deny rules](gotcha-env-deny-rules.md): deny rules have no exceptions; each real env file is denied by name
