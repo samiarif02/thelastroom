@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ draws its own splash from these: void, and the brass monogram in place of the
+     launcher icon on white. -->
+<resources>
+    <style name="LaunchTheme.Boardroom" parent="LaunchTheme">
+        <item name="android:windowSplashScreenBackground">@color/brand_void</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/launch_mark</item>
+    </style>
+    <style name="NormalTheme.Boardroom" parent="NormalTheme">
+        <item name="android:windowBackground">@color/brand_void</item>
+    </style>
+</resources>
