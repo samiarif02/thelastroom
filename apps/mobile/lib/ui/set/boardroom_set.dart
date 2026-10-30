@@ -39,7 +39,8 @@ abstract final class BoardroomSet {
     target: Alignment(0, -0.3),
   );
 
-  /// A tighter framing for the follow-up question, reached by a hard cut, not a push.
+  /// A tighter framing for the follow-up question, reached by a hard cut, not a push. The
+  /// desk takes the same framing as the interviewer, so it stays below her shoulders.
   static const CameraShot middleTight = CameraShot(
     scale: 2.3,
     focus: Alignment(0.04, -0.12),
@@ -49,7 +50,8 @@ abstract final class BoardroomSet {
   /// Where the desk's edge sits, as a share of the set's height.
   static const double deskLine = 0.68;
 
-  /// The three planes, back to front. [tight] swaps the middle close-up for [middleTight].
+  /// The three planes, back to front. [tight] swaps the middle and front close-ups for
+  /// [middleTight].
   static List<CameraLayer> layers({
     required SilhouetteFigure figure,
     ChapterGrade grade = ChapterGrade.lobby,
@@ -65,7 +67,7 @@ abstract final class BoardroomSet {
       child: _Middle(figure: figure, grade: grade, label: figureLabel),
     ),
     CameraLayer(
-      close: frontClose,
+      close: tight ? middleTight : frontClose,
       child: _Front(grade: grade),
     ),
   ];
@@ -186,13 +188,14 @@ class _WindowPainter extends CustomPainter {
       if (x > glass.left && x < glass.right) continue;
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), grain);
     }
-    canvas.drawLine(
-      glass.topCenter,
-      glass.bottomCenter,
-      Paint()
-        ..color = BrandColors.line
-        ..strokeWidth = 2,
-    );
+    // Mullions at the glass's thirds: never down the centre, where the interviewer's head is.
+    final mullion = Paint()
+      ..color = BrandColors.line
+      ..strokeWidth = 2;
+    for (final third in [1 / 3, 2 / 3]) {
+      final x = glass.left + glass.width * third;
+      canvas.drawLine(Offset(x, glass.top), Offset(x, glass.bottom), mullion);
+    }
   }
 
   @override

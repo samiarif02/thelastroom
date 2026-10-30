@@ -8,9 +8,14 @@ import 'package:flutter/widgets.dart';
 
 import 'ambient_clock.dart';
 
-/// The grain + vignette laid over every frame (brief §9: very subtle). The grain is a few
-/// pre-baked noise tiles swapped at film rate behind a [RepaintBoundary], so it costs one
-/// textured rect per frame. It holds still under reduced motion (the [AmbientClock] stops).
+/// Grain + vignette over [child] (brief §9: very subtle). The grain is a few pre-baked noise
+/// tiles swapped at film rate behind a [RepaintBoundary], so it costs one textured rect per
+/// frame. It holds still under reduced motion (the [AmbientClock] stops).
+///
+/// The vignette is an ellipse fitted to the frame. **Lay it under text, never over it**: it
+/// darkens the edges by up to [vignette], which would take edge text below AA. So the app
+/// wraps every route in grain only (`vignette: 0`), and scenes put a vignette-only overlay
+/// (`grain: 0`) round their set, beneath their subtitles and cards.
 ///
 /// Needs an [AmbientClock] above it to move; without one the grain is a still frame.
 class FilmOverlay extends StatelessWidget {
@@ -48,6 +53,7 @@ class FilmOverlay extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   radius: _radius,
+                  transform: const _FitEllipse(),
                   colors: [
                     BrandColors.clear,
                     vignetteColor.withValues(alpha: vignette),
@@ -70,6 +76,21 @@ class FilmOverlay extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+/// Stretches a radial gradient (measured on the box's shortest side) into an ellipse that
+/// fits the whole box, so a tall phone's top and bottom aren't swallowed by the vignette.
+class _FitEllipse extends GradientTransform {
+  const _FitEllipse();
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    final c = bounds.center;
+    final side = bounds.shortestSide;
+    return Matrix4.translationValues(c.dx, c.dy, 0)
+      ..scaleByDouble(bounds.width / side, bounds.height / side, 1, 1)
+      ..translateByDouble(-c.dx, -c.dy, 0, 1);
   }
 }
 

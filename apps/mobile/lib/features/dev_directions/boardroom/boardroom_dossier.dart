@@ -26,7 +26,10 @@ class BoardroomDossier extends StatelessWidget {
             ),
           ),
         ),
-        const Spotlight(center: Alignment(-0.7, -0.6), intensity: 0.4),
+        const FilmOverlay(
+          grain: 0,
+          child: Spotlight(center: Alignment(-0.7, -0.6), intensity: 0.4),
+        ),
         const SafeArea(
           child: AnchoredScroll(
             alignment: MainAxisAlignment.center,

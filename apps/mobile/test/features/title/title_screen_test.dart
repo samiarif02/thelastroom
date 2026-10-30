@@ -41,12 +41,26 @@ void main() {
     expect(find.byType(BankersLamp), findsOneWidget);
   });
 
-  testWidgets('every frame is on film stock: grain and vignette', (
+  testWidgets('every frame is grained; the vignette never lies over text', (
     tester,
   ) async {
     await boot(tester);
-    expect(find.byType(FilmOverlay), findsOneWidget);
     expect(find.byType(AmbientClock), findsOneWidget);
+    final overlays = tester
+        .widgetList<FilmOverlay>(find.byType(FilmOverlay))
+        .toList();
+    expect(overlays.where((o) => o.grain > 0), hasLength(1));
+    expect(overlays.where((o) => o.vignette > 0), isNotEmpty);
+    // A vignette over text would dim edge text below AA.
+    for (final overlay in overlays.where((o) => o.vignette > 0)) {
+      expect(
+        find.descendant(
+          of: find.byWidget(overlay),
+          matching: find.byType(Text),
+        ),
+        findsNothing,
+      );
+    }
   });
 
   testWidgets('text inherits the brand style, not the debug fallback', (

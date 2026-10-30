@@ -2,6 +2,7 @@ import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
 import '../film/cue.dart';
+import '../film/film_overlay.dart';
 import '../film/timeline.dart';
 import '../light/bokeh.dart';
 import '../ornament/brass.dart';
@@ -87,12 +88,17 @@ class ChapterTitleCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Opacity(
-                opacity: lamp * 0.7,
-                child: Bokeh(
-                  colors: [grade.key, grade.tint],
-                  count: 14,
-                  seed: 21,
+              // The room's light and its vignette, beneath the frame and the words.
+              FilmOverlay(
+                grain: 0,
+                vignetteColor: grade.shadow,
+                child: Opacity(
+                  opacity: lamp * 0.7,
+                  child: Bokeh(
+                    colors: [grade.key, grade.tint],
+                    count: 14,
+                    seed: 21,
+                  ),
                 ),
               ),
               SafeArea(

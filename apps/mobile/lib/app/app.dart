@@ -20,11 +20,15 @@ class TheLastRoomApp extends ConsumerWidget {
       routerConfig: ref.watch(routerProvider),
       // Screens are built without Scaffold/Material (no stock look), so the brand body style
       // must be the root default; otherwise Flutter's yellow-underline debug style shows.
-      // Every frame is shot on the same film stock: one ambient clock, one grain + vignette.
+      // Every frame is shot on the same film stock: one ambient clock and its grain. The
+      // vignette is each scene's, laid under its text (see FilmOverlay).
       builder: (context, child) => DefaultTextStyle(
         style: BrandType.body,
         child: AmbientClock(
-          child: FilmOverlay(child: child ?? const SizedBox.shrink()),
+          child: FilmOverlay(
+            vignette: 0,
+            child: child ?? const SizedBox.shrink(),
+          ),
         ),
       ),
     );

@@ -111,16 +111,20 @@ class _BoardroomSceneState extends State<BoardroomScene> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            HardCut(
-              shot: followUp,
-              child: DollyCamera(
-                closeUp: _beat.index >= _Beat.push.index,
-                onPushEnd: () => _go(_Beat.choices),
-                layers: BoardroomSet.layers(
-                  figure: SilhouetteFigure.priya,
-                  figureLabel:
-                      '${MissionOne.interviewer}, the ${MissionOne.interviewerRole.toLowerCase()}',
-                  tight: followUp,
+            FilmOverlay(
+              grain: 0,
+              vignetteColor: ChapterGrade.lobby.shadow,
+              child: HardCut(
+                shot: followUp,
+                child: DollyCamera(
+                  closeUp: _beat.index >= _Beat.push.index,
+                  onPushEnd: () => _go(_Beat.choices),
+                  layers: BoardroomSet.layers(
+                    figure: SilhouetteFigure.priya,
+                    figureLabel:
+                        '${MissionOne.interviewer}, the ${MissionOne.interviewerRole.toLowerCase()}',
+                    tight: followUp,
+                  ),
                 ),
               ),
             ),
