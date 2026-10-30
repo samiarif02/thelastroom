@@ -118,26 +118,30 @@ class _DraftPanelState extends State<DraftPanel> {
                           ),
                         ),
                       ),
-                    Semantics(
-                      label: DraftPanel.heading,
-                      textField: true,
-                      child: EditableText(
-                        controller: _text,
-                        focusNode: _focus,
-                        style: BrandType.choice,
-                        cursorColor: brass,
-                        backgroundCursorColor: BrandColors.textSecondary,
-                        selectionColor: brass.withValues(alpha: 0.3),
-                        minLines: 1,
-                        maxLines: _maxLines,
-                        keyboardType: TextInputType.multiline,
-                        keyboardAppearance: Brightness.dark,
-                        textCapitalization: TextCapitalization.sentences,
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(
-                            DraftPanel.maxLength,
-                          ),
-                        ],
+                    // One node for screen readers: the label and the field (EditableText's own
+                    // node would otherwise be a second, unlabelled text field).
+                    MergeSemantics(
+                      child: Semantics(
+                        label: DraftPanel.heading,
+                        textField: true,
+                        child: EditableText(
+                          controller: _text,
+                          focusNode: _focus,
+                          style: BrandType.choice,
+                          cursorColor: brass,
+                          backgroundCursorColor: BrandColors.textSecondary,
+                          selectionColor: brass.withValues(alpha: 0.3),
+                          minLines: 1,
+                          maxLines: _maxLines,
+                          keyboardType: TextInputType.multiline,
+                          keyboardAppearance: Brightness.dark,
+                          textCapitalization: TextCapitalization.sentences,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(
+                              DraftPanel.maxLength,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

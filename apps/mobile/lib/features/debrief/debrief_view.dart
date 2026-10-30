@@ -10,6 +10,7 @@ import '../mission/mission_lookup.dart';
 import '../mission/widgets/cue_button.dart';
 import '../mission/widgets/trust_meter.dart';
 import 'debrief_facts.dart';
+import 'first_try_slip.dart';
 import 'red_pen_slip.dart';
 
 /// The debrief (FR-15): the candidate file slides across the walnut into the lamp's pool, the
@@ -22,6 +23,7 @@ class DebriefView extends ConsumerStatefulWidget {
     required this.score,
     required this.trust,
     required this.onContinue,
+    this.firstTry,
   });
 
   final Mission mission;
@@ -31,14 +33,14 @@ class DebriefView extends ConsumerStatefulWidget {
   final int trust;
   final VoidCallback onContinue;
 
+  /// The player's own words from the draft-first step, shown beside a stronger version.
+  final String? firstTry;
+
   static const String title = 'Candidate assessment';
-  static const String lastMissionLabel = 'Back to the lobby';
+  static const String continueLabel = 'Back to the tower';
 
   /// The dossier sheet's largest text scale (the slip and buttons below take the full 2x).
   static const double maxSheetTextScale = 1.5;
-
-  static String continueLabel(Mission? next) =>
-      next == null ? lastMissionLabel : 'Next: ${next.title}';
 
   @override
   ConsumerState<DebriefView> createState() => _DebriefViewState();
@@ -141,9 +143,16 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                       )
                     else
                       const CleanRunSlip(),
+                    if (widget.firstTry case final words?) ...[
+                      const SizedBox(height: BrandSpace.md),
+                      FirstTrySlip(
+                        firstTry: words,
+                        stronger: strongestOpening(widget.mission).text,
+                      ),
+                    ],
                     const SizedBox(height: BrandSpace.lg),
                     CueButton(
-                      label: DebriefView.continueLabel(widget.mission.next),
+                      label: DebriefView.continueLabel,
                       grade: grade,
                       onPressed: _settled ? widget.onContinue : null,
                     ),

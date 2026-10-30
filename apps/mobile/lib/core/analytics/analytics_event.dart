@@ -10,6 +10,8 @@ enum AnalyticsEvent {
   guestStarted('guest_started'),
   accountLinked('account_linked'),
   onboardingCompleted('onboarding_completed'),
+  towerOpened('tower_opened'),
+  roomEntered('room_entered'),
   missionStarted('mission_started'),
   missionCompleted('mission_completed'),
   baselineRecorded('baseline_recorded'),

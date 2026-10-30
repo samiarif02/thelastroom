@@ -8,6 +8,7 @@ import 'package:the_last_room/features/debrief/debrief_view.dart';
 import 'package:the_last_room/features/debrief/red_pen_slip.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/widgets/beat_timer.dart';
+import 'package:the_last_room/features/tower/tower_screen.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
 import 'mission_harness.dart';
@@ -218,23 +219,22 @@ void main() {
       // The dossier is settled at once; the slip and the way on are there.
       expect(find.byType(RedPenSlip), findsOneWidget);
       expect(
-        find.text(
-          DebriefView.continueLabel(missionTheOpportunity.next).toUpperCase(),
-        ),
+        find.text(DebriefView.continueLabel.toUpperCase()),
         findsOneWidget,
       );
     },
   );
 
-  testWidgets('after the dossier, the next mission starts', (tester) async {
+  testWidgets('after the dossier, back to the tower with the room lit', (
+    tester,
+  ) async {
     final rig = await playMissionOne(tester);
     await rig.settleDossier();
-    final next = find.text(
-      DebriefView.continueLabel(missionTellMeAboutYourself).toUpperCase(),
-    );
-    await tester.ensureVisible(next);
-    await tester.tap(next);
-    await rig.until(find.byType(ChapterTitleCard));
-    expect(rig.state(2).mission, missionTellMeAboutYourself);
+    final back = find.text(DebriefView.continueLabel.toUpperCase());
+    await tester.ensureVisible(back);
+    await tester.tap(back);
+    await rig.until(find.byType(TowerScreen));
+    final tower = tester.widget<TowerScreen>(find.byType(TowerScreen));
+    expect(tower.lit, missionTheOpportunity.number);
   });
 }

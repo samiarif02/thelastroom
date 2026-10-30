@@ -26,9 +26,8 @@ class MissionScreen extends ConsumerWidget {
       AsyncData() => MissionPlayer(
         key: ValueKey(number),
         number: number,
-        onExit: (next) => context.go(
-          next == null ? Routes.home : Routes.mission(next.number),
-        ),
+        // The Tower lights this room and shows the next one glowing (brief 13).
+        onExit: () => context.go(Routes.tower(lit: number)),
       ),
       AsyncError(:final error, :final stackTrace) => _LockedDoor(
         onLog: () => ref
@@ -72,7 +71,7 @@ class _LockedDoor extends StatefulWidget {
   static const String title = 'THIS ROOM IS LOCKED';
   static const String line =
       'Something went wrong setting the scene. Your progress is safe on this device.';
-  static const String back = 'Back to the lobby';
+  static const String back = 'Back to the tower';
 
   @override
   State<_LockedDoor> createState() => _LockedDoorState();
@@ -114,7 +113,7 @@ class _LockedDoorState extends State<_LockedDoor> {
               const SizedBox(height: BrandSpace.lg),
               CueButton(
                 label: _LockedDoor.back,
-                onPressed: () => context.go(Routes.home),
+                onPressed: () => context.go(Routes.tower()),
               ),
             ],
           ),

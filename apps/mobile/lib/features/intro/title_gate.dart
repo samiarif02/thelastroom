@@ -1,13 +1,15 @@
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
+import '../../core/audio/game_sounds.dart';
 import '../title/title_screen.dart';
 
 /// The title card as the way in: once it has played, "Tap to begin" fades up, and a tap
 /// anywhere (also during the card) goes to the intro. The title card itself is 06's.
-class TitleGate extends StatelessWidget {
+class TitleGate extends ConsumerStatefulWidget {
   const TitleGate({super.key});
 
   static const String prompt = 'Tap to begin';
@@ -16,10 +18,27 @@ class TitleGate extends StatelessWidget {
   static const Duration _promptDelay = Duration(milliseconds: 3800);
 
   @override
+  ConsumerState<TitleGate> createState() => _TitleGateState();
+}
+
+class _TitleGateState extends ConsumerState<TitleGate> {
+  late final GameSounds _sounds = ref.read(gameSoundsProvider);
+
+  @override
+  void initState() {
+    super.initState();
+    _sounds.titleOpened();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final still = MediaQuery.disableAnimationsOf(context);
-    void begin() => context.go(Routes.intro);
-    final wait = still ? Duration.zero : _promptDelay;
+    void begin() {
+      _sounds.uiTap();
+      context.go(Routes.intro);
+    }
+
+    final wait = still ? Duration.zero : TitleGate._promptDelay;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -32,7 +51,7 @@ class TitleGate extends StatelessWidget {
           bottom: MediaQuery.paddingOf(context).bottom + BrandSpace.xl,
           child: Semantics(
             button: true,
-            label: prompt,
+            label: TitleGate.prompt,
             onTap: begin,
             excludeSemantics: true,
             child: GestureDetector(
@@ -46,7 +65,7 @@ class TitleGate extends StatelessWidget {
                   child: _FadeUpAfter(
                     wait: wait,
                     child: Text(
-                      prompt.toUpperCase(),
+                      TitleGate.prompt.toUpperCase(),
                       textAlign: TextAlign.center,
                       style: BrandType.eyebrow.copyWith(
                         color: ChapterGrade.lobby.key,

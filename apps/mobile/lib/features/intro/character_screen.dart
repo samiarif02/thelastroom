@@ -1,23 +1,28 @@
 import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
+import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../mission/mission_screen.dart';
 import '../mission/widgets/cue_button.dart';
 
-/// The character card: the candidate you play (the content's character sheet), as their CV on
-/// the desk, before Mission 1. The answers are Jordan's; the draft step is the player's own.
-class CharacterScreen extends StatelessWidget {
+/// The practice CV, on the desk before Mission 1 (brief 13): the content's character sheet,
+/// headed with the player's name, so it reads as *your practice CV for this role*. The facts
+/// belong to the scenario; the draft step is the player's own words.
+class CharacterScreen extends ConsumerWidget {
   const CharacterScreen({super.key});
 
-  static const String eyebrow = 'THE CANDIDATE';
+  static const String eyebrow = 'YOUR PRACTICE CV';
+  static const String premise =
+      'Your practice CV for this role. The facts belong to the scenario: every line you '
+      'pick in the room is built from them.';
   static const String yourWords =
-      "When the interviewer asks, you pick Jordan's lines. Before them, you can write the "
-      'answer in your own words, about yourself. That part is yours, and it stays on this '
-      'device.';
+      'Before the lines, you can start each answer in your own words, about yourself. That '
+      'part is yours, and it stays on this device.';
   static const String enter = 'Step into the room';
 
   /// The first sentence of a fact: the CV line. The rest is for writers and the coach.
@@ -27,8 +32,11 @@ class CharacterScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const grade = ChapterGrade.lobby;
+    final name =
+        ref.watch(profileProvider).value?.displayName ??
+        PlayerProfile.fallbackName;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -50,7 +58,7 @@ class CharacterScreen extends StatelessWidget {
               children: [
                 const BrassOrnament(text: eyebrow),
                 const SizedBox(height: BrandSpace.lg),
-                const _CvSheet(character: player),
+                _CvSheet(character: player, name: name),
                 const SizedBox(height: BrandSpace.lg),
                 Text(
                   yourWords,
@@ -75,9 +83,12 @@ class CharacterScreen extends StatelessWidget {
 }
 
 class _CvSheet extends StatelessWidget {
-  const _CvSheet({required this.character});
+  const _CvSheet({required this.character, required this.name});
 
   final PlayerCharacter character;
+
+  /// The player's name, at the head of the sheet.
+  final String name;
 
   static const double _shadowBlur = 24;
   static const Offset _shadowOffset = Offset(-6, 14);
@@ -108,14 +119,14 @@ class _CvSheet extends StatelessWidget {
               Semantics(
                 header: true,
                 child: Text(
-                  character.name,
+                  name,
                   textAlign: TextAlign.center,
                   style: BrandType.display.copyWith(color: BrandColors.ink),
                 ),
               ),
               const SizedBox(height: BrandSpace.sm),
               Text(
-                character.premise,
+                CharacterScreen.premise,
                 textAlign: TextAlign.center,
                 style: BrandType.body.copyWith(color: BrandColors.inkSoft),
               ),

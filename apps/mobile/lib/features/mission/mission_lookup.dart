@@ -46,6 +46,20 @@ extension MissionLookup on Mission {
   bool get offersDraft => !hinted;
 }
 
+extension AddressedLine on SceneLine {
+  /// The line as said to the player: the content's candidate name ("Hi Jordan") becomes
+  /// [name] ("Hi Sami"). The answer lines stay the practice CV's, in the first person.
+  SceneLine addressedTo(String name) => SceneLine(
+    speakerId: speakerId,
+    text: text.replaceAll(_candidateName, name),
+  );
+}
+
+/// The practice candidate's first name as the interviewers say it, as a whole word.
+final RegExp _candidateName = RegExp(
+  '\\b${RegExp.escape(player.name.split(' ').first)}\\b',
+);
+
 Interviewer interviewerById(String id) =>
     interviewers.firstWhere((i) => i.id == id);
 

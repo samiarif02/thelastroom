@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/providers.dart';
 import 'package:the_last_room/core/analytics/analytics_event.dart';
+import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
 import 'package:the_last_room/features/debrief/debrief_facts.dart';
 import 'package:the_last_room/features/mission/mission_controller.dart';
@@ -24,6 +25,9 @@ void main() {
         analyticsProvider.overrideWithValue(analytics),
         progressRepositoryProvider.overrideWithValue(progress),
         attemptSeedProvider.overrideWithValue(() => testSeed),
+        profileRepositoryProvider.overrideWithValue(
+          InMemoryProfileRepository(onboardedPlayer),
+        ),
       ],
     );
   });
@@ -145,9 +149,38 @@ void main() {
       final six = await container.read(provider.future);
       final line = m6.continuity!.lineFor(s.score!.optionIdsByCost);
       expect(line, isNotNull);
-      expect(six.scene, [...m6.scene, line]);
+      expect(six.scene.map((l) => l.text), [
+        for (final l in [...m6.scene, line!]) l.addressedTo(testName).text,
+      ]);
     },
   );
+
+  test('the interviewers call the player by their first name', () async {
+    final provider = missionControllerProvider(1);
+    final sub = container.listen(provider, (_, _) {});
+    addTearDown(sub.close);
+    final one = await container.read(provider.future);
+    expect(
+      one.scene.first.text,
+      "Hi $testName, I'm Priya. "
+      'I hire for the product team here at Northstar Labs.',
+    );
+    final candidate = player.name.split(' ').first;
+    for (final line in [...one.scene, one.question]) {
+      expect(line.text, isNot(contains(candidate)));
+    }
+  });
+
+  test('a player who skipped their name is called Candidate', () {
+    const line = SceneLine(speakerId: 'priya', text: 'Last one, Jordan.');
+    expect(
+      line.addressedTo(PlayerProfile.fallbackName).text,
+      'Last one, Candidate.',
+    );
+    // A whole word only: never inside another word.
+    const other = SceneLine(speakerId: 'priya', text: 'Jordanian food.');
+    expect(other.addressedTo('Sami').text, 'Jordanian food.');
+  });
 
   test('an unknown mission number is an error, not a crash', () async {
     final provider = missionControllerProvider(99);
