@@ -39,9 +39,16 @@
   <script>
     {{flutter_js}}
     {{flutter_build_config}}
+    // Zero setup, no network (AGENTS.md 6), in `flutter run -d chrome` as in the release build:
+    // CanvasKit comes from this server, not www.gstatic.com, and the engine's Roboto fallback
+    // from web/fonts/, not fonts.gstatic.com (the app's own text is all in the bundled brand
+    // fonts; a glyph none of them has shows as a box rather than fetching a Noto font).
+    // The loader reads the config for CanvasKit; the engine reads it at initializeEngine.
+    const config = { canvasKitBaseUrl: 'canvaskit/', fontFallbackBaseUrl: 'fonts/' };
     _flutter.loader.load({
+      config: config,
       onEntrypointLoaded: async function (engineInitializer) {
-        const appRunner = await engineInitializer.initializeEngine();
+        const appRunner = await engineInitializer.initializeEngine(config);
         await appRunner.runApp();
         const loading = document.getElementById('loading');
         loading.style.opacity = '0';

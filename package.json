@@ -15,7 +15,7 @@
     "check:env": "node scripts/check-env.mjs",
     "check:rls": "node scripts/check-rls.mjs",
     "test:db": "supabase db reset && supabase test db",
-    "build:web": "cd apps/mobile && flutter build web --release",
+    "build:web": "cd apps/mobile && flutter build web --release --no-web-resources-cdn",
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "engines": {
