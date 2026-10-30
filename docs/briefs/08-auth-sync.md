@@ -79,7 +79,7 @@ wording in your status file).
 - [ ] Against the local stack (`supabase start` + `env/dev.json`): an attempt recorded on the
       phone appears once in `mission_attempts`; killing the network mid-sync then restoring it
       leaves exactly one row (paste the SQL output in the PR).
-- [ ] Fresh clone, no env file, Chrome and phone: app starts, drift works, no Supabase request.
+- [ ] Fresh clone, no env file, Chrome: app starts, drift works, no Supabase request.
 - [ ] All local-review gates green (incl. the `db` job); CI green; `docs/status/08.md` current.
 - [ ] No UI change, so no screenshots; say so.
 
@@ -87,5 +87,6 @@ wording in your status file).
 
 - Never edit `docs/HANDOFF.md`. Keep `docs/status/08.md`: done, half-done, next.
 - You're the only worker using Docker this wave; `supabase stop` when not testing.
-- Phone tests: ask the lead for the realme window, or use Chrome; 06 has the OnePlus.
+- **No phone:** the OnePlus is 06's only and the realme is the lead's. Test with unit tests and
+  Chrome; the lead checks Android in review. The owner runs two workers at a time.
 - Own branch, local-review, PR (not a draft), CI green, never merge. End with the PR link.
