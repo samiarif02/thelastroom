@@ -8,6 +8,7 @@ const fixture = ContentBundle(
       id: 'priya',
       name: 'Priya',
       role: 'Recruiter',
+      voice: 'Warm and brisk.',
       tests: {Dimension.relevance},
     ),
   ],
@@ -15,6 +16,8 @@ const fixture = ContentBundle(
     Lesson(
       id: 'lesson_name_your_part',
       title: 'Say what you did',
+      flag: Flag.weNotI,
+      flaw: 'It hides what you did.',
       takeaway: 'Use "I" for your part of a team result.',
       recall: RecallCheck(
         prompt: 'Which line shows your own part?',

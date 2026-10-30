@@ -1,3 +1,5 @@
+import 'package:engine/engine.dart';
+
 import 'identified.dart';
 
 /// The one concrete lesson a debrief teaches (FR-15), and the Recall Room card that checks it
@@ -6,6 +8,8 @@ class Lesson implements Identified {
   const Lesson({
     required this.id,
     required this.title,
+    required this.flag,
+    required this.flaw,
     required this.takeaway,
     required this.recall,
   });
@@ -13,6 +17,13 @@ class Lesson implements Identified {
   @override
   final String id;
   final String title;
+
+  /// The mistake this lesson teaches. A line may only teach a lesson for a flag it carries.
+  final Flag flag;
+
+  /// The hidden flaw, in one plain sentence the debrief shows under the red-pen line: why a
+  /// line that sounds fine still cost points.
+  final String flaw;
 
   /// One or two sentences: what to do differently next time.
   final String takeaway;

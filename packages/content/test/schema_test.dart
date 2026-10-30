@@ -40,9 +40,10 @@ void main() {
     int score = 2,
     Set<Flag> flags = const {},
     String? lessonId,
+    String text = 'A line.',
   }) => AnswerOption(
     id: id,
-    text: 'A line.',
+    text: text,
     scores: DimensionScores(
       relevance: score,
       specificity: score,
@@ -198,5 +199,55 @@ void main() {
     final weak = base.beats.first.options[1];
     expect(weak.scored.optionId, weak.id);
     expect(weak.scored.flags, {Flag.weNotI, Flag.vague});
+  });
+
+  test('an answer line is at most $maxOptionWords words (writing note 4)', () {
+    final beats = [...base.beats];
+    beats[0] = Beat(
+      kind: BeatKind.open,
+      options: [
+        option('o1', text: List.filled(maxOptionWords + 1, 'word').join(' ')),
+        option('o2', text: List.filled(maxOptionWords, 'word').join(' ')),
+        option('o3'),
+      ],
+    );
+    expect(problems(withMission(beats: beats)), [
+      'o1: is ${maxOptionWords + 1} words, over $maxOptionWords',
+    ]);
+  });
+
+  test('an interviewer line fits two subtitle lines', () {
+    final long = 'a' * (maxSubtitleChars + 1);
+    expect(
+      problems(
+        withMission(
+          scene: [SceneLine(speakerId: 'priya', text: long)],
+        ),
+      ),
+      [
+        'm_fixture: a line by priya is ${maxSubtitleChars + 1} characters, '
+            'over $maxSubtitleChars',
+      ],
+    );
+  });
+
+  test('a line can only teach a lesson for a flag it carries', () {
+    final beats = [...base.beats];
+    beats[0] = Beat(
+      kind: BeatKind.open,
+      options: [
+        option(
+          'o1',
+          score: 1,
+          flags: {Flag.vague},
+          lessonId: 'lesson_name_your_part',
+        ),
+        option('o2'),
+        option('o3'),
+      ],
+    );
+    expect(problems(withMission(beats: beats)), [
+      'o1: teaches lesson_name_your_part, a we_not_i lesson, but is not flagged we_not_i',
+    ]);
   });
 }

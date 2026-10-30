@@ -37,6 +37,18 @@ const int maxOptions = 4;
 const int minSceneLines = 1;
 const int maxSceneLines = 3;
 
+/// The longest an answer line may be, in words. Lines are read on a phone mid-interview: the
+/// owner's target is 20–25 words, and anything over this fails (writing note 4, 2026-10-30).
+const int maxOptionWords = 30;
+
+/// The longest an interviewer's line may be, in characters: about two subtitle lines of the
+/// 22 pt serif on a 360 dp phone (DESIGN.md), so a line never needs a third.
+const int maxSubtitleChars = 80;
+
+/// The number of words in [text], split on whitespace.
+int wordCount(String text) =>
+    text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+
 /// Every rule the content must hold. An empty list means it's valid; the content tests assert
 /// exactly that, so a broken mission fails CI instead of a playthrough.
 ///
@@ -55,11 +67,25 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
   }
 
   final interviewerIds = {for (final i in bundle.interviewers) i.id};
-  final lessonIds = {for (final l in bundle.lessons) l.id};
+  final lessonsById = {for (final l in bundle.lessons) l.id: l};
 
   void checkSpeaker(String ownerId, SceneLine line) {
     if (!interviewerIds.contains(line.speakerId)) {
       issue(ownerId, 'speaker ${line.speakerId} is not an interviewer');
+    }
+    if (line.text.length > maxSubtitleChars) {
+      issue(
+        ownerId,
+        'a line by ${line.speakerId} is ${line.text.length} characters, '
+        'over $maxSubtitleChars',
+      );
+    }
+  }
+
+  void checkWords(String id, String text) {
+    final words = wordCount(text);
+    if (words > maxOptionWords) {
+      issue(id, 'is $words words, over $maxOptionWords');
     }
   }
 
@@ -72,6 +98,7 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
     }
     for (final option in options) {
       checkId(option);
+      checkWords(option.id, option.text);
       if (!option.scores.isInRange) {
         issue(
           option.id,
@@ -88,8 +115,18 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
         }
       }
       final lessonId = option.lessonId;
-      if (lessonId != null && !lessonIds.contains(lessonId)) {
-        issue(option.id, 'lesson $lessonId does not exist');
+      if (lessonId != null) {
+        final lesson = lessonsById[lessonId];
+        if (lesson == null) {
+          issue(option.id, 'lesson $lessonId does not exist');
+        } else if (!option.flags.contains(lesson.flag)) {
+          // The debrief shows the lesson's flaw under this line, so it must be this line's.
+          issue(
+            option.id,
+            'teaches $lessonId, a ${lesson.flag.wireName} lesson, '
+            'but is not flagged ${lesson.flag.wireName}',
+          );
+        }
       }
       // A flagged line can be the costliest one, and the debrief must then teach something
       // (FR-15) and schedule a recall card for it (FR-16).
@@ -104,7 +141,10 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
   for (final lesson in bundle.lessons) {
     checkId(lesson);
     final recall = lesson.recall;
-    recall.options.forEach(checkId);
+    for (final option in recall.options) {
+      checkId(option);
+      checkWords(option.id, option.text);
+    }
     if (!recall.options.any((o) => o.id == recall.correctOptionId)) {
       issue(lesson.id, 'the recall answer is not one of its options');
     }
