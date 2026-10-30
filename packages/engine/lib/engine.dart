@@ -13,4 +13,5 @@ export 'src/flag.dart';
 export 'src/follow_up.dart';
 export 'src/recall.dart';
 export 'src/scoring.dart';
+export 'src/shuffle.dart';
 export 'src/skill.dart';
