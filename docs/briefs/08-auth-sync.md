@@ -14,6 +14,14 @@ Read first: ADR 0002 and 0005, `docs/rules/state-management.md`, `docs/rules/mig
 `docs/rules/error-handling.md`, FR-3, FR-4, FR-60, FR-61, `apps/mobile/lib/core/backend/`
 (brief 05's interface) and `supabase/migrations/`.
 
+## Order change: brief 10 lands before you (owner, 2026-10-30)
+
+The mission player (10) is built first and saves attempts through
+**`apps/mobile/lib/core/progress/progress_repository.dart`**: an interface (`recordAttempt`,
+`attempts`, `baseline`), an in-memory implementation and a provider. **Implement that interface
+on drift** (attempt + outbox row in one transaction) and override its provider, so the player
+persists and syncs without a screen edit. Add methods if you need them; don't rename them.
+
 ## Hard rules
 
 - Zero setup and offline (AGENTS.md 6): no keys → the database and outbox still work locally;
@@ -53,7 +61,8 @@ Read first: ADR 0002 and 0005, `docs/rules/state-management.md`, `docs/rules/mig
 
 ## File ownership (parallel wave: touch only these)
 
-- `apps/mobile/lib/core/{db,sync}/**` (new), `apps/mobile/lib/core/backend/**`,
+- `apps/mobile/lib/core/{db,sync}/**` (new), `apps/mobile/lib/core/progress/**` (after 10
+  merges: your drift implementation and the provider override), `apps/mobile/lib/core/backend/**`,
   `apps/mobile/lib/main.dart`, `apps/mobile/lib/app/providers.dart`
 - `apps/mobile/test/core/{db,sync,backend}/**`, `apps/mobile/web/sqlite3.wasm`,
   `apps/mobile/web/drift_worker.js` (new files only; `web/index.html` is 06's)
