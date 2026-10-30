@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/audio/dev/sound_board_routes.dart';
 import '../features/dev_catalog/dev_catalog_routes.dart';
 import '../features/intro/character_screen.dart';
 import '../features/intro/intro_screen.dart';
@@ -42,6 +43,7 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
     ),
   ),
   if (devRoutes) ...DevCatalogRoutes.routes,
+  if (devRoutes) ...SoundBoardRoutes.routes,
 ];
 
 /// What an unknown address shows: the cinematic error state, never the stock page.

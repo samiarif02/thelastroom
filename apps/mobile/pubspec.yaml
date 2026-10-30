@@ -15,7 +15,9 @@ dependencies:
   content:
   engine:
   flutter_riverpod: ^3.4.3
+  flutter_soloud: ^5.2.2
   go_router: ^18.1.1
+  shared_preferences: ^2.5.6
   supabase_flutter: ^2.18.3
 
 dev_dependencies:
@@ -25,3 +27,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: false
+  assets:
+    - assets/audio/ogg/
+    - assets/audio/m4a/
