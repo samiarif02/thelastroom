@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:brand/brand.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/app.dart';
@@ -8,7 +9,7 @@ import 'package:the_last_room/core/backend/backend.dart';
 import 'package:the_last_room/core/backend/guest_sign_in.dart';
 import 'package:the_last_room/core/env/env.dart';
 import 'package:the_last_room/core/logging/log.dart';
-import 'package:the_last_room/features/placeholder/placeholder_screen.dart';
+import 'package:the_last_room/features/title/title_screen.dart';
 import 'package:the_last_room/main.dart';
 
 import 'fakes.dart';
@@ -54,9 +55,11 @@ void main() {
         () => throw StateError('the backend was touched with no keys'),
       );
       await boot(tester, container);
-      await tester.pumpAndSettle();
+      // The scene never settles (grain, lamp flicker and breathing run on an ambient clock),
+      // so pump through the title card instead of pumpAndSettle.
+      await tester.pump(BrandMotion.titleCard);
 
-      expect(find.text(PlaceholderScreen.title), findsOneWidget);
+      expect(find.byType(TitleScreen), findsOneWidget);
       expect(container.read(sessionProvider), isA<NoSession>());
       expect(tester.takeException(), isNull);
       expect(log.at(LogLevel.warn), isEmpty);
@@ -72,7 +75,7 @@ void main() {
     final container = containerWith(keyedEnv, () => backend);
     await boot(tester, container);
 
-    expect(find.text(PlaceholderScreen.title), findsOneWidget);
+    expect(find.byType(TitleScreen), findsOneWidget);
     expect(
       backend.restoreCalls,
       1,
@@ -84,7 +87,7 @@ void main() {
     await tester.pump(signInAttemptTimeout);
     expect(log.at(LogLevel.warn), hasLength(1));
     expect(log.at(LogLevel.error), isEmpty);
-    expect(find.text(PlaceholderScreen.title), findsOneWidget);
+    expect(find.byType(TitleScreen), findsOneWidget);
     container.dispose();
     await tester.pump(maxSignInRetryDelay);
   });
@@ -98,7 +101,7 @@ void main() {
       final container = containerWith(keyedEnv, () => backend);
       await boot(tester, container);
 
-      expect(find.text(PlaceholderScreen.title), findsOneWidget);
+      expect(find.byType(TitleScreen), findsOneWidget);
       await tester.pump();
       expect(log.at(LogLevel.warn), hasLength(1));
       expect(tester.takeException(), isNull);

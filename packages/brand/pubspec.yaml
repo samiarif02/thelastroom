@@ -16,32 +16,11 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-# Prototype fonts for the three cinematic directions (brief 03). Bundled, never fetched at
-# runtime (zero setup, ADR 0005). Static, Latin-subset instances of the OFL originals, one
-# OFL.txt per family. Brief 06 deletes the two directions that lose.
+# The Boardroom's pair (DESIGN.md, D4): Cormorant Garamond (display) + Manrope (body). Bundled,
+# never fetched at runtime (zero setup, ADR 0005). Static, Latin-subset instances of the OFL
+# originals, one OFL.txt per family.
 flutter:
   fonts:
-    - family: InstrumentSerif
-      fonts:
-        - asset: fonts/instrument_serif/InstrumentSerif-Regular.ttf
-        - asset: fonts/instrument_serif/InstrumentSerif-Italic.ttf
-          style: italic
-    - family: Geist
-      fonts:
-        - asset: fonts/geist/Geist-Regular.ttf
-        - asset: fonts/geist/Geist-Medium.ttf
-          weight: 500
-    - family: BigShouldersDisplay
-      fonts:
-        - asset: fonts/big_shoulders_display/BigShouldersDisplay-SemiBold.ttf
-          weight: 600
-        - asset: fonts/big_shoulders_display/BigShouldersDisplay-ExtraBold.ttf
-          weight: 800
-    - family: InterTight
-      fonts:
-        - asset: fonts/inter_tight/InterTight-Regular.ttf
-        - asset: fonts/inter_tight/InterTight-SemiBold.ttf
-          weight: 600
     - family: CormorantGaramond
       fonts:
         - asset: fonts/cormorant_garamond/CormorantGaramond-Medium.ttf

@@ -4,20 +4,16 @@ import 'package:go_router/go_router.dart';
 
 import 'direction_studio.dart';
 
-/// `/dev/directions`: the three prototype directions side by side, each a poster in its own
-/// type and light. Debug builds only.
+/// `/dev/directions`: the brief 03 prototype, now only the chosen direction (C). Debug builds
+/// only; brief 06b replaces it with `/dev/catalog`.
 class DirectionsPickerScreen extends StatelessWidget {
   const DirectionsPickerScreen({super.key});
 
-  static const String heading = 'Three directions';
+  static const String heading = 'The chosen direction';
 
-  // BrandType has no bundled font until brief 06 picks one, and on the web an unbundled family
-  // means a runtime font download. This dev screen borrows the neutral sans from direction A.
-  static final TextStyle _label = BrandType.label.copyWith(
-    fontFamily: nightGlass.type.body.fontFamily,
-  );
-  static final TextStyle _display = nightGlass.type.display;
-  static final TextStyle _body = nightGlass.type.body.copyWith(
+  static const TextStyle _label = BrandType.label;
+  static const TextStyle _display = BrandType.display;
+  static final TextStyle _body = BrandType.body.copyWith(
     color: BrandColors.textSecondary,
   );
 
@@ -39,15 +35,15 @@ class DirectionsPickerScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('DEV · BRIEF 03', style: _label),
+                    const Text('DEV · BRIEF 03', style: _label),
                     const SizedBox(height: BrandSpace.sm),
                     Semantics(
                       header: true,
-                      child: Text(heading, style: _display),
+                      child: const Text(heading, style: _display),
                     ),
                     const SizedBox(height: BrandSpace.sm),
                     Text(
-                      'Mission 1, three ways. Open one, then step through its title card, scene and dossier.',
+                      'Mission 1 in the Boardroom. Open it, then step through its title card, scene and dossier.',
                       style: _body,
                     ),
                   ],

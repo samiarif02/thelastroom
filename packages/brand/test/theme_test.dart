@@ -20,4 +20,19 @@ void main() {
       expect(BrandTheme.dark(grade: grade).colorScheme.primary, grade.key);
     }
   });
+
+  test(
+    'Material text that slips through still renders in the bundled sans',
+    () {
+      final theme = BrandTheme.dark();
+      expect(
+        theme.textTheme.bodyMedium!.fontFamily,
+        'packages/brand/${BrandFonts.sans}',
+      );
+      expect(
+        theme.textTheme.displayLarge!.fontFamily,
+        BrandType.titleCard.fontFamily,
+      );
+    },
+  );
 }

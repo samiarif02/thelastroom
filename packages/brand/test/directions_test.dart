@@ -2,68 +2,68 @@ import 'package:brand/brand.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// The owner's font pairs (brief 03), one per direction, all bundled in this package.
+/// D4 (owner, 2026-10-30): Cormorant Garamond + Manrope, bundled in this package. The losing
+/// pairs from brief 03 are gone.
 void main() {
-  const pairs = {
-    'night-glass': ('InstrumentSerif', 'Geist'),
-    'concrete-noir': ('BigShouldersDisplay', 'InterTight'),
-    'boardroom': ('CormorantGaramond', 'Manrope'),
-  };
-  const banned = ['Playfair', 'Bebas', 'Montserrat', 'Poppins', 'Roboto'];
+  const pair = ['CormorantGaramond', 'Manrope'];
+  const banned = [
+    'InstrumentSerif',
+    'Geist',
+    'BigShouldersDisplay',
+    'InterTight',
+    'Playfair',
+    'Bebas',
+    'Montserrat',
+    'Poppins',
+    'Roboto',
+  ];
 
   String family(TextStyle s) =>
       s.fontFamily!.replaceFirst('packages/brand/', '');
 
-  test('there are three directions, A to C, with unique ids', () {
-    expect(cinematicDirections.map((d) => d.letter), ['A', 'B', 'C']);
-    expect(cinematicDirections.map((d) => d.id).toSet(), hasLength(3));
+  test('every style uses the bundled pair, from the brand package', () {
+    for (final s in BrandType.all) {
+      expect(s.fontFamily, startsWith('packages/brand/'));
+      expect(pair, contains(family(s)));
+      for (final b in banned) {
+        expect(family(s), isNot(contains(b)));
+      }
+    }
+    expect(family(BrandType.titleCard), BrandFonts.display);
+    expect(family(BrandType.body), BrandFonts.sans);
   });
 
-  for (final d in cinematicDirections) {
-    group('${d.letter} ${d.name}', () {
-      final styles = [
-        d.type.eyebrow,
-        d.type.titleCard,
-        d.type.display,
-        d.type.body,
-        d.type.subtitle,
-        d.type.speaker,
-        d.type.choice,
-        d.type.label,
-        d.type.score,
-        d.type.stamp,
-        d.type.note,
-      ];
+  test('scores use tabular lining figures', () {
+    expect(
+      BrandType.score.fontFeatures,
+      containsAll(const [
+        FontFeature.tabularFigures(),
+        FontFeature.liningFigures(),
+      ]),
+    );
+  });
 
-      test('uses only its own bundled pair, from the brand package', () {
-        final (display, body) = pairs[d.id]!;
-        for (final s in styles) {
-          expect(s.fontFamily, startsWith('packages/brand/'));
-          expect([display, body], contains(family(s)));
-        }
-        expect(family(d.type.titleCard), display);
-        expect(family(d.type.body), body);
-        for (final s in styles) {
-          for (final b in banned) {
-            expect(family(s), isNot(contains(b)));
-          }
-        }
-      });
+  test('the speaker is set in small caps', () {
+    expect(BrandType.speaker.fontFeatures, [const FontFeature.enable('smcp')]);
+  });
 
-      test('scores use tabular figures', () {
-        expect(
-          d.type.score.fontFeatures,
-          contains(const FontFeature.tabularFigures()),
-        );
-      });
+  test(
+    'the only prototype direction left is C, built from the real tokens',
+    () {
+      expect(cinematicDirections.map((d) => d.letter), ['C']);
+      final c = cinematicDirections.single;
+      expect(c.palette.surface, BrandColors.surface);
+      expect(c.type.titleCard, BrandType.titleCard);
+      expect(c.grades.map((g) => g.key), ChapterGrade.values.map((g) => g.key));
+      expect(c.motion.cut, BrandMotion.dolly);
+    },
+  );
 
-      test('has the three chapter grades in order', () {
-        expect(d.grades.map((g) => g.name), [
-          'Lobby',
-          'Pressure',
-          'Final round',
-        ]);
-      });
-    });
-  }
+  test('the chapter grades run lobby, pressure, final round', () {
+    expect(ChapterGrade.values.map((g) => g.label), [
+      'Lobby',
+      'Pressure',
+      'Final round',
+    ]);
+  });
 }
