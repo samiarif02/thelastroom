@@ -345,6 +345,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                 grade: grade,
                 figureLabel: '${lead.name}, the ${lead.role.toLowerCase()}',
                 tight: _tight,
+                expression: _expression,
               ),
             ),
           ),
@@ -477,6 +478,22 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
         ];
     }
   }
+
+  /// The interviewer's face at this point of the scene (brief 16): a smile while she talks,
+  /// listening while you draft, thinking while you read the cards, a nod when you lock one in,
+  /// "hmm" on the follow-up, and a smile again at the dossier.
+  InterviewerExpression get _expression => switch (_stage) {
+    SceneStage.card ||
+    SceneStage.opening ||
+    SceneStage.lines ||
+    SceneStage.push ||
+    SceneStage.debrief => InterviewerExpression.smile,
+    SceneStage.draft => InterviewerExpression.neutral,
+    SceneStage.beats ||
+    SceneStage.replies when _locked != null => InterviewerExpression.nod,
+    SceneStage.beats => InterviewerExpression.thinking,
+    SceneStage.followUp || SceneStage.replies => InterviewerExpression.hmm,
+  };
 
   /// The framings the camera moves through at [stage]: the subtitles start below the lowest
   /// the face gets in any of them.

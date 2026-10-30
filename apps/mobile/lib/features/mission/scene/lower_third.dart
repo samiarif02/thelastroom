@@ -39,12 +39,16 @@ class QuestionReminder extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: BrandSpace.sm),
-    child: Text(
-      text,
-      textAlign: TextAlign.center,
-      style: BrandType.choice.copyWith(
-        color: BrandColors.textSecondary,
-        fontStyle: FontStyle.italic,
+    // On the speech panel: it falls over the interviewer's jacket, and the panel keeps it AA
+    // over every cast colour (brief 16).
+    child: SpeechPanel(
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: BrandType.choice.copyWith(
+          color: BrandColors.textSecondary,
+          fontStyle: FontStyle.italic,
+        ),
       ),
     ),
   );

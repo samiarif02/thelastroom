@@ -129,6 +129,7 @@ abstract final class MissionSet {
     required ChapterGrade grade,
     required String figureLabel,
     required bool tight,
+    InterviewerExpression expression = InterviewerExpression.neutral,
   }) {
     final kit = BoardroomSet.layers(figure: figure, grade: grade);
     return [
@@ -140,7 +141,12 @@ abstract final class MissionSet {
       CameraLayer(
         wide: wide,
         close: tight ? MissionSet.tight : _middleClose,
-        child: _Interviewer(figure: figure, grade: grade, label: figureLabel),
+        child: _Interviewer(
+          figure: figure,
+          grade: grade,
+          label: figureLabel,
+          expression: expression,
+        ),
       ),
       // The desk takes the interviewer's framing on the tight shot, so it stays under her.
       CameraLayer(
@@ -158,7 +164,10 @@ class _Interviewer extends StatelessWidget {
     required this.figure,
     required this.grade,
     required this.label,
+    required this.expression,
   });
+
+  final InterviewerExpression expression;
 
   final SilhouetteFigure figure;
   final ChapterGrade grade;
@@ -180,6 +189,7 @@ class _Interviewer extends StatelessWidget {
               figure: figure,
               grade: grade,
               semanticLabel: label,
+              expression: expression,
             ),
           ),
         ],
