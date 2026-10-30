@@ -3,7 +3,12 @@
 /// swap in a fake and the game never needs the backend to run.
 library;
 
-/// Who the player is to the backend. Linking email or Google (brief 08) adds a linked state.
+import 'remote_rows.dart';
+
+export 'remote_rows.dart';
+
+/// Who the player is to the backend. There's no sign-up in v1 (owner, 2026-10-30): the silent
+/// guest is the only account.
 sealed class BackendSession {
   const BackendSession();
 }
@@ -36,6 +41,19 @@ abstract interface class Backend {
 
   /// Creates a new anonymous user and signs in as them.
   Future<GuestSession> signInAnonymously();
+
+  /// Sends [attempts]; one already on the server (same `attempt_id`) is skipped, never updated
+  /// (insert on conflict do nothing), so a retried batch is safe.
+  Future<void> insertAttempts(List<RemoteAttempt> attempts);
+
+  /// Creates or replaces the signed-in player's profile row.
+  Future<void> upsertProfile(RemoteProfile profile);
+
+  /// Every attempt of the signed-in player, oldest first (the restore on a fresh install).
+  Future<List<RemoteAttempt>> fetchAttempts();
+
+  /// The signed-in player's profile, or null if they've never synced one.
+  Future<RemoteProfile?> fetchProfile();
 }
 
 /// The backend answered, but not with what the app needs.

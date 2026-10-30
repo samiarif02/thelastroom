@@ -1,8 +1,8 @@
 -- profiles: owner-only RLS (FR-62). User B can't read or write user A's row; anon gets nothing;
--- a client can't set created_at or another user's user_id.
+-- a client can't set created_at or another user's user_id (column grants refuse both).
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(14);
+select plan(16);
 
 insert into auth.users (id, email, is_anonymous) values
   ('aaaaaaaa-0000-4000-8000-00000000000a', 'a@example.test', true),
@@ -14,28 +14,42 @@ create function pg_temp.act_as(uid uuid) returns void language sql as $$
          set_config('role', 'authenticated', true);
 $$;
 
--- A signs in and creates their profile, trying to backdate created_at.
+-- A signs in and creates their profile.
 select pg_temp.act_as('aaaaaaaa-0000-4000-8000-00000000000a');
 
 select lives_ok(
-  $$ insert into public.profiles (target_role, nerves_level, created_at)
-     values ('general', 3, '2000-01-01') $$,
+  $$ insert into public.profiles (target_role, nerves_level) values ('general', 3) $$,
   'a user can create their own profile (user_id defaults to auth.uid())'
 );
 
 select results_eq(
   $$ select user_id, created_at = now() from public.profiles $$,
   $$ values ('aaaaaaaa-0000-4000-8000-00000000000a'::uuid, true) $$,
-  'the owner sees exactly their row, and created_at is the server time, not the client value'
+  'the owner sees exactly their row, and created_at is the server time'
+);
+
+select throws_ok(
+  $$ insert into public.profiles (target_role, created_at) values ('general', '2000-01-01') $$,
+  '42501',
+  null,
+  'a client can''t send created_at on insert'
 );
 
 select isnt_empty(
-  $$ update public.profiles set created_at = '2000-01-01', calm_mode = true returning 1 $$,
-  'the owner can update their row ...'
+  $$ update public.profiles set calm_mode = true returning 1 $$,
+  'the owner can update their row'
 );
+
+select throws_ok(
+  $$ update public.profiles set created_at = '2000-01-01' $$,
+  '42501',
+  null,
+  'a client can''t rewrite created_at'
+);
+
 select ok(
   (select created_at = now() and calm_mode from public.profiles),
-  '... but created_at keeps the server value'
+  'created_at keeps the server value'
 );
 
 select throws_ok(

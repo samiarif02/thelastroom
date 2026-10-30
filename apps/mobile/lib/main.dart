@@ -8,8 +8,13 @@ import 'app/app.dart';
 import 'app/providers.dart';
 import 'core/audio/audio_providers.dart';
 import 'core/audio/game_sounds.dart';
+import 'core/db/app_database.dart';
 import 'core/env/env.dart';
 import 'core/logging/log.dart';
+import 'core/profile/drift_profile_repository.dart';
+import 'core/profile/profile_repository.dart';
+import 'core/progress/drift_progress_repository.dart';
+import 'core/progress/progress_repository.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,16 +37,34 @@ void main() {
 
   log.info('app started', {'env': env.appEnv, 'supabase': env.hasSupabase});
 
+  // Progress and the profile live on the device first (ADR 0002), with or without a backend.
+  final db = AppDatabase.onDevice();
   final container = ProviderContainer(
     overrides: [
       envProvider.overrideWithValue(env),
       logProvider.overrideWithValue(log),
+      databaseProvider.overrideWithValue(db),
+      progressRepositoryProvider.overrideWith(
+        (ref) => DriftProgressRepository(
+          db,
+          log: log,
+          signal: ref.watch(outboxSignalProvider),
+        ),
+      ),
+      profileRepositoryProvider.overrideWith(
+        (ref) => DriftProfileRepository(
+          db,
+          legacy: LocalProfileRepository(),
+          signal: ref.watch(outboxSignalProvider),
+        ),
+      ),
       gameSoundsProvider.overrideWith(
         (ref) => ref.watch(audioGameSoundsProvider),
       ),
     ],
   );
   startBackendAfterFirstFrame(container);
+  startSync(container);
   startAudio(container);
   runApp(
     UncontrolledProviderScope(
@@ -57,4 +80,13 @@ void startBackendAfterFirstFrame(ProviderContainer container) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     unawaited(container.read(sessionProvider.notifier).start());
   });
+}
+
+/// Keeps the sync worker alive: it exists only once a guest is signed in (never with no keys),
+/// and sends again whenever the app comes back to the foreground (the usual "reconnected").
+void startSync(ProviderContainer container) {
+  container.listen(syncWorkerProvider, (_, _) {});
+  AppLifecycleListener(
+    onResume: () => unawaited(container.read(syncWorkerProvider)?.flush()),
+  );
 }

@@ -15,6 +15,8 @@ class AttemptRecord {
     required this.score,
     required this.hinted,
     this.draft,
+    this.attemptId,
+    this.completedAt,
   });
 
   final String missionId;
@@ -36,13 +38,21 @@ class AttemptRecord {
   /// the device: never logged, never sent as an event.
   final String? draft;
 
+  /// The device-generated id the server deduplicates on. A store assigns it when it records the
+  /// attempt; null on a record that hasn't been stored.
+  final String? attemptId;
+
+  /// When the player finished, by the device's clock. Set by the store, like [attemptId].
+  final DateTime? completedAt;
+
   @override
   String toString() =>
       'AttemptRecord($missionId #$attemptNumber, total ${score.total})';
 }
 
-/// Where the player's progress is kept. Brief 10 ships [InMemoryProgressRepository]; brief 08
-/// implements this on drift and overrides [progressRepositoryProvider], and no screen changes.
+/// Where the player's progress is kept. [InMemoryProgressRepository] for tests and the catalog;
+/// the app overrides [progressRepositoryProvider] with the drift store (`main.dart`), so
+/// progress survives a restart and syncs, and no screen changes.
 abstract interface class ProgressRepository {
   /// Stores a finished attempt.
   Future<void> recordAttempt(AttemptRecord attempt);
@@ -55,7 +65,7 @@ abstract interface class ProgressRepository {
   Future<AttemptRecord?> baseline();
 }
 
-/// Progress for this run of the app only: lost on restart until brief 08's drift store lands.
+/// Progress for this run of the app only (tests, and the default before `main.dart` overrides).
 class InMemoryProgressRepository implements ProgressRepository {
   InMemoryProgressRepository({String? baselineMissionId})
     : _baselineMissionId =
