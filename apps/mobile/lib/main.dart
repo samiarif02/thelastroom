@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
 import 'app/providers.dart';
+import 'core/audio/audio_providers.dart';
+import 'core/audio/game_sounds.dart';
 import 'core/env/env.dart';
 import 'core/logging/log.dart';
 
@@ -34,9 +36,13 @@ void main() {
     overrides: [
       envProvider.overrideWithValue(env),
       logProvider.overrideWithValue(log),
+      gameSoundsProvider.overrideWith(
+        (ref) => ref.watch(audioGameSoundsProvider),
+      ),
     ],
   );
   startBackendAfterFirstFrame(container);
+  startAudio(container);
   runApp(
     UncontrolledProviderScope(
       container: container,

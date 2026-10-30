@@ -42,6 +42,8 @@
 </head>
 <body>
   <div id="loading" aria-label="Loading The Last Room"><span>THE LAST ROOM</span></div>
+  <!-- flutter_soloud's audio engine (WASM), bundled with the app: no network request. -->
+  <script src="assets/packages/flutter_soloud/web/init_soloud.js" defer></script>
   <script>
     {{flutter_js}}
     {{flutter_build_config}}
