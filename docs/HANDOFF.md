@@ -1,6 +1,6 @@
 # HANDOFF: live state
 
-Last updated: 2026-10-29 20:00 (Thu), claude-geo profile, LEAD session (PR #3 merged, wave 1 started).
+Last updated: 2026-10-30 02:30 (Fri), LEAD session (wave 2 briefs committed, workers not started).
 Read `docs/memory/MEMORY.md` first. **Parallel mode: only the lead edits this file.** Workers keep
 `docs/status/NN.md`.
 
@@ -21,39 +21,52 @@ Read `docs/memory/MEMORY.md` first. **Parallel mode: only the lead edits this fi
 
 ## Current goal
 
-Wave 1, target merged by Fri 30 Oct evening (03 picked by Fri noon).
+**Wave 2**, target merged by Sat 31 Oct evening (06 by Sat morning: it's the critical path for
+10). Wave 1 merged Fri 30 Oct ~01:30 (PRs #5, #7, #6). Four workers (the owner raised the cap
+from three).
 
-| Worktree | Branch | Brief | Profile (tab) | State |
+| Worktree | Branch | Brief | Profile (tab) | Phone |
 | --- | --- | --- | --- | --- |
-| w1 | `feat/03-cinematic-direction` | `docs/briefs/03-cinematic-direction.md` | claude-geo | brief committed, not started |
-| w2 | `feat/04-engine-content` | `docs/briefs/04-engine-content.md` | claude | brief committed, not started |
-| w3 | `feat/05-supabase` | `docs/briefs/05-supabase.md` | claude | brief committed, not started |
-| main folder | `docs/lead-wave-1` | lead docs: ADR 0005, no-Vercel sweep, D1/FR-13 confirmed, wave plan | lead | in progress |
+| w1 | `feat/06-design-system` | `docs/briefs/06-design-system.md` | claude-geo | OnePlus 9 |
+| w2 | `feat/07-missions-2-7` | `docs/briefs/07-missions-2-7.md` | claude | none (dart test) |
+| w3 | `feat/08-auth-sync` | `docs/briefs/08-auth-sync.md` | claude | Chrome / realme by arrangement |
+| w4 | `feat/09-sound` | `docs/briefs/09-sound.md` | claude-geo | Chrome / realme by arrangement |
+| main folder | `docs/lead-wave-2` | lead docs: renumbering, D2/D4/D5, worker doc requests, memory | lead | realme 8 |
 
-**Merge order:** 04 → 05 → 03 (03 waits for the owner's pick). Wave-1 hot spots: only 05 touches
-`apps/mobile/pubspec.yaml`, `pubspec.lock`, `main.dart`, `providers.dart`, CI, `scripts/`; only 03
-touches `router.dart`, `packages/brand`, `DESIGN.md`; only 04 touches `packages/engine|content`.
+All four branches start at `cffba86` with their brief as the first commit.
+
+**Merge order:** 07 → 06 → 08 → 09. **Shared hot spots this wave:** `apps/mobile/pubspec.yaml` +
+`pubspec.lock` (08 adds drift; 09 adds `flutter_soloud`, `shared_preferences`, `assets/audio/`;
+the second to merge rebases and reruns `flutter pub get`). `router.dart` and `web/index.html` are
+06's; 09 adds one `/dev/sound` route and the soloud script tags. `main.dart` is 08's; 09 adds one
+preload line. The lead checks these at merge.
+
+**Waiting on the owner:** Mission 1 wording notes (forward to w2 / brief 07); approve the sound
+set by ear on `/dev/sound` before 09 merges.
+
+**Brief numbers shifted** (sound became 09): 10 mission player, 11 notifications, 12 AI coach,
+13 tower + Recall Room + report, 14 dogfood/APK/release, 15 submission.
 
 ## Branch
 
-Lead: `docs/lead-wave-1` in the main folder. Workers: see the table above. `main` = `050ad6d`.
+Lead: `docs/lead-wave-2` in the main folder (off `main` = `cffba86`). Workers: the table above.
 
 ## Plan to 5 Nov (lead ticks these after each merge)
 
 29 Oct 2026 is a Thursday. Full plan: `docs/v1-plan.md`.
 
 - [x] Thu 29: 01 foundation (PR #1), lead docs (PR #2), 02 spec (PR #3)
-- [ ] Wave 1, Thu 29–Fri 30: 03 cinematic direction (owner picks Fri noon) · 04 engine + Mission 1
+- [x] Wave 1, Thu 29–Fri 30 (merged Fri 01:30, PRs #5 #7 #6): 03 cinematic direction (owner picks Fri noon) · 04 engine + Mission 1
       content · 05 Supabase schema, RLS tests, anonymous auth (optional at runtime)
-- [ ] Wave 2, Fri 30–Sat 31: 06 design system + cinematic layer + fonts, icons, launch screens ·
-      07 Missions 2–7 content · 08 app-side auth link + drift outbox sync
-- [ ] Wave 3, Sat 31–Sun 1: 09 **mission player: Mission 1 playable offline** (needs 04 + 06) ·
-      10 notifications · 11 AI coach (optional, first to cut)
-- [ ] Wave 4, Mon 2–Wed 4: 12 tower home + Recall Room + report · 13 dogfood fixes, APK on a
-      GitHub Release · 14 submission write-up, demo video script, reviewer run guide
+- [ ] Wave 2, Fri 30–Sat 31: 06 design system (Boardroom) · 07 Missions 2–7 content · 08 drift +
+      outbox sync + email linking · 09 sound design
+- [ ] Wave 3, Sun 1–Mon 2: 10 **mission player: Chapter 1 playable offline** (needs 04, 06, 07, 09) ·
+      11 notifications · 12 AI coach (optional, first to cut)
+- [ ] Wave 4, Mon 2–Wed 4: 13 tower home + Recall Room + report · 14 dogfood fixes, APK on a
+      GitHub Release · 15 submission write-up, demo video script, reviewer run guide
 - [ ] Thu 5: record the demo video, submit early
 
-**Cut order if we slip** (first to go first): 11 AI coach → sound (D5) → Chapter 2–3 teaser
+**Cut order if we slip** (first to go first): 12 AI coach → trim 09's cue sheet to the core cues → Chapter 2–3 teaser
 polish → skill tree visuals (keep the radar) → notifications on iOS (keep Android) → Missions
 5–7 polish (keep them playable). Never cut: Mission 1 quality, zero setup, the design system,
 the gates, the demo video.
@@ -68,14 +81,15 @@ the gates, the demo video.
 | Initiative (15) | Brief challenged (untimed baseline, M6 continuity, unhinted skills, waitlist as a flag) | Med: draft-first, Recall Room, kind notifications unbuilt |
 | Demos (10) | Web build compiles; release APK on a OnePlus 9 | **High**: no public link by choice, so the **video carries Demos**, plus a 3-command run guide and an APK Release. Script it early (14) |
 | Shipping speed (10) | 3 PRs merged day 1; 3 workers in parallel from tonight | Med: wave PRs must stay small |
-| Design (10) | Tokens, AA tests, no-ripple theme | **High**: still the placeholder look; 03 picks a direction Fri noon, 06 builds it |
+| Design (10) | Boardroom direction chosen from 3 phone-tested prototypes (9 stills + 3 clips); bundled OFL fonts; AA tests per pair | **High** until 06 lands: the app itself still shows the placeholder |
 | Completeness (10) | CI green | **High**: nothing playable until 09 (Sat 31–Sun 1) |
 
 **Weakest right now:** Design and Completeness (nothing cinematic or playable yet), then Demos.
 
 ## Done
 
-- PR #1 foundation (`ddfc597`), PR #2 lead docs (`489d9e6`), PR #3 spec v1 (`050ad6d`), all
+- PR #1 foundation (`ddfc597`), PR #2 lead docs (`489d9e6`), PR #3 spec v1 (`050ad6d`), PR #4
+  wave-1 lead docs (`dff4bc2`), all
   2026-10-29. Spec: `docs/v1-plan.md`, ACs in `docs/requirements.md`, ADRs 0001–0004, engine API
   types, content schema + `validateContent`, `EventValue`.
 - Owner decisions (2026-10-29): D1 = waitlist as a profile flag (`chapter_2_waitlist_at`), no
@@ -85,19 +99,19 @@ the gates, the demo video.
 
 ## In progress
 
-- Lead: `docs/lead-wave-1` (this file, ADR 0005, no-Vercel sweep, wave plan). Uncommitted.
+- Lead: PR #4 merged (ADR 0005, zero setup, wave plan). Waiting on wave-1 PRs.
 - Workers w1–w3: briefs committed, sessions not started yet.
 
 ## Next steps
 
 1. Owner starts the three workers (tabs in the table above).
-2. Lead opens the wave-1 docs PR; owner says merge; workers rebase after.
-3. Lead reviews 04, 05, 03 as they land; owner picks the direction on 03 by Fri noon.
-4. After wave 1: lead writes wave-2 briefs 06, 07, 08.
+2. Lead reviews 04, 05, 03 as they land; owner picks the direction on 03 by Fri noon.
+3. After wave 1: lead writes wave-2 briefs 06, 07, 08.
 
 ## Open decisions for the owner
 
-- D2 (portrait art: proposed in 03), D4 (fonts: one of the three pairs, picked in 03), D5 (sound).
+- D2, D4, D5 decided (2026-10-30): code-drawn rim-lit silhouettes; Cormorant Garamond + Manrope;
+  sound in v1, on but quiet.
 - Accept the Android SDK licenses (`flutter doctor --android-licenses`, interactive).
 - Optional: install the iOS 27 simulator runtime; iOS 26.3 is used meanwhile.
 
@@ -113,6 +127,9 @@ the gates, the demo video.
 - `check:standards` engine-pure-dart greps engine sources for the clock-read call, **including
   comments**: write "reads no clock", not the call itself.
 
+- **Lead review device:** realme 8 (RMX3085, Android 13, 1080×2400), `adb -s LFCQ8HKNAUDIFUPR`.
+  adb isn't on PATH: use `~/Library/Android/sdk/platform-tools/adb`. Main at `dff4bc2`, release APK, no
+  keys: boots to the title screen, cold start 3.6 s (`am start -W`). Workers use the OnePlus 9.
 - Prefer the owner's OnePlus 9 over the emulator for Android: `adb -s 96239c4a ...`. The emulator
   `Medium_Phone_API_36.1` on this Mac (16 GB, macOS 27.2): restores from
   snapshot then crashes; cold boot (`-no-snapshot -gpu host`) works but is CPU-starved (System

@@ -14,7 +14,7 @@ truth for the player's progress; the server is a backup and a sync target.
 | Game rules and scores | `packages/engine`: pure functions the controller calls, never inside a widget or provider |
 | Content (missions, interviewers, lessons) | `packages/content`: const data, versioned |
 | Progress, attempts, recall cards, settings | drift tables in `core/db`, exposed through repositories |
-| Remote sync | `core/sync`: the outbox, flushed when online |
+| Remote sync | `core/sync`: the outbox, flushed when online through the `Backend` interface (`core/backend`) |
 
 ## Rules
 
@@ -22,7 +22,9 @@ truth for the player's progress; the server is a backup and a sync target.
   in one transaction. The UI never waits on the network.
 - **The outbox is idempotent.** Each attempt has a client-generated `attempt_id`; the server
   upserts on it. Retries are safe, ordering doesn't matter.
-- **No screen talks to Supabase.** Only `core/sync` and `core/auth` import `supabase_flutter`.
+- **No screen talks to Supabase.** Only `apps/mobile/lib/core/backend/supabase_backend.dart`
+  imports `supabase_flutter`. Sync and sign-in go through the `Backend` interface
+  (`core/backend/backend.dart`), so tests swap in a fake and the app runs with no backend at all.
 - **No global mutable singletons.** Everything injectable goes through a provider so tests can
   override it.
 - **Providers are read in `build` with `ref.watch`, and in callbacks with `ref.read`.**

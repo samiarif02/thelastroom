@@ -5,8 +5,8 @@ type: project
 ---
 
 Parallel mode (kit README §4c, owner, 2026-10-29). One long-lived LEAD session in the main folder
-reviews and merges (only on the owner's explicit "merge #N"); up to three workers each build one
-`docs/briefs/NN-slug.md` in their own worktree `../thelastroom-w1..w3` and never merge.
+reviews and merges (only on the owner's explicit "merge #N"); up to four workers (the owner raised it from three, 2026-10-30) each build one
+`docs/briefs/NN-slug.md` in their own worktree `../thelastroom-w1..w4` and never merge.
 
 - The lead creates each worktree (`git worktree add ../thelastroom-wN -b <branch> main`) and
   commits the brief as the branch's first commit; worktrees only see committed files.

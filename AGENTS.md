@@ -30,7 +30,7 @@ build run locally; nothing is hosted). The full design is `docs/product-brief.md
 
 ```
 apps/mobile/        Flutter app (android/ ios/ web/). lib/app (bootstrap, router, theme wiring),
-                    lib/core (env, logging, analytics, db, sync, notifications), lib/features/*
+                    lib/core (env, logging, analytics, backend, db, sync, audio, notifications), lib/features/*
 packages/engine/    pure Dart: scoring, follow-ups, unlocks, Leitner recall, baseline compare
 packages/content/   missions, interviewers, lessons as typed Dart + validation tests
 packages/brand/     design tokens + ThemeData; the only place a raw colour may be written
@@ -98,4 +98,4 @@ conventions are replaced.
 | Expo OTA-first releases, EAS | Store builds (Flutter has no first-party OTA); the web is not hosted (CI compile check only); APK on a GitHub Release | Stack difference. |
 | npm workspaces | Dart pub workspace (root `pubspec.yaml` with `workspace:`); root `package.json` only for gates and `prepare` | Dart's own monorepo tool. |
 | `check:events` against `/api/track` | `check:events`: the Dart enum is the registry (unregistered names don't compile), the check bans string event names and keeps the enum and `docs/EVENTS.md` in step | The compiler already does half the job. |
-| `check:store`, `check:rls`, `check:template` | Not ported yet | Store readiness lands with the store build; the RLS test lands with the first migration (Prompt 6). |
+| `check:store`, `check:rls`, `check:template` | `check:rls` is ported (`scripts/check-rls.mjs`, run in CI's `check` job; CI's `db` job runs the pgTAP RLS tests with `supabase test db`). `check:store` and `check:template` are not ported yet | Store readiness lands with the store build. |

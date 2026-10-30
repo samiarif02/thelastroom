@@ -11,7 +11,7 @@ constructor that accepts a `String` (`apps/mobile/lib/core/analytics/event_value
 comes from a content item (`EventValue.id(mission)`), anything else that varies is an enum.
 Property values below are planned; they're fixed when each feature's spec is written.
 
-**The Mission 1 slice (milestone 05)** fires `intro_completed`, `mission_started`,
+**The Mission 1 slice (milestone 10)** fires `intro_completed`, `mission_started`,
 `draft_completed`, `answer_timer_expired`, `follow_up_answered`, `mission_completed`,
 `baseline_recorded` and `user_activated`. `draft_completed` and `answer_timer_expired` were
 added in brief 02 because the slice couldn't be measured without them (`docs/v1-plan.md`).
