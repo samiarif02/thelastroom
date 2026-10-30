@@ -6,13 +6,22 @@ Written by the lead session, 2026-10-30 (Fri). Worktree `../thelastroom-w4`, bra
 ## Goal
 
 Sound is half of "cinematic". Build the audio engine, every named cue and a licensed sound
-library, so the mission player (brief 10) and the tower (13) only ever call
-`audio.play(Cue.x)`. **`docs/sound-design.md` is your spec** (the owner's, copied into the repo
+library, so the mission player (brief 10) and the tower (13) never name a file. **`docs/sound-design.md` is your spec** (the owner's, copied into the repo
 in this branch's first commit): the engine, the full cue sheet, loudness and sourcing rules.
 
 Owner decision (2026-10-30): **D5 is decided: sound ships in v1**, on by default but quiet
 (effects 60 %, ambience 35 %), per `docs/sound-design.md`. That replaces "off by default" in
 brief §9.
+
+## Order change: brief 10 lands before you (owner, 2026-10-30)
+
+To keep Mission 1 playable by Sunday, the mission player (10) is built before this brief. It
+calls sound through a small interface it creates, **`apps/mobile/lib/core/audio/game_sounds.dart`**:
+`abstract interface class GameSounds` (typing character, question lands, choice, lock-in,
+follow-up challenge, trust up/down, dossier, stamp, results, chapter card, ambience per chapter),
+a no-op implementation and its provider. **Your job includes implementing `GameSounds` on top of
+`AudioService`** and overriding that provider (one line), so the player gains sound without
+editing a single screen. Don't rename its methods; add to it if a cue needs a new hook.
 
 ## Hard rules
 
@@ -83,20 +92,22 @@ brief §9.
 
 ## Acceptance criteria
 
+- [ ] `GameSounds` implemented on `AudioService`; with it, the merged mission player plays its
+      cues with no screen edits.
 - [ ] Every cue in the sheet exists, plays on the `/dev/sound` board on the phone and in Chrome,
       and has a credits row with a real licence.
 - [ ] Fresh clone, no env file: `flutter run -d chrome` starts silently until the first tap, then
       sound works; no network request for audio.
 - [ ] iOS silent switch respected (simulator or device note); Android ducks on focus loss.
 - [ ] The tests in item 7 pass. Asset weight reported in the PR (aim < 3 MB total).
-- [ ] PR: a **screen recording with sound** of the `/dev/sound` board (all cues, the four typing
+- [ ] PR: a **Chrome screen recording with sound** of the `/dev/sound` board (all cues, the four typing
       voices, the ambience crossfade), compressed. The owner listens before merge.
 - [ ] All local-review gates green; CI green; `docs/status/09.md` current.
 
 ## How to work
 
 - Never edit `docs/HANDOFF.md`. Keep `docs/status/09.md`: done, half-done, next.
-- Four workers share this Mac. The OnePlus is 06's, the realme is the lead's: test on Chrome,
-  and ask the lead for a realme window for the phone checks (the realme has no `screenrecord`:
-  `scrcpy --record` with audio works on Android 11+).
+- **No phone:** the OnePlus is 06's only and the realme is the lead's. Test with unit tests and
+  Chrome; the lead checks Android (and records with scrcpy, audio included) in review. The owner
+  runs two workers at a time.
 - Own branch, local-review, PR (not a draft), CI green, never merge. End with the PR link.
