@@ -48,11 +48,6 @@ class _TolerantComparator extends LocalFileComparator {
       await getGoldenBytes(golden),
     );
     if (result.passed || result.diffPercent <= _tolerance) {
-      if (!result.passed) {
-        debugPrint(
-          '$golden: ${(result.diffPercent * 100).toStringAsFixed(3)}% off, within tolerance',
-        );
-      }
       result.dispose();
       return true;
     }
