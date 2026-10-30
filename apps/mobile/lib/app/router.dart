@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/dev_directions/dev_directions_routes.dart';
-import '../features/placeholder/placeholder_screen.dart';
+import '../features/title/title_screen.dart';
 
 /// Route paths. Notification deep links (brief §8) resolve to these.
 abstract final class Routes {
@@ -16,10 +16,7 @@ const bool devRoutesEnabled = !kReleaseMode;
 
 /// The app's routes. [devRoutes] is a parameter so a test can prove the release set.
 List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
-  GoRoute(
-    path: Routes.home,
-    builder: (context, state) => const PlaceholderScreen(),
-  ),
+  GoRoute(path: Routes.home, builder: (context, state) => const TitleScreen()),
   if (devRoutes) ...DevDirectionsRoutes.routes,
 ];
 
