@@ -43,6 +43,19 @@ Acceptance: 06a meets the criteria below that cover its items (fonts, AA, title 
 word, zero setup, gates, compressed screenshots of the title card and the components); 06b
 meets the rest.
 
+## 06b changes (owner, 2026-10-30, after 06a merged as PR #10)
+
+You're on `feat/06b-catalog-platform` (from `main` with 06a and 07 merged). Two things moved:
+
+- **Edge to edge is now brief 10's** (the owner wants it in the mission player now), including
+  `app.dart`'s system UI and the Android `styles.xml`. Don't touch those.
+- **`ui/figure/silhouette_figure.dart` and `ui/figure/interviewer_silhouette.dart` are brief 10's**
+  this wave (it fixes a stray rim-light dot). Leave them alone.
+
+Brief 10 (w2) and brief 09 (sound, w4) run in parallel with you. Components 10 uses keep their
+public API; additions only. 09 adds one `/dev/sound` route and the `flutter_soloud` script tags to
+`web/index.html`; keep the dev routes a simple list.
+
 ## Hard rules
 
 - Zero setup (AGENTS.md non-negotiable 6): `flutter run` / `flutter run -d chrome` from a fresh
