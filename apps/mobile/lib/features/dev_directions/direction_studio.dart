@@ -19,27 +19,19 @@ enum DirectionFrame {
       values.firstWhere((f) => f.name == name, orElse: () => title);
 }
 
-/// A direction's tokens plus its three frames and its film stock (grain and vignette).
+/// A direction's tokens plus its three frames.
 class DirectionStudio {
   const DirectionStudio({
     required this.direction,
     required this.title,
     required this.scene,
     required this.dossier,
-    required this.grain,
-    required this.vignette,
   });
 
   final CinematicDirection direction;
   final Widget title;
   final Widget scene;
   final Widget dossier;
-
-  /// Grain opacity, 0–1.
-  final double grain;
-
-  /// Vignette strength, 0–1.
-  final double vignette;
 
   Widget frame(DirectionFrame f) => switch (f) {
     DirectionFrame.title => title,
@@ -53,8 +45,6 @@ class DirectionStudio {
       title: BoardroomTitle(),
       scene: BoardroomScene(),
       dossier: BoardroomDossier(),
-      grain: BrandFilm.grain,
-      vignette: BrandFilm.vignette,
     ),
   ];
 

@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:the_last_room/app/router.dart';
+import 'package:the_last_room/features/dev_directions/boardroom/boardroom_scene.dart';
 import 'package:the_last_room/features/dev_directions/dev_directions_routes.dart';
 import 'package:the_last_room/features/dev_directions/direction_studio.dart';
 import 'package:the_last_room/features/dev_directions/mission_one.dart';
-import 'package:the_last_room/features/dev_directions/shared/typewriter_text.dart';
+import 'package:the_last_room/ui/film_kit.dart';
 
 /// Long enough for every frame's choreography to finish (the slowest is about 9 s: the
 /// Boardroom scene's typewriter plus its 2.2 s dolly).
@@ -90,8 +91,10 @@ void main() {
         await tester.pumpWidget(
           MaterialApp.router(theme: BrandTheme.dark(), routerConfig: router),
         );
-        // Through the letterbox and into the line, then tap until the line is complete.
-        await tester.pump(const Duration(milliseconds: 2400));
+        // Through the letterbox and into the line, then tap to complete it.
+        for (var i = 0; i < 12; i++) {
+          await tester.pump(const Duration(milliseconds: 200));
+        }
         await tester.tapAt(const Offset(187, 200));
         await tester.pump();
         final line = tester.widget<TypewriterText>(find.byType(TypewriterText));
@@ -99,6 +102,29 @@ void main() {
         for (var i = 0; i < 40; i++) {
           await tester.pump(_step);
         }
+      });
+
+      testWidgets('tap twice to lock an answer; the follow-up lands on a cut', (
+        tester,
+      ) async {
+        await _pumpFrame(tester, studio: studio, frame: DirectionFrame.scene);
+        // The controls pill must not cover the scene (it once filled the screen's height).
+        final first = find.text(MissionOne.answers.first);
+        await tester.tap(first);
+        await tester.pump();
+        await tester.tap(first);
+        await tester.pump();
+        final cards = tester.widgetList<AnswerCard>(find.byType(AnswerCard));
+        expect(cards.map((c) => c.state), [
+          AnswerCardState.locked,
+          AnswerCardState.disabled,
+          AnswerCardState.disabled,
+        ]);
+        for (var i = 0; i < 30; i++) {
+          await tester.pump(_step);
+        }
+        final line = tester.widget<TypewriterText>(find.byType(TypewriterText));
+        expect(line.text, BoardroomScene.followUp);
       });
 
       testWidgets('reduced motion lands every frame in its final state', (

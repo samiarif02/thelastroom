@@ -1,3 +1,5 @@
+import '../../ui/film_kit.dart';
+
 /// Fake Mission 1 data for the direction prototypes. The engine and content packages aren't
 /// needed to judge a look; brief 06 replaces this with the real mission.
 abstract final class MissionOne {
@@ -21,10 +23,10 @@ abstract final class MissionOne {
   ];
 
   static const List<DossierScore> scores = [
-    DossierScore('Relevance', 78),
-    DossierScore('Specificity', 52),
-    DossierScore('Structure', 70),
-    DossierScore('Adaptability', 64),
+    DossierScore(label: 'Relevance', value: 78),
+    DossierScore(label: 'Specificity', value: 52),
+    DossierScore(label: 'Structure', value: 70),
+    DossierScore(label: 'Adaptability', value: 64),
   ];
 
   static const int total = 66;
@@ -34,14 +36,4 @@ abstract final class MissionOne {
 
   static const String weakLine = '“We shipped it in two weeks.”';
   static const String note = 'Who is “we”? Say what you did.';
-}
-
-/// One stamped score on the dossier.
-class DossierScore {
-  const DossierScore(this.dimension, this.value);
-
-  final String dimension;
-
-  /// 0–100.
-  final int value;
 }

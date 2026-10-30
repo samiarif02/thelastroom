@@ -3,10 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'direction_studio.dart';
-import 'shared/ambient.dart';
-import 'shared/film_overlay.dart';
 
-/// `/dev/directions/<id>`: one direction, frame by frame, under its grain and vignette.
+/// `/dev/directions/<id>`: one direction, frame by frame (the app lays its grain and vignette
+/// over every route).
 ///
 /// A slim pill of controls sits top-right (back, the three frames, replay, hide). Hide it for
 /// screenshots, or open the route with `?chrome=off`.
@@ -42,47 +41,40 @@ class _DirectionStageScreenState extends State<DirectionStageScreen> {
   Widget build(BuildContext context) {
     final studio = widget.studio;
     final d = studio.direction;
-    return AmbientClock(
-      child: ColoredBox(
-        color: d.palette.void_,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            FilmOverlay(
-              grain: studio.grain,
-              vignette: d.lobby.shadow,
-              vignetteStrength: studio.vignette,
-              child: AnimatedSwitcher(
-                duration: BrandMotion.standard,
-                child: KeyedSubtree(
-                  key: ValueKey('${_frame.name}-$_take'),
-                  child: studio.frame(_frame),
+    return ColoredBox(
+      color: d.palette.void_,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          AnimatedSwitcher(
+            duration: BrandMotion.standard,
+            child: KeyedSubtree(
+              key: ValueKey('${_frame.name}-$_take'),
+              child: studio.frame(_frame),
+            ),
+          ),
+          if (_chrome)
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topRight,
+                child: _Controls(
+                  direction: d,
+                  frame: _frame,
+                  onFrame: _show,
+                  onReplay: () => _show(_frame),
+                  onHide: () => setState(() => _chrome = false),
                 ),
+              ),
+            )
+          else
+            // Hidden controls come back with a long press anywhere.
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onLongPress: () => setState(() => _chrome = true),
               ),
             ),
-            if (_chrome)
-              SafeArea(
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: _Controls(
-                    direction: d,
-                    frame: _frame,
-                    onFrame: _show,
-                    onReplay: () => _show(_frame),
-                    onHide: () => setState(() => _chrome = false),
-                  ),
-                ),
-              )
-            else
-              // Hidden controls come back with a long press anywhere.
-              Positioned.fill(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onLongPress: () => setState(() => _chrome = true),
-                ),
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -183,7 +175,8 @@ class _Control extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: BrandSpace.sm + 2),
-            child: Center(child: Text(label, style: style)),
+            // heightFactor keeps the pill as tall as a control, not the screen.
+            child: Center(heightFactor: 1, child: Text(label, style: style)),
           ),
         ),
       ),
