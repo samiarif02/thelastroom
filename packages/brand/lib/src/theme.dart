@@ -22,6 +22,8 @@ abstract final class BrandTheme {
     );
     return ThemeData(
       useMaterial3: true,
+      fontFamily: BrandFonts.sans,
+      package: BrandFonts.package,
       brightness: Brightness.dark,
       colorScheme: scheme,
       scaffoldBackgroundColor: BrandColors.surface,
@@ -34,8 +36,10 @@ abstract final class BrandTheme {
       textTheme: const TextTheme(
         displayLarge: BrandType.titleCard,
         headlineMedium: BrandType.display,
+        titleLarge: BrandType.subtitle,
         bodyLarge: BrandType.body,
-        bodyMedium: BrandType.body,
+        bodyMedium: BrandType.choice,
+        labelLarge: BrandType.eyebrow,
         labelSmall: BrandType.label,
       ),
       textSelectionTheme: TextSelectionThemeData(
@@ -57,8 +61,8 @@ abstract final class BrandTheme {
   }
 }
 
-/// A plain cross-fade: the neutral default until the cinematic transitions (elevator, camera
-/// cuts) are built. Also what reduced motion falls back to.
+/// A plain cross-fade: the neutral default between routes. The cinematic moves (elevator, dolly,
+/// hard cut) live in the screens, and this is also what reduced motion falls back to.
 class _FadeTransitionsBuilder extends PageTransitionsBuilder {
   const _FadeTransitionsBuilder();
 

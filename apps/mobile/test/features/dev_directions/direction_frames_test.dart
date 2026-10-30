@@ -47,8 +47,8 @@ Future<void> _pumpFrame(
 }
 
 void main() {
-  test('there is a studio for each of the three directions', () {
-    expect(DirectionStudio.all.map((s) => s.direction.letter), ['A', 'B', 'C']);
+  test('only the chosen direction, C, is left (brief 06)', () {
+    expect(DirectionStudio.all.map((s) => s.direction.letter), ['C']);
   });
 
   for (final studio in DirectionStudio.all) {

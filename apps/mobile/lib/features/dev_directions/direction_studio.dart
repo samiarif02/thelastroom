@@ -4,12 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'boardroom/boardroom_dossier.dart';
 import 'boardroom/boardroom_scene.dart';
 import 'boardroom/boardroom_title.dart';
-import 'concrete_noir/concrete_noir_dossier.dart';
-import 'concrete_noir/concrete_noir_scene.dart';
-import 'concrete_noir/concrete_noir_title.dart';
-import 'night_glass/night_glass_dossier.dart';
-import 'night_glass/night_glass_scene.dart';
-import 'night_glass/night_glass_title.dart';
 
 /// The three frames every direction shows (brief 03).
 enum DirectionFrame {
@@ -55,28 +49,12 @@ class DirectionStudio {
 
   static const List<DirectionStudio> all = [
     DirectionStudio(
-      direction: nightGlass,
-      title: NightGlassTitle(),
-      scene: NightGlassScene(),
-      dossier: NightGlassDossier(),
-      grain: 0.05,
-      vignette: 0.55,
-    ),
-    DirectionStudio(
-      direction: concreteNoir,
-      title: ConcreteNoirTitle(),
-      scene: ConcreteNoirScene(),
-      dossier: ConcreteNoirDossier(),
-      grain: 0.16,
-      vignette: 0.62,
-    ),
-    DirectionStudio(
       direction: boardroom,
       title: BoardroomTitle(),
       scene: BoardroomScene(),
       dossier: BoardroomDossier(),
-      grain: 0.09,
-      vignette: 0.65,
+      grain: BrandFilm.grain,
+      vignette: BrandFilm.vignette,
     ),
   ];
 

@@ -1,16 +1,9 @@
 import 'boardroom.dart';
-import 'concrete_noir.dart';
 import 'direction.dart';
-import 'night_glass.dart';
 
 export 'boardroom.dart';
-export 'concrete_noir.dart';
 export 'direction.dart';
-export 'night_glass.dart';
 
-/// The three prototype directions, A to C (brief 03).
-const List<CinematicDirection> cinematicDirections = [
-  nightGlass,
-  concreteNoir,
-  boardroom,
-];
+/// The prototype directions still on `/dev/directions`: only the winner, C (brief 06). A and B
+/// were deleted with their fonts; 06b deletes this folder once `/dev/catalog` replaces it.
+const List<CinematicDirection> cinematicDirections = [boardroom];
