@@ -47,8 +47,9 @@ the top.**
 | Film stock: grain 9%, vignette 0.65 | `motion.dart` (`BrandFilm`) | **Final** (06a) |
 | Theme: no ripple, no stock transitions, Manrope for anything Material | `theme.dart` (`BrandTheme`) | Safety net in place |
 
-**Still to do (06b and later):** golden tests and `/dev/catalog`, cinematic loading/empty/
-offline/error states, the tower and elevator art direction.
+**06b added:** cinematic states, `/dev/catalog` with goldens, the platform edges and a web
+build with no network request (sections below). **Still to do:** the tower and elevator art
+direction (13); edge to edge on Android (moved to brief 10).
 
 ### The film kit (brief 06a): `apps/mobile/lib/ui/`, one import `ui/film_kit.dart`
 
@@ -66,6 +67,8 @@ offline/error states, the tower and elevator art direction.
 | `ChapterTitleCard`, `TrackedTitle` | Lamp, brass frame, tracking-in title that never breaks a word | `onTitleLanded`, `onFinished` |
 | `Dossier`, `WaxSeal`, `StampIn`, `PenNote`, `PenStroke` | Letterhead slides in, scores stamped, total sealed, pen notes | `onStamp(i)`, `onSeal`, `onPen`, `onFinished` |
 | `Timeline`, `cue`, `mix`, `AnchoredScroll` | Cue-sheet choreography on one clock; content anchored low that scrolls only at 2x | `cues`, `onFinished` |
+| `SceneState.loading/empty/offline/error`, `LoadingRule` (06b) | The four designed states: lamp, brass ornament, italic line, note. Offline switches the lamp off; loading has a breathing brass rule, never a spinner | `onAction` (adds a `BrassButton`) |
+| `BrassButton` (06b) | An engraved brass plate with a tracked caps label, 44 pt, brightens on hover/focus/press; null `onTap` is disabled | `onTap` |
 
 Rules the kit holds to (and screens must too):
 
@@ -78,6 +81,35 @@ Rules the kit holds to (and screens must too):
 - Every animated component has a reduced-motion path (a short cross-fade, or settled at once);
   beats don't fire under reduced motion, `onFinished`/`onComplete` still do.
 - A hard cut moves every plane together; only the dolly pushes planes at different rates.
+
+### `/dev/catalog` and goldens (06b)
+
+- `/dev/catalog` (debug and profile builds only) lists every component; each opens on its
+  states full frame, with **STILL** (reduced motion), **2X** (text) and the **grade** toggles,
+  `?shot=<id>` and `?chrome=off` for screenshots. It replaced `/dev/directions`.
+- `features/dev_catalog/catalog_entries.dart` is the one list: the catalog's pages *and* the
+  golden tests (`apps/mobile/test/features/dev_catalog/goldens/`, one PNG per state, drawn with
+  the real fonts). A new component added there gets a golden and a 1x/2x/reduced-motion
+  play-through test for free. Redraw them on Linux (`goldens/README.md`: a Docker one-liner on
+  CI's Flutter), then look at every changed image.
+- Goldens are Linux pixels: CI compares them; macOS anti-aliases glyphs differently (1.5–6% of
+  pixels), so there the tests render every state but skip the diff. Grain isn't in them.
+- An unknown route shows `WrongFloorScreen` (the error state, "Back to the lobby").
+
+### Platform edges (06b)
+
+- **Icon:** a brass "LR" in Cormorant Garamond over a rule with two diamonds, on walnut with
+  the lamp's warm pool, inside the title card's double brass frame. Android legacy + adaptive
+  (with monochrome), iOS, web favicon/icons/maskable. Drawn by
+  `packages/brand/tool/make_icons.py` (Pillow); its colours mirror `colors.dart`.
+- **Launch:** void with the monogram, so the jump to the first Flutter frame is invisible.
+  Android: `drawable/launch_background.xml` and Android 12+'s splash, through
+  `LaunchTheme.Boardroom` / `NormalTheme.Boardroom` (`values*/brand_themes.xml`), which extend
+  `styles.xml` rather than edit it. iOS: `LaunchScreen.storyboard` on void.
+- **Web, no network:** `build:web` uses `--no-web-resources-cdn` (CanvasKit and Roboto ship
+  with the build); `web/index.html` sets `canvasKitBaseUrl` and `fontFallbackBaseUrl` so a
+  plain `flutter run -d chrome` stays local too (Roboto vendored in `web/fonts/`, OFL). A glyph
+  none of the fonts has shows as a box instead of fetching a Noto font.
 
 ## Chosen direction: C, The Boardroom (owner, 2026-10-30)
 
@@ -120,7 +152,7 @@ now the spec, not a proposal.
   ("THROU / GH").~~ Fixed in 06a: `TrackedTitle` decides the lines once at the final tracking,
   between words only, and draws each line unbreakable while it tracks in (tested at 320, 375
   and 412 wide, 1x and 2x text, every 50 ms of the animation).
-- Edge to edge on Android: 06b.
+- Edge to edge on Android: moved to brief 10 (owner, 2026-10-30).
 
 **D2, portrait art (confirmed by the owner, 2026-10-30):** keep the **rim-lit silhouettes drawn in
 code** that the prototype already uses, with a code-driven idle (breath, a slow head turn,
@@ -260,7 +292,7 @@ Tight): folders, pubspec entries and `directions/*.dart`.
 ## Design session brief: must-dos carried from the foundation
 
 Found while booting the foundation build, and agreed by the owner (2026-10-29) to be fixed in the
-design session:
+design session. **All four are done** (1 in 06a; 2–4 in 06b, see "Platform edges" above):
 
 1. **Bundle the fonts.** Choose the OFL display serif and body sans (decision D4), add the files
    to `packages/brand`, and set `fontFamily` on every `BrandType` style. Today the web build has
