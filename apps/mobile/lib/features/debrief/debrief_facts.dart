@@ -62,6 +62,18 @@ class DebriefFacts {
   static const int strongFrom = 60;
 }
 
+/// The opening line that scores best in [mission]: what "A stronger version" sets beside the
+/// player's own first try. Weighted like the engine's line cost; ties go to the first.
+AnswerOption strongestOpening(Mission mission) {
+  int worth(AnswerOption o) => [
+    Dimension.relevance,
+    Dimension.specificity,
+    Dimension.structure,
+  ].fold(0, (sum, d) => sum + d.weightPercent * o.scores[d]);
+  final options = mission.beats.first.options;
+  return options.reduce((best, o) => worth(o) > worth(best) ? o : best);
+}
+
 /// "Relevance" for [Dimension.relevance].
 String dimensionLabel(Dimension d) =>
     '${d.name[0].toUpperCase()}${d.name.substring(1)}';

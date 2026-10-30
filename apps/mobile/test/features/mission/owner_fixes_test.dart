@@ -71,7 +71,7 @@ void main() {
             await rig.run(const Duration(milliseconds: 400), eachFrame: check);
             if (rig.typing) await rig.tapScene();
             check();
-            if (i < lines - 1) await rig.tapScene();
+            if (i < lines - 1) await rig.tapNext();
           }
           await rig.run(BrandMotion.dolly, eachFrame: check);
           await rig.skipDraft();
@@ -84,7 +84,7 @@ void main() {
             await rig.run(const Duration(milliseconds: 950), eachFrame: check);
           }
           await rig.until(
-            find.text(rig.state(1).followUp!.line.text),
+            find.text(rig.state(1).followUpLine!.text),
             eachFrame: check,
           );
           await rig.run(const Duration(seconds: 2), eachFrame: check);

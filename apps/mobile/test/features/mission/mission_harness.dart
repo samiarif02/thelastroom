@@ -10,10 +10,12 @@ import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/core/analytics/analytics.dart';
 import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/core/audio/game_sounds.dart';
+import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
 import 'package:the_last_room/features/mission/mission_controller.dart';
 import 'package:the_last_room/features/mission/scene/mission_card.dart';
 import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
+import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
 /// The seed every harness attempt is shuffled with.
@@ -119,11 +121,22 @@ class RecordingSounds implements GameSounds {
   void stopAll() => calls.add(('stopAll', const []));
 }
 
+/// The player every rig starts as unless a test says otherwise: onboarded, named.
+const PlayerProfile onboardedPlayer = PlayerProfile(
+  firstName: testName,
+  onboarded: true,
+);
+
+/// The name the rig's player gave in onboarding.
+const String testName = 'Sami';
+
 /// The app, booted at [location], with recording fakes and a pinned seed.
 class MissionRig {
-  MissionRig(this.tester);
+  MissionRig(this.tester, {PlayerProfile profile = onboardedPlayer})
+    : profile = InMemoryProfileRepository(profile);
 
   final WidgetTester tester;
+  final InMemoryProfileRepository profile;
   final RecordingAnalytics analytics = RecordingAnalytics();
   final RecordingSounds sounds = RecordingSounds();
   final InMemoryProgressRepository progress = InMemoryProgressRepository();
@@ -147,6 +160,7 @@ class MissionRig {
         analyticsProvider.overrideWithValue(analytics),
         gameSoundsProvider.overrideWithValue(sounds),
         progressRepositoryProvider.overrideWithValue(progress),
+        profileRepositoryProvider.overrideWithValue(profile),
         attemptSeedProvider.overrideWithValue(() => testSeed),
         routerProvider.overrideWithValue(router),
       ],
@@ -210,7 +224,8 @@ class MissionRig {
   }
 
   /// Skips the title card and plays the lines (letting each type a little, so the typing
-  /// sound fires) up to the question landing and the push in.
+  /// sound fires) up to the question landing and the push in: each line is completed with a
+  /// tap, then moved on with one tap on the Next control.
   Future<void> playLines(int number) async {
     await until(find.byType(MissionCard));
     await tapScene();
@@ -219,8 +234,18 @@ class MissionRig {
       await until(find.byType(TypewriterSubtitle));
       await run(const Duration(milliseconds: 300));
       if (typing) await tapScene(); // completes the line
-      if (i < lines - 1) await tapScene(); // the next line
+      if (i < lines - 1) await tapNext(); // the next line
     }
+  }
+
+  /// One tap on the Next control under a typed line.
+  Future<void> tapNext() async {
+    final next = find.byType(NextControl);
+    await until(next);
+    await tester.ensureVisible(next);
+    await tester.pump();
+    await tester.tapAt(tester.getCenter(next));
+    await tester.pump();
   }
 
   /// Whether the subtitle on screen is still typing (never, under reduced motion).
@@ -274,7 +299,7 @@ class MissionRig {
       await say(mission.allOptionsById[id]!);
     }
     // The follow-up's line, after the hard cut: let it type, then complete it.
-    await until(find.text(state(number).followUp!.line.text));
+    await until(find.text(state(number).followUpLine!.text));
     await run(const Duration(milliseconds: 300));
     if (typing) await tapScene();
     await say(mission.allOptionsById[reply]!);

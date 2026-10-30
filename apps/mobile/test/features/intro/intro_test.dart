@@ -1,12 +1,15 @@
 import 'package:content/content.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/core/analytics/analytics_event.dart';
+import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/features/intro/character_screen.dart';
 import 'package:the_last_room/features/intro/intro_screen.dart';
 import 'package:the_last_room/features/intro/title_gate.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
-import 'package:the_last_room/features/title/title_screen.dart';
+import 'package:the_last_room/features/onboarding/onboarding_screen.dart';
+import 'package:the_last_room/features/tower/tower_screen.dart';
 
 import '../mission/mission_harness.dart';
 
@@ -19,28 +22,15 @@ void main() {
     await rig.tester.pump();
   }
 
-  testWidgets('title → intro → character card → Mission 1', (tester) async {
+  testWidgets('the CV before Mission 1 is the player\'s practice CV', (
+    tester,
+  ) async {
     final rig = MissionRig(tester);
-    await rig.boot(Routes.home);
-    expect(find.byType(TitleScreen), findsOneWidget);
-    await tester.tapAt(const Offset(187, 300));
-    await rig.until(find.byType(IntroScreen));
-
-    for (final frame in IntroScreen.frames) {
-      await rig.until(find.text(frame.title));
-      await rig.run(const Duration(seconds: 1));
-      await tapText(
-        rig,
-        frame == IntroScreen.frames.last ? IntroScreen.last : IntroScreen.next,
-      );
-    }
-    expect(rig.analytics.only(AnalyticsEvent.introCompleted).wire, {
-      'skipped': false,
-    });
-
+    await rig.boot(Routes.character);
     await rig.until(find.byType(CharacterScreen));
-    expect(find.text(player.name), findsOneWidget);
-    expect(find.text(player.premise), findsOneWidget);
+    expect(find.text(testName), findsOneWidget);
+    expect(find.text(CharacterScreen.premise), findsOneWidget);
+    expect(find.text(player.premise), findsNothing);
     await tapText(rig, CharacterScreen.enter);
     await rig.until(find.byType(MissionPlayer));
     expect(rig.state(1).mission, missionTheOpportunity);
@@ -52,7 +42,7 @@ void main() {
     final rig = MissionRig(tester);
     await rig.boot(Routes.intro);
     await tapText(rig, IntroScreen.skip);
-    await rig.until(find.byType(CharacterScreen));
+    await rig.until(find.byType(OnboardingScreen));
     expect(rig.analytics.count(AnalyticsEvent.introCompleted), 1);
     expect(
       rig.analytics.only(AnalyticsEvent.introCompleted).wire['skipped'],
@@ -61,10 +51,10 @@ void main() {
   });
 
   for (final textScale in [1.0, 2.0]) {
-    testWidgets('title, intro and character card survive ${textScale}x text', (
+    testWidgets('title, intro and CV survive ${textScale}x text', (
       tester,
     ) async {
-      final rig = MissionRig(tester);
+      final rig = MissionRig(tester, profile: const PlayerProfile());
       await rig.boot(Routes.home, textScale: textScale);
       await rig.run(const Duration(seconds: 5));
       expect(find.text(TitleGate.prompt.toUpperCase()), findsOneWidget);
@@ -72,8 +62,12 @@ void main() {
       await rig.until(find.byType(IntroScreen));
       await rig.run(const Duration(seconds: 5));
       await tapText(rig, IntroScreen.skip);
-      await rig.until(find.byType(CharacterScreen));
-      await rig.run(const Duration(seconds: 1));
+      await rig.until(find.byType(OnboardingScreen));
+      await rig.tester.pumpWidget(const SizedBox.shrink());
+      final cv = MissionRig(tester);
+      await cv.boot(Routes.character, textScale: textScale);
+      await cv.until(find.byType(CharacterScreen));
+      await cv.run(const Duration(seconds: 1));
     });
   }
 
@@ -85,7 +79,7 @@ void main() {
     await rig.run(const Duration(milliseconds: 500));
     expect(find.text('THIS ROOM IS LOCKED'), findsOneWidget);
     expect(find.textContaining('MissionNotFound'), findsNothing);
-    await tapText(rig, 'Back to the lobby');
-    await rig.until(find.byType(TitleScreen));
+    await tapText(rig, 'Back to the tower');
+    await rig.until(find.byType(TowerScreen));
   });
 }

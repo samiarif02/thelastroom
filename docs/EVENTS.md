@@ -21,7 +21,9 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `intro_completed` | The 3-screen intro finishes (or is skipped) | `skipped` |
 | `guest_started` | Anonymous sign-in succeeds on first launch | |
 | `account_linked` | A guest links email or Google | `provider` |
-| `onboarding_completed` | The post-Mission-1 onboarding finishes | `nerves_level`, `has_interview_date` |
+| `onboarding_completed` | The first-launch onboarding finishes, before the Tower (brief 13). Never the name | `skipped_steps`, `named`, `experience`, `target_role`, `nerves_level`, `calm_mode`, `weekly_goal` |
+| `tower_opened` | The Tower (home) is shown | `missions_done`, `after_mission` |
+| `room_entered` | The player enters a room on the Tower (the elevator starts) | `mission_id`, `replay` |
 | `mission_started` | A mission scene starts | `mission_id`, `chapter`, `attempt_number` |
 | `mission_completed` | A mission's debrief is shown | `mission_id`, `chapter`, `score_bucket`, `attempt_number` |
 | `baseline_recorded` | Mission 1's first completion stores the baseline | `score_bucket` |
@@ -31,7 +33,7 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `recall_session_completed` | A Recall Room session ends | `cards`, `correct`, `box_moves` |
 | `skill_unlocked` | A skill is demonstrated in an unhinted mission | `skill_id` |
 | `chapter_completed` | The chapter's review mission is completed | `chapter`, `score_delta_bucket` |
-| `progress_report_viewed` | The report vs. baseline is opened | `source` |
+| `progress_report_viewed` | The progress screen (the report vs. baseline) is opened | `source` |
 | `coach_feedback_requested` | "Say it your way" is sent to the AI coach | `mission_id`, `remaining_today` |
 | `notification_permission_prompted` | The custom pre-prompt is shown | |
 | `notification_permission_granted` | The OS permission is granted | |

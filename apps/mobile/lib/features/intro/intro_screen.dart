@@ -7,14 +7,15 @@ import '../../app/providers.dart';
 import '../../app/router.dart';
 import '../../core/analytics/analytics_event.dart';
 import '../../core/analytics/event_value.dart';
+import '../../core/audio/game_sounds.dart';
 import '../../ui/film_kit.dart';
 import '../mission/widgets/cue_button.dart';
 
 /// One frame of the intro: a line in the serif, and a quieter line beneath it.
 typedef IntroFrame = ({String title, String line});
 
-/// The intro (FR-1): three frames, each a slow push on one line, before the player meets their
-/// character. "Skip" works from the first frame; finishing or skipping fires `intro_completed`
+/// The intro (FR-1) and onboarding's welcome cards (brief 13): three frames, each a slow push
+/// on one line, showing what the game is before anything is asked. "Skip" works from the first frame; finishing or skipping fires `intro_completed`
 /// once, then the character card.
 class IntroScreen extends ConsumerStatefulWidget {
   const IntroScreen({super.key});
@@ -42,7 +43,7 @@ class IntroScreen extends ConsumerStatefulWidget {
 
   static const String skip = 'Skip';
   static const String next = 'Continue';
-  static const String last = 'Meet your candidate';
+  static const String last = 'Let’s begin';
 
   @override
   ConsumerState<IntroScreen> createState() => _IntroScreenState();
@@ -54,6 +55,7 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
 
   void _advance() {
     if (_frame < IntroScreen.frames.length - 1) {
+      ref.read(gameSoundsProvider).pageTurn();
       setState(() => _frame++);
     } else {
       _finish(skipped: false);
@@ -66,7 +68,7 @@ class _IntroScreenState extends ConsumerState<IntroScreen> {
     ref.read(analyticsProvider).track(AnalyticsEvent.introCompleted, {
       'skipped': EventValue.flag(skipped),
     });
-    context.go(Routes.character);
+    context.go(Routes.onboarding);
   }
 
   @override

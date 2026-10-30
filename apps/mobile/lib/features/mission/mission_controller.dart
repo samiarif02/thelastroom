@@ -9,6 +9,7 @@ import '../../app/providers.dart';
 import '../../core/analytics/analytics.dart';
 import '../../core/analytics/analytics_event.dart';
 import '../../core/analytics/event_value.dart';
+import '../../core/profile/profile_repository.dart';
 import '../../core/progress/progress_repository.dart';
 import 'mission_lookup.dart';
 
@@ -30,7 +31,11 @@ class MissionState {
     required this.seed,
     required this.attemptNumber,
     required this.scene,
+    required this.question,
+    this.playerName = PlayerProfile.fallbackName,
     this.picks = const [],
+    this.draft,
+    this.earlierDraft,
     this.draftDone = false,
     this.followUp,
     this.reply,
@@ -45,6 +50,21 @@ class MissionState {
 
   /// The setup lines, plus Mission 6's callback to an earlier answer when there is one.
   final List<SceneLine> scene;
+
+  /// The mission's question, addressed to the player like [scene].
+  final SceneLine question;
+
+  /// What the interviewers call the player (the profile's first name).
+  final String playerName;
+
+  /// The player's own words from the draft-first step, or null (skipped, or not offered).
+  final String? draft;
+
+  /// The words from the player's first attempt at this mission that has any, for a replay.
+  final String? earlierDraft;
+
+  /// What the dossier shows as "Your first try": this attempt's words, else an earlier one's.
+  String? get firstTry => draft ?? earlierDraft;
 
   /// The lines locked in so far, one per beat, in beat order.
   final List<AnswerOption> picks;
@@ -77,8 +97,12 @@ class MissionState {
   /// The trust meter, from the engine (`trustAfter`).
   int get trust => trustAfter([for (final p in picks) p.scored]);
 
+  /// The follow-up's line, addressed to the player.
+  SceneLine? get followUpLine => followUp?.line.addressedTo(playerName);
+
   MissionState _copy({
     List<AnswerOption>? picks,
+    String? draft,
     bool? draftDone,
     FollowUp? followUp,
     AnswerOption? reply,
@@ -88,6 +112,10 @@ class MissionState {
     seed: seed,
     attemptNumber: attemptNumber,
     scene: scene,
+    question: question,
+    playerName: playerName,
+    draft: draft ?? this.draft,
+    earlierDraft: earlierDraft,
     picks: picks ?? this.picks,
     draftDone: draftDone ?? this.draftDone,
     followUp: followUp ?? this.followUp,
@@ -112,7 +140,6 @@ class MissionController extends AsyncNotifier<MissionState> {
 
   bool _started = false;
   bool _completing = false;
-  String? _draft;
 
   Analytics get _analytics => ref.read(analyticsProvider);
   ProgressRepository get _progress => ref.read(progressRepositoryProvider);
@@ -122,15 +149,21 @@ class MissionController extends AsyncNotifier<MissionState> {
     // A rebuild is a new attempt (Riverpod keeps the notifier between builds).
     _started = false;
     _completing = false;
-    _draft = null;
     final mission = missionByNumber(number);
     if (mission == null) throw MissionNotFound(number);
     final previous = await _progress.attempts(missionId: mission.id);
+    final name = (await ref.read(profileProvider.future)).displayName;
     return MissionState(
       mission: mission,
       seed: ref.read(attemptSeedProvider)(),
       attemptNumber: previous.length + 1,
-      scene: [...mission.scene, ?await _continuityLine(mission)],
+      scene: [
+        for (final line in [...mission.scene, ?await _continuityLine(mission)])
+          line.addressedTo(name),
+      ],
+      question: mission.question.addressedTo(name),
+      playerName: name,
+      earlierDraft: previous.map((a) => a.draft).nonNulls.firstOrNull,
     );
   }
 
@@ -162,13 +195,13 @@ class MissionController extends AsyncNotifier<MissionState> {
   /// the attempt on the device; the event says only whether it was skipped.
   void finishDraft(String? text) {
     if (_now.draftDone) return;
-    final draft = text?.trim();
-    _draft = draft == null || draft.isEmpty ? null : draft;
+    final trimmed = text?.trim();
+    final draft = trimmed == null || trimmed.isEmpty ? null : trimmed;
     _analytics.track(AnalyticsEvent.draftCompleted, {
       'mission_id': EventValue.id(_now.mission),
-      'skipped': EventValue.flag(_draft == null),
+      'skipped': EventValue.flag(draft == null),
     });
-    state = AsyncData(_now._copy(draftDone: true));
+    state = AsyncData(_now._copy(draft: draft, draftDone: true));
   }
 
   /// Locks [option] in as the current beat's line. After the third, the engine picks the
@@ -235,7 +268,7 @@ class MissionController extends AsyncNotifier<MissionState> {
         replyOptionId: reply.id,
         score: score,
         hinted: now.mission.hinted,
-        draft: _draft,
+        draft: now.draft,
       ),
     );
     final bucket = EventValue.name(ScoreBucket.of(score.total));

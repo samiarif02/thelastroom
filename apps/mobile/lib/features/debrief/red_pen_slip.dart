@@ -29,7 +29,7 @@ class RedPenSlip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final soft = BrandType.label.copyWith(color: BrandColors.inkSoft);
-    return _Paper(
+    return PaperSlip(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -93,13 +93,14 @@ class CleanRunSlip extends StatelessWidget {
       'Nothing to mark. Every line answered the question, with your own part in it.';
 
   @override
-  Widget build(BuildContext context) => _Paper(
+  Widget build(BuildContext context) => PaperSlip(
     child: Text(text, style: BrandType.body.copyWith(color: BrandColors.ink)),
   );
 }
 
-class _Paper extends StatelessWidget {
-  const _Paper({required this.child});
+/// A cream slip of paper on the desk, under the file: the debrief's slips and the progress file's.
+class PaperSlip extends StatelessWidget {
+  const PaperSlip({super.key, required this.child});
 
   final Widget child;
 

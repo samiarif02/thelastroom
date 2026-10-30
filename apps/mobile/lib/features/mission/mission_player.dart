@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/audio/game_sounds.dart';
+import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../debrief/debrief_view.dart';
 import 'mission_controller.dart';
@@ -16,6 +17,7 @@ import 'scene/mission_set.dart';
 import 'scene/scene_scrim.dart';
 import 'widgets/beat_timer.dart';
 import 'widgets/draft_panel.dart';
+import 'widgets/next_control.dart';
 import 'widgets/trust_meter.dart';
 
 /// Where the scene is. The order matters: later stages never go back.
@@ -59,19 +61,24 @@ class MissionPlayer extends ConsumerStatefulWidget {
 
   final int number;
 
-  /// After the dossier: on to [next] (null after the last mission).
-  final void Function(Mission? next) onExit;
+  /// After the dossier: back to the Tower.
+  final VoidCallback onExit;
 
   static const String continueLabel = 'Continue the scene';
 
   /// Shown under a selected card until it's locked.
   static const String lockHint = 'Tap it again to say it';
 
+  /// A typed interviewer line moves on by itself after this (owner, 2026-10-30), unless the
+  /// player has paused it or switched auto-advance off. Never applies to choosing an answer.
+  static const Duration autoAdvanceAfter = Duration(seconds: 6);
+
   @override
   ConsumerState<MissionPlayer> createState() => _MissionPlayerState();
 }
 
-class _MissionPlayerState extends ConsumerState<MissionPlayer> {
+class _MissionPlayerState extends ConsumerState<MissionPlayer>
+    with SingleTickerProviderStateMixin {
   // Rests between beats, so each one lands before the next starts.
   static const Duration _beforeLines = Duration(milliseconds: 350);
   static const Duration _afterLock = Duration(milliseconds: 900);
@@ -80,6 +87,14 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
 
   final TypewriterController _typer = TypewriterController();
   late final AppLifecycleListener _lifecycle;
+  late final AnimationController _countdown =
+      AnimationController(vsync: this, duration: MissionPlayer.autoAdvanceAfter)
+        ..addStatusListener((status) {
+          if (status == AnimationStatus.completed) _nextLine();
+        });
+
+  /// A touch on the scene paused this line's countdown.
+  bool _paused = false;
 
   SceneStage _stage = SceneStage.card;
   int _line = 0;
@@ -101,8 +116,11 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
   // Kept from the start: `dispose` stops the sound, when `ref` can no longer be read.
   late final GameSounds _sounds = ref.read(gameSoundsProvider);
 
+  PlayerProfile get _profile =>
+      ref.read(profileProvider).value ?? const PlayerProfile();
+
   /// The setup lines, then the question.
-  List<SceneLine> get _lines => [..._game.scene, _game.mission.question];
+  List<SceneLine> get _lines => [..._game.scene, _game.question];
   bool get _onQuestion => _line == _lines.length - 1;
 
   @override
@@ -119,6 +137,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
   @override
   void dispose() {
     _lifecycle.dispose();
+    _countdown.dispose();
     _typer.dispose();
     _sounds.stopAll();
     super.dispose();
@@ -158,11 +177,44 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
 
   void _lineDone() {
     setState(() => _lineTyped = true);
-    if (_stage == SceneStage.lines && _onQuestion) {
+    if (_stage != SceneStage.lines) return;
+    if (_onQuestion) {
       _sounds.questionLands();
       _go(SceneStage.push);
       setState(() => _closeUp = true);
+    } else if (_profile.autoAdvance) {
+      _paused = false;
+      unawaited(_countdown.forward(from: 0));
     }
+  }
+
+  /// On to the next setup line (the Next control, a tap, or the countdown running out).
+  void _nextLine() {
+    if (_stage != SceneStage.lines || _onQuestion || !_typer.isComplete) {
+      return;
+    }
+    _countdown.reset();
+    setState(() {
+      _line++;
+      _lineTyped = false;
+      _paused = false;
+    });
+  }
+
+  /// A tap in the lower third, where the line and the Next control are: completes the typing
+  /// line, or moves on. The whole region answers, so the first tap never misses.
+  void _tapLowerThird() {
+    if (!_typer.isComplete) {
+      _completeLine();
+    } else if (_stage == SceneStage.lines && !_onQuestion) {
+      _sounds.uiTap();
+      _nextLine();
+    }
+  }
+
+  void _completeLine() {
+    _typer.complete();
+    _sounds.subtitleCompleted();
   }
 
   void _pushDone() {
@@ -181,7 +233,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
     _go(SceneStage.beats);
   }
 
-  /// A tap on the scene: completes the typing line, or moves on to the next one.
+  /// A tap on the scene above the lower third: completes the typing line, pauses its
+  /// countdown, or moves on to the next one.
   void _tap() {
     switch (_stage) {
       case SceneStage.card:
@@ -189,13 +242,13 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
       case SceneStage.opening:
         _startLines();
       case SceneStage.lines || SceneStage.followUp when !_typer.isComplete:
-        _typer.complete();
-        _sounds.subtitleCompleted();
+        _completeLine();
+      // A touch on the scene while the line counts down pauses it; the next one moves on.
+      case SceneStage.lines when !_onQuestion && _countdown.isAnimating:
+        _countdown.stop();
+        setState(() => _paused = true);
       case SceneStage.lines when !_onQuestion:
-        setState(() {
-          _line++;
-          _lineTyped = false;
-        });
+        _nextLine();
       case _:
         break;
     }
@@ -267,7 +320,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
         mission: mission,
         score: game.score!,
         trust: game.trust,
-        onContinue: () => widget.onExit(mission.next),
+        firstTry: game.firstTry,
+        onContinue: widget.onExit,
       );
     }
 
@@ -295,7 +349,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
             ),
           ),
         ),
-        if (mission.timed && _stage == SceneStage.beats)
+        if (mission.timed && !_profile.calmMode && _stage == SceneStage.beats)
           BeatTimer(
             key: ValueKey(_beatShown),
             running: _locked == null,
@@ -316,6 +370,11 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
           regionTop: regionTop,
           trust: _stage.index >= SceneStage.beats.index ? game.trust : null,
           grade: grade,
+          onTapLowerThird:
+              _stage.index <= SceneStage.push.index ||
+                  _stage == SceneStage.followUp
+              ? _tapLowerThird
+              : null,
           children: _lowerThird(game, lead, grade),
         ),
         if (_stage == SceneStage.card)
@@ -353,18 +412,37 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
       case SceneStage.lines || SceneStage.push:
         return [
           subtitle(_lines[_line], onComplete: _lineDone),
-          if (_lineTyped && !_onQuestion) const _NextCue(),
+          if (_lineTyped && !_onQuestion)
+            AnimatedBuilder(
+              animation: _countdown,
+              builder: (context, _) {
+                final counting = _profile.autoAdvance;
+                final left = 1 - _countdown.value;
+                return NextControl(
+                  grade: grade,
+                  onPressed: () {
+                    _sounds.uiTap();
+                    _nextLine();
+                  },
+                  remaining: counting ? left : null,
+                  secondsLeft: counting
+                      ? (left * MissionPlayer.autoAdvanceAfter.inSeconds).ceil()
+                      : null,
+                  paused: _paused,
+                );
+              },
+            ),
         ];
       case SceneStage.draft:
         return [
-          QuestionReminder(text: game.mission.question.text, grade: grade),
+          QuestionReminder(text: game.question.text, grade: grade),
           const SizedBox(height: BrandSpace.sm),
           DraftPanel(grade: grade, onDone: _draftDone),
         ];
       case SceneStage.beats:
         final beats = game.mission.beats;
         return [
-          QuestionReminder(text: game.mission.question.text, grade: grade),
+          QuestionReminder(text: game.question.text, grade: grade),
           AnswerCards(
             key: ValueKey('beat-$_beatShown'),
             label: beatLabel(beats[_beatShown].kind, _beatShown, beats.length),
@@ -379,9 +457,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer> {
           ),
         ];
       case SceneStage.followUp || SceneStage.replies:
-        final followUp = game.followUp!;
         return [
-          subtitle(followUp.line, onComplete: _followUpTyped),
+          subtitle(game.followUpLine!, onComplete: _followUpTyped),
           if (_stage == SceneStage.replies) ...[
             const SizedBox(height: BrandSpace.md),
             AnswerCards(
@@ -423,12 +500,16 @@ class _Overlay extends StatelessWidget {
     required this.trust,
     required this.grade,
     required this.children,
+    this.onTapLowerThird,
   });
 
   final double regionTop;
   final int? trust;
   final ChapterGrade grade;
   final List<Widget> children;
+
+  /// Taps anywhere in the lower third, while it holds only a line (no cards, no draft).
+  final VoidCallback? onTapLowerThird;
 
   static const double _meterWidth = 0.55;
 
@@ -451,32 +532,17 @@ class _Overlay extends StatelessWidget {
           left: insets.left + BrandSpace.lg,
           right: insets.right + BrandSpace.lg,
           bottom: insets.bottom + BrandSpace.md,
-          child: LowerThird(children: children),
+          child: onTapLowerThird == null
+              ? LowerThird(children: children)
+              : GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onTapLowerThird,
+                  child: LowerThird(children: children),
+                ),
         ),
       ],
     );
   }
-}
-
-/// "▸" after a typed setup line: a tap moves on.
-class _NextCue extends StatelessWidget {
-  const _NextCue();
-
-  static const String glyph = '▸';
-
-  @override
-  Widget build(BuildContext context) => IgnorePointer(
-    child: Padding(
-      padding: const EdgeInsets.only(top: BrandSpace.xs),
-      child: ExcludeSemantics(
-        child: Text(
-          glyph,
-          textAlign: TextAlign.center,
-          style: BrandType.label.copyWith(color: BrandColors.textSecondary),
-        ),
-      ),
-    ),
-  );
 }
 
 /// The timer's dimming of the room, and its number in the last seconds.
