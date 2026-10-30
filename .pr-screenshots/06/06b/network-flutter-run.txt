@@ -1,0 +1,20 @@
+# flutter run -d web-server --web-port 8791 (debug, CDN flag left at its default), headless
+# Chrome via CDP, 25 s. Page requests only (Chrome's own update/variations traffic excluded by
+# recording the page's Network domain). ~1,100 DDC module requests elided.
+page: http://localhost:8791/
+requests: 1140, same-origin: 1140, cross-origin: 0
+   /
+   /canvaskit/chromium/canvaskit.wasm
+   /canvaskit/chromium/canvaskit.js
+   /main.dart.js
+   /manifest.json
+   /ddc_module_loader.js
+   /stack_trace_mapper.js
+   /main_module.bootstrap.js
+   /on_load_end_bootstrap.js
+   /dwds/src/injected/client.js
+   /favicon.png
+   /assets/FontManifest.json
+   /fonts/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2
+# Before the index.html config: the same run fetched
+#   https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Boardroom's launch and window themes. They extend styles.xml's LaunchTheme and
+     NormalTheme (edge to edge lives there, brief 10) rather than editing them, and only add the
+     brand: void behind everything, the monogram while the engine starts. -->
+<resources>
+    <!-- LaunchTheme already shows drawable/launch_background (void + the monogram). -->
+    <style name="LaunchTheme.Boardroom" parent="LaunchTheme" />
+    <style name="NormalTheme.Boardroom" parent="NormalTheme">
+        <item name="android:windowBackground">@color/brand_void</item>
+    </style>
+</resources>

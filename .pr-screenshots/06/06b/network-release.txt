@@ -1,0 +1,13 @@
+# npm run build:web (--no-web-resources-cdn), served by python3 -m http.server, headless Chrome
+# via CDP, 20 s. Every request the page made.
+page: http://localhost:8765/
+requests: 14, same-origin: 14, cross-origin: 0
+   /
+   /canvaskit/chromium/canvaskit.wasm
+   /canvaskit/chromium/canvaskit.js
+   /main.dart.js
+   /manifest.json
+   /assets/FontManifest.json
+   /assets/fonts/fallback/Roboto-Regular.ttf
+   /favicon.png
+   /icons/Icon-192.png
