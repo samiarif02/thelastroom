@@ -3,11 +3,20 @@ import 'package:engine/engine.dart';
 
 /// The one tiny mission the schema tests run against. Real mission text lands in brief 04.
 const fixture = ContentBundle(
+  chapters: [
+    Chapter(
+      number: 1,
+      title: 'One',
+      missionTitles: ['Fixture'],
+      playable: true,
+    ),
+  ],
   interviewers: [
     Interviewer(
       id: 'priya',
       name: 'Priya',
       role: 'Recruiter',
+      voice: 'Warm and brisk.',
       tests: {Dimension.relevance},
     ),
   ],
@@ -15,6 +24,8 @@ const fixture = ContentBundle(
     Lesson(
       id: 'lesson_name_your_part',
       title: 'Say what you did',
+      flag: Flag.weNotI,
+      flaw: 'It hides what you did.',
       takeaway: 'Use "I" for your part of a team result.',
       recall: RecallCheck(
         prompt: 'Which line shows your own part?',

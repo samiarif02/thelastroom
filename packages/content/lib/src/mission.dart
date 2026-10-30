@@ -37,6 +37,8 @@ class Mission implements Identified {
     this.timed = true,
     this.isBaseline = false,
     this.skillRequirements = const [],
+    this.continuity,
+    this.epilogue = const [],
   });
 
   @override
@@ -72,6 +74,51 @@ class Mission implements Identified {
 
   /// What this mission demands to unlock a skill. Only meaningful on an unhinted mission.
   final List<SkillRequirement> skillRequirements;
+
+  /// Mission 6: the interviewer picks up a line from an earlier answer (FR-30). `null` on every
+  /// other mission.
+  final Continuity? continuity;
+
+  /// Lines played after the debrief: Mission 7's cliffhanger before the Chapter 2 teaser.
+  /// Empty on most missions.
+  final List<SceneLine> epilogue;
+}
+
+/// An earlier mission's answer, carried into this one: the interviewer quotes the line that
+/// cost the most and challenges it (brief §6, Mission 6).
+///
+/// The challenge is one extra setup line, played after [Mission.scene] and before the
+/// question. The beats stay the same for every variant, so the player answers the same
+/// question however they got there; only what the interviewer quotes changes.
+class Continuity {
+  const Continuity({required this.fromMissionId, required this.variants});
+
+  /// The mission whose answer is challenged.
+  final String fromMissionId;
+
+  /// One per beat option of [fromMissionId] that can be the costliest beat line.
+  final List<ContinuityVariant> variants;
+
+  /// The challenge for an attempt at [fromMissionId], given its `MissionScore.optionIdsByCost`:
+  /// the variant for the costliest line that has one. The follow-up reply never has one, so
+  /// this is the costliest *beat* line. `null` when the earlier mission hasn't been played.
+  SceneLine? lineFor(List<String> optionIdsByCost) {
+    for (final optionId in optionIdsByCost) {
+      for (final variant in variants) {
+        if (variant.sourceOptionId == optionId) return variant.line;
+      }
+    }
+    return null;
+  }
+}
+
+/// What the interviewer says when [sourceOptionId] was the costliest line.
+class ContinuityVariant {
+  const ContinuityVariant({required this.sourceOptionId, required this.line});
+
+  /// A beat option id of [Continuity.fromMissionId].
+  final String sourceOptionId;
+  final SceneLine line;
 }
 
 /// One subtitle: who says it and what they say (typewriter reveal, FR-10).

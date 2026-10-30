@@ -12,6 +12,7 @@ class Interviewer implements Identified {
     required this.id,
     required this.name,
     required this.role,
+    required this.voice,
     required this.tests,
   });
 
@@ -21,6 +22,10 @@ class Interviewer implements Identified {
   /// Shown in small caps above their subtitles.
   final String name;
   final String role;
+
+  /// One line on how they talk, for writers and the typing-sound voice (brief 09): every line
+  /// they say should sound like this one person.
+  final String voice;
 
   /// The dimensions this interviewer mostly probes; their follow-ups lean on these.
   final Set<Dimension> tests;

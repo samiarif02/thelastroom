@@ -1,47 +1,46 @@
+import 'package:engine/engine.dart';
+
 import '../lesson.dart';
 
-/// "Why this role" is about the role: the lesson for [Flag.generic] in Chapter 1.
 const lessonWhyThisRole = Lesson(
   id: 'lesson_why_this_role',
   title: 'Say why this role, not why any job',
-  takeaway:
-      'Name one thing in this job you want to do, and why. If the line would work for any '
-      'company, it is too general.',
+  flag: Flag.generic,
+  flaw: 'It sounds keen, but it would fit any company and any candidate.',
+  takeaway: 'Name one thing in this job you want to do, and why. If the line would work for anyone applying anywhere, it is too general.',
   recall: RecallCheck(
     prompt: 'Which opening answers "Why this role?" best?',
     options: [
       RecallOption(
         id: 'recall_why_this_role_culture',
-        text: 'I have always loved technology, and you have a great culture.',
+        text: "I've always loved technology, and your company has a really great culture.",
       ),
       RecallOption(
         id: 'recall_why_this_role_work',
-        text:
-            'I want to spend my days talking to users and using data to decide what to '
-            'build, and this role does both.',
+        text: 'I want to talk to users and read the numbers, and this role does both.',
       ),
       RecallOption(
         id: 'recall_why_this_role_challenge',
-        text: 'I am a hard worker, and I am ready for a new challenge.',
+        text: "I'm a hard worker, and I'm ready for a new challenge in a growing company.",
       ),
     ],
     correctOptionId: 'recall_why_this_role_work',
   ),
 );
 
-/// Staying on the question: the lesson for [Flag.offQuestion].
 const lessonAnswerTheQuestion = Lesson(
   id: 'lesson_answer_the_question',
   title: 'Answer the question they asked',
-  takeaway:
-      '"Why did you apply?" is about the work, not the salary or the location. Save the '
-      'perks for when they ask about them.',
+  flag: Flag.offQuestion,
+  flaw: 'It answers a question nobody asked, so the real one goes unanswered.',
+  takeaway: 'Listen for what they actually asked, and answer that first. Perks, side stories and apologies can wait until they ask.',
   recall: RecallCheck(
     prompt: 'The recruiter asks why you applied. Which answer stays on the question?',
     options: [
       RecallOption(
         id: 'recall_answer_the_question_perks',
-        text: 'The salary is good, and the office is close to my home.',
+        text:
+            'The salary is good, and the office is very close to where I live.',
       ),
       RecallOption(
         id: 'recall_answer_the_question_work',
@@ -50,26 +49,25 @@ const lessonAnswerTheQuestion = Lesson(
       ),
       RecallOption(
         id: 'recall_answer_the_question_any',
-        text: 'Honestly, any job here would be fine for me.',
+        text: "Honestly, any job here would be fine for me, I'm just keen to start.",
       ),
     ],
     correctOptionId: 'recall_answer_the_question_work',
   ),
 );
 
-/// Sounding like a person: the lesson for [Flag.memorized].
 const lessonTalkLikeYourself = Lesson(
   id: 'lesson_talk_like_yourself',
   title: 'Talk like a person, not a CV',
-  takeaway:
-      'Phrases like "motivated team player" sound learned by heart and prove nothing. Swap '
-      'each one for something you actually did.',
+  flag: Flag.memorized,
+  flaw: 'It sounds rehearsed, so the listener stops believing it.',
+  takeaway: 'Phrases like "proactive team player" sound learned by heart and prove nothing. Swap each one for something you actually did.',
   recall: RecallCheck(
     prompt: 'Which line sounds like a real person talking?',
     options: [
       RecallOption(
         id: 'recall_talk_like_yourself_driven',
-        text: 'I am a results-driven self-starter.',
+        text: "I'm a results-driven self-starter with strong communication skills.",
       ),
       RecallOption(
         id: 'recall_talk_like_yourself_real',
@@ -77,94 +75,282 @@ const lessonTalkLikeYourself = Lesson(
       ),
       RecallOption(
         id: 'recall_talk_like_yourself_fast',
-        text: 'I thrive in fast-paced environments.',
+        text:
+            'I thrive in fast-paced environments and always go the extra mile.',
       ),
     ],
     correctOptionId: 'recall_talk_like_yourself_real',
   ),
 );
 
-/// "I", not "we": the lesson for [Flag.weNotI].
 const lessonNameYourPart = Lesson(
   id: 'lesson_name_your_part',
   title: 'Say what you did',
-  takeaway: 'Use "I" for your part of a team result. They are hiring you, not your team.',
+  flag: Flag.weNotI,
+  flaw: 'It sounds modest, but it hides what you actually did.',
+  takeaway: 'Use "I" for your part of a team result and "we" for the rest. They are hiring you, not your team.',
   recall: RecallCheck(
     prompt: 'Which line shows your own part?',
     options: [
       RecallOption(
         id: 'recall_name_your_part_we',
-        text: 'We improved the app a lot.',
+        text: 'We improved the app a lot, and the whole team was proud of it.',
       ),
       RecallOption(
         id: 'recall_name_your_part_i',
-        text: 'I ran the user interviews and redesigned the sign-up.',
+        text: 'I ran the user interviews and redesigned the sign-up myself.',
       ),
       RecallOption(
         id: 'recall_name_your_part_team',
-        text: 'Our team worked really hard on it.',
+        text: 'Our team worked really hard on it, and we got great results.',
       ),
     ],
     correctOptionId: 'recall_name_your_part_i',
   ),
 );
 
-/// Concrete beats general: the lesson for [Flag.vague].
 const lessonBeConcrete = Lesson(
   id: 'lesson_be_concrete',
   title: 'One real example, one real number',
-  takeaway:
-      'Swap "a lot of projects" for one example you can name, with a detail or a number '
-      'that shows what changed.',
+  flag: Flag.vague,
+  flaw: 'It claims a skill but never shows one example of it.',
+  takeaway: 'Swap "a lot of projects" for one example you can name, with a detail or a number that shows what changed.',
   recall: RecallCheck(
     prompt: 'Which evidence is easiest to believe?',
     options: [
       RecallOption(
         id: 'recall_be_concrete_lots',
-        text: 'I have a lot of experience working with users.',
+        text: 'I have a lot of experience working closely with users and data.',
       ),
       RecallOption(
         id: 'recall_be_concrete_number',
-        text: 'I interviewed twelve students and cut the sign-up from five screens to two.',
+        text: 'I interviewed twelve students and cut sign-up to two screens.',
       ),
       RecallOption(
         id: 'recall_be_concrete_always',
-        text: 'I always use data in my work.',
+        text: 'I always use data in my work, and it has served me very well.',
       ),
     ],
     correctOptionId: 'recall_be_concrete_number',
   ),
 );
 
-/// One story, then stop: the lesson for [Flag.rambling].
 const lessonOneStory = Lesson(
   id: 'lesson_one_story',
   title: 'Tell one story, then stop',
-  takeaway:
-      'Pick your best example, tell it from start to finish, and end it on purpose. A clear '
-      'ending sounds confident; a trailing list sounds unsure.',
+  flag: Flag.rambling,
+  flaw: 'It keeps going after the point, so the point gets lost.',
+  takeaway: 'Pick your best example, tell it start to finish, and end on purpose. A clear ending sounds confident; a trailing list sounds unsure.',
   recall: RecallCheck(
     prompt: 'You have just finished your example. What is the best next line?',
     options: [
       RecallOption(
         id: 'recall_one_story_more',
-        text:
-            'So yes, I have some other projects too, if you want to hear them…',
+        text: "So yes, I've got some other projects too, if you want to hear them…",
       ),
       RecallOption(
         id: 'recall_one_story_land',
-        text: 'That is the kind of work I want to do here every day.',
+        text: "That's the kind of work I want to be doing here, every single day.",
       ),
       RecallOption(
         id: 'recall_one_story_guess',
-        text: 'Anyway, I think that is mostly it, I guess.',
+        text:
+            "Anyway, I think that's mostly it, I guess, unless you have more…",
       ),
     ],
     correctOptionId: 'recall_one_story_land',
   ),
 );
 
-/// Every lesson the campaign teaches.
+const lessonPromiseTheHabit = Lesson(
+  id: 'lesson_promise_the_habit',
+  title: 'Promise the habit, not the result',
+  flag: Flag.vague,
+  flaw: 'It promises results nobody can know yet, so it sounds bold but not believable.',
+  takeaway: 'Instead of promising impact, say what you will do: the habit you would bring, and how you would check it worked.',
+  recall: RecallCheck(
+    prompt: 'Which ending is the most believable?',
+    options: [
+      RecallOption(
+        id: 'recall_promise_the_habit_double',
+        text: "I'm confident I could double your key numbers within my first year.",
+      ),
+      RecallOption(
+        id: 'recall_promise_the_habit_habit',
+        text: "I'd ask users first, then check the numbers to see what worked.",
+      ),
+      RecallOption(
+        id: 'recall_promise_the_habit_harder',
+        text:
+            'Nobody on your shortlist will work harder than me, I promise you.',
+      ),
+    ],
+    correctOptionId: 'recall_promise_the_habit_habit',
+  ),
+);
+
+const lessonShareTheCredit = Lesson(
+  id: 'lesson_share_the_credit',
+  title: "Claim your part, not the team's",
+  flag: Flag.vague,
+  flaw: "It takes credit for the whole team's work, and one more question will show it.",
+  takeaway: 'Say exactly what you did, then name who did the rest. Precise credit is more impressive than all of it.',
+  recall: RecallCheck(
+    prompt: 'Who built the fix? Which answer is the most convincing?',
+    options: [
+      RecallOption(
+        id: 'recall_share_the_credit_all',
+        text: 'Me, really. I drove the whole thing, from start to finish, on my own.',
+      ),
+      RecallOption(
+        id: 'recall_share_the_credit_split',
+        text: 'I found the problem and wrote the page; an engineer built the link.',
+      ),
+      RecallOption(
+        id: 'recall_share_the_credit_team',
+        text: "It was a team effort, so I'd rather not single anyone out here.",
+      ),
+    ],
+    correctOptionId: 'recall_share_the_credit_split',
+  ),
+);
+
+const lessonNowThenNext = Lesson(
+  id: 'lesson_now_then_next',
+  title: 'Now, then, next',
+  flag: Flag.rambling,
+  flaw: 'It starts at the beginning of your life, not at what matters for this job.',
+  takeaway: '"Tell me about yourself" in three steps: what you do now, one thing from before that fits this job, and why this job is next.',
+  recall: RecallCheck(
+    prompt: 'Which is the best first line for "Tell me about yourself"?',
+    options: [
+      RecallOption(
+        id: 'recall_now_then_next_childhood',
+        text: "I grew up in a small town, and I always loved fixing people's computers.",
+      ),
+      RecallOption(
+        id: 'recall_now_then_next_now',
+        text: "I've just graduated in Information Systems, and I love user research.",
+      ),
+      RecallOption(
+        id: 'recall_now_then_next_adjectives',
+        text:
+            "I'd describe myself as curious, hard-working and a good listener.",
+      ),
+    ],
+    correctOptionId: 'recall_now_then_next_now',
+  ),
+);
+
+const lessonOwnTheGap = Lesson(
+  id: 'lesson_own_the_gap',
+  title: 'Name the gap, then close it',
+  flag: Flag.generic,
+  flaw: 'It argues with the concern instead of answering it, so the concern stays.',
+  takeaway: "Agree with the fair part of a concern, then show what you have already done about it. Don't argue, and don't give in.",
+  recall: RecallCheck(
+    prompt: 'They say others have more experience. Which reply works best?',
+    options: [
+      RecallOption(
+        id: 'recall_own_the_gap_attitude',
+        text: "Experience isn't everything; attitude matters much more than years.",
+      ),
+      RecallOption(
+        id: 'recall_own_the_gap_fair',
+        text: "That's fair. I've done both halves of this job already, on a small scale.",
+      ),
+      RecallOption(
+        id: 'recall_own_the_gap_give_in',
+        text: "I completely understand if you'd rather hire someone with more experience.",
+      ),
+    ],
+    correctOptionId: 'recall_own_the_gap_fair',
+  ),
+);
+
+const lessonTellItDontRecite = Lesson(
+  id: 'lesson_tell_it_dont_recite',
+  title: 'Tell the story, not the method',
+  flag: Flag.memorized,
+  flaw: 'Saying the steps out loud makes a real story sound learned by heart.',
+  takeaway: 'Use STAR to plan the story, then hide it: say what happened, what you did and what changed, in your own words.',
+  recall: RecallCheck(
+    prompt: 'Which opening sounds like a real story?',
+    options: [
+      RecallOption(
+        id: 'recall_tell_it_dont_recite_labels',
+        text:
+            'The situation was my internship, and my task was a ticket report.',
+      ),
+      RecallOption(
+        id: 'recall_tell_it_dont_recite_story',
+        text: 'At my internship I sent my lead a report with a wrong number in it.',
+      ),
+      RecallOption(
+        id: 'recall_tell_it_dont_recite_learning',
+        text: 'The key learning from this whole experience was attention to detail.',
+      ),
+    ],
+    correctOptionId: 'recall_tell_it_dont_recite_story',
+  ),
+);
+
+const lessonOwnYourPart = Lesson(
+  id: 'lesson_own_your_part',
+  title: 'Own your part',
+  flag: Flag.blame,
+  flaw:
+      'It may be true, but it says whose fault it was instead of what you did.',
+  takeaway: 'Name your own part in what went wrong first, in one sentence. Then say what you did about it, and leave the others out.',
+  recall: RecallCheck(
+    prompt: 'They ask about a mistake. Which line owns it?',
+    options: [
+      RecallOption(
+        id: 'recall_own_your_part_tool',
+        text: 'The export tool duplicated rows, so the numbers were wrong from the start.',
+      ),
+      RecallOption(
+        id: 'recall_own_your_part_mine',
+        text: "I didn't check the export for duplicates, so my numbers were wrong.",
+      ),
+      RecallOption(
+        id: 'recall_own_your_part_nobody',
+        text: 'Nobody had warned me about the export, and I was still very new there.',
+      ),
+    ],
+    correctOptionId: 'recall_own_your_part_mine',
+  ),
+);
+
+const lessonKeepYourStory = Lesson(
+  id: 'lesson_keep_your_story',
+  title: 'Keep your story straight',
+  flag: Flag.offQuestion,
+  flaw:
+      'Changing the story under pressure makes the first version sound untrue.',
+  takeaway: "When someone pushes back, repeat the same facts calmly and add detail. Don't soften or rewrite what happened.",
+  recall: RecallCheck(
+    prompt: '"That\'s not what you told Marcus." What do you say?',
+    options: [
+      RecallOption(
+        id: 'recall_keep_your_story_rewrite',
+        text: 'Maybe my lead caught it first, actually, and I only fixed it later on.',
+      ),
+      RecallOption(
+        id: 'recall_keep_your_story_same',
+        text: "It's the same story: my mistake, and I told my lead that afternoon.",
+      ),
+      RecallOption(
+        id: 'recall_keep_your_story_better',
+        text: "I think I just explained it better this time round, that's all.",
+      ),
+    ],
+    correctOptionId: 'recall_keep_your_story_same',
+  ),
+);
+
+/// Every lesson the campaign teaches. Each belongs to one flag; a flag can have several, so
+/// a mission can teach the version of a mistake its own lines make.
 const List<Lesson> lessons = [
   lessonWhyThisRole,
   lessonAnswerTheQuestion,
@@ -172,4 +358,11 @@ const List<Lesson> lessons = [
   lessonNameYourPart,
   lessonBeConcrete,
   lessonOneStory,
+  lessonPromiseTheHabit,
+  lessonShareTheCredit,
+  lessonNowThenNext,
+  lessonOwnTheGap,
+  lessonTellItDontRecite,
+  lessonOwnYourPart,
+  lessonKeepYourStory,
 ];

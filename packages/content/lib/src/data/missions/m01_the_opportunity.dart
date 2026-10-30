@@ -6,13 +6,13 @@ import '../interviewers.dart';
 /// Mission 1, "The Opportunity" (brief §6): Priya asks why you applied.
 ///
 /// The baseline every later score is compared with (FR-30), so it is unhinted and untimed, and
-/// no model answer is shown before it. The role is a general entry-level product job, the
-/// Product Associate at Northstar Labs; Priya's setup names its two halves (users and numbers)
-/// so a strong answer has something concrete to tie back to.
+/// no model answer is shown before it. The role is the Product Associate at Northstar Labs;
+/// Priya greets Jordan by name and names the role's two halves (users and numbers), so the
+/// player knows who they play and a strong answer has something concrete to tie back to.
 ///
-/// Scores are 0–3 on relevance, specificity, structure and adaptability. Beat lines carry 0
-/// adaptability: only the follow-up reply earns it. The PR for brief 04 has the review table:
-/// every line, its scores and flags, and why.
+/// Reworked to the owner's writing notes (2026-10-30): every set has one tempting wrong line
+/// with a hidden flaw, the options are close in length, and every line draws on Jordan's
+/// facts (`player`, the character sheet).
 const missionTheOpportunity = Mission(
   id: 'm01_the_opportunity',
   chapter: 1,
@@ -24,15 +24,11 @@ const missionTheOpportunity = Mission(
   scene: [
     SceneLine(
       speakerId: priyaId,
-      text:
-          "Hi, thanks for coming in. I'm Priya, and I hire for the product team here at "
-          'Northstar Labs.',
+      text: "Hi Jordan, I'm Priya. I hire for the product team here at Northstar Labs.",
     ),
     SceneLine(
       speakerId: priyaId,
-      text:
-          'The Product Associate role is mostly two things: talking to users and reading the '
-          'numbers, so the team knows what to build next.',
+      text: "I've read your CV. This role is talking to users and reading the numbers.",
     ),
     SceneLine(
       speakerId: priyaId,
@@ -51,8 +47,8 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_open_role_fit',
           text:
-              'I applied because I like finding out why people get stuck in a product, and '
-              'this role does that with real users and real data.',
+              'I like finding out why people get stuck in a product, and this role is '
+              'built around exactly that: real users and real numbers.',
           scores: DimensionScores(
             relevance: 3,
             specificity: 2,
@@ -61,14 +57,14 @@ const missionTheOpportunity = Mission(
           ),
         ),
         AnswerOption(
-          id: 'm01_open_great_company',
+          id: 'm01_open_believe',
           text:
-              "I've always been passionate about technology, and Northstar is a great "
-              'company with an amazing culture.',
+              "I've followed Northstar for a while, and I really believe in what you're "
+              'building. I want my first job to be somewhere with real purpose.',
           scores: DimensionScores(
             relevance: 2,
-            specificity: 0,
-            structure: 2,
+            specificity: 1,
+            structure: 3,
             adaptability: 0,
           ),
           flags: {Flag.generic},
@@ -77,8 +73,8 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_open_first_job',
           text:
-              "To be honest, I'm looking for my first full-time job, and the location and "
-              'benefits here are really good.',
+              "Honestly, I'm looking for my first full-time job, and the hybrid schedule "
+              'and the location here would suit me really well.',
           scores: DimensionScores(
             relevance: 1,
             specificity: 1,
@@ -89,17 +85,17 @@ const missionTheOpportunity = Mission(
           lessonId: 'lesson_answer_the_question',
         ),
         AnswerOption(
-          id: 'm01_open_cv_words',
+          id: 'm01_open_job_ad',
           text:
-              'I am a highly motivated, detail-oriented team player who is eager to learn and '
-              'grow in a fast-paced environment.',
+              'I read the job description closely, and I match almost every point on it: '
+              'user research, data analysis, teamwork and communication.',
           scores: DimensionScores(
-            relevance: 1,
-            specificity: 0,
+            relevance: 2,
+            specificity: 1,
             structure: 1,
             adaptability: 0,
           ),
-          flags: {Flag.memorized, Flag.generic},
+          flags: {Flag.memorized},
           lessonId: 'lesson_talk_like_yourself',
         ),
       ],
@@ -110,9 +106,9 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_evidence_sign_up',
           text:
-              'In my final-year project, I interviewed twelve students who used our study app. '
-              'Most gave up at sign-up, so I cut it from five screens to two, and finished '
-              'sign-ups went from 40% to 75%.',
+              'In my final-year project I interviewed twelve students, cut our study '
+              "app's sign-up from five screens to two, and finished sign-ups went from "
+              '40% to 75%.',
           scores: DimensionScores(
             relevance: 3,
             specificity: 3,
@@ -123,8 +119,8 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_evidence_team_did',
           text:
-              'In my final-year project, we interviewed students about our study app, and we '
-              'cut the sign-up from five screens to two.',
+              'In my final-year project our team interviewed twelve students, rebuilt the '
+              'sign-up together, and we took finished sign-ups from 40% to 75%.',
           scores: DimensionScores(
             relevance: 3,
             specificity: 1,
@@ -135,10 +131,10 @@ const missionTheOpportunity = Mission(
           lessonId: 'lesson_name_your_part',
         ),
         AnswerOption(
-          id: 'm01_evidence_lots_of_projects',
+          id: 'm01_evidence_always',
           text:
-              "I've done a lot of projects where I worked with users and data, so I have good "
-              'experience with this kind of work.',
+              "Across my degree, my internship and my café job, I've always been the one "
+              'who listens to users first and then checks what the data says.',
           scores: DimensionScores(
             relevance: 2,
             specificity: 0,
@@ -151,9 +147,8 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_evidence_whole_story',
           text:
-              'So it started in my second year, when I joined a coding club, and then a friend '
-              'asked me to help with an app, and we tried a few ideas, and later I took a data '
-              'course, which was also really interesting…',
+              'It started in second year, when a friend needed help with an app, and then '
+              'I took a data module, and later my project went that way…',
           scores: DimensionScores(
             relevance: 1,
             specificity: 1,
@@ -171,8 +166,8 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_land_bring_habit',
           text:
-              "That's the work I want to do every day, and I'd bring the same habit here: "
-              'talk to users first, then check the numbers to see if it worked.',
+              "That's the work I want to do every day: talk to users first, then check "
+              'the numbers to see if the change actually worked.',
           scores: DimensionScores(
             relevance: 3,
             specificity: 2,
@@ -181,24 +176,24 @@ const missionTheOpportunity = Mission(
           ),
         ),
         AnswerOption(
-          id: 'm01_land_learn_and_grow',
+          id: 'm01_land_same_impact',
           text:
-              'I think this role would be a great opportunity for me to learn a lot and grow '
-              'my career.',
+              "I'm confident I could bring that same kind of impact here from day one, "
+              'and help your team move its own numbers just as quickly.',
           scores: DimensionScores(
             relevance: 2,
             specificity: 1,
-            structure: 2,
+            structure: 3,
             adaptability: 0,
           ),
-          flags: {Flag.generic},
-          lessonId: 'lesson_why_this_role',
+          flags: {Flag.vague},
+          lessonId: 'lesson_promise_the_habit',
         ),
         AnswerOption(
           id: 'm01_land_any_role',
           text:
-              "Honestly, I'd be happy in any role here. I just really want to get my foot in "
-              'the door.',
+              "Honestly, I'd be happy in any role here. I just really want to get my foot "
+              'in the door at a company like Northstar.',
           scores: DimensionScores(
             relevance: 0,
             specificity: 1,
@@ -211,8 +206,8 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_land_trail_off',
           text:
-              "So yes, that's basically it, I think. Unless you want to hear about my other "
-              'projects too, because there are a few more…',
+              "So yes, that's basically it, I think, unless you'd like to hear about my "
+              'other projects too, because there are a few more of those…',
           scores: DimensionScores(
             relevance: 1,
             specificity: 0,
@@ -230,16 +225,15 @@ const missionTheOpportunity = Mission(
       id: 'm01_follow_hardest_part',
       line: SceneLine(
         speakerId: priyaId,
-        text:
-            "Thanks, that's clear. What do you think will be the hardest part of this job "
-            'for you?',
+        text: "Thanks, that's clear. What will be the hardest part of this job for you?",
       ),
       replies: [
         AnswerOption(
           id: 'm01_reply_hardest_big_data',
           text:
-              "Working with large company data. I've only used small datasets, so I've started "
-              "an SQL course, and I'd ask someone on the data team to check my first queries.",
+              "Big company data. I've only used small spreadsheets, so I'm halfway "
+              "through an SQL course, and I'd ask the data team to check my first "
+              'queries.',
           scores: DimensionScores(
             relevance: 3,
             specificity: 3,
@@ -248,11 +242,13 @@ const missionTheOpportunity = Mission(
           ),
         ),
         AnswerOption(
-          id: 'm01_reply_hardest_nothing',
-          text: "I don't think anything will be too hard. I'm a fast learner and a hard worker.",
+          id: 'm01_reply_hardest_perfectionist',
+          text:
+              "Probably that I care a lot about getting things perfect, so I'll need to "
+              'learn when good enough really is good enough in a fast team.',
           scores: DimensionScores(
             relevance: 1,
-            specificity: 0,
+            specificity: 1,
             structure: 1,
             adaptability: 1,
           ),
@@ -261,7 +257,9 @@ const missionTheOpportunity = Mission(
         ),
         AnswerOption(
           id: 'm01_reply_hardest_technical',
-          text: "Maybe some of the technical parts, but I'm sure I'll figure it out.",
+          text:
+              "Maybe some of the technical side at first, but I learn quickly, and I'm "
+              "sure I'll pick it all up within my first few months.",
           scores: DimensionScores(
             relevance: 2,
             specificity: 0,
@@ -284,8 +282,8 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_reply_part_mine',
           text:
-              'I ran the twelve interviews myself and designed the new two-screen sign-up. Two '
-              'teammates built the back end.',
+              'I ran all twelve interviews and designed the new two-screen sign-up. Two '
+              'teammates built the back end, and one built the screens.',
           scores: DimensionScores(
             relevance: 3,
             specificity: 3,
@@ -295,29 +293,31 @@ const missionTheOpportunity = Mission(
         ),
         AnswerOption(
           id: 'm01_reply_part_team_effort',
-          text: 'We all did everything together, really. It was a team effort.',
+          text:
+              "It was a real team effort. I'd rather not single myself out, because the "
+              'result only happened since all four of us pulled together.',
           scores: DimensionScores(
             relevance: 1,
             specificity: 0,
             structure: 2,
-            adaptability: 0,
+            adaptability: 1,
           ),
           flags: {Flag.weNotI},
           lessonId: 'lesson_name_your_part',
         ),
         AnswerOption(
-          id: 'm01_reply_part_bit_of_all',
+          id: 'm01_reply_part_led_it',
           text:
-              'I did a bit of everything: the design, the testing, the meetings, the '
-              'presentation, and some of the code as well.',
+              'Honestly, I led most of it: the research, the design and the sign-up fix. '
+              'The others mainly helped out with the coding side of things.',
           scores: DimensionScores(
             relevance: 2,
             specificity: 1,
-            structure: 1,
+            structure: 2,
             adaptability: 1,
           ),
           flags: {Flag.vague},
-          lessonId: 'lesson_be_concrete',
+          lessonId: 'lesson_share_the_credit',
         ),
       ],
     ),
@@ -332,8 +332,8 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_reply_example_sign_up',
           text:
-              'Sure. In my final-year project I interviewed twelve students, saw most of them '
-              'quit at sign-up, and cut it from five screens to two.',
+              'Sure. In my project I interviewed twelve students, saw most of them quit '
+              'at sign-up, and cut it from five screens to two.',
           scores: DimensionScores(
             relevance: 3,
             specificity: 3,
@@ -344,13 +344,13 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_reply_example_in_general',
           text:
-              'Well, in general I always try to listen to users and use data in everything I '
-              'do.',
+              'The best example is really how I work in general: I always start from what '
+              'users tell me, and then I let the data decide.',
           scores: DimensionScores(
             relevance: 2,
             specificity: 0,
             structure: 2,
-            adaptability: 0,
+            adaptability: 1,
           ),
           flags: {Flag.vague},
           lessonId: 'lesson_be_concrete',
@@ -358,12 +358,12 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_reply_example_list',
           text:
-              'There are many, like my club app, my internship, a class project and some '
-              'freelance work, and they all used data in different ways…',
+              'There are a few: my project, my internship, the café, a class assignment, '
+              'and they all used data in slightly different ways…',
           scores: DimensionScores(
             relevance: 2,
             specificity: 1,
-            structure: 0,
+            structure: 1,
             adaptability: 1,
           ),
           flags: {Flag.rambling},
@@ -376,14 +376,14 @@ const missionTheOpportunity = Mission(
       trigger: Flag.generic,
       line: SceneLine(
         speakerId: priyaId,
-        text: 'A lot of people tell me that. Why this role, and not any other product job?',
+        text: 'A lot of people tell me that. Why this role, not any other product job?',
       ),
       replies: [
         AnswerOption(
           id: 'm01_reply_why_here_both',
           text:
-              'Because here the same person talks to users and reads the numbers. In most '
-              'roles I looked at, those are two different teams.',
+              'Because here one person talks to users and reads the numbers. In most '
+              'roles I looked at, those were two separate teams.',
           scores: DimensionScores(
             relevance: 3,
             specificity: 3,
@@ -392,10 +392,10 @@ const missionTheOpportunity = Mission(
           ),
         ),
         AnswerOption(
-          id: 'm01_reply_why_here_values',
+          id: 'm01_reply_why_here_growing',
           text:
-              "Northstar is a leader in the industry, and I really admire the company's "
-              'values.',
+              'Because Northstar is growing fast, and I want to be somewhere a new '
+              'graduate can make a real impact early on, not just watch.',
           scores: DimensionScores(
             relevance: 1,
             specificity: 0,
@@ -408,8 +408,8 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_reply_why_here_replied',
           text:
-              'Honestly, I applied to a lot of places, and Northstar was one of the first to '
-              'reply.',
+              'Honestly, I applied to quite a few places, and Northstar was one of the '
+              'first to reply and invite me in for a chat.',
           scores: DimensionScores(
             relevance: 0,
             specificity: 1,
@@ -432,8 +432,8 @@ const missionTheOpportunity = Mission(
         AnswerOption(
           id: 'm01_reply_work_research',
           text:
-              "The user research. I'd rather find out why people get stuck than guess, and "
-              'this role is built around that.',
+              "The user research. I'd rather find out why people get stuck than guess, "
+              "and in this role that's half of the job.",
           scores: DimensionScores(
             relevance: 3,
             specificity: 2,
@@ -442,20 +442,24 @@ const missionTheOpportunity = Mission(
           ),
         ),
         AnswerOption(
-          id: 'm01_reply_work_perks',
-          text: 'The salary and the hybrid schedule are big reasons too, to be honest.',
+          id: 'm01_reply_work_learn',
+          text:
+              "Mostly the chance to learn from experienced people. I know I'd grow faster "
+              "here than anywhere else I've applied to so far.",
           scores: DimensionScores(
-            relevance: 0,
+            relevance: 1,
             specificity: 1,
             structure: 2,
-            adaptability: 0,
+            adaptability: 1,
           ),
           flags: {Flag.offQuestion},
           lessonId: 'lesson_answer_the_question',
         ),
         AnswerOption(
           id: 'm01_reply_work_anything',
-          text: "I'm open to anything, really. I just like working with technology.",
+          text:
+              "I'm open to anything, really. I just enjoy working with technology and "
+              'people, so most of the work sounds good to me.',
           scores: DimensionScores(
             relevance: 1,
             specificity: 0,
