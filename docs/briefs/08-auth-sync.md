@@ -14,6 +14,28 @@ Read first: ADR 0002 and 0005, `docs/rules/state-management.md`, `docs/rules/mig
 `docs/rules/error-handling.md`, FR-3, FR-4, FR-60, FR-61, `apps/mobile/lib/core/backend/`
 (brief 05's interface) and `supabase/migrations/`.
 
+## Owner's changes (2026-10-30, after the feedback session): read first
+
+- **No sign-up, no login, no email linking in v1.** The silent guest account (brief 05) is the
+  only account. Drop item 5 (linking a guest to email) and the `account_linked` event from this
+  brief.
+- **The profile now holds what onboarding asks** (brief 13): first name, experience, target role,
+  nerves level, calm mode, weekly goal, auto-advance setting. Brief 13 creates
+  `core/profile/profile_repository.dart` with a local implementation; **you sync it** to
+  `profiles` (new migration: add the columns, owner-only RLS unchanged, pgTAP tests for them),
+  and read it from the device first: the server is only a backup, never asked on every launch.
+- **Security pass** (owner: "no one can access our database"), in the PR as a checklist:
+  - RLS on every table, owner-only, tested for a second user and the `anon` role (exists; extend
+    to the new columns).
+  - Grants: least privilege per table; no `delete`; server-set columns can't be written by the
+    client.
+  - `supabase db lint` and the Security Advisor clean; paste the output.
+  - Only the **anon (publishable) key** is in the app; it is public by design and safe only
+    because of RLS. The service-role key and any AI key are **never** in the app or the repo:
+    server secrets live in Supabase Edge Function secrets. `check:secrets` stays clean.
+  - The first name is personal data: never in analytics events or logs (test).
+  - Rate-limit friendliness: the sync worker backs off and batches; no tight retry loops.
+
 ## Order change: brief 10 lands before you (owner, 2026-10-30)
 
 The mission player (10) is built first and saves attempts through
