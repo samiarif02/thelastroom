@@ -78,13 +78,13 @@ void main() {
     expect(engine.played[1].volume, closeTo(0.3, 1e-9));
   });
 
-  test('defaults: effects at 60%, ambience at 35%', () {
+  test('defaults: effects at 80%, ambience at 50%', () {
     audio
       ..applySettings(const AudioSettings())
       ..play(Cue.choiceTap)
       ..startAmbience(1);
-    expect(engine.played[0].volume, 0.6);
-    expect(engine.live.last.volume, 0.35);
+    expect(engine.played[0].volume, 0.8);
+    expect(engine.live.last.volume, 0.5);
   });
 
   group('ambience', () {
@@ -114,9 +114,43 @@ void main() {
       audio
         ..startAmbience(3)
         ..duck();
-      expect(engine.live.single.volume, closeTo(0.35 * 0.6, 1e-9));
+      expect(engine.live.single.volume, closeTo(0.5 * 0.6, 1e-9));
       audio.unduck();
-      expect(engine.live.single.volume, closeTo(0.35, 1e-9));
+      expect(engine.live.single.volume, closeTo(0.5, 1e-9));
+    });
+
+    test(
+      'an interruption that ducks lowers everything, its end restores it',
+      () {
+        audio
+          ..startAmbience(1)
+          ..interruptionBegan(duck: true);
+        expect(engine.masterVolume, AudioService.interruptionDuckLevel);
+        expect(engine.live.single.cue, Cue.ambienceLobby);
+        audio.interruptionEnded();
+        expect(engine.masterVolume, 1);
+      },
+    );
+
+    test('an interruption that pauses silences the game until it ends', () {
+      audio
+        ..startAmbience(1)
+        ..interruptionBegan(duck: false);
+      expect(engine.live, isEmpty);
+      expect(audio.play(Cue.stamp), isNull);
+      audio.interruptionEnded();
+      expect(engine.live.single.cue, Cue.ambienceLobby);
+    });
+
+    test('the end of an interruption doesn\'t wake a hidden app', () {
+      audio
+        ..startAmbience(1)
+        ..suspend()
+        ..interruptionBegan(duck: false)
+        ..interruptionEnded();
+      expect(engine.live, isEmpty);
+      audio.resume();
+      expect(engine.live.single.cue, Cue.ambienceLobby);
     });
 
     test('suspend fades the room out, resume brings it back', () {

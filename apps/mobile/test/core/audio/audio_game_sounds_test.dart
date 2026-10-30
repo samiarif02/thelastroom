@@ -114,6 +114,77 @@ void main() {
     });
   });
 
+  group('title, intro and tower', () {
+    test('the title sting plays alone, then the lobby fades in under it', () {
+      fakeAsync((async) {
+        sounds.titleOpened();
+        expect(engine.cues, [Cue.titleOpen]);
+        async.elapse(AudioGameSounds.titleRoomToneDelay);
+        expect(audio.currentLoop, Cue.ambienceLobby);
+      });
+    });
+
+    test('the title never takes over a room a scene already chose', () {
+      fakeAsync((async) {
+        sounds
+          ..titleOpened()
+          ..ambience(2);
+        async.elapse(AudioGameSounds.titleRoomToneDelay);
+        expect(audio.currentLoop, Cue.ambienceCorridor);
+      });
+    });
+
+    test('each one-shot hook maps to its cue', () {
+      sounds
+        ..uiTap()
+        ..pageTurn()
+        ..roomEntered()
+        ..lockedRoomTapped();
+      expect(engine.cues, [
+        Cue.choiceTap,
+        Cue.pageTurn,
+        Cue.roomEnter,
+        Cue.lockedFloor,
+      ]);
+    });
+
+    test('the tower brings in the lobby\'s room tone', () {
+      sounds.towerOpened();
+      expect(engine.live.single.cue, Cue.ambienceLobby);
+    });
+
+    test('the elevator plays its whole sequence, in order', () {
+      fakeAsync((async) {
+        sounds.elevator();
+        async.elapse(AudioGameSounds.elevatorSequence.last.$1);
+        expect(engine.cues, [
+          for (final (_, cue) in AudioGameSounds.elevatorSequence) cue,
+        ]);
+      });
+    });
+
+    test('stopAll cuts the title\'s pending room tone', () {
+      fakeAsync((async) {
+        sounds
+          ..titleOpened()
+          ..stopAll();
+        async.elapse(const Duration(seconds: 10));
+        expect(engine.cues, [Cue.titleOpen]);
+        expect(audio.currentLoop, isNull);
+      });
+    });
+
+    test('stopAll cuts an elevator mid-ride', () {
+      fakeAsync((async) {
+        sounds.elevator();
+        async.elapse(const Duration(seconds: 1));
+        sounds.stopAll();
+        async.elapse(const Duration(seconds: 10));
+        expect(engine.cues, [Cue.elevatorDoorsClose, Cue.elevatorRide]);
+      });
+    });
+  });
+
   test('chapter ambience goes through the service', () {
     sounds.ambience(2);
     expect(engine.live.single.cue, Cue.ambienceCorridor);

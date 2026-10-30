@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/settings/audio/audio_settings_section.dart';
 import '../audio_providers.dart';
 import '../audio_service.dart';
+import '../audio_settings.dart';
 import '../cue.dart';
 import 'sound_board_typing.dart';
 import 'sound_board_widgets.dart';
@@ -24,50 +23,12 @@ class SoundBoardScreen extends ConsumerStatefulWidget {
 }
 
 class _SoundBoardScreenState extends ConsumerState<SoundBoardScreen> {
-  final List<Timer> _sequence = [];
-
-  // The elevator between missions, as brief 13 will play it: (seconds from the start, cue).
-  static const List<(double, Cue)> _elevator = [
-    (0, Cue.elevatorDoorsClose),
-    (0.9, Cue.elevatorRide),
-    (1.6, Cue.elevatorFloorTick),
-    (2.2, Cue.elevatorFloorTick),
-    (2.8, Cue.elevatorFloorTick),
-    (3.9, Cue.elevatorChime),
-    (4.6, Cue.elevatorDoorsOpen),
-  ];
-
   static const List<Cue> _loops = [
     Cue.ambienceLobby,
     Cue.ambienceCorridor,
     Cue.ambienceBoardroom,
     Cue.recallPad,
   ];
-
-  @override
-  void dispose() {
-    _cancelSequence();
-    super.dispose();
-  }
-
-  void _cancelSequence() {
-    for (final t in _sequence) {
-      t.cancel();
-    }
-    _sequence.clear();
-  }
-
-  void _playSequence(AudioService audio, List<(double, Cue)> steps) {
-    _cancelSequence();
-    for (final (at, cue) in steps) {
-      _sequence.add(
-        Timer(
-          Duration(milliseconds: (at * Duration.millisecondsPerSecond).round()),
-          () => audio.play(cue),
-        ),
-      );
-    }
-  }
 
   // The board shows the service's state, which isn't a provider of its own: rebuild after acting.
   void _act(VoidCallback action) => setState(action);
@@ -104,10 +65,13 @@ class _SoundBoardScreenState extends ConsumerState<SoundBoardScreen> {
                 builder: (context, status, _) => _Status(status: status),
               ),
               const SizedBox(height: BrandSpace.xl),
-              const BoardSection(
+              BoardSection(
                 title: 'SETTINGS',
-                note: 'The section the Settings screen embeds. Defaults: on, ambience 35%, effects 60%.',
-                child: AudioSettingsSection(),
+                note:
+                    'The section the Settings screen embeds. Defaults: on, '
+                    'ambience ${_percent(AudioSettings.defaultAmbienceVolume)}, '
+                    'effects ${_percent(AudioSettings.defaultEffectsVolume)}.',
+                child: const AudioSettingsSection(),
               ),
               BoardSection(
                 title: 'ROOM TONE',
@@ -140,9 +104,27 @@ class _SoundBoardScreenState extends ConsumerState<SoundBoardScreen> {
               ),
               BoardSection(
                 title: 'MOMENTS',
-                note: 'The mission player\'s calls (GameSounds), and the elevator as the tower will play it.',
+                note: 'Every GameSounds call: the title, intro and tower, then the mission player\'s.',
                 child: BoardButtons(
                   children: [
+                    BoardButton(
+                      label: 'Title opened',
+                      onTap: () => _act(sounds.titleOpened),
+                    ),
+                    BoardButton(label: 'UI tap', onTap: sounds.uiTap),
+                    BoardButton(label: 'Page turn', onTap: sounds.pageTurn),
+                    BoardButton(
+                      label: 'Tower opened',
+                      onTap: () => _act(sounds.towerOpened),
+                    ),
+                    BoardButton(
+                      label: 'Room entered',
+                      onTap: sounds.roomEntered,
+                    ),
+                    BoardButton(
+                      label: 'Locked room',
+                      onTap: sounds.lockedRoomTapped,
+                    ),
                     BoardButton(
                       label: 'Question lands',
                       onTap: () => _act(sounds.questionLands),
@@ -159,16 +141,10 @@ class _SoundBoardScreenState extends ConsumerState<SoundBoardScreen> {
                       label: 'Score stamped',
                       onTap: sounds.scoreStamped,
                     ),
-                    BoardButton(
-                      label: 'Elevator',
-                      onTap: () => _playSequence(audio, _elevator),
-                    ),
+                    BoardButton(label: 'Elevator', onTap: sounds.elevator),
                     BoardButton(
                       label: 'Stop all',
-                      onTap: () => _act(() {
-                        _cancelSequence();
-                        sounds.stopAll();
-                      }),
+                      onTap: () => _act(sounds.stopAll),
                     ),
                   ],
                 ),
@@ -221,3 +197,5 @@ class _Status extends StatelessWidget {
     );
   }
 }
+
+String _percent(double volume) => '${(volume * 100).round()}%';

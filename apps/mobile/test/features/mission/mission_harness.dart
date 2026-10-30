@@ -95,6 +95,27 @@ class RecordingSounds implements GameSounds {
   void ambience(int chapter) => calls.add(('ambience', [chapter]));
 
   @override
+  void titleOpened() => calls.add(('titleOpened', const []));
+
+  @override
+  void uiTap() => calls.add(('uiTap', const []));
+
+  @override
+  void pageTurn() => calls.add(('pageTurn', const []));
+
+  @override
+  void towerOpened() => calls.add(('towerOpened', const []));
+
+  @override
+  void roomEntered() => calls.add(('roomEntered', const []));
+
+  @override
+  void elevator() => calls.add(('elevator', const []));
+
+  @override
+  void lockedRoomTapped() => calls.add(('lockedRoomTapped', const []));
+
+  @override
   void stopAll() => calls.add(('stopAll', const []));
 }
 

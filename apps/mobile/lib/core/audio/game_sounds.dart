@@ -50,6 +50,27 @@ abstract interface class GameSounds {
   /// The room tone for a chapter starts, cross-fading from the previous one.
   void ambience(int chapter);
 
+  /// The app opened on the title: the title sting, then the lobby's room tone.
+  void titleOpened();
+
+  /// A button or "continue" was tapped outside the interview.
+  void uiTap();
+
+  /// An intro or character card turned.
+  void pageTurn();
+
+  /// The tower (chapter map) opened: the lobby's room tone comes in.
+  void towerOpened();
+
+  /// The player walked into a mission room.
+  void roomEntered();
+
+  /// The elevator ride between floors.
+  void elevator();
+
+  /// The player tapped a locked room: its sound, heard through the door.
+  void lockedRoomTapped();
+
   /// Every sound stops (leaving the scene, app paused).
   void stopAll();
 }
@@ -96,6 +117,27 @@ class SilentGameSounds implements GameSounds {
 
   @override
   void ambience(int chapter) {}
+
+  @override
+  void titleOpened() {}
+
+  @override
+  void uiTap() {}
+
+  @override
+  void pageTurn() {}
+
+  @override
+  void towerOpened() {}
+
+  @override
+  void roomEntered() {}
+
+  @override
+  void elevator() {}
+
+  @override
+  void lockedRoomTapped() {}
 
   @override
   void stopAll() {}

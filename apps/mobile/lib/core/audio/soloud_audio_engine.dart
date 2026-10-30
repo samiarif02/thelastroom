@@ -11,8 +11,12 @@ import 'cue.dart';
 /// - **Android:** `lowLatency: false` puts the game on the media stream (`mediaMusic`), so the
 ///   volume keys and screen recorders (scrcpy) treat it as media; the low-latency MMAP path is
 ///   invisible to recorders.
-/// - **iOS:** SoLoud leaves `AVAudioSession` to the app. Its default category (`soloAmbient`)
-///   already respects the silent switch.
+/// - **iOS:** SoLoud leaves `AVAudioSession` to the app; `audio_focus.dart` sets it to
+///   `ambient` (respects the silent switch, mixes with the player's music).
+///
+/// Gain staging: a cue plays at its bus volume (`AudioSettings`) x the per-call gain, then SoLoud
+/// adds two fixed stages: [masterGain] (pinned at start) and [monoToStereoGain] (every cue is
+/// mono and the output is stereo). `gain_staging_test.dart` multiplies them out.
 /// - **Web:** the browser only lets audio start after a user gesture; `audio_providers.dart`
 ///   waits for the first tap before calling [start]. Assets load with [LoadMode.disk] there, as
 ///   flutter_soloud's docs ask.
@@ -28,6 +32,13 @@ class SoloudAudioEngine implements AudioEngine {
   /// Typing ticks overlap each other and the room tone; the default cap (16) could steal them.
   static const int _maxVoices = 32;
 
+  /// SoLoud's global volume, set explicitly at start so nothing upstream leaves it lower.
+  static const double masterGain = 1;
+
+  /// SoLoud pans a mono voice into stereo with a constant-power law: each channel gets
+  /// cos(pi / 4) at the centre, about -3 dB (`Soloud::setVoicePan_internal`).
+  static const double monoToStereoGain = 0.7071067811865476;
+
   @override
   Future<void> start() async {
     // init() on a running engine re-initialises it and unloads everything: start once.
@@ -35,7 +46,9 @@ class SoloudAudioEngine implements AudioEngine {
     await _soloud.init(
       lowLatency: defaultTargetPlatform != TargetPlatform.android || kIsWeb,
     );
-    _soloud.setMaxActiveVoiceCount(_maxVoices);
+    _soloud
+      ..setMaxActiveVoiceCount(_maxVoices)
+      ..setGlobalVolume(masterGain);
   }
 
   @override
@@ -92,6 +105,16 @@ class SoloudAudioEngine implements AudioEngine {
       _soloud
         ..fadeVolume(handle, 0, fadeOut)
         ..scheduleStop(handle, fadeOut);
+    }
+  }
+
+  @override
+  void fadeMasterVolume(double volume, Duration over) {
+    if (!_soloud.isInitialized) return;
+    if (over == Duration.zero) {
+      _soloud.setGlobalVolume(volume);
+    } else {
+      _soloud.fadeGlobalVolume(volume, over);
     }
   }
 
