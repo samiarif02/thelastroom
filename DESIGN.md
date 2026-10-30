@@ -90,9 +90,10 @@ Rules the kit holds to (and screens must too):
 - `features/dev_catalog/catalog_entries.dart` is the one list: the catalog's pages *and* the
   golden tests (`apps/mobile/test/features/dev_catalog/goldens/`, one PNG per state, drawn with
   the real fonts). A new component added there gets a golden and a 1x/2x/reduced-motion
-  play-through test for free. Redraw: `flutter test --update-goldens test/features/dev_catalog`,
-  then look at every changed image.
-- Goldens compare within 1.5% (macOS draws them, Linux CI checks them). Grain isn't in them.
+  play-through test for free. Redraw them on Linux (`goldens/README.md`: a Docker one-liner on
+  CI's Flutter), then look at every changed image.
+- Goldens are Linux pixels: CI compares them; macOS anti-aliases glyphs differently (1.5–6% of
+  pixels), so there the tests render every state but skip the diff. Grain isn't in them.
 - An unknown route shows `WrongFloorScreen` (the error state, "Back to the lobby").
 
 ### Platform edges (06b)

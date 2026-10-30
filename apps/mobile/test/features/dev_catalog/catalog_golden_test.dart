@@ -6,9 +6,9 @@ import 'package:the_last_room/features/dev_catalog/catalog_entries.dart';
 import '../../ui/harness.dart';
 
 /// One golden per catalog state: every film-kit component's key states, settled, at a phone's
-/// 375×667, the harness's default (`flutter test --update-goldens test/features/dev_catalog` to redraw them, then look
-/// at every changed image before committing). The grain is seeded and the ambient clock is the
-/// test's fake time, so a frame is the same on every run.
+/// 375×667, the harness's default. Linux pixels, compared on Linux only; redraw them as
+/// `goldens/README.md` says, then look at every changed image before committing. The grain is
+/// seeded and the ambient clock is the test's fake time, so a frame is the same on every run.
 void main() {
   const stageKey = ValueKey('catalog-stage');
 
