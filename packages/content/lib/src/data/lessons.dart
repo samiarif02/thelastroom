@@ -215,6 +215,140 @@ const lessonShareTheCredit = Lesson(
   ),
 );
 
+const lessonNowThenNext = Lesson(
+  id: 'lesson_now_then_next',
+  title: 'Now, then, next',
+  flag: Flag.rambling,
+  flaw: 'It starts at the beginning of your life, not at what matters for this job.',
+  takeaway: '"Tell me about yourself" in three steps: what you do now, one thing from before that fits this job, and why this job is next.',
+  recall: RecallCheck(
+    prompt: 'Which is the best first line for "Tell me about yourself"?',
+    options: [
+      RecallOption(
+        id: 'recall_now_then_next_childhood',
+        text: "I grew up in a small town, and I always loved fixing people's computers.",
+      ),
+      RecallOption(
+        id: 'recall_now_then_next_now',
+        text: "I've just graduated in Information Systems, and I love user research.",
+      ),
+      RecallOption(
+        id: 'recall_now_then_next_adjectives',
+        text:
+            "I'd describe myself as curious, hard-working and a good listener.",
+      ),
+    ],
+    correctOptionId: 'recall_now_then_next_now',
+  ),
+);
+
+const lessonOwnTheGap = Lesson(
+  id: 'lesson_own_the_gap',
+  title: 'Name the gap, then close it',
+  flag: Flag.generic,
+  flaw: 'It argues with the concern instead of answering it, so the concern stays.',
+  takeaway: "Agree with the fair part of a concern, then show what you have already done about it. Don't argue, and don't give in.",
+  recall: RecallCheck(
+    prompt: 'They say others have more experience. Which reply works best?',
+    options: [
+      RecallOption(
+        id: 'recall_own_the_gap_attitude',
+        text: "Experience isn't everything; attitude matters much more than years.",
+      ),
+      RecallOption(
+        id: 'recall_own_the_gap_fair',
+        text: "That's fair. I've done both halves of this job already, on a small scale.",
+      ),
+      RecallOption(
+        id: 'recall_own_the_gap_give_in',
+        text: "I completely understand if you'd rather hire someone with more experience.",
+      ),
+    ],
+    correctOptionId: 'recall_own_the_gap_fair',
+  ),
+);
+
+const lessonTellItDontRecite = Lesson(
+  id: 'lesson_tell_it_dont_recite',
+  title: 'Tell the story, not the method',
+  flag: Flag.memorized,
+  flaw: 'Saying the steps out loud makes a real story sound learned by heart.',
+  takeaway: 'Use STAR to plan the story, then hide it: say what happened, what you did and what changed, in your own words.',
+  recall: RecallCheck(
+    prompt: 'Which opening sounds like a real story?',
+    options: [
+      RecallOption(
+        id: 'recall_tell_it_dont_recite_labels',
+        text:
+            'The situation was my internship, and my task was a ticket report.',
+      ),
+      RecallOption(
+        id: 'recall_tell_it_dont_recite_story',
+        text: 'At my internship I sent my lead a report with a wrong number in it.',
+      ),
+      RecallOption(
+        id: 'recall_tell_it_dont_recite_learning',
+        text: 'The key learning from this whole experience was attention to detail.',
+      ),
+    ],
+    correctOptionId: 'recall_tell_it_dont_recite_story',
+  ),
+);
+
+const lessonOwnYourPart = Lesson(
+  id: 'lesson_own_your_part',
+  title: 'Own your part',
+  flag: Flag.blame,
+  flaw:
+      'It may be true, but it says whose fault it was instead of what you did.',
+  takeaway: 'Name your own part in what went wrong first, in one sentence. Then say what you did about it, and leave the others out.',
+  recall: RecallCheck(
+    prompt: 'They ask about a mistake. Which line owns it?',
+    options: [
+      RecallOption(
+        id: 'recall_own_your_part_tool',
+        text: 'The export tool duplicated rows, so the numbers were wrong from the start.',
+      ),
+      RecallOption(
+        id: 'recall_own_your_part_mine',
+        text: "I didn't check the export for duplicates, so my numbers were wrong.",
+      ),
+      RecallOption(
+        id: 'recall_own_your_part_nobody',
+        text: 'Nobody had warned me about the export, and I was still very new there.',
+      ),
+    ],
+    correctOptionId: 'recall_own_your_part_mine',
+  ),
+);
+
+const lessonKeepYourStory = Lesson(
+  id: 'lesson_keep_your_story',
+  title: 'Keep your story straight',
+  flag: Flag.offQuestion,
+  flaw:
+      'Changing the story under pressure makes the first version sound untrue.',
+  takeaway: "When someone pushes back, repeat the same facts calmly and add detail. Don't soften or rewrite what happened.",
+  recall: RecallCheck(
+    prompt: '"That\'s not what you told Marcus." What do you say?',
+    options: [
+      RecallOption(
+        id: 'recall_keep_your_story_rewrite',
+        text: 'Maybe my lead caught it first, actually, and I only fixed it later on.',
+      ),
+      RecallOption(
+        id: 'recall_keep_your_story_same',
+        text: "It's the same story: my mistake, and I told my lead that afternoon.",
+      ),
+      RecallOption(
+        id: 'recall_keep_your_story_better',
+        text: "I think I just explained it better this time round, that's all.",
+      ),
+    ],
+    correctOptionId: 'recall_keep_your_story_same',
+  ),
+);
+
 /// Every lesson the campaign teaches. Each belongs to one flag; a flag can have several, so
 /// a mission can teach the version of a mistake its own lines make.
 const List<Lesson> lessons = [
@@ -226,4 +360,9 @@ const List<Lesson> lessons = [
   lessonOneStory,
   lessonPromiseTheHabit,
   lessonShareTheCredit,
+  lessonNowThenNext,
+  lessonOwnTheGap,
+  lessonTellItDontRecite,
+  lessonOwnYourPart,
+  lessonKeepYourStory,
 ];

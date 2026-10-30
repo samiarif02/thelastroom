@@ -3,6 +3,14 @@ import 'package:engine/engine.dart';
 
 /// The one tiny mission the schema tests run against. Real mission text lands in brief 04.
 const fixture = ContentBundle(
+  chapters: [
+    Chapter(
+      number: 1,
+      title: 'One',
+      missionTitles: ['Fixture'],
+      playable: true,
+    ),
+  ],
   interviewers: [
     Interviewer(
       id: 'priya',

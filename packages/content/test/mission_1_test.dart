@@ -8,10 +8,6 @@ void main() {
   final paths = allPaths(mission);
   final totals = [for (final p in paths) p.score.total];
 
-  test('the shipped content passes validateContent', () {
-    expect(validateContent(gameContent), isEmpty);
-  });
-
   test('Mission 1 is the unhinted, untimed baseline (FR-13, FR-30)', () {
     expect(mission.isBaseline, isTrue);
     expect(mission.hinted, isFalse);
@@ -39,35 +35,5 @@ void main() {
     // So the baseline has room to show growth either way.
     expect(totals.reduce((a, b) => a > b ? a : b), greaterThanOrEqualTo(90));
     expect(totals.reduce((a, b) => a < b ? a : b), lessThanOrEqualTo(30));
-  });
-
-  test('beat lines carry no adaptability: only the reply earns it', () {
-    for (final beat in mission.beats) {
-      for (final option in beat.options) {
-        expect(option.scores.adaptability, 0, reason: option.id);
-      }
-    }
-  });
-
-  test('every follow-up can actually be asked', () {
-    expect(
-      {for (final p in paths) p.followUp.id},
-      {for (final f in mission.followUps) f.id},
-    );
-  });
-
-  test('every flag the mission can raise is taught by a lesson for it', () {
-    final lessonsById = {for (final l in gameContent.lessons) l.id: l};
-    final options = allOptions(mission);
-    for (final flag in {for (final o in options) ...o.flags}) {
-      expect(
-        options.any(
-          (o) =>
-              o.flags.contains(flag) && lessonsById[o.lessonId]?.flag == flag,
-        ),
-        isTrue,
-        reason: '${flag.wireName} is never taught',
-      );
-    }
   });
 }

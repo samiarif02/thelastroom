@@ -14,7 +14,11 @@ void main() {
     bool? hinted,
     bool? timed,
     List<SceneLine>? scene,
+    Continuity? continuity,
+    List<SceneLine>? epilogue,
+    List<Chapter>? chapters,
   }) => ContentBundle(
+    chapters: chapters ?? fixture.chapters,
     interviewers: fixture.interviewers,
     lessons: fixture.lessons,
     missions: [
@@ -31,6 +35,8 @@ void main() {
         timed: timed ?? base.timed,
         isBaseline: base.isBaseline,
         skillRequirements: base.skillRequirements,
+        continuity: continuity,
+        epilogue: epilogue ?? base.epilogue,
       ),
     ],
   );
@@ -249,5 +255,179 @@ void main() {
     expect(problems(withMission(beats: beats)), [
       'o1: teaches lesson_name_your_part, a we_not_i lesson, but is not flagged we_not_i',
     ]);
+  });
+
+  test(
+    'chapters are numbered in order, and a playable one lists its missions',
+    () {
+      expect(
+        problems(
+          withMission(
+            chapters: const [
+              Chapter(
+                number: 1,
+                title: 'One',
+                missionTitles: ['Other'],
+                playable: true,
+              ),
+              Chapter(
+                number: 3,
+                title: 'Three',
+                missionTitles: ['Later'],
+                playable: false,
+              ),
+            ],
+          ),
+        ),
+        [
+          'chapter 3: chapters must be 1, 2, 3…',
+          "chapter 1: its mission titles don't match its missions",
+        ],
+      );
+    },
+  );
+
+  test('a mission must sit in a playable chapter', () {
+    expect(
+      problems(
+        withMission(
+          chapters: const [
+            Chapter(
+              number: 1,
+              title: 'One',
+              missionTitles: ['Fixture'],
+              playable: false,
+            ),
+          ],
+        ),
+      ),
+      contains('m_fixture: chapter 1 is not a playable chapter'),
+    );
+  });
+
+  test('continuity quotes an earlier mission, once per beat line', () {
+    const line = SceneLine(speakerId: 'priya', text: 'You said that.');
+    expect(
+      problems(
+        withMission(
+          continuity: const Continuity(
+            fromMissionId: 'm_fixture',
+            variants: [ContinuityVariant(sourceOptionId: 'o1', line: line)],
+          ),
+        ),
+      ),
+      contains(
+        'm_fixture: continuity must come from an earlier mission, not m_fixture',
+      ),
+    );
+  });
+
+  test('the continuity line must still fit the scene', () {
+    final mission = fixture.missions.single;
+    final bundle = ContentBundle(
+      chapters: const [
+        Chapter(
+          number: 1,
+          title: 'One',
+          missionTitles: ['Fixture', 'Next'],
+          playable: true,
+        ),
+      ],
+      interviewers: fixture.interviewers,
+      lessons: fixture.lessons,
+      missions: [
+        mission,
+        Mission(
+          id: 'm_next',
+          chapter: 1,
+          number: 2,
+          title: 'Next',
+          scene: const [
+            SceneLine(speakerId: 'priya', text: 'One.'),
+            SceneLine(speakerId: 'priya', text: 'Two.'),
+            SceneLine(speakerId: 'priya', text: 'Three.'),
+          ],
+          question: mission.question,
+          beats: mission.beats
+              .map(
+                (b) => Beat(
+                  kind: b.kind,
+                  options: [
+                    for (final o in b.options)
+                      AnswerOption(
+                        id: 'next_${o.id}',
+                        text: o.text,
+                        scores: o.scores,
+                        flags: o.flags,
+                        lessonId: o.lessonId,
+                      ),
+                  ],
+                ),
+              )
+              .toList(),
+          followUps: const [],
+          hinted: true,
+          continuity: const Continuity(
+            fromMissionId: 'm_fixture',
+            variants: [
+              ContinuityVariant(
+                sourceOptionId: 'o1',
+                line: SceneLine(speakerId: 'priya', text: 'You said that.'),
+              ),
+              ContinuityVariant(
+                sourceOptionId: 'o1',
+                line: SceneLine(speakerId: 'priya', text: 'Again.'),
+              ),
+              ContinuityVariant(
+                sourceOptionId: 'fd1',
+                line: SceneLine(speakerId: 'priya', text: 'A reply.'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    expect(
+      problems(bundle),
+      containsAll([
+        'm_next: o1 is challenged twice',
+        'm_next: fd1 is not a beat line of m_fixture',
+        'm_next: the continuity line makes 4 scene lines, at most 3',
+      ]),
+    );
+  });
+
+  test('lineFor picks the costliest line that has a challenge', () {
+    const early = SceneLine(speakerId: 'priya', text: 'Early.');
+    const late = SceneLine(speakerId: 'priya', text: 'Late.');
+    const continuity = Continuity(
+      fromMissionId: 'm_fixture',
+      variants: [
+        ContinuityVariant(sourceOptionId: 'o1', line: early),
+        ContinuityVariant(sourceOptionId: 'e2', line: late),
+      ],
+    );
+    expect(continuity.lineFor(['fd2', 'e2', 'o1']), same(late));
+    expect(continuity.lineFor(['fd2', 'o1', 'e2']), same(early));
+    expect(continuity.lineFor(['fd2']), isNull);
+  });
+
+  test('an epilogue has at most three lines, all by interviewers', () {
+    expect(
+      problems(
+        withMission(
+          epilogue: const [
+            SceneLine(speakerId: 'priya', text: 'One.'),
+            SceneLine(speakerId: 'priya', text: 'Two.'),
+            SceneLine(speakerId: 'priya', text: 'Three.'),
+            SceneLine(speakerId: 'nobody', text: 'Four.'),
+          ],
+        ),
+      ),
+      [
+        'm_fixture: has 4 epilogue lines, at most 3',
+        'm_fixture: speaker nobody is not an interviewer',
+      ],
+    );
   });
 }

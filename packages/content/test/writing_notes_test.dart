@@ -110,6 +110,17 @@ void main() {
     });
   }
 
+  test('every fact on the character sheet is used somewhere in Chapter 1', () {
+    final text = textOf.values.join(' ').toLowerCase();
+    for (final fact in player.facts) {
+      expect(
+        fact.markers.any((m) => text.contains(m.toLowerCase())),
+        isTrue,
+        reason: fact.id,
+      );
+    }
+  });
+
   test('every figure a line quotes is on the character sheet (note 3)', () {
     final figure = RegExp(r'\d[\d,.]*%?');
     for (final MapEntry(key: id, value: text) in textOf.entries) {
