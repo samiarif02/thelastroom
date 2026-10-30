@@ -58,8 +58,8 @@ void main() {
 
   testWidgets('shows the defaults and toggles sound off', (tester) async {
     await pump(tester, const AudioSettingsSection());
-    expect(find.text('35%'), findsOneWidget);
-    expect(find.text('60%'), findsOneWidget);
+    expect(find.text('50%'), findsOneWidget);
+    expect(find.text('80%'), findsOneWidget);
     expect(find.text('ON'), findsOneWidget);
 
     await tester.tap(find.text(AudioSettingsSection.masterLabel));
@@ -83,9 +83,9 @@ void main() {
       tester.getSemantics(find.bySemanticsLabel('Effects')),
       matchesSemantics(
         label: 'Effects',
-        value: '60%',
-        increasedValue: '70%',
-        decreasedValue: '50%',
+        value: '80%',
+        increasedValue: '90%',
+        decreasedValue: '70%',
         isSlider: true,
         isEnabled: true,
         hasEnabledState: true,

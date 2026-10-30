@@ -36,6 +36,9 @@ class AudioService {
   /// Settings changes and master on/off glide rather than jump.
   static const Duration settingsFade = Duration(milliseconds: 200);
 
+  /// Another app asked us to duck (a notification sound, navigation): everything drops to this.
+  static const double interruptionDuckLevel = 0.25;
+
   final ValueNotifier<AudioStatus> _status = ValueNotifier(AudioStatus.idle);
   AudioStatus get status => _status.value;
 
@@ -48,7 +51,10 @@ class AudioService {
   bool _ducked = false;
   bool get isDucked => _ducked;
 
-  bool _suspended = false;
+  // Silent while the app is hidden, or while another app holds the audio (a call): two separate
+  // reasons, so ending one doesn't bring the sound back while the other still holds.
+  bool _hidden = false;
+  bool _interrupted = false;
 
   // The loop the scene wants, kept even while muted or not started, so it can come back.
   Cue? _loop;
@@ -76,7 +82,8 @@ class AudioService {
     }
   }
 
-  bool get _canPlay => _status.value == AudioStatus.ready && !_suspended;
+  bool get _canPlay =>
+      _status.value == AudioStatus.ready && !_hidden && !_interrupted;
 
   /// Plays a one-shot [cue] at its bus volume times [gain], at [speed] (pitch follows). Returns
   /// the voice, or null when nothing plays (sound off, not started, silent).
@@ -139,14 +146,38 @@ class AudioService {
   /// The app went to the background or lost the screen: fade to silence, but remember the
   /// room so [resume] brings it back.
   void suspend() {
-    if (_suspended) return;
-    _suspended = true;
+    if (_hidden) return;
+    _hidden = true;
     _fadeOutLoop();
   }
 
   void resume() {
-    if (!_suspended) return;
-    _suspended = false;
+    if (!_hidden) return;
+    _hidden = false;
+    _restartLoop(fadeIn: ambienceCrossfade);
+  }
+
+  /// Another app took the audio (platform audio focus / an iOS interruption). [duck] lowers
+  /// everything under it (a notification sound); otherwise the game goes quiet, like [suspend].
+  void interruptionBegan({required bool duck}) {
+    if (duck) {
+      if (_status.value == AudioStatus.ready) {
+        _engine.fadeMasterVolume(interruptionDuckLevel, duckFade);
+      }
+      return;
+    }
+    if (_interrupted) return;
+    _interrupted = true;
+    _fadeOutLoop();
+  }
+
+  /// The other app let the audio go: full volume again, and the room comes back.
+  void interruptionEnded() {
+    if (_status.value == AudioStatus.ready) {
+      _engine.fadeMasterVolume(1, unduckFade);
+    }
+    if (!_interrupted) return;
+    _interrupted = false;
     _restartLoop(fadeIn: ambienceCrossfade);
   }
 

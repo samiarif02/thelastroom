@@ -6,8 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../app/providers.dart';
 import 'cue.dart';
 
-/// The player's sound settings. Defaults (owner, D5): on, but quiet, so a reviewer hears it on
-/// first run without being startled.
+/// The player's sound settings. Defaults (owner, D5): on, and clearly audible on a phone speaker
+/// at a normal media volume. 0.6 / 0.35 measured about 20 dB under target on the owner's realme 8
+/// (2026-10-30), so they went up; `gain_staging_test.dart` holds the floor.
 class AudioSettings {
   const AudioSettings({
     this.enabled = true,
@@ -15,8 +16,8 @@ class AudioSettings {
     this.effectsVolume = defaultEffectsVolume,
   });
 
-  static const double defaultAmbienceVolume = 0.35;
-  static const double defaultEffectsVolume = 0.6;
+  static const double defaultAmbienceVolume = 0.5;
+  static const double defaultEffectsVolume = 0.8;
 
   /// The master switch: off mutes everything.
   final bool enabled;

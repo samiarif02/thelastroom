@@ -27,6 +27,10 @@ enum Cue {
   elevatorChime('elevator_chime'),
   elevatorDoorsOpen('elevator_doors_open'),
 
+  // Title, intro and tower.
+  pageTurn('page_turn'),
+  roomEnter('room_enter'),
+
   // Room tone, one loop per chapter, and the Recall Room's pad.
   ambienceLobby('ambience_lobby', bus: CueBus.ambience, loops: true),
   ambienceCorridor('ambience_corridor', bus: CueBus.ambience, loops: true),

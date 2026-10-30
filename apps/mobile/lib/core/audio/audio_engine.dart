@@ -29,4 +29,7 @@ abstract interface class AudioEngine {
 
   /// Stops every playing voice.
   void stopAll();
+
+  /// Glides the gain applied to everything (an interruption ducking the game) over [over].
+  void fadeMasterVolume(double volume, Duration over);
 }

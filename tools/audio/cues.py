@@ -2,8 +2,10 @@
 
 Each recipe is registered with `@cue(name, bus, lufs, describe)`. `name` is the asset's base name
 (`apps/mobile/assets/audio/{ogg,m4a}/<name>.*`) and must match `Cue.asset` in
-`apps/mobile/lib/core/audio/cue.dart`. Loudness targets follow the spec (effects about -16 LUFS,
-ambience about -24 LUFS); the quiet repeating ticks sit lower on purpose ("soft, muted").
+`apps/mobile/lib/core/audio/cue.dart`. Loudness targets follow the spec (effects about -16 LUFS);
+room tone sits at -20 LUFS and the typing ticks are pushed to the -1 dBTP ceiling, because on a
+phone speaker at the default bus volumes anything quieter was inaudible (owner, realme 8). The
+repeating ticks stay "soft, muted" through their bus volume and sound, not by being quiet files.
 """
 
 import math
@@ -45,9 +47,9 @@ EFFECTS = "effects"
 AMBIENCE = "ambience"
 
 EFFECT_LUFS = -16.0
-AMBIENCE_LUFS = -24.0
+AMBIENCE_LUFS = -20.0
 STING_LUFS = -20.0
-TICK_LUFS = -27.0
+TICK_LUFS = -20.0
 
 LOOP_SECONDS = 16.0
 
@@ -280,6 +282,32 @@ def elevator_doors_open(r):
     return reverb(out, r, seconds=0.8, wet=0.2, brightness=0.7, tail=False)
 
 
+# --- title, intro and tower ---------------------------------------------------------------------
+
+
+@cue("page_turn", EFFECTS, -20.0, "Intro card turns: a soft paper flick on a short breath of air")
+def page_turn(r):
+    s = 0.5
+    flick_s = 0.18
+    out = silence(s)
+    flick = sweep_filter(white(r, flick_s), "bandpass", 2600, 5200, q=0.8) * swell(flick_s, 0.03, 0.12, curve=1.4)
+    place(out, flick * 0.55, 0)
+    air = sweep_filter(white(r, 0.4), "bandpass", 1100, 380, q=0.8) * swell(0.4, 0.08, 0.28)
+    place(out, air * 0.5, 0.04)
+    return reverb(out, r, seconds=0.4, wet=0.12, tail=False)
+
+
+@cue("room_enter", EFFECTS, -18.0, "Entering a room: a door latch, then the room's air opens around you")
+def room_enter(r):
+    s = 1.1
+    out = silence(s)
+    place(out, wood_tap(r, 0.08, [(620, 0.6, 0.012), (1500, 0.3, 0.006)], click_cut=2500) * 0.5, 0)
+    place(out, thump(r, 0.2, 120, 80, 0.035, noise_cut=900, noise_amount=0.4) * 0.35, 0.05)
+    whoosh = sweep_filter(white(r, 0.9), "bandpass", 500, 1600, q=0.8) * swell(0.9, 0.25, 0.55)
+    place(out, whoosh * 0.45, 0.12)
+    return reverb(out, r, seconds=0.9, wet=0.22, brightness=0.7, tail=False)
+
+
 # --- room ambience (seamless loops) --------------------------------------------------------------
 
 
@@ -375,12 +403,12 @@ def question_lands(r):
     return out
 
 
-@cue("timer_pulse", EFFECTS, -24.0, "Soft timer: one quiet heartbeat-like pulse (timed missions only)")
+@cue("timer_pulse", EFFECTS, -20.0, "Soft timer: one quiet heartbeat-like pulse (timed missions only)")
 def timer_pulse(r):
     return heartbeat(r)[: samples(0.45)]
 
 
-@cue("timer_tick", EFFECTS, -24.0, "Soft timer, last 10 seconds: a clock tick (timed missions only)")
+@cue("timer_tick", EFFECTS, -20.0, "Soft timer, last 10 seconds: a clock tick (timed missions only)")
 def timer_tick(r):
     s = 0.07
     return wood_tap(r, s, [(2100, 0.5, 0.009), (4700, 0.3, 0.004)], click_cut=7000)
@@ -476,7 +504,7 @@ def stamp(r):
     return reverb(saturate(body + clack, 1.3), r, seconds=0.4, wet=0.12, tail=False)
 
 
-@cue("count_tick", EFFECTS, -26.0, "Score count-up: a small tick per step")
+@cue("count_tick", EFFECTS, -20.0, "Score count-up: a small tick per step")
 def count_tick(r):
     s = 0.04
     return wood_tap(r, s, [(2600, 0.5, 0.005), (5200, 0.15, 0.002)], click_cut=8000)

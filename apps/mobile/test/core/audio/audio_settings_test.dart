@@ -22,10 +22,10 @@ void main() {
   test('defaults: on, ambience 35%, effects 60%', () {
     const s = AudioSettings();
     expect(s.enabled, isTrue);
-    expect(s.ambienceVolume, 0.35);
-    expect(s.effectsVolume, 0.6);
-    expect(s.volumeFor(CueBus.effects), 0.6);
-    expect(s.volumeFor(CueBus.ambience), 0.35);
+    expect(s.ambienceVolume, 0.5);
+    expect(s.effectsVolume, 0.8);
+    expect(s.volumeFor(CueBus.effects), 0.8);
+    expect(s.volumeFor(CueBus.ambience), 0.5);
   });
 
   test('master off makes every bus silent', () {

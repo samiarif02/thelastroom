@@ -27,6 +27,7 @@ class FakeAudioEngine implements AudioEngine {
   final Set<Cue> loaded = {};
   final List<Played> played = [];
   int stopAllCalls = 0;
+  double masterVolume = 1;
   int _next = 1;
 
   /// What's sounding now.
@@ -68,6 +69,9 @@ class FakeAudioEngine implements AudioEngine {
   @override
   void stop(AudioVoice voice, {Duration fadeOut = Duration.zero}) =>
       _find(voice).stopped = true;
+
+  @override
+  void fadeMasterVolume(double volume, Duration over) => masterVolume = volume;
 
   @override
   void stopAll() {

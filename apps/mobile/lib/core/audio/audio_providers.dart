@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import 'audio_engine.dart';
+import 'audio_focus.dart';
 import 'audio_game_sounds.dart';
 import 'audio_service.dart';
 import 'audio_settings.dart';
@@ -48,7 +49,15 @@ final audioGameSoundsProvider = Provider<GameSounds>((ref) {
 /// (until then the game is silent, with no error and no network request).
 void startAudio(ProviderContainer container, {bool waitForTap = kIsWeb}) {
   final audio = container.read(audioServiceProvider);
-  void preload() => unawaited(audio.preload());
+  final log = container.read(logProvider);
+  // The session is set before the engine opens the device (iOS needs its category first).
+  // The web has no session to configure.
+  Future<void> start() async {
+    if (!kIsWeb) await followAudioFocus(audio, log);
+    await audio.preload();
+  }
+
+  void preload() => unawaited(start());
   if (waitForTap) {
     _onFirstPointerDown(preload);
   } else {

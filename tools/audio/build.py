@@ -86,7 +86,8 @@ def render(spec):
     out = BUILD / f"{spec['name']}.wav"
     write_wav(out, y, seed_for(spec["name"]))
     raw.unlink()
-    return out, integrated_lufs(out), bool(limited), len(y) / SR
+    peak_dbtp = 20 * np.log10(true_peak(y) + 1e-12)
+    return out, integrated_lufs(out), peak_dbtp, bool(limited), len(y) / SR
 
 
 def encode(spec, wav):
@@ -124,7 +125,8 @@ def write_credits(rows):
         "Edits, for every file: rendered mono 44.1 kHz, loudness-normalised to the target below",
         "(EBU R128 integrated, ffmpeg `ebur128`) with a -1 dBTP true-peak ceiling, then encoded to",
         "OGG Vorbis (`oggenc`) and M4A AAC (`ffmpeg`). A target marked *peak-limited* hit the",
-        "ceiling first, so it sits a little under its target.",
+        "ceiling first, so it sits a little under its target. `peak` is the file's true peak; the",
+        "app's gain test (`gain_staging_test.dart`) reads it and the loudness from this table.",
         "",
         f"Loops (`loop`) are exactly {LOOP_SECONDS:g} s and periodic: they repeat with no seam.",
         "",
@@ -135,6 +137,7 @@ def write_credits(rows):
         loudness = f"{row['lufs']:.1f} LUFS"
         if row["limited"]:
             loudness += " (peak-limited)"
+        loudness += f", peak {row['peak_dbtp']:.1f} dBTP"
         kind = "loop" if row["loop"] else f"{row['seconds']:.2f} s"
         lines.append(
             f"| `{row['name']}.ogg`, `{row['name']}.m4a` | `{row['name']}` | {row['describe']} "
@@ -153,10 +156,10 @@ def main(only):
     for spec in CUES:
         if only and spec["name"] not in only:
             continue
-        wav, lufs, limited, seconds = render(spec)
+        wav, lufs, peak_dbtp, limited, seconds = render(spec)
         ogg, m4a = encode(spec, wav)
         report[spec["name"]] = {
-            "lufs": lufs, "limited": limited, "seconds": seconds,
+            "lufs": lufs, "peak_dbtp": peak_dbtp, "limited": limited, "seconds": seconds,
             "ogg_bytes": ogg.stat().st_size, "m4a_bytes": m4a.stat().st_size,
         }
         print(f"{spec['name']:22} {seconds:5.2f}s {lufs:6.1f} LUFS{' limited' if limited else ''}"
