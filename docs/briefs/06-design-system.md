@@ -1,8 +1,9 @@
 # Brief 06: Design system + cinematic layer, The Boardroom (wave 2, worktree w1)
 
 Written by the lead session, 2026-10-30 (Fri). Worktree `../thelastroom-w1`, branch
-`feat/06-design-system`. **Timebox: PR up by Sat 31 Oct, 10:00.** This is the critical path:
-brief 10 (the mission player) builds on it.
+`feat/06-design-system`. **Two PRs** (owner, 2026-10-30): **06a merged by Sat 31 Oct morning**
+(PR up by **Fri 30 Oct, 22:00**), then 06b. 06a is the critical path: brief 10 (the mission
+player) starts on it straight away.
 
 ## Goal
 
@@ -13,6 +14,34 @@ state with goldens, and no Material default or runtime fetch is left anywhere.
 Read first: `DESIGN.md` "Chosen direction: C, The Boardroom" (**that section is your spec**) and
 "C · The Boardroom", brief §9, `docs/rules/components.md`, `docs/rules/code-quality.md`,
 ADR 0005, and `apps/mobile/lib/features/dev_directions/` (the prototype you're promoting).
+
+## Two PRs: 06a first, then 06b (owner, 2026-10-30)
+
+So Mission 1 is playable by Sunday, not Monday, this brief ships in two PRs. Items below refer
+to "In scope".
+
+**06a: the foundation brief 10 builds on** (this branch, PR up by Fri 22:00, small):
+- Item 1 (tokens, theme, AA tests) and item 2 (delete the losing fonts and direction files;
+  keep `features/dev_directions/` until 06b's catalog replaces it).
+- From item 3, the **core film kit** the mission player needs, each with widget tests (no
+  goldens yet): grain + vignette, letterbox, typewriter subtitle with `onCharacter`, camera rig
+  (dolly push + black-frame hard cut), spotlight / banker's lamp, rim-lit silhouette with idle,
+  answer card (all five states), chapter title card, dossier with stamped scores, wax seal and
+  pen note.
+- Item 6 (the Boardroom title card as home) and the "THROU / GH" fix from item 7.
+- A **public API note** in the PR: each component's constructor and callbacks, so brief 10 can
+  start before reading the code.
+
+**06b: the rest** (a new branch `feat/06b-catalog-platform` from `main` after 06a merges; the
+lead creates it): item 4 (cinematic loading/empty/offline/error states), item 5 (`/dev/catalog`,
+goldens, reduced-motion and 2x toggles; then delete `features/dev_directions/`), the
+edge-to-edge part of item 7, item 8 (no runtime fetch on the web), item 9 (icons, launch
+screens), the profile-build jank check. Components brief 10 is already using must keep their
+public API; additions only.
+
+Acceptance: 06a meets the criteria below that cover its items (fonts, AA, title never breaks a
+word, zero setup, gates, compressed screenshots of the title card and the components); 06b
+meets the rest.
 
 ## Hard rules
 
@@ -106,6 +135,7 @@ None new. The title card fires nothing until the intro exists (brief 10).
 ## How to work
 
 - Never edit `docs/HANDOFF.md`. Keep `docs/status/06.md`: done, half-done, next.
-- Phone: the **OnePlus 9** (`adb -s 96239c4a`) is yours this wave; the realme is the lead's.
-  Four workers share this Mac: one Gradle build at a time where you can.
+- Phone: the **OnePlus 9** (`adb -s 96239c4a`) is yours, and **only yours**: other workers test
+  with unit tests and Chrome; the realme is the lead's for reviews. The owner runs two workers
+  at a time so the Mac stays responsive.
 - Own branch, local-review, PR (not a draft), CI green, never merge. End with the PR link.
