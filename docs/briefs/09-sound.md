@@ -1,7 +1,7 @@
 # Brief 09: Sound design: audio engine, cues, sound library (wave 2, worktree w4)
 
 Written by the lead session, 2026-10-30 (Fri). Worktree `../thelastroom-w4`, branch
-`feat/09-sound`. **Timebox: PR up by Sat 31 Oct, evening.**
+`feat/09-sound`. **Timebox: PR up by Sat 31 Oct, afternoon** (so it merges right after 10).
 
 ## Goal
 
@@ -13,15 +13,16 @@ Owner decision (2026-10-30): **D5 is decided: sound ships in v1**, on by default
 (effects 60 %, ambience 35 %), per `docs/sound-design.md`. That replaces "off by default" in
 brief §9.
 
-## Order change: brief 10 lands before you (owner, 2026-10-30)
+## Running in parallel with brief 10 (owner, 2026-10-30)
 
-To keep Mission 1 playable by Sunday, the mission player (10) is built before this brief. It
-calls sound through a small interface it creates, **`apps/mobile/lib/core/audio/game_sounds.dart`**:
-`abstract interface class GameSounds` (typing character, question lands, choice, lock-in,
-follow-up challenge, trust up/down, dossier, stamp, results, chapter card, ambience per chapter),
-a no-op implementation and its provider. **Your job includes implementing `GameSounds` on top of
-`AudioService`** and overriding that provider (one line), so the player gains sound without
-editing a single screen. Don't rename its methods; add to it if a cue needs a new hook.
+The owner starts you **now, as a third worker, alongside brief 10 (mission player, w2) and 06b
+(w1)**, so Mission 1 has sound when 10 lands. The contract between you and 10 is
+**`apps/mobile/lib/core/audio/game_sounds.dart`**, already on this branch: the lead wrote it, and
+the identical file is on 10's branch (git merges identical additions cleanly). 10 calls
+`gameSoundsProvider`; **you implement `GameSounds` on `AudioService` and override that provider**
+(one line), so the player gains sound without editing a screen. Don't change its signatures
+(ask the lead; additions are fine, with a no-op in `SilentGameSounds`). Test your
+implementation against the interface with a fake engine; you don't need 10's screens.
 
 ## Hard rules
 
