@@ -148,15 +148,27 @@ class SilhouettePainter extends CustomPainter {
         SilhouetteFigure.rim(head, side: lightFrom, width: _rimWidth),
         rimPaint,
       )
-      ..drawPath(figure.headLines(), detailPaint)
-      ..drawCircle(
+      ..drawPath(figure.headLines(), detailPaint);
+    if (catchesLight(figure, lightFrom)) {
+      canvas.drawCircle(
         figure.glint,
-        1.3,
+        _glintRadius,
         Paint()..color = grade.key.withValues(alpha: light),
-      )
+      );
+    }
+    canvas
       ..restore()
       ..restore();
   }
+
+  static const double _glintRadius = 1.3;
+
+  /// Whether [figure]'s glint (an earring, a lens) is on the side the lamp is on. On the far
+  /// side it would float in the dark beside the head: after the push-in it read as a lone
+  /// bright dot next to the subtitle (owner's phone review, 2026-10-30). A catch-light can only
+  /// be where the light falls.
+  static bool catchesLight(SilhouetteFigure figure, double lightFrom) =>
+      (figure.glint.dx - figure.neck.dx) * lightFrom > 0;
 
   @override
   bool shouldRepaint(SilhouettePainter oldDelegate) =>
