@@ -1,0 +1,29 @@
+/// The film kit: The Boardroom's reusable components (brief 06). Screens import this one file.
+library;
+
+export 'camera/camera_rig.dart';
+export 'camera/camera_shot.dart';
+export 'camera/hard_cut.dart';
+export 'choice/answer_card.dart';
+export 'figure/interviewer_silhouette.dart';
+export 'figure/silhouette_figure.dart';
+export 'film/ambient_clock.dart';
+export 'film/cue.dart';
+export 'film/film_overlay.dart';
+export 'film/letterbox.dart';
+export 'film/timeline.dart';
+export 'haptics.dart';
+export 'light/bankers_lamp.dart';
+export 'light/bokeh.dart';
+export 'light/dust.dart';
+export 'light/flicker.dart';
+export 'light/spotlight.dart';
+export 'ornament/brass.dart';
+export 'paper/dossier.dart';
+export 'paper/pen.dart';
+export 'paper/stamp_in.dart';
+export 'paper/wax_seal.dart';
+export 'subtitle/typewriter_subtitle.dart';
+export 'subtitle/typewriter_text.dart';
+export 'title/chapter_title_card.dart';
+export 'title/tracked_title.dart';
