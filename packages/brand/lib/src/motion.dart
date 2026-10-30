@@ -68,8 +68,8 @@ abstract final class BrandMotion {
 
 /// Film stock: how much grain and vignette lie over every frame (brief §9: very subtle).
 abstract final class BrandFilm {
-  /// Grain opacity, 0–1. Medium grain for the Boardroom.
-  static const double grain = 0.09;
+  /// Grain opacity, 0–1. Daylight wants only a whisper of it.
+  static const double grain = 0.035;
 
   /// How far the vignette reaches in, 0–1.
   static const double vignette = 0.65;

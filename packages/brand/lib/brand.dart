@@ -1,6 +1,7 @@
 /// The Last Room's design tokens and theme. See DESIGN.md.
 library;
 
+export 'src/cast.dart';
 export 'src/colors.dart';
 export 'src/contrast.dart';
 export 'src/layout.dart';

@@ -9,7 +9,6 @@ import 'package:the_last_room/features/mission/scene/mission_set.dart';
 import 'package:the_last_room/features/mission/widgets/trust_meter.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
-import '../../ui/harness.dart';
 import 'mission_harness.dart';
 
 /// The owner's three fixes from the 06a phone review (2026-10-30), brief 10.
@@ -116,56 +115,9 @@ void main() {
     });
   });
 
-  group('2. no stray rim-light dot', () {
-    RenderObject paintOf(WidgetTester tester) => tester.renderObject(
-      find.descendant(
-        of: find.byType(InterviewerSilhouette),
-        matching: find.byType(CustomPaint),
-      ),
-    );
-
-    testWidgets(
-      'lit from the left, Priya\'s glint (on her right) is not drawn',
-      (tester) async {
-        await pumpKit(
-          tester,
-          Center(
-            child: SizedBox(
-              width: 200,
-              child: InterviewerSilhouette(figure: SilhouetteFigure.priya),
-            ),
-          ),
-        );
-        expect(paintOf(tester), isNot(paints..circle()));
-      },
-    );
-
-    testWidgets('lit from her side, the glint catches the light', (
-      tester,
-    ) async {
-      await pumpKit(
-        tester,
-        Center(
-          child: SizedBox(
-            width: 200,
-            child: InterviewerSilhouette(
-              figure: SilhouetteFigure.priya,
-              lightFrom: 1,
-            ),
-          ),
-        ),
-      );
-      expect(paintOf(tester), paints..circle());
-    });
-
-    test('the rule, for every figure', () {
-      for (final figure in SilhouetteFigure.byId.values) {
-        final onRight = figure.glint.dx > figure.neck.dx;
-        expect(SilhouettePainter.catchesLight(figure, 1), onRight);
-        expect(SilhouettePainter.catchesLight(figure, -1), !onRight);
-      }
-    });
-  });
+  // 2. "No stray rim-light dot" was the silhouette's (its glint floated in the dark); the
+  // friendly interviewer that replaced it (brief 16) has no dark to float in. Its sparkle
+  // is on the lit side by construction (`FriendlyFigure.priya.accessories`).
 
   group('3. edge to edge', () {
     testWidgets('transparent bars, light icons, edge-to-edge mode', (
@@ -196,8 +148,8 @@ void main() {
       expect(region.value, EdgeToEdge.style);
       expect(region.value.statusBarColor!.a, 0);
       expect(region.value.systemNavigationBarColor!.a, 0);
-      expect(region.value.statusBarIconBrightness, Brightness.light);
-      expect(region.value.systemNavigationBarIconBrightness, Brightness.light);
+      expect(region.value.statusBarIconBrightness, Brightness.dark);
+      expect(region.value.systemNavigationBarIconBrightness, Brightness.dark);
     });
 
     testWidgets(

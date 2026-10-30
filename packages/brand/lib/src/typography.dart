@@ -18,7 +18,7 @@ abstract final class BrandFonts {
 /// read. Colours are the default use; components re-colour a style from the grade or the paper
 /// (`style.copyWith(color: grade.key)`), always to an AA-tested pair.
 abstract final class BrandType {
-  /// "CHAPTER ONE" and "NORTHSTAR LABS" above a title: tracked sans caps in brass.
+  /// "CHAPTER ONE" and "NORTHSTAR LABS" above a title: tracked sans caps in the accent.
   static const TextStyle eyebrow = TextStyle(
     fontFamily: BrandFonts.sans,
     package: BrandFonts.package,
@@ -26,7 +26,7 @@ abstract final class BrandType {
     height: 1.4,
     letterSpacing: 4.2,
     fontWeight: FontWeight.w600,
-    color: _brass,
+    color: _accent,
   );
 
   /// The chapter title card: serif caps, tracked wide. Set in capitals by the caller.
@@ -79,7 +79,7 @@ abstract final class BrandType {
     letterSpacing: 2.4,
     fontWeight: FontWeight.w600,
     fontFeatures: [FontFeature.enable('smcp')],
-    color: _brass,
+    color: _accent,
   );
 
   /// Answer card text.
@@ -110,7 +110,7 @@ abstract final class BrandType {
     fontSize: 19,
     height: 1.2,
     fontWeight: FontWeight.w500,
-    color: _brass,
+    color: _accent,
   );
 
   /// Scores: tabular lining figures, so digits don't jitter while they tick. Ink on paper.
@@ -162,6 +162,6 @@ abstract final class BrandType {
     note,
   ];
 
-  // The lobby grade's key: the default brass before a screen applies its own grade.
-  static const Color _brass = ChapterGrade.lobbyKey;
+  // The lobby grade's key: the default accent before a screen applies its own grade.
+  static const Color _accent = ChapterGrade.lobbyKey;
 }

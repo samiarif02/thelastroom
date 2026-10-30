@@ -16,9 +16,8 @@ class TheLastRoomApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'The Last Room',
       debugShowCheckedModeBanner: false,
-      theme: BrandTheme.dark(),
-      darkTheme: BrandTheme.dark(),
-      themeMode: ThemeMode.dark,
+      theme: BrandTheme.light(),
+      themeMode: ThemeMode.light,
       color: BrandColors.void_,
       routerConfig: ref.watch(routerProvider),
       // Screens are built without Scaffold/Material (no stock look), so the brand body style
@@ -41,21 +40,23 @@ class TheLastRoomApp extends ConsumerWidget {
 }
 
 /// Every frame is shot full-bleed: the scene draws under the status and navigation bars, which
-/// are transparent with light icons (owner's phone review, 2026-10-30: no flat black bands).
+/// are transparent with dark icons on the light look (owner's phone review, 2026-10-30: no
+/// flat bands).
 /// Screens keep their content clear of the bars with the view padding (`SafeArea`).
 class EdgeToEdge extends StatefulWidget {
   const EdgeToEdge({super.key, required this.child});
 
   final Widget child;
 
-  /// Transparent bars, light icons (dark status bar content on iOS means light text).
+  /// Transparent bars, dark icons over the cream (on iOS `statusBarBrightness` names the
+  /// background: light).
   static const SystemUiOverlayStyle style = SystemUiOverlayStyle(
     statusBarColor: BrandColors.clear,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
     systemNavigationBarColor: BrandColors.clear,
     systemNavigationBarDividerColor: BrandColors.clear,
-    systemNavigationBarIconBrightness: Brightness.light,
+    systemNavigationBarIconBrightness: Brightness.dark,
     systemNavigationBarContrastEnforced: false,
     systemStatusBarContrastEnforced: false,
   );

@@ -3,9 +3,11 @@
 > **The bar:** someone should screenshot it because it looks like a film, not like an app. If a
 > screen could belong to any other quiz app, it isn't done. (Brief §9)
 
-This is the design direction from the brief. The owner chose **C, The Boardroom**
-(2026-10-30); brief 06a made its tokens the real ones in `packages/brand` and built the film kit
-in `apps/mobile/lib/ui/` (see "The film kit" below).
+This is the design direction from the brief. The look is **Morning Office** (owner's pick,
+2026-10-30, brief 16; see "Chosen direction"): bright, warm and friendly, with an illustrated
+interviewer. It replaced **C, The Boardroom** (chosen earlier the same day), whose film kit
+(brief 06a, `apps/mobile/lib/ui/`) and every animation stay; only the palette, the set and the
+interviewer changed.
 
 ## The big idea: the building
 
@@ -24,12 +26,12 @@ the top.**
 | Technique | Where | Flutter approach |
 | --- | --- | --- |
 | Letterbox bars in for the scene, out for the choice phase | Mission scenes | Animated bars; the scene scales slightly (Ken Burns) |
-| Spotlight on the interviewer, a slow flicker, dust in the light | Every scene | Radial gradient + CustomPainter particles, pre-composited |
+| A pool of sunlight on the interviewer, sun shafts through the glass | Every scene | Radial gradient + CustomPainter, pre-composited |
 | Film grain + vignette, very subtle | Global overlay | Fragment shader or tiled noise behind a `RepaintBoundary` |
 | Camera cuts: wide → close-up on the question; over-the-shoulder for the follow-up | Mission flow | Hero + scale/translate; depth-of-field blur on the background layer only |
 | Subtitle dialogue: typewriter reveal, speaker's name in small caps | All dialogue | Custom text animation; tap to complete |
 | Chapter title cards ("CHAPTER ONE — GET THROUGH THE DOOR") | Chapter start | Full-screen serif, slow fade and tracking-in |
-| A colour grade per chapter | Theme | `ChapterGrade`: Ch1 warm amber lobby, Ch2 cold steel blue, Ch3 oxblood and gold; the whole UI re-tints |
+| A colour grade per chapter | Theme | `ChapterGrade`: Ch1 leaf green, Ch2 sky blue, Ch3 raspberry (Morning Office); the whole UI re-tints |
 | Parallax: background, desk, interviewer on 3 layers | Scenes, tower | `sensors_plus` tilt (pointer on web); off under reduced motion |
 | Trust meter as a heartbeat line; timer as the light dimming | Answer phase | CustomPainter; numbers only under 10 s |
 | Debrief as a candidate dossier: a file slides onto the desk, scores stamped, red-pen notes | Debrief | Layered cards, stamp animation, haptic thud |
@@ -39,13 +41,14 @@ the top.**
 
 | Token group | Where | Status |
 | --- | --- | --- |
-| Colour: void, surface, walnut, line, cream text, paper/ink, fountain-pen red, banker's-lamp glass | `packages/brand/lib/src/colors.dart` (`BrandColors`) | **Final** (06a), every text pair AA-tested |
-| Chapter grades: key, shadow, tint per chapter | `ChapterGrade` | **Final** (06a) |
+| Colour: void (lightest), cream surface, white raised, line, charcoal text, paper/ink, pen red, leaf | `packages/brand/lib/src/colors.dart` (`BrandColors`) | **Final** (16, Morning Office), every text pair AA-tested, text over colour too |
+| Chapter grades: key, shadow, tint per chapter (green → blue → raspberry) | `ChapterGrade` | **Final** (16) |
 | Type: Cormorant Garamond + Manrope, small-caps speaker, tabular lining figures | `typography.dart` (`BrandFonts`, `BrandType`) | **Final** (06a), bundled |
 | Spacing, radii, 44 pt targets | `layout.dart` | Initial scale |
 | Motion: dolly 2.2 s, hard cut 1/24 s, letterbox, typewriter, title card, dossier, curves | `motion.dart` (`BrandMotion`) | **Final** (06a) |
-| Film stock: grain 9%, vignette 0.65 | `motion.dart` (`BrandFilm`) | **Final** (06a) |
-| Theme: no ripple, no stock transitions, Manrope for anything Material | `theme.dart` (`BrandTheme`) | Safety net in place |
+| Film stock: grain 3.5% (daylight), vignette 0.65 | `motion.dart` (`BrandFilm`) | **Final** (16) |
+| Cast: skin, hair, clothes for Priya, Marcus, Lena | `cast.dart` (`BrandCast`) | **Final** (16), decorative |
+| Theme: light, no ripple, no stock transitions, Manrope for anything Material | `theme.dart` (`BrandTheme.light`) | Safety net in place |
 
 **06b added:** cinematic states, `/dev/catalog` with goldens, the platform edges and a web
 build with no network request (sections below). **Still to do:** the tower and elevator art
@@ -58,17 +61,19 @@ direction (13); edge to edge on Android (moved to brief 10).
 | `AmbientClock`, `FilmOverlay` | One free-running clock for grain, flicker and breathing; grain + elliptical vignette | — |
 | `Letterbox`, `AnimatedLetterbox` | 13% cinema bars, driven by `t` or by `shown` | `onSettled` |
 | `CameraRig`, `DollyCamera`, `CameraShot`, `CameraLayer` | Layered set framed wide → close; parallax from per-layer close-ups; 2.2 s dolly push | `onPushStart`, `onPushEnd` |
-| `HardCut` | One black frame when `shot` changes (the follow-up) | `onCut` |
-| `Spotlight`, `BankersLamp`, `Bokeh`, `Dust`, `lampFlicker` | The lamp's pool with dust, the green-shaded lamp, the city out of focus | — |
-| `InterviewerSilhouette`, `SilhouetteFigure.priya/.marcus` | D2: rim-lit silhouettes, idle = breath, slow head turn, rim flicker | — |
-| `BoardroomSet.layers(...)` | The room in three parallax planes, wide/close/tight framings | — |
-| `TypewriterSubtitle`, `TypewriterController` | Speaker in small caps, line typed at 30 ms/char, tap or controller completes | `onCharacter(char, index)`, `onComplete` |
+| `HardCut` | One frame of void (a cream blink) when `shot` changes (the follow-up) | `onCut` |
+| `Spotlight`, `BankersLamp`, `Bokeh`, `Dust`, `lampFlicker` | The pool of sun (dust off by default), the desk mug (`BankersLamp` keeps its name; cold = offline), soft bokeh | — |
+| `InterviewerSilhouette`, `SilhouetteFigure.priya/.marcus/.lena` | The scene's handle on an interviewer: draws the `FriendlyInterviewer` (names kept from the silhouettes the mission uses) | `expression` |
+| `BoardroomSet.layers(...)` | The office in three parallax planes, wide/close/tight framings (name kept) | `expression` |
+| `TypewriterSubtitle`, `TypewriterController`, `SpeechPanel` | Speaker in small caps, line typed at 30 ms/char on a soft speech panel (AA over her jacket), tap or controller completes | `onCharacter(char, index)`, `onComplete` |
 | `AnswerCard`, `AnswerCardState` | Engraved plaque: idle, focused, selected, locked, disabled | `onTap` |
 | `ChapterTitleCard`, `TrackedTitle` | Lamp, brass frame, tracking-in title that never breaks a word | `onTitleLanded`, `onFinished` |
 | `Dossier`, `WaxSeal`, `StampIn`, `PenNote`, `PenStroke` | Letterhead slides in, scores stamped, total sealed, pen notes | `onStamp(i)`, `onSeal`, `onPen`, `onFinished` |
 | `Timeline`, `cue`, `mix`, `AnchoredScroll` | Cue-sheet choreography on one clock; content anchored low that scrolls only at 2x | `cues`, `onFinished` |
 | `SceneState.loading/empty/offline/error`, `LoadingRule` (06b) | The four designed states: lamp, brass ornament, italic line, note. Offline switches the lamp off; loading has a breathing brass rule, never a spinner | `onAction` (adds a `BrassButton`) |
 | `BrassButton` (06b) | An engraved brass plate with a tracked caps label, 44 pt, brightens on hover/focus/press; null `onTap` is disabled | `onTap` |
+| `FriendlyInterviewer`, `FriendlyFigure.priya/.marcus/.lena`, `InterviewerExpression`, `FaceShape`, `FaceGesture` (16) | The friendly cast: five expressions (eased; the nod moves the head), idle = breath, blink, sway; reduced motion stills it | `expression` |
+| `OfficeBackdrop`, `OfficeDesk`, `DeskMug` (16) | The Morning Office set: wall, glass, far city, sun shafts, plant; the pale desk; the mug with steam | — |
 
 Rules the kit holds to (and screens must too):
 
@@ -98,23 +103,155 @@ Rules the kit holds to (and screens must too):
 
 ### Platform edges (06b)
 
-- **Icon:** a brass "LR" in Cormorant Garamond over a rule with two diamonds, on walnut with
-  the lamp's warm pool, inside the title card's double brass frame. Android legacy + adaptive
+- **Icon:** a leaf-green "LR" in Cormorant Garamond over a rule with two diamonds, on cream
+  with a pool of morning sun, inside the title card's double frame (brief 16; 06b's layout). Android legacy + adaptive
   (with monochrome), iOS, web favicon/icons/maskable. Drawn by
   `packages/brand/tool/make_icons.py` (Pillow); its colours mirror `colors.dart`.
 - **Launch:** void with the monogram, so the jump to the first Flutter frame is invisible.
   Android: `drawable/launch_background.xml` and Android 12+'s splash, through
   `LaunchTheme.Boardroom` / `NormalTheme.Boardroom` (`values*/brand_themes.xml`), which extend
-  `styles.xml` rather than edit it. iOS: `LaunchScreen.storyboard` on void.
+  `styles.xml` rather than edit it. iOS: `LaunchScreen.storyboard` on void (cream since 16).
 - **Web, no network:** `build:web` uses `--no-web-resources-cdn` (CanvasKit and Roboto ship
   with the build); `web/index.html` sets `canvasKitBaseUrl` and `fontFallbackBaseUrl` so a
   plain `flutter run -d chrome` stays local too (Roboto vendored in `web/fonts/`, OFL). A glyph
   none of the fonts has shows as a box instead of fetching a Noto font.
 
-## Chosen direction: C, The Boardroom (owner, 2026-10-30)
+## Brief 16: three brighter, friendlier options (the owner picked Morning Office)
 
-The owner picked **C · The Boardroom** after comparing all three on a phone (PR #6). This
-settles **D4**: **Cormorant Garamond** (display) + **Manrope** (body). The palette, grades,
+After the first phone play (2026-10-30) the Boardroom read as **James Bond / a CID
+investigation**: Priya as a silhouette in a spotlight feels like an interrogation. Every
+animation, component and screen stayed; the **palette** and the **interviewer** changed. The
+three options were compared live on the phone and in Chrome (a temporary `/dev/looks` and a
+look switch over every screen, with the tokens briefly read at runtime); after the pick the
+chosen palette became the `const` tokens again and the switch, the other two options and the
+silhouette were deleted. Stills and phone recordings: `.pr-screenshots/16/`.
+
+All three shared one **friendly interviewer** (`ui/figure/friendly_*`, D2 still "drawn in code"): Priya
+(black bob, gold hoops, teal blazer), Marcus (cropped hair, beard, glasses, tie) and Lena
+(auburn bun, freckles, mustard jumper), with five expressions (neutral, smile, thinking, nod,
+hmm) and an idle (breath, blink, a little sway) that reduced motion stops. The head stays in
+`MissionSet.faceInDesign`, so subtitles stay clear of the face; a subtitle sits on a soft
+speech panel, so a line over her jacket stays AA. The rim light remains on the lit edge
+(the grade's key in a dark look, a soft sheen in daylight).
+
+AA (WCAG 4.5:1 for every pair, including the grade keys, which set small text) is tested for
+every look in `packages/brand/test/contrast_test.dart`, with **text over colour**: the
+choice text and numeral on the warmest card (raised mixed halfway into the tint) and every
+text on the speech panel over every cast colour. Figures below are the lowest ratio across
+void, surface and raised.
+
+### 1 · Morning Office: Cormorant Garamond + Manrope
+
+*A sunny office at 9 a.m.: cream, plants and glass, coffee on the desk.*
+
+- **Palette:** void `#FFFCF6`, surface `#F8F1E4`, raised `#FFFFFF`, line `#E2D5BF`, text
+  `#2A2420` (13.6:1), secondary `#665A50` (5.9). Paper `#FFFFFF`: ink `#2A2420` (15.3), ink soft
+  `#665A50` (6.7), red pen `#B83A2A` (5.7).
+- **Grades** (key / shadow / tint): Ch1 leaf green `#2C7356` / `#E9F2EA` / butter sun `#FFE7AE`
+  (5.1). Ch2 sky blue `#2D5C9E` / `#E6EDF7` / `#D4E3F8` (6.0). Ch3 raspberry `#A8344A` /
+  `#F9E7E8` / `#FAD3C8` (5.7). Tension rises through saturation and warmth, never darkness.
+  Card text 13.1+, card numeral 5.2+.
+- **Scene:** tall glass full of pale sky, the city soft and far, slanting sun shafts, a plant
+  by the window, a mug with steam on a pale desk. No dust (it only shows in a dark beam).
+- **Cards and dossier:** white plaques with a green rule; the dossier is a crisp white sheet.
+- **Tower (13):** a white-and-glass tower in morning light, completed floors with leafy
+  balconies, the current floor glowing butter yellow.
+
+### 2 · Bold & Playful: Manrope for everything
+
+*Confident colour blocks, a game you want to win, grown-up enough for work.*
+
+- **Palette:** void `#1B1446`, surface `#261C62`, raised `#342885`, line `#5446B0`, text
+  `#FFF9EE` (11.2:1), secondary `#D3C9FF` (7.6). Paper `#FFFFFF`: ink `#1B1446` (17.0), ink soft
+  `#4C4390` (8.4), red pen `#C8174F` (5.7).
+- **Grades:** Ch1 sunny yellow `#FFD23F` / `#140E3A` / violet `#5B3FD0` (8.1). Ch2 mint
+  `#4CE0BE` / `#0E1840` / `#1F55C8` (7.1). Ch3 hot pink `#FF8CC0` / `#26103E` / `#9A2272` (5.5).
+  The colour gets louder as the stakes rise. Card text 8.5+, card numeral 4.6+.
+- **Type:** headings and the interviewer's lines in **Manrope** (no new font; brief 16 allows
+  one option a friendlier voice): rounder, more game-like.
+- **Scene:** flat colour blocks drifting slowly (a big halo disc behind Priya, a slab, a pill,
+  a small sun), confetti dots, a chunky desk with a thick yellow edge and a pencil pot.
+- **Cards and dossier:** violet plaques with yellow numerals; the dossier is a white card on
+  indigo with a hot-pink seal.
+- **Tower (13):** a stack of coloured blocks, each floor its own colour, the current one
+  bouncing gently.
+
+### 3 · Sunset City: Cormorant Garamond + Manrope
+
+*Golden hour on the 40th floor: peach light, coral sky, the city glowing below.*
+
+- **Palette:** void `#FFF5EE`, surface `#FFE9DD`, raised `#FFF8F3`, line `#F1C8B4`, text
+  `#3A1C44` plum (12.6:1), secondary `#6E4466` (6.7). Paper `#FFFBF7`: ink `#3A1C44` (14.3), ink
+  soft `#6E4466` (7.6), red pen `#B0303F` (6.1).
+- **Grades:** Ch1 late-afternoon terracotta `#A8432C` / `#FFE2D2` / peach `#FFC9A3` (5.1). Ch2
+  sunset violet `#6A3C9E` / `#EFE2F7` / coral `#F4B3B8` (6.5). Ch3 dusk magenta `#9A2260` /
+  `#F8DDE9` / lilac `#D9B4E8` (6.5). The sky deepens chapter by chapter while the ground stays
+  warm and light: the final round is dusk, not night. Card text 10.8+, card numeral 4.8+.
+- **Scene:** the glass full of a peach-to-coral sky, a low sun, the skyline glowing with lit
+  windows, a little globe lamp on the desk.
+- **Cards and dossier:** warm cream plaques with terracotta numerals; the dossier on cream.
+- **Tower (13):** the tower itself at golden hour, glass reflecting the sunset; it gets
+  later in the day as you climb.
+
+### Comparison
+
+| | Morning Office | Bold & Playful | Sunset City |
+| --- | --- | --- | --- |
+| Mood | calm, optimistic, daylight | energetic, game-like | warm, cinematic, aspirational |
+| Ground | light cream | deep indigo + colour blocks | light peach |
+| Chapter climb | green → blue → raspberry | yellow → mint → hot pink | afternoon → sunset → dusk |
+| Type | serif + sans | sans only | serif + sans |
+| Still a film? | partly (quiet) | least | **most** |
+| Show to clients | clean, safe, a little generic | memorable, but "kids' app" risk | **premium and distinctive** |
+| Open it tomorrow | relaxing | **most habit-forming** | inviting, a place to return to |
+| Lowest AA (any text pair) | 5.0 | 4.6 | 4.8 |
+
+### Recommendation (before the pick): 3, Sunset City. **The owner chose 1, Morning Office.**
+
+1. **It keeps what's loved.** The owner's favourite screens (candidate file, dossier) and
+   the film language survive intact: golden-hour light, a skyline, depth. It's the only
+   option that still passes the brief's bar ("looks like a film") while losing the
+   interrogation.
+2. **Beautiful enough to show clients.** Peach-to-violet gradients and a serif read premium
+   and distinctive in a screenshot; Morning Office is pleasant but could be any HR SaaS.
+3. **Makes you want to open it tomorrow.** It's warm and aspirational (the 40th floor at the
+   best hour of the day), and the chapter arc is literally the day ending, so each chapter
+   feels later, bigger and closer to the offer, without ever going dark.
+4. **The tower writes itself.** Brief 13's tower at golden hour, reflecting the sky, is the
+   most screenshot-able home screen of the three.
+
+**What to borrow:** from Bold & Playful, its confidence for rewards and streaks (a flat
+colour burst when a floor unlocks); from Morning Office, the desk props (the mug, the plant).
+
+## Chosen direction: Morning Office (owner, 2026-10-30, brief 16)
+
+The owner played all three options on the phone and picked **1 · Morning Office** (spec
+above, now the real tokens in `packages/brand`). It settles the look: daylight, warm cream,
+white glass, a plant and a mug, soft colour; the chapters climb leaf green → sky blue →
+raspberry through saturation, never darkness. **D2** stays "drawn in code", now as the friendly
+cast (Priya, Marcus, Lena) with expressions instead of silhouettes. **D4** is unchanged:
+Cormorant Garamond + Manrope.
+
+What carries over from the Boardroom unchanged: every camera move (the 2.2 s dolly push with
+parallax, the follow-up's hard cut, now a one-frame cream blink), the letterbox, typewriter,
+title card, dossier, seal and pen, the designed states, motion principles and reduced motion.
+
+Rules the new look adds:
+
+- **Text over the interviewer sits on the speech panel** (`SpeechPanel`, void at 94%); it is
+  AA-tested over every cast colour.
+- **A scene sets the interviewer's expression per beat**: smile on the greeting, thinking on
+  the cards, a nod on lock-in, "hmm" on the follow-up (the kit and `/dev/catalog/scene` do;
+  the mission player is a follow-up for its owner).
+- **When the cards are up, the question shrinks to a one-line recap** so it never covers her
+  face (owner, 2026-10-30).
+- No dust in daylight; grain at 3.5%.
+
+## Previous direction: C, The Boardroom (owner, 2026-10-30; replaced the same day)
+
+*Kept for the record. Its palette, walnut set, banker's lamp and silhouettes are gone (brief
+16).* The owner picked **C · The Boardroom** after comparing all three on a phone (PR #6). This
+settled **D4**: **Cormorant Garamond** (display) + **Manrope** (body). The palette, grades,
 type ramp and set pieces are exactly as written in "C · The Boardroom" below; that section is
 now the spec, not a proposal.
 
