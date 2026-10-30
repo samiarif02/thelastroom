@@ -3,10 +3,9 @@
 > **The bar:** someone should screenshot it because it looks like a film, not like an app. If a
 > screen could belong to any other quiz app, it isn't done. (Brief §9)
 
-This is the design direction from the brief. **The token values in `packages/brand` are
-provisional** and get filled in during the design session (Prompt 3a: choose the direction;
-3b: build the system). The token *names* and structure are already in place, so screens built
-before then won't need restructuring.
+This is the design direction from the brief. The owner chose **C, The Boardroom**
+(2026-10-30); brief 06a made its tokens the real ones in `packages/brand` and built the film kit
+in `apps/mobile/lib/ui/` (see "The film kit" below).
 
 ## The big idea: the building
 
@@ -40,17 +39,45 @@ the top.**
 
 | Token group | Where | Status |
 | --- | --- | --- |
-| Colour: near-black/charcoal surfaces, warm off-white text, one spotlight-amber accent, red pen | `packages/brand/lib/src/colors.dart` (`BrandColors`) | **Provisional values**, AA-tested |
-| Chapter grades: key, shadow, tint per chapter | `ChapterGrade` | **Provisional values** |
-| Type: display serif (titles, chapter cards, names), legible sans (body, choices), tabular figures | `typography.dart` (`BrandType`) | **Fonts to choose and bundle** (OFL, offline) |
+| Colour: void, surface, walnut, line, cream text, paper/ink, fountain-pen red, banker's-lamp glass | `packages/brand/lib/src/colors.dart` (`BrandColors`) | **Final** (06a), every text pair AA-tested |
+| Chapter grades: key, shadow, tint per chapter | `ChapterGrade` | **Final** (06a) |
+| Type: Cormorant Garamond + Manrope, small-caps speaker, tabular lining figures | `typography.dart` (`BrandFonts`, `BrandType`) | **Final** (06a), bundled |
 | Spacing, radii, 44 pt targets | `layout.dart` | Initial scale |
-| Motion: durations (quick, standard, cinematic, elevator, title card), eased weighty curves, reduced-motion fade | `motion.dart` (`BrandMotion`) | Initial values |
-| Theme: no ripple, no stock transitions, brand colours for anything Material | `theme.dart` (`BrandTheme`) | Safety net in place |
+| Motion: dolly 2.2 s, hard cut 1/24 s, letterbox, typewriter, title card, dossier, curves | `motion.dart` (`BrandMotion`) | **Final** (06a) |
+| Film stock: grain 9%, vignette 0.65 | `motion.dart` (`BrandFilm`) | **Final** (06a) |
+| Theme: no ripple, no stock transitions, Manrope for anything Material | `theme.dart` (`BrandTheme`) | Safety net in place |
 
-**To fill in during the design session:** final palette and grades (checked against WCAG AA,
-including text over imagery with scrims), the font pair, the illustration style for the four
-interviewers (3 expressions each, animated idle via Rive), grain/vignette intensity, the tower
-and elevator art direction, and golden tests for every key screen.
+**Still to do (06b and later):** golden tests and `/dev/catalog`, cinematic loading/empty/
+offline/error states, the tower and elevator art direction.
+
+### The film kit (brief 06a): `apps/mobile/lib/ui/`, one import `ui/film_kit.dart`
+
+| Component | What it is | Seams (callbacks) |
+| --- | --- | --- |
+| `AmbientClock`, `FilmOverlay` | One free-running clock for grain, flicker and breathing; grain + elliptical vignette | — |
+| `Letterbox`, `AnimatedLetterbox` | 13% cinema bars, driven by `t` or by `shown` | `onSettled` |
+| `CameraRig`, `DollyCamera`, `CameraShot`, `CameraLayer` | Layered set framed wide → close; parallax from per-layer close-ups; 2.2 s dolly push | `onPushStart`, `onPushEnd` |
+| `HardCut` | One black frame when `shot` changes (the follow-up) | `onCut` |
+| `Spotlight`, `BankersLamp`, `Bokeh`, `Dust`, `lampFlicker` | The lamp's pool with dust, the green-shaded lamp, the city out of focus | — |
+| `InterviewerSilhouette`, `SilhouetteFigure.priya/.marcus` | D2: rim-lit silhouettes, idle = breath, slow head turn, rim flicker | — |
+| `BoardroomSet.layers(...)` | The room in three parallax planes, wide/close/tight framings | — |
+| `TypewriterSubtitle`, `TypewriterController` | Speaker in small caps, line typed at 30 ms/char, tap or controller completes | `onCharacter(char, index)`, `onComplete` |
+| `AnswerCard`, `AnswerCardState` | Engraved plaque: idle, focused, selected, locked, disabled | `onTap` |
+| `ChapterTitleCard`, `TrackedTitle` | Lamp, brass frame, tracking-in title that never breaks a word | `onTitleLanded`, `onFinished` |
+| `Dossier`, `WaxSeal`, `StampIn`, `PenNote`, `PenStroke` | Letterhead slides in, scores stamped, total sealed, pen notes | `onStamp(i)`, `onSeal`, `onPen`, `onFinished` |
+| `Timeline`, `cue`, `mix`, `AnchoredScroll` | Cue-sheet choreography on one clock; content anchored low that scrolls only at 2x | `cues`, `onFinished` |
+
+Rules the kit holds to (and screens must too):
+
+- **The vignette lies under text, never over it.** It darkens the frame's edges by up to 65%,
+  which takes edge text below AA. The app wraps every route in grain only; a scene vignettes
+  its set (`FilmOverlay(grain: 0, ...)`) beneath its subtitles and cards. Tested on the title.
+- **The app never settles.** Grain, flicker and breathing run on the ambient clock, so
+  `pumpAndSettle` times out. Tests `pump(duration)` through the choreography (and pump in
+  steps: a single big pump skips the rests between beats).
+- Every animated component has a reduced-motion path (a short cross-fade, or settled at once);
+  beats don't fire under reduced motion, `onFinished`/`onComplete` still do.
+- A hard cut moves every plane together; only the dolly pushes planes at different rates.
 
 ## Chosen direction: C, The Boardroom (owner, 2026-10-30)
 
@@ -89,11 +116,13 @@ now the spec, not a proposal.
 
 **Known issues from the phone review (fix in 06)**
 
-- The Boardroom title's tracking-in starts wide enough that "THROUGH" breaks mid-word
-  ("THROU / GH") for the first moments of the animation. Lay out at the final tracking and
-  animate a transform, or forbid breaks inside a word.
+- ~~The Boardroom title's tracking-in starts wide enough that "THROUGH" breaks mid-word
+  ("THROU / GH").~~ Fixed in 06a: `TrackedTitle` decides the lines once at the final tracking,
+  between words only, and draws each line unbreakable while it tracks in (tested at 320, 375
+  and 412 wide, 1x and 2x text, every 50 ms of the animation).
+- Edge to edge on Android: 06b.
 
-**D2, portrait art (proposal, owner to confirm):** keep the **rim-lit silhouettes drawn in
+**D2, portrait art (confirmed by the owner, 2026-10-30):** keep the **rim-lit silhouettes drawn in
 code** that the prototype already uses, with a code-driven idle (breath, a slow head turn,
 lamp flicker on the rim). It's original, needs no rights, costs no build days and suits the
 Boardroom's low-key light. Painterly portraits (commissioned or AI-generated with commercial
@@ -217,18 +246,16 @@ cost depth cue if C's parallax costs too much on low-end Android.
 ### Fonts (all SIL OFL 1.1, bundled in `packages/brand/fonts/`, each with its `OFL.txt`)
 
 Static, Latin-subset instances made with fontTools from the google/fonts originals (none
-declares a Reserved Font Name, so subsetting and instancing are allowed):
+declares a Reserved Font Name, so subsetting and instancing are allowed). The subsets keep
+`smcp`, `lnum` and `tnum` (small caps and tabular lining figures):
 
 | Family | Weights bundled | Copyright |
 | --- | --- | --- |
-| Instrument Serif | Regular, Italic | The Instrument Serif Project Authors |
-| Geist | 400, 500 | The Geist Project Authors (Vercel) |
-| Big Shoulders Display | 600, 800 | The Big Shoulders Project Authors |
-| Inter Tight | 400, 600 | The Inter Project Authors |
 | Cormorant Garamond | 500, 600, 500 italic | The Cormorant Project Authors |
 | Manrope | 400, 600 | The Manrope Project Authors |
 
-Brief 06 deletes the two losing pairs (folders, pubspec entries, `directions/*.dart`).
+06a deleted the two losing pairs (Instrument Serif + Geist, Big Shoulders Display + Inter
+Tight): folders, pubspec entries and `directions/*.dart`.
 
 ## Design session brief: must-dos carried from the foundation
 
