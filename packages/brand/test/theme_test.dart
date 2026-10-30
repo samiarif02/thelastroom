@@ -21,15 +21,18 @@ void main() {
     }
   });
 
-  test('Material text that slips through still renders in the bundled sans', () {
-    final theme = BrandTheme.dark();
-    expect(
-      theme.textTheme.bodyMedium!.fontFamily,
-      'packages/brand/${BrandFonts.sans}',
-    );
-    expect(
-      theme.textTheme.displayLarge!.fontFamily,
-      BrandType.titleCard.fontFamily,
-    );
-  });
+  test(
+    'Material text that slips through still renders in the bundled sans',
+    () {
+      final theme = BrandTheme.dark();
+      expect(
+        theme.textTheme.bodyMedium!.fontFamily,
+        'packages/brand/${BrandFonts.sans}',
+      );
+      expect(
+        theme.textTheme.displayLarge!.fontFamily,
+        BrandType.titleCard.fontFamily,
+      );
+    },
+  );
 }

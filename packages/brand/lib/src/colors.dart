@@ -51,12 +51,7 @@ abstract final class BrandColors {
 /// steel pressure, then brass on oxblood, which *is* the last room.
 enum ChapterGrade {
   /// Chapter 1, Get Through the Door: warm amber lobby. Key 8.8:1 on surface.
-  lobby(
-    label: 'Lobby',
-    key: lobbyKey,
-    shadow: lobbyShadow,
-    tint: lobbyTint,
-  ),
+  lobby(label: 'Lobby', key: lobbyKey, shadow: lobbyShadow, tint: lobbyTint),
 
   /// Chapter 2, Under Pressure: cold steel blue. Key 8.2:1 on surface.
   pressure(

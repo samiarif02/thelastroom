@@ -47,17 +47,17 @@ void main() {
     expect(BrandType.speaker.fontFeatures, [const FontFeature.enable('smcp')]);
   });
 
-  test('the only prototype direction left is C, built from the real tokens', () {
-    expect(cinematicDirections.map((d) => d.letter), ['C']);
-    final c = cinematicDirections.single;
-    expect(c.palette.surface, BrandColors.surface);
-    expect(c.type.titleCard, BrandType.titleCard);
-    expect(
-      c.grades.map((g) => g.key),
-      ChapterGrade.values.map((g) => g.key),
-    );
-    expect(c.motion.cut, BrandMotion.dolly);
-  });
+  test(
+    'the only prototype direction left is C, built from the real tokens',
+    () {
+      expect(cinematicDirections.map((d) => d.letter), ['C']);
+      final c = cinematicDirections.single;
+      expect(c.palette.surface, BrandColors.surface);
+      expect(c.type.titleCard, BrandType.titleCard);
+      expect(c.grades.map((g) => g.key), ChapterGrade.values.map((g) => g.key));
+      expect(c.motion.cut, BrandMotion.dolly);
+    },
+  );
 
   test('the chapter grades run lobby, pressure, final round', () {
     expect(ChapterGrade.values.map((g) => g.label), [
