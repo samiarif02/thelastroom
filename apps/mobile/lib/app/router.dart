@@ -11,6 +11,7 @@ import '../features/mission/mission_screen.dart';
 import '../features/onboarding/home_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/progress/progress_screen.dart';
+import '../features/recall/recall_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/title/wrong_floor_screen.dart';
 import '../features/tower/tower_screen.dart';
@@ -38,6 +39,9 @@ abstract final class Routes {
   static const String settings = '$_towerPath/$_settings';
   static const String character = '$_towerPath/$_character';
 
+  /// The Recall Room (brief 21).
+  static const String recall = '$_towerPath/$_recall';
+
   /// A mission by campaign number: `/tower/mission/1`.
   static String mission(int number) => '$_towerPath/$_mission/$number';
 
@@ -45,6 +49,7 @@ abstract final class Routes {
   static const String _settings = 'settings';
   static const String _character = 'character';
   static const String _mission = 'mission';
+  static const String _recall = 'recall';
 }
 
 /// Dev tools (`/dev/...`) exist in debug and profile builds only. In a release build this is a
@@ -87,6 +92,10 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
           // A bad number reaches the mission screen's locked-door state, not a crash.
           number: int.tryParse(state.pathParameters['number'] ?? '') ?? 0,
         ),
+      ),
+      GoRoute(
+        path: Routes._recall,
+        builder: (context, state) => const RecallScreen(),
       ),
     ],
   ),

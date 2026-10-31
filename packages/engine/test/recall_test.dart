@@ -3,36 +3,65 @@ import 'package:test/test.dart';
 
 void main() {
   final today = CalendarDay(2026, 10, 29);
+  const thinking = Duration(seconds: 4);
+  const instant = Duration(milliseconds: 600);
 
   RecallCard card(String id, LeitnerBox box, CalendarDay due) =>
-      RecallCard(lessonId: id, box: box, due: due);
+      RecallCard(cardId: id, box: box, due: due);
 
   RecallCard rescheduled(RecallOutcome outcome) => switch (outcome) {
     Rescheduled(:final card) => card,
     Retired() => fail('expected the card to stay, but it retired'),
   };
 
-  test('a new card goes in box one, due tomorrow', () {
-    final c = newRecallCard('lesson_a', today: today);
-    expect(c.lessonId, 'lesson_a');
-    expect(c.box, LeitnerBox.one);
-    expect(c.due, CalendarDay(2026, 10, 30));
+  test('a new card goes in box one, due the same day', () {
+    final c = newRecallCard('trap_a', today: today);
+    expect(c, card('trap_a', LeitnerBox.one, today));
+  });
+
+  group('judgeRecall', () {
+    test('wrong is missed, however long it took', () {
+      expect(judgeRecall(correct: false), RecallVerdict.missed);
+      expect(
+        judgeRecall(correct: false, decidedIn: thinking),
+        RecallVerdict.missed,
+      );
+    });
+
+    test('right after reading is known; right under 1.5 s is a guess', () {
+      expect(
+        judgeRecall(correct: true, decidedIn: thinking),
+        RecallVerdict.known,
+      );
+      expect(
+        judgeRecall(correct: true, decidedIn: instant),
+        RecallVerdict.guessed,
+      );
+      expect(
+        judgeRecall(correct: true, decidedIn: guessThreshold),
+        RecallVerdict.known,
+      );
+      // Not measured: counted as read, as with a mission beat.
+      expect(judgeRecall(correct: true), RecallVerdict.known);
+    });
   });
 
   group('reviewRecallCard', () {
-    test('correct moves one → three, due in 3 days', () {
-      final c = rescheduled(
-        reviewRecallCard(
-          card('l', LeitnerBox.one, today),
-          correct: true,
-          today: today,
-        ),
+    test('known moves one → three, due in 3 days', () {
+      final outcome = reviewRecallCard(
+        card('l', LeitnerBox.one, today),
+        correct: true,
+        today: today,
+        decidedIn: thinking,
       );
-      expect(c.box, LeitnerBox.three);
-      expect(c.due, CalendarDay(2026, 11, 1));
+      expect(outcome.verdict, RecallVerdict.known);
+      expect(
+        rescheduled(outcome),
+        card('l', LeitnerBox.three, CalendarDay(2026, 11, 1)),
+      );
     });
 
-    test('correct moves three → seven, due in 7 days', () {
+    test('known moves three → seven, due in 7 days', () {
       final c = rescheduled(
         reviewRecallCard(
           card('l', LeitnerBox.three, today),
@@ -40,31 +69,45 @@ void main() {
           today: today,
         ),
       );
-      expect(c.box, LeitnerBox.seven);
-      expect(c.due, CalendarDay(2026, 11, 5));
+      expect(c, card('l', LeitnerBox.seven, CalendarDay(2026, 11, 5)));
     });
 
-    test('correct from box seven retires the card', () {
+    test('known from box seven retires the card', () {
       final outcome = reviewRecallCard(
         card('l', LeitnerBox.seven, today),
         correct: true,
         today: today,
       );
-      expect(outcome, isA<Retired>().having((r) => r.lessonId, 'id', 'l'));
+      expect(outcome, isA<Retired>().having((r) => r.cardId, 'id', 'l'));
+      expect(outcome.verdict, RecallVerdict.known);
     });
 
-    test('wrong sends any box back to one, due tomorrow', () {
+    test('missed sends any box back to one, due tomorrow', () {
       for (final box in LeitnerBox.values) {
-        final c = rescheduled(
-          reviewRecallCard(
-            card('l', box, today.addDays(-3)),
-            correct: false,
-            today: today,
-          ),
+        final outcome = reviewRecallCard(
+          card('l', box, today.addDays(-3)),
+          correct: false,
+          today: today,
+          decidedIn: thinking,
         );
-        expect(c.box, LeitnerBox.one);
-        expect(c.due, today.addDays(1));
-        expect(c.lessonId, 'l');
+        expect(outcome.verdict, RecallVerdict.missed);
+        expect(
+          rescheduled(outcome),
+          card('l', LeitnerBox.one, today.addDays(1)),
+        );
+      }
+    });
+
+    test('a guessed right answer stays in its box, due tomorrow', () {
+      for (final box in LeitnerBox.values) {
+        final outcome = reviewRecallCard(
+          card('l', box, today),
+          correct: true,
+          today: today,
+          decidedIn: instant,
+        );
+        expect(outcome.verdict, RecallVerdict.guessed);
+        expect(rescheduled(outcome), card('l', box, today.addDays(1)));
       }
     });
 
@@ -80,6 +123,37 @@ void main() {
     });
   });
 
+  group('withMissedCards', () {
+    test('a new mistake gets a new card, due today', () {
+      expect(withMissedCards([], ['trap_a', 'trap_b'], today: today), [
+        card('trap_a', LeitnerBox.one, today),
+        card('trap_b', LeitnerBox.one, today),
+      ]);
+    });
+
+    test('making a mistake again puts its card back in box one', () {
+      final cards = [
+        card('trap_a', LeitnerBox.seven, today.addDays(5)),
+        card('trap_b', LeitnerBox.three, today.addDays(2)),
+        card('overdue', LeitnerBox.three, today.addDays(-2)),
+      ];
+      expect(
+        withMissedCards(cards, ['trap_a', 'overdue', 'trap_a'], today: today),
+        [
+          card('trap_a', LeitnerBox.one, today),
+          card('trap_b', LeitnerBox.three, today.addDays(2)),
+          // Already overdue: stays overdue, so it comes first.
+          card('overdue', LeitnerBox.one, today.addDays(-2)),
+        ],
+      );
+    });
+
+    test('no mistakes, no change', () {
+      final cards = [card('a', LeitnerBox.three, today)];
+      expect(withMissedCards(cards, const [], today: today), cards);
+    });
+  });
+
   group('dueRecallCards', () {
     final cards = [
       card('future', LeitnerBox.one, today.addDays(1)),
@@ -90,7 +164,7 @@ void main() {
     ];
 
     test('due on or before today: most overdue, then lowest box, then id', () {
-      expect(dueRecallCards(cards, today: today).map((c) => c.lessonId), [
+      expect(dueRecallCards(cards, today: today).map((c) => c.cardId), [
         'overdue',
         'today_one_a',
         'today_one_b',
@@ -98,17 +172,17 @@ void main() {
       ]);
     });
 
-    test('at most the limit, six by default', () {
+    test('at most the limit, five by default (a one-minute round)', () {
       final many = [
         for (var i = 0; i < 10; i++)
-          card('lesson_$i', LeitnerBox.one, today.addDays(-i)),
+          card('card_$i', LeitnerBox.one, today.addDays(-i)),
       ];
-      expect(dueRecallCards(many, today: today), hasLength(6));
+      expect(dueRecallCards(many, today: today), hasLength(5));
       expect(
-        dueRecallCards(many, today: today, limit: 2).map((c) => c.lessonId),
-        ['lesson_9', 'lesson_8'],
+        dueRecallCards(many, today: today, limit: 2).map((c) => c.cardId),
+        ['card_9', 'card_8'],
       );
-      expect(recallSessionCardLimit, 6);
+      expect(recallSessionCardLimit, 5);
     });
 
     test('nothing due, nothing returned; a negative limit is a bug', () {
@@ -118,5 +192,15 @@ void main() {
         throwsRangeError,
       );
     });
+  });
+
+  test('the streak is the run of known answers at the end', () {
+    const k = RecallVerdict.known;
+    const g = RecallVerdict.guessed;
+    const m = RecallVerdict.missed;
+    expect(recallStreak([]), 0);
+    expect(recallStreak([k, k, k]), 3);
+    expect(recallStreak([k, m, k, k]), 2);
+    expect(recallStreak([k, k, g]), 0);
   });
 }

@@ -124,9 +124,18 @@ new email form.**
   - "Say it your way" is milestone 12; until then the dossier has no dead button for it.
 - **FR-16** **[10, 13]** Progress: XP, any skill unlocked, a Recall Room card for each lesson
   missed.
-  - [10] After the dossier, every lesson attached to a picked line is scheduled with
-    `newRecallCard` (box one, due tomorrow) and stored locally; a lesson already in the Recall
-    Room isn't duplicated.
+  - [21] Every mistake becomes a card: each weak beat line gives the card of the misconception
+    that tempted it ("You fell for: …", `Reason.tempts`), and a weak follow-up reply gives its
+    lesson's card. Cards are built from the stored attempts when the Recall Room or the tower
+    loads, each attempt once, and kept on the device. A new card goes in box one **due the same
+    day**, because a first-time player must find something in the room right after Mission 1;
+    after that, Leitner at 1, 3 and 7 days. Making the same mistake again puts its card back in
+    box one.
+  - [21] A round is up to 5 cards, about a minute. The player picks the principle that beats
+    the misconception (or answers the lesson's recall check) with one tap, timed like a mission
+    beat: right after thinking promotes the card; **right but guessed (under 1.5 s) leaves it in
+    its box, due tomorrow**; wrong sends it back to box one, due tomorrow. A streak and progress
+    ring sits at the top.
   - [10] Skills come from `newlyUnlockedSkills`; a hinted attempt unlocks none (engine test).
   - [13] XP and the Recall Room screen.
 - **FR-17** **[09]** Sound design: typing ticks, named cues and per-chapter ambience, under the

@@ -98,7 +98,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text(LastRoomCard.title), findsOneWidget);
-    expect(find.text(RecallRoomCard.title), findsOneWidget);
+    expect(find.text(RecallRoomCardView.title), findsOneWidget);
     expect(rig.analytics.only(AnalyticsEvent.towerOpened).wire, {
       'missions_done': 2,
       'after_mission': false,
