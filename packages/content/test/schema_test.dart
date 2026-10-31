@@ -430,4 +430,138 @@ void main() {
       ],
     );
   });
+
+  group('why step and reaction (wave 5)', () {
+    // The fixture's open beat (o1, o2, o3) with a why step and a reaction.
+    Beat openWith({List<Reason>? reasons, SceneLine? reacting}) {
+      final open = base.beats.first;
+      return Beat(
+        kind: open.kind,
+        options: open.options,
+        why: ReasonPrompt(
+          line: const SceneLine(speakerId: 'priya', text: 'Why that line?'),
+          reasons:
+              reasons ??
+              const [
+                Reason(id: 'r1', text: 'It is specific.', soundFor: {'o1'}),
+                Reason(id: 'r2', text: 'It is modest.', soundFor: {'o2'}),
+                Reason(id: 'r3', text: 'It is safe.', soundFor: {'o3'}),
+              ],
+        ),
+        reaction: BeatReaction(
+          strong:
+              reacting ?? const SceneLine(speakerId: 'priya', text: 'Good.'),
+          weak: const SceneLine(speakerId: 'priya', text: 'Hm.'),
+          guessed: const SceneLine(speakerId: 'priya', text: 'Too quick.'),
+        ),
+      );
+    }
+
+    List<String> problemsWith(Beat open) =>
+        problems(withMission(beats: [open, ...base.beats.skip(1)]));
+
+    test('a well-formed why step and reaction pass', () {
+      expect(problemsWith(openWith()), isEmpty);
+    });
+
+    test('every option has exactly one sound reason', () {
+      expect(
+        problemsWith(
+          openWith(
+            reasons: const [
+              Reason(id: 'r1', text: 'It is specific.', soundFor: {'o1', 'o2'}),
+              Reason(id: 'r2', text: 'It is modest.', soundFor: {'o2'}),
+              Reason(id: 'r3', text: 'It is safe.'),
+            ],
+          ),
+        ),
+        [
+          'o2: has 2 sound reasons, needs exactly 1',
+          'o3: has 0 sound reasons, needs exactly 1',
+        ],
+      );
+    });
+
+    test('a sound reason only names options of its own beat', () {
+      expect(
+        problemsWith(
+          openWith(
+            reasons: const [
+              Reason(id: 'r1', text: 'It is specific.', soundFor: {'o1', 'e1'}),
+              Reason(id: 'r2', text: 'It is modest.', soundFor: {'o2'}),
+              Reason(id: 'r3', text: 'It is safe.', soundFor: {'o3'}),
+            ],
+          ),
+        ),
+        ['r1: is sound for e1, not an option of its beat'],
+      );
+    });
+
+    test('3–4 reasons, with unique snake_case ids', () {
+      expect(
+        problemsWith(
+          openWith(
+            reasons: const [
+              Reason(id: 'r1', text: 'It is specific.', soundFor: {'o1'}),
+              Reason(id: 'r1', text: 'It is modest.', soundFor: {'o2', 'o3'}),
+            ],
+          ),
+        ),
+        [
+          'm_fixture open beat: has 2 reasons, needs $minReasons–$maxReasons',
+          'r1: id is used more than once',
+        ],
+      );
+    });
+
+    test('a reason is at most $maxReasonWords words', () {
+      final long = List.filled(maxReasonWords + 1, 'word').join(' ');
+      expect(
+        problemsWith(
+          openWith(
+            reasons: [
+              Reason(id: 'r1', text: long, soundFor: const {'o1'}),
+              const Reason(id: 'r2', text: 'It is modest.', soundFor: {'o2'}),
+              const Reason(id: 'r3', text: 'It is safe.', soundFor: {'o3'}),
+            ],
+          ),
+        ),
+        ['r1: is ${maxReasonWords + 1} words, over $maxReasonWords'],
+      );
+    });
+
+    test('the interviewer says the why line and the reactions', () {
+      expect(
+        problemsWith(
+          openWith(
+            reacting: const SceneLine(speakerId: 'nobody', text: 'Hi.'),
+          ),
+        ),
+        ['m_fixture open beat: speaker nobody is not an interviewer'],
+      );
+    });
+
+    test('a reason marks itself sound only for the options it names', () {
+      const reason = Reason(id: 'r', text: 'x', soundFor: {'a'});
+      expect(reason.pickFor('a').sound, isTrue);
+      expect(reason.pickFor('b').sound, isFalse);
+      expect(reason.pickFor('a').reasonId, 'r');
+    });
+  });
+
+  group('Beat.isStrongest', () {
+    test(
+      'the line with the smallest weighted shortfall; ties are all strongest',
+      () {
+        final beat = Beat(
+          kind: BeatKind.open,
+          options: [option('a', score: 3), option('b', score: 3), option('c')],
+        );
+        expect(beat.isStrongest('a'), isTrue);
+        expect(beat.isStrongest('b'), isTrue);
+        expect(beat.isStrongest('c'), isFalse);
+        expect(beat.isStrongest('missing'), isFalse);
+      },
+    );
+  });
 }

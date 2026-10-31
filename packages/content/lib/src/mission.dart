@@ -148,6 +148,16 @@ class Beat {
 
   /// The interviewer's line straight after the pick, by how it landed. `null`: no reaction.
   final BeatReaction? reaction;
+
+  /// Whether [optionId] is a strongest line of this beat: the smallest weighted shortfall on
+  /// relevance, specificity and structure (the measure the debrief's red pen uses). Lines tied
+  /// for best are all strongest. The mission player passes this to `judgePick`.
+  bool isStrongest(String optionId) {
+    int shortfall(AnswerOption o) =>
+        weightedShortfall(o.scored, beatDimensions);
+    final best = options.map(shortfall).reduce((a, b) => a < b ? a : b);
+    return options.any((o) => o.id == optionId && shortfall(o) == best);
+  }
 }
 
 /// "Why that line?": the question and 3–4 reasons, one of them the right reasoning for each

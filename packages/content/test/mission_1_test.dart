@@ -1,4 +1,5 @@
 import 'package:content/content.dart';
+import 'package:engine/engine.dart';
 import 'package:test/test.dart';
 
 import 'paths.dart';
@@ -36,4 +37,56 @@ void main() {
     expect(totals.reduce((a, b) => a > b ? a : b), greaterThanOrEqualTo(90));
     expect(totals.reduce((a, b) => a < b ? a : b), lessThanOrEqualTo(30));
   });
+
+  test('every beat asks why and reacts, in Priya\'s voice (wave 5)', () {
+    for (final beat in mission.beats) {
+      final why = beat.why!;
+      final reaction = beat.reaction!;
+      final lines = [
+        why.line,
+        reaction.strong,
+        reaction.weak,
+        reaction.guessed,
+      ];
+      expect(lines.map((l) => l.speakerId), everyElement(priyaId));
+      expect(why.reasons, hasLength(beat.options.length));
+    }
+  });
+
+  test(
+    'the best line, given for the right reason after thinking, scores 100',
+    () {
+      BeatPick pick(Beat beat, {required Duration decidedIn}) {
+        final best = beat.options.firstWhere((o) => beat.isStrongest(o.id));
+        final reason = beat.why!.reasons.firstWhere(
+          (r) => r.isSoundFor(best.id),
+        );
+        return BeatPick(
+          beat: beat.kind,
+          choice: best.scored,
+          decidedIn: decidedIn,
+          reason: reason.pickFor(best.id),
+        );
+      }
+
+      final reply = mission.followUps
+          .firstWhere((f) => f.trigger == null)
+          .replies
+          .first
+          .scored;
+      MissionScore play(Duration decidedIn) => scoreAttempt(
+        AttemptInput(
+          picks: [for (final b in mission.beats) pick(b, decidedIn: decidedIn)],
+          followUpReply: reply,
+          hinted: false,
+        ),
+      );
+      final thought = play(const Duration(seconds: 5));
+      final rushed = play(const Duration(milliseconds: 400));
+      expect(thought.beatCredits, everyElement(PickCredit.full));
+      expect(rushed.guessed, isTrue);
+      expect(rushed.total, lessThan(thought.total));
+      expect(rushed.dimensions[Dimension.structure], 0);
+    },
+  );
 }

@@ -48,6 +48,13 @@ const int maxOptionWords = 30;
 /// 22 pt serif on a 360 dp phone (DESIGN.md), so a line never needs a third.
 const int maxSubtitleChars = 80;
 
+/// A "why that line?" step offers this many reasons (wave 5, brief 19).
+const int minReasons = 3;
+const int maxReasons = 4;
+
+/// A reason is one thought the player can hold at a glance, shorter than an answer line.
+const int maxReasonWords = 16;
+
 /// The number of words in [text], split on whitespace.
 int wordCount(String text) =>
     text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
@@ -89,6 +96,38 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
     final words = wordCount(text);
     if (words > maxOptionWords) {
       issue(id, 'is $words words, over $maxOptionWords');
+    }
+  }
+
+  // The why step: 3–4 reasons, each option explained by exactly one sound reason, and a sound
+  // reason only ever names an option of its own beat.
+  void checkWhy(String beatId, Beat beat, ReasonPrompt why) {
+    checkSpeaker(beatId, why.line);
+    final reasons = why.reasons;
+    if (reasons.length < minReasons || reasons.length > maxReasons) {
+      issue(
+        beatId,
+        'has ${reasons.length} reasons, needs $minReasons–$maxReasons',
+      );
+    }
+    final optionIds = {for (final o in beat.options) o.id};
+    for (final reason in reasons) {
+      checkId(reason);
+      if (wordCount(reason.text) > maxReasonWords) {
+        issue(
+          reason.id,
+          'is ${wordCount(reason.text)} words, over $maxReasonWords',
+        );
+      }
+      for (final optionId in reason.soundFor.difference(optionIds)) {
+        issue(reason.id, 'is sound for $optionId, not an option of its beat');
+      }
+    }
+    for (final optionId in optionIds) {
+      final sound = reasons.where((r) => r.isSoundFor(optionId)).length;
+      if (sound != 1) {
+        issue(optionId, 'has $sound sound reasons, needs exactly 1');
+      }
     }
   }
 
@@ -179,7 +218,16 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
       issue(mission.id, 'beats must be open, evidence, land, in that order');
     }
     for (final beat in mission.beats) {
-      checkOptions('${mission.id} ${beat.kind.name} beat', beat.options);
+      final beatId = '${mission.id} ${beat.kind.name} beat';
+      checkOptions(beatId, beat.options);
+      final why = beat.why;
+      if (why != null) checkWhy(beatId, beat, why);
+      final reaction = beat.reaction;
+      if (reaction != null) {
+        for (final line in [reaction.strong, reaction.weak, reaction.guessed]) {
+          checkSpeaker(beatId, line);
+        }
+      }
     }
 
     final defaults = mission.followUps.where((f) => f.trigger == null).length;
