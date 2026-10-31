@@ -173,15 +173,22 @@ new email form.**
   - Unit tests: a guessed evidence beat in an otherwise perfect answer gives relevance and
     specificity 75, structure 0; exactly 1.5 s is not a guess.
 - **FR-26** **[19]** The reason counts. After each pick the interviewer asks "why that line?"
-  and offers 3–4 reasons. Each option is explained by exactly one sound reason; the others are
-  realistic misreadings. A sound reason keeps the beat's points; an unsound one keeps
-  **60 %** (`unsoundReasonKeepPercent`), and the score names it (`PickCredit.unsoundReason`).
+  and offers 3–4 reasons. Reasons are **principles about interviewing**, never a restatement of
+  a line: exactly one is sound (the real reason the strongest line works), and each other is
+  the misconception that tempts people into one weak line (`Reason.tempts`), so the debrief can
+  say "You fell for: …". **The reason step can cost a lucky strong pick; it never deepens a
+  weak one, which the debrief explains instead.** A strongest line given with the wrong
+  principle keeps **60 %** (`unsoundReasonKeepPercent`, `PickCredit.unsoundReason`); a weak
+  line keeps its own points whatever the reason (`ReasonPick.counts`, set by
+  `Beat.reasonPick`).
   - Points are credited in integer hundredths, so the score stays exact and reproducible.
   - **Attempts saved before wave 5** (no timing, no reason) keep 100 % and score exactly as they
     did. Unit test: every 0–3 combination scores identically with and without a sound reason.
   - Content: every beat of every mission has a why step and a reaction (strong, weak, guessed)
-    in the interviewer's voice; the validator enforces it, and that each option has exactly one
-    sound reason and each reason names only options of its own beat.
+    in the interviewer's voice. The validator enforces it, and that each beat has exactly one
+    sound reason, sound only for its strongest line(s); that every weak line is tempted by
+    exactly one reason; that reasons name only options of their own beat; and that no reason
+    shares five words in a row with a line.
 
 ### Campaign and progression (brief §6)
 
