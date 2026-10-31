@@ -6,8 +6,12 @@ import '../core/analytics/analytics.dart';
 import '../core/backend/backend.dart';
 import '../core/backend/guest_sign_in.dart';
 import '../core/backend/supabase_backend.dart';
+import '../core/db/app_database.dart';
 import '../core/env/env.dart';
 import '../core/logging/log.dart';
+import '../core/profile/profile_repository.dart';
+import '../core/sync/outbox.dart';
+import '../core/sync/sync_worker.dart';
 
 /// App-wide services. Overridden in `main.dart` (real values) and in tests (fakes), so nothing
 /// below the root constructs its own.
@@ -58,3 +62,33 @@ class SessionNotifier extends Notifier<BackendSession> {
     return signIn.run();
   }
 }
+
+/// The device's database. `main.dart` overrides it with [AppDatabase.onDevice]; nothing reads it
+/// unless the drift stores are in use (tests use the in-memory stores and never touch it).
+final databaseProvider = Provider<AppDatabase>(
+  (ref) =>
+      throw UnimplementedError('databaseProvider is overridden in main.dart'),
+);
+
+/// Rung by the stores when something is queued for the server.
+final outboxSignalProvider = Provider<OutboxSignal>((ref) {
+  final signal = OutboxSignal();
+  ref.onDispose(() => unawaited(signal.close()));
+  return signal;
+});
+
+/// The sync worker: built only for a signed-in guest, so with no keys (or before the guest
+/// sign-in) it never exists and nothing is sent. `main.dart` keeps it alive by listening.
+final syncWorkerProvider = Provider<SyncWorker?>((ref) {
+  if (ref.watch(sessionProvider) is! GuestSession) return null;
+  final worker = SyncWorker(
+    db: ref.watch(databaseProvider),
+    backend: ref.watch(backendProvider),
+    log: ref.watch(logProvider),
+    signal: ref.watch(outboxSignalProvider),
+    onRestored: () => ref.invalidate(profileProvider),
+  );
+  ref.onDispose(() => unawaited(worker.dispose()));
+  unawaited(worker.start());
+  return worker;
+});

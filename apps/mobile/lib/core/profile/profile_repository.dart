@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../app/providers.dart';
+import '../analytics/analytics_event.dart';
+
 /// Where the player is in their career (onboarding's second question).
 enum Experience { student, freshGraduate, earlyCareer, switchingCareers }
 
@@ -20,6 +23,7 @@ class PlayerProfile {
     this.weeklyGoal,
     this.autoAdvance = true,
     this.onboarded = false,
+    this.waitlistJoinedAt,
   });
 
   /// Null when the player chose "call me Candidate".
@@ -42,6 +46,10 @@ class PlayerProfile {
   /// Onboarding is done: launches go straight to the Tower.
   final bool onboarded;
 
+  /// When the player joined the Chapter 2 waitlist (FR-5 / D1: a flag, no email form); null if
+  /// they haven't.
+  final DateTime? waitlistJoinedAt;
+
   /// What interviewers call the player.
   String get displayName => firstName ?? fallbackName;
 
@@ -59,6 +67,7 @@ class PlayerProfile {
     int? Function()? weeklyGoal,
     bool? autoAdvance,
     bool? onboarded,
+    DateTime? Function()? waitlistJoinedAt,
   }) => PlayerProfile(
     firstName: firstName == null ? this.firstName : firstName(),
     experience: experience == null ? this.experience : experience(),
@@ -68,11 +77,16 @@ class PlayerProfile {
     weeklyGoal: weeklyGoal == null ? this.weeklyGoal : weeklyGoal(),
     autoAdvance: autoAdvance ?? this.autoAdvance,
     onboarded: onboarded ?? this.onboarded,
+    waitlistJoinedAt: waitlistJoinedAt == null
+        ? this.waitlistJoinedAt
+        : waitlistJoinedAt(),
   );
 }
 
-/// Where the profile is kept. [LocalProfileRepository] keeps it on the device; brief 08 syncs
-/// it to Supabase behind this same interface. No sign-up: the silent guest is the only account.
+/// Where the profile is kept. The app uses the drift store (`DriftProfileRepository`), which
+/// queues every change for the server; [LocalProfileRepository] was brief 13's first store and is
+/// now only read once, to carry an existing profile over. No sign-up: the silent guest is the
+/// only account.
 abstract interface class ProfileRepository {
   /// The stored profile, or a fresh one (not onboarded) on first launch.
   Future<PlayerProfile> load();
@@ -100,8 +114,11 @@ class LocalProfileRepository implements ProfileRepository {
   @override
   Future<PlayerProfile> load() async => PlayerProfile(
     firstName: await _prefs.getString(_name),
-    experience: _byName(Experience.values, await _prefs.getString(_experience)),
-    targetRole: _byName(TargetRole.values, await _prefs.getString(_role)),
+    experience: enumByName(
+      Experience.values,
+      await _prefs.getString(_experience),
+    ),
+    targetRole: enumByName(TargetRole.values, await _prefs.getString(_role)),
     nervesLevel: await _prefs.getInt(_nerves),
     calmMode: await _prefs.getBool(_calm) ?? false,
     weeklyGoal: await _prefs.getInt(_goal),
@@ -126,14 +143,6 @@ class LocalProfileRepository implements ProfileRepository {
     T? value,
     Future<void> Function(String, T) set,
   ) => value == null ? _prefs.remove(key) : set(key, value);
-
-  // A value from an older build that no longer names a case reads as unanswered.
-  static T? _byName<T extends Enum>(List<T> values, String? name) {
-    for (final v in values) {
-      if (v.name == name) return v;
-    }
-    return null;
-  }
 }
 
 /// The profile for this run only: tests, and anywhere the device store isn't wanted.
@@ -169,4 +178,23 @@ class ProfileNotifier extends AsyncNotifier<PlayerProfile> {
     state = AsyncData(next);
     await ref.read(profileRepositoryProvider).save(next);
   }
+
+  /// Joins the Chapter 2 waitlist (FR-5 / D1: a timestamp, no email form) and fires
+  /// `waitlist_joined` once. Joining again changes nothing.
+  Future<void> joinWaitlist() async {
+    if ((await future).waitlistJoinedAt != null) return;
+    await change(
+      (p) => p.copyWith(waitlistJoinedAt: () => DateTime.now().toUtc()),
+    );
+    ref.read(analyticsProvider).track(AnalyticsEvent.waitlistJoined);
+  }
+}
+
+/// The case of [values] called [name]; null for a name from another build (it reads as
+/// unanswered).
+T? enumByName<T extends Enum>(List<T> values, String? name) {
+  for (final v in values) {
+    if (v.name == name) return v;
+  }
+  return null;
 }

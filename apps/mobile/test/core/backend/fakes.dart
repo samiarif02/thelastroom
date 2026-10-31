@@ -25,12 +25,58 @@ const Env emptyEnv = Env(
 );
 
 /// A [Backend] whose answers each test scripts. The defaults are a first launch that works.
+/// Its tables behave like the server's: attempts are insert-or-skip on `attempt_id`, the
+/// profile is one row. [online] false makes every data call fail, like a dropped network.
 class FakeBackend implements Backend {
   FakeBackend({
     Future<BackendSession> Function()? restore,
     Future<GuestSession> Function()? signIn,
   }) : _restore = restore ?? (() async => const NoSession()),
        _signIn = signIn ?? (() async => const GuestSession(userId: guestId));
+
+  /// The server's `mission_attempts`, by `attempt_id`.
+  final Map<String, RemoteAttempt> attempts = {};
+  RemoteProfile? profile;
+  bool online = true;
+
+  /// Each `insertAttempts` call's batch size.
+  final List<int> attemptBatches = [];
+  int profileUpserts = 0;
+  int fetches = 0;
+
+  void _network() {
+    if (!online) throw const BackendException('offline');
+  }
+
+  @override
+  Future<void> insertAttempts(List<RemoteAttempt> batch) async {
+    _network();
+    attemptBatches.add(batch.length);
+    for (final a in batch) {
+      attempts.putIfAbsent(a.attemptId, () => a);
+    }
+  }
+
+  @override
+  Future<void> upsertProfile(RemoteProfile p) async {
+    _network();
+    profileUpserts++;
+    profile = p;
+  }
+
+  @override
+  Future<List<RemoteAttempt>> fetchAttempts() async {
+    _network();
+    fetches++;
+    return attempts.values.toList()
+      ..sort((a, b) => a.completedAt.compareTo(b.completedAt));
+  }
+
+  @override
+  Future<RemoteProfile?> fetchProfile() async {
+    _network();
+    return profile;
+  }
 
   static const String guestId = '00000000-0000-4000-8000-000000000001';
 

@@ -3,7 +3,7 @@
 -- can't set created_at or another user's user_id.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(16);
+select plan(17);
 
 insert into auth.users (id, email, is_anonymous) values
   ('aaaaaaaa-0000-4000-8000-00000000000a', 'a@example.test', true),
@@ -19,9 +19,9 @@ prepare sync_attempt(uuid) as
   insert into public.mission_attempts (
     attempt_id, mission_id, content_schema_version,
     relevance_score, specificity_score, structure_score, adaptability_score, total_score,
-    hinted, flags, completed_at, created_at
+    hinted, flags, completed_at
   ) values (
-    $1, 'mission_01', 1, 80, 60, 70, 50, 66, false, array['vague'], '2026-10-28 20:00+00', '2000-01-01'
+    $1, 'mission_01', 1, 80, 60, 70, 50, 66, false, array['vague'], '2026-10-28 20:00+00'
   )
   on conflict (attempt_id) do nothing;
 
@@ -56,6 +56,16 @@ select throws_ok(
   '42501',
   null,
   'a user can''t insert an attempt for another user'
+);
+
+select throws_ok(
+  $$ insert into public.mission_attempts (
+       attempt_id, mission_id, content_schema_version, relevance_score, specificity_score,
+       structure_score, adaptability_score, total_score, hinted, completed_at, created_at
+     ) values (gen_random_uuid(), 'mission_01', 1, 0, 0, 0, 0, 0, false, now(), '2000-01-01') $$,
+  '42501',
+  null,
+  'a client can''t send created_at (column grants)'
 );
 
 select throws_ok(
