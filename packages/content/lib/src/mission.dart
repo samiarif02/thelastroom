@@ -149,6 +149,15 @@ class Beat {
   /// The interviewer's line straight after the pick, by how it landed. `null`: no reaction.
   final BeatReaction? reaction;
 
+  /// THE way to build the [ReasonPick] for [reason] given after picking [optionId]. The reason
+  /// only counts (can cost 40 %) on a strongest line; a weak line keeps its own points, and
+  /// [Reason.tempts] tells the debrief which misconception the player fell for.
+  ReasonPick reasonPick(Reason reason, String optionId) => ReasonPick(
+    reasonId: reason.id,
+    sound: reason.isSoundFor(optionId),
+    counts: isStrongest(optionId),
+  );
+
   /// Whether [optionId] is a strongest line of this beat: the smallest weighted shortfall on
   /// relevance, specificity and structure (the measure the debrief's red pen uses). Lines tied
   /// for best are all strongest. The mission player passes this to `judgePick`.
@@ -160,8 +169,9 @@ class Beat {
   }
 }
 
-/// "Why that line?": the question and 3–4 reasons, one of them the right reasoning for each
-/// option.
+/// "Why that line?": the question and 3–4 reasons. Reasons are principles about interviewing,
+/// never a restatement of a line: one is the real reason the strongest line works, the others
+/// are the misconceptions that tempt people into the weak lines.
 class ReasonPrompt {
   const ReasonPrompt({required this.line, required this.reasons});
 
@@ -176,18 +186,26 @@ class Reason implements Identified {
     required this.id,
     required this.text,
     this.soundFor = const {},
+    this.tempts = const {},
   });
 
   @override
   final String id;
   final String text;
 
-  /// The option ids this reason correctly explains. Empty: a common misconception, never sound.
+  /// The option ids this reason correctly explains: only the beat's strongest line(s). Empty: a
+  /// misconception, never sound.
   final Set<String> soundFor;
+
+  /// The weak option ids this misconception leads people to, so the debrief can say "You fell
+  /// for: …". Empty on the sound reason.
+  final Set<String> tempts;
 
   /// Whether this is the right reasoning for [optionId].
   bool isSoundFor(String optionId) => soundFor.contains(optionId);
 
+  /// Kept for compatibility. The mission player uses [Beat.reasonPick], which also knows
+  /// whether the reason can cost the pick anything.
   ReasonPick pickFor(String optionId) =>
       ReasonPick(reasonId: id, sound: isSoundFor(optionId));
 }

@@ -63,6 +63,42 @@ void main() {
   List<String> problems(ContentBundle bundle) =>
       validateContent(bundle).map((i) => i.toString()).toList();
 
+  const reaction = BeatReaction(
+    strong: SceneLine(speakerId: 'priya', text: 'Good.'),
+    weak: SceneLine(speakerId: 'priya', text: 'Hm.'),
+    guessed: SceneLine(speakerId: 'priya', text: 'Too quick.'),
+  );
+
+  /// An open beat over [options] with a valid why step: one principle sound for the strongest
+  /// line, one misconception tempting each other line (unless [reasons] are given).
+  Beat openBeat(List<AnswerOption> options, {List<Reason>? reasons}) {
+    final beat = Beat(kind: BeatKind.open, options: options);
+    return Beat(
+      kind: BeatKind.open,
+      options: options,
+      why: ReasonPrompt(
+        line: const SceneLine(speakerId: 'priya', text: 'Why that line?'),
+        reasons:
+            reasons ??
+            [
+              for (final o in options)
+                beat.isStrongest(o.id)
+                    ? Reason(
+                        id: 'why_${o.id}',
+                        text: 'Be specific.',
+                        soundFor: {o.id},
+                      )
+                    : Reason(
+                        id: 'why_${o.id}',
+                        text: 'Myth ${o.id}.',
+                        tempts: {o.id},
+                      ),
+            ],
+      ),
+      reaction: reaction,
+    );
+  }
+
   test('the content schema version is positive', () {
     expect(contentSchemaVersion, greaterThan(0));
   });
@@ -209,16 +245,15 @@ void main() {
 
   test('an answer line is at most $maxOptionWords words (writing note 4)', () {
     final beats = [...base.beats];
-    beats[0] = Beat(
-      kind: BeatKind.open,
-      why: base.beats.first.why,
-      reaction: base.beats.first.reaction,
-      options: [
-        option('o1', text: List.filled(maxOptionWords + 1, 'word').join(' ')),
-        option('o2', text: List.filled(maxOptionWords, 'word').join(' ')),
-        option('o3'),
-      ],
-    );
+    beats[0] = openBeat([
+      option(
+        'o1',
+        score: 3,
+        text: List.filled(maxOptionWords + 1, 'word').join(' '),
+      ),
+      option('o2', text: List.filled(maxOptionWords, 'word').join(' ')),
+      option('o3', score: 1),
+    ]);
     expect(problems(withMission(beats: beats)), [
       'o1: is ${maxOptionWords + 1} words, over $maxOptionWords',
     ]);
@@ -241,21 +276,16 @@ void main() {
 
   test('a line can only teach a lesson for a flag it carries', () {
     final beats = [...base.beats];
-    beats[0] = Beat(
-      kind: BeatKind.open,
-      why: base.beats.first.why,
-      reaction: base.beats.first.reaction,
-      options: [
-        option(
-          'o1',
-          score: 1,
-          flags: {Flag.vague},
-          lessonId: 'lesson_name_your_part',
-        ),
-        option('o2'),
-        option('o3'),
-      ],
-    );
+    beats[0] = openBeat([
+      option(
+        'o1',
+        score: 1,
+        flags: {Flag.vague},
+        lessonId: 'lesson_name_your_part',
+      ),
+      option('o2', score: 3),
+      option('o3'),
+    ]);
     expect(problems(withMission(beats: beats)), [
       'o1: teaches lesson_name_your_part, a we_not_i lesson, but is not flagged we_not_i',
     ]);
@@ -436,127 +466,173 @@ void main() {
   });
 
   group('why step and reaction (wave 5)', () {
-    // The fixture's open beat (o1, o2, o3) with a why step and a reaction.
-    Beat openWith({List<Reason>? reasons, SceneLine? reacting}) {
-      final open = base.beats.first;
-      return Beat(
-        kind: open.kind,
-        options: open.options,
-        why: ReasonPrompt(
-          line: const SceneLine(speakerId: 'priya', text: 'Why that line?'),
-          reasons:
-              reasons ??
-              const [
-                Reason(id: 'r1', text: 'It is specific.', soundFor: {'o1'}),
-                Reason(id: 'r2', text: 'It is modest.', soundFor: {'o2'}),
-                Reason(id: 'r3', text: 'It is safe.', soundFor: {'o3'}),
-              ],
-        ),
-        reaction: BeatReaction(
-          strong:
-              reacting ?? const SceneLine(speakerId: 'priya', text: 'Good.'),
-          weak: const SceneLine(speakerId: 'priya', text: 'Hm.'),
-          guessed: const SceneLine(speakerId: 'priya', text: 'Too quick.'),
-        ),
-      );
-    }
-
+    // o1 is the strongest line (3s); o2 and o3 are weak (1s).
+    final options = [
+      option('o1', score: 3),
+      option('o2', score: 1),
+      option('o3', score: 1),
+    ];
     List<String> problemsWith(Beat open) =>
         problems(withMission(beats: [open, ...base.beats.skip(1)]));
+    const sound = Reason(id: 'r1', text: 'Be specific.', soundFor: {'o1'});
+    const myth2 = Reason(id: 'r2', text: 'Modesty wins.', tempts: {'o2'});
+    const myth3 = Reason(id: 'r3', text: 'Safe is best.', tempts: {'o3'});
+
+    test(
+      'one principle for the strongest line, one myth per weak line, passes',
+      () {
+        expect(problemsWith(openBeat(options)), isEmpty);
+      },
+    );
 
     test('every beat needs a why step and a reaction', () {
-      final open = base.beats.first;
-      expect(problemsWith(Beat(kind: open.kind, options: open.options)), [
+      expect(problemsWith(Beat(kind: BeatKind.open, options: options)), [
         'm_fixture open beat: needs a why step and a reaction',
       ]);
     });
 
-    test('a well-formed why step and reaction pass', () {
-      expect(problemsWith(openWith()), isEmpty);
-    });
-
-    test('every option has exactly one sound reason', () {
+    test('exactly one sound reason, and only for a strongest line', () {
       expect(
         problemsWith(
-          openWith(
+          openBeat(
+            options,
             reasons: const [
-              Reason(id: 'r1', text: 'It is specific.', soundFor: {'o1', 'o2'}),
-              Reason(id: 'r2', text: 'It is modest.', soundFor: {'o2'}),
-              Reason(id: 'r3', text: 'It is safe.'),
+              sound,
+              Reason(
+                id: 'r2',
+                text: 'Modesty wins.',
+                soundFor: {'o2'},
+                tempts: {'o2'},
+              ),
+              myth3,
             ],
           ),
         ),
         [
-          'o2: has 2 sound reasons, needs exactly 1',
-          'o3: has 0 sound reasons, needs exactly 1',
+          'm_fixture open beat: has 2 sound reasons, needs exactly 1',
+          'r2: is sound for o2, which is not a strongest line',
         ],
       );
     });
 
-    test('a sound reason only names options of its own beat', () {
+    test('every weak line is tempted by exactly one misconception', () {
       expect(
         problemsWith(
-          openWith(
+          openBeat(
+            options,
             reasons: const [
-              Reason(id: 'r1', text: 'It is specific.', soundFor: {'o1', 'e1'}),
-              Reason(id: 'r2', text: 'It is modest.', soundFor: {'o2'}),
-              Reason(id: 'r3', text: 'It is safe.', soundFor: {'o3'}),
+              sound,
+              Reason(id: 'r2', text: 'Modesty wins.', tempts: {'o2', 'o1'}),
+              Reason(id: 'r3', text: 'Safe is best.', tempts: {'o2'}),
             ],
           ),
         ),
-        ['r1: is sound for e1, not an option of its beat'],
+        [
+          'r2: tempts o1, which is a strongest line',
+          'o2: is tempted by 2 reasons, needs exactly 1',
+          'o3: is tempted by 0 reasons, needs exactly 1',
+        ],
       );
     });
 
-    test('3–4 reasons, with unique snake_case ids', () {
+    test('a reason only names options of its own beat', () {
       expect(
         problemsWith(
-          openWith(
+          openBeat(
+            options,
             reasons: const [
-              Reason(id: 'r1', text: 'It is specific.', soundFor: {'o1'}),
-              Reason(id: 'r1', text: 'It is modest.', soundFor: {'o2', 'o3'}),
+              sound,
+              Reason(id: 'r2', text: 'Modesty wins.', tempts: {'o2', 'e2'}),
+              myth3,
+            ],
+          ),
+        ),
+        ['r2: names e2, not an option of its beat'],
+      );
+    });
+
+    test('a reason is a principle: it never repeats five words of a line', () {
+      final lined = [
+        option(
+          'o1',
+          score: 3,
+          text: 'I tagged six hundred support tickets myself.',
+        ),
+        option('o2', score: 1),
+        option('o3', score: 1),
+      ];
+      expect(
+        problemsWith(
+          openBeat(
+            lined,
+            reasons: const [
+              Reason(
+                id: 'r1',
+                text: 'Because I Tagged Six Hundred Support tickets.',
+                soundFor: {'o1'},
+              ),
+              myth2,
+              myth3,
+            ],
+          ),
+        ),
+        ['r1: repeats "i tagged six hundred support" from o1'],
+      );
+      expect(sharedPhrase('one two three four', 'one two three four'), isNull);
+    });
+
+    test('3–4 reasons, with unique ids, of at most $maxReasonWords words', () {
+      final long = List.filled(maxReasonWords + 1, 'word').join(' ');
+      expect(
+        problemsWith(
+          openBeat(
+            options,
+            reasons: [
+              Reason(id: 'r1', text: long, soundFor: const {'o1'}),
+              const Reason(
+                id: 'r1',
+                text: 'Modesty wins.',
+                tempts: {'o2', 'o3'},
+              ),
             ],
           ),
         ),
         [
           'm_fixture open beat: has 2 reasons, needs $minReasons–$maxReasons',
+          'r1: is ${maxReasonWords + 1} words, over $maxReasonWords',
           'r1: id is used more than once',
         ],
       );
     });
 
-    test('a reason is at most $maxReasonWords words', () {
-      final long = List.filled(maxReasonWords + 1, 'word').join(' ');
-      expect(
-        problemsWith(
-          openWith(
-            reasons: [
-              Reason(id: 'r1', text: long, soundFor: const {'o1'}),
-              const Reason(id: 'r2', text: 'It is modest.', soundFor: {'o2'}),
-              const Reason(id: 'r3', text: 'It is safe.', soundFor: {'o3'}),
-            ],
-          ),
-        ),
-        ['r1: is ${maxReasonWords + 1} words, over $maxReasonWords'],
-      );
-    });
-
     test('the interviewer says the why line and the reactions', () {
+      final beat = openBeat(options);
       expect(
         problemsWith(
-          openWith(
-            reacting: const SceneLine(speakerId: 'nobody', text: 'Hi.'),
+          Beat(
+            kind: beat.kind,
+            options: beat.options,
+            why: beat.why,
+            reaction: const BeatReaction(
+              strong: SceneLine(speakerId: 'nobody', text: 'Hi.'),
+              weak: SceneLine(speakerId: 'priya', text: 'Hm.'),
+              guessed: SceneLine(speakerId: 'priya', text: 'Too quick.'),
+            ),
           ),
         ),
         ['m_fixture open beat: speaker nobody is not an interviewer'],
       );
     });
 
-    test('a reason marks itself sound only for the options it names', () {
-      const reason = Reason(id: 'r', text: 'x', soundFor: {'a'});
-      expect(reason.pickFor('a').sound, isTrue);
-      expect(reason.pickFor('b').sound, isFalse);
-      expect(reason.pickFor('a').reasonId, 'r');
+    test('reasonPick: the reason only counts on a strongest line', () {
+      final beat = openBeat(options);
+      final strongRight = beat.reasonPick(sound, 'o1');
+      final strongWrong = beat.reasonPick(myth2, 'o1');
+      final weak = beat.reasonPick(myth2, 'o2');
+      expect((strongRight.sound, strongRight.counts), (true, true));
+      expect((strongWrong.sound, strongWrong.counts), (false, true));
+      expect((weak.sound, weak.counts), (false, false));
+      expect(weak.reasonId, 'r2');
     });
   });
 

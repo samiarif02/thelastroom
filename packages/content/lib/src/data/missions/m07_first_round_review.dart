@@ -44,19 +44,19 @@ const missionFirstRoundReview = Mission(
         line: SceneLine(speakerId: marcusId, text: 'Why that one?'),
         reasons: [
           Reason(
-            id: 'm07_open_why_unasked',
-            text: "It's a problem nobody had asked me to fix.",
+            id: 'm07_open_why_fits',
+            text: 'Pick an example that fits the question exactly: nobody asked me.',
             soundFor: {'m07_open_cafe_late'},
           ),
           Reason(
-            id: 'm07_open_why_research',
-            text: "It's my strongest project, with real research behind it.",
-            soundFor: {'m07_open_supervisor_asked'},
+            id: 'm07_open_why_impressive',
+            text: 'My most impressive project is the best example, whatever the question.',
+            tempts: {'m07_open_supervisor_asked'},
           ),
           Reason(
-            id: 'm07_open_why_trait',
-            text: "It tells him I'm proactive before I give the example.",
-            soundFor: {'m07_open_proactive'},
+            id: 'm07_open_why_trait_first',
+            text: 'Naming the trait first tells him what the story proves.',
+            tempts: {'m07_open_proactive'},
           ),
         ],
       ),
@@ -123,19 +123,19 @@ const missionFirstRoundReview = Mission(
         line: SceneLine(speakerId: marcusId, text: 'Why tell it like that?'),
         reasons: [
           Reason(
-            id: 'm07_evidence_why_measured',
-            text: 'It says what I measured, what I made and how I tested it.',
+            id: 'm07_evidence_why_tested',
+            text: 'Show what I measured, what I built and how I tested it.',
             soundFor: {'m07_evidence_checklist'},
           ),
           Reason(
-            id: 'm07_evidence_why_agreed',
-            text: 'It shows everyone agreed and followed the new routine.',
-            soundFor: {'m07_evidence_team_routine'},
+            id: 'm07_evidence_why_consensus',
+            text: 'Getting everyone to agree is the real sign of a good improvement.',
+            tempts: {'m07_evidence_team_routine'},
           ),
           Reason(
-            id: 'm07_evidence_why_example',
-            text: 'It shows my work ethic set an example.',
-            soundFor: {'m07_evidence_harder'},
+            id: 'm07_evidence_why_effort',
+            text: 'Setting an example with effort is how real change happens.',
+            tempts: {'m07_evidence_harder'},
           ),
         ],
       ),
@@ -202,19 +202,21 @@ const missionFirstRoundReview = Mission(
         line: SceneLine(speakerId: marcusId, text: 'Why close on that?'),
         reasons: [
           Reason(
-            id: 'm07_land_why_lasting',
-            text: 'It gives the result, and how the fix outlasted my shifts.',
+            id: 'm07_land_why_lasted',
+            text: 'End with the result that lasted, so the improvement is proven.',
             soundFor: {'m07_land_on_time'},
           ),
           Reason(
-            id: 'm07_land_why_leader',
-            text: "It shows the leadership I'd bring to Northstar.",
-            soundFor: {'m07_land_natural_leader'},
+            id: 'm07_land_why_about_me',
+            text:
+                'Drawing out what it says about me makes the ending stronger.',
+            tempts: {'m07_land_natural_leader'},
           ),
           Reason(
             id: 'm07_land_why_modest',
-            text: "It's modest about a small example.",
-            soundFor: {'m07_land_small_thing'},
+            text:
+                'Playing down a small example keeps me from sounding arrogant.',
+            tempts: {'m07_land_small_thing'},
           ),
         ],
       ),

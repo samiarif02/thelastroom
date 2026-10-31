@@ -55,6 +55,33 @@ const int maxReasons = 4;
 /// A reason is one thought the player can hold at a glance, shorter than an answer line.
 const int maxReasonWords = 16;
 
+/// A reason may not share a run of this many words with an option of its beat: reasons are
+/// principles, not paraphrases of a line.
+const int maxSharedWords = 4;
+
+/// The first run of more than [maxSharedWords] words [a] and [b] share (ignoring case and
+/// punctuation), or null.
+String? sharedPhrase(String a, String b) {
+  List<String> words(String t) => t
+      .toLowerCase()
+      .replaceAll(RegExp(r"[^a-z0-9%' ]"), ' ')
+      .split(RegExp(r'\s+'))
+      .where((w) => w.isNotEmpty)
+      .toList();
+  final wa = words(a);
+  final wb = words(b);
+  const n = maxSharedWords + 1;
+  final runs = <String>{};
+  for (var i = 0; i + n <= wb.length; i++) {
+    runs.add(wb.sublist(i, i + n).join(' '));
+  }
+  for (var i = 0; i + n <= wa.length; i++) {
+    final run = wa.sublist(i, i + n).join(' ');
+    if (runs.contains(run)) return run;
+  }
+  return null;
+}
+
 /// The number of words in [text], split on whitespace.
 int wordCount(String text) =>
     text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
@@ -99,8 +126,9 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
     }
   }
 
-  // The why step: 3–4 reasons, each option explained by exactly one sound reason, and a sound
-  // reason only ever names an option of its own beat.
+  // The why step: 3–4 principles. Exactly one is sound, and only for the beat's strongest
+  // line(s); every weak line is tempted by exactly one misconception; and no reason repeats an
+  // option's wording, so "why?" can't be answered by matching sentences.
   void checkWhy(String beatId, Beat beat, ReasonPrompt why) {
     checkSpeaker(beatId, why.line);
     final reasons = why.reasons;
@@ -111,6 +139,14 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
       );
     }
     final optionIds = {for (final o in beat.options) o.id};
+    final strongest = {
+      for (final o in beat.options)
+        if (beat.isStrongest(o.id)) o.id,
+    };
+    final sound = reasons.where((r) => r.soundFor.isNotEmpty).toList();
+    if (sound.length != 1) {
+      issue(beatId, 'has ${sound.length} sound reasons, needs exactly 1');
+    }
     for (final reason in reasons) {
       checkId(reason);
       if (wordCount(reason.text) > maxReasonWords) {
@@ -119,14 +155,32 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
           'is ${wordCount(reason.text)} words, over $maxReasonWords',
         );
       }
-      for (final optionId in reason.soundFor.difference(optionIds)) {
-        issue(reason.id, 'is sound for $optionId, not an option of its beat');
+      for (final optionId in {
+        ...reason.soundFor,
+        ...reason.tempts,
+      }.difference(optionIds)) {
+        issue(reason.id, 'names $optionId, not an option of its beat');
+      }
+      for (final optionId in reason.soundFor.difference(strongest)) {
+        issue(
+          reason.id,
+          'is sound for $optionId, which is not a strongest line',
+        );
+      }
+      for (final optionId in reason.tempts.intersection(strongest)) {
+        issue(reason.id, 'tempts $optionId, which is a strongest line');
+      }
+      for (final option in beat.options) {
+        final shared = sharedPhrase(reason.text, option.text);
+        if (shared != null) {
+          issue(reason.id, 'repeats "$shared" from ${option.id}');
+        }
       }
     }
-    for (final optionId in optionIds) {
-      final sound = reasons.where((r) => r.isSoundFor(optionId)).length;
-      if (sound != 1) {
-        issue(optionId, 'has $sound sound reasons, needs exactly 1');
+    for (final optionId in optionIds.difference(strongest)) {
+      final tempting = reasons.where((r) => r.tempts.contains(optionId)).length;
+      if (tempting != 1) {
+        issue(optionId, 'is tempted by $tempting reasons, needs exactly 1');
       }
     }
   }

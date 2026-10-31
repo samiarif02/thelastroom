@@ -65,7 +65,7 @@ void main() {
           beat: beat.kind,
           choice: best.scored,
           decidedIn: decidedIn,
-          reason: reason.pickFor(best.id),
+          reason: beat.reasonPick(reason, best.id),
         );
       }
 

@@ -54,9 +54,9 @@ const fixture = ContentBundle(
           why: ReasonPrompt(
             line: SceneLine(speakerId: 'priya', text: 'Why that line?'),
             reasons: [
-              Reason(id: 'o_r1', text: 'It is specific.', soundFor: {'o1'}),
-              Reason(id: 'o_r2', text: 'It is modest.', soundFor: {'o2'}),
-              Reason(id: 'o_r3', text: 'It is safe.', soundFor: {'o3'}),
+              Reason(id: 'o_r1', text: 'Be specific.', soundFor: {'o1'}),
+              Reason(id: 'o_r2', text: 'Modesty wins.', tempts: {'o2'}),
+              Reason(id: 'o_r3', text: 'Safe is best.', tempts: {'o3'}),
             ],
           ),
           reaction: _reaction,
@@ -77,9 +77,9 @@ const fixture = ContentBundle(
           why: ReasonPrompt(
             line: SceneLine(speakerId: 'priya', text: 'Why that line?'),
             reasons: [
-              Reason(id: 'e_r1', text: 'It is specific.', soundFor: {'e1'}),
-              Reason(id: 'e_r2', text: 'It is modest.', soundFor: {'e2'}),
-              Reason(id: 'e_r3', text: 'It is safe.', soundFor: {'e3'}),
+              Reason(id: 'e_r1', text: 'Be specific.', soundFor: {'e1'}),
+              Reason(id: 'e_r2', text: 'Modesty wins.', tempts: {'e2'}),
+              Reason(id: 'e_r3', text: 'Safe is best.', tempts: {'e3'}),
             ],
           ),
           reaction: _reaction,
@@ -100,9 +100,9 @@ const fixture = ContentBundle(
           why: ReasonPrompt(
             line: SceneLine(speakerId: 'priya', text: 'Why that line?'),
             reasons: [
-              Reason(id: 'l_r1', text: 'It is specific.', soundFor: {'l1'}),
-              Reason(id: 'l_r2', text: 'It is modest.', soundFor: {'l2'}),
-              Reason(id: 'l_r3', text: 'It is safe.', soundFor: {'l3'}),
+              Reason(id: 'l_r1', text: 'Be specific.', soundFor: {'l1'}),
+              Reason(id: 'l_r2', text: 'Modesty wins.', tempts: {'l2'}),
+              Reason(id: 'l_r3', text: 'Safe is best.', tempts: {'l3'}),
             ],
           ),
           reaction: _reaction,

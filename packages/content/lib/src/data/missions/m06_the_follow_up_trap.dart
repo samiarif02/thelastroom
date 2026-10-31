@@ -91,20 +91,20 @@ const missionTheFollowUpTrap = Mission(
         line: SceneLine(speakerId: lenaId, text: 'Why start like that?'),
         reasons: [
           Reason(
-            id: 'm06_open_why_plain',
-            text: 'It gives the facts plainly, the same as before.',
+            id: 'm06_open_why_same_facts',
+            text:
+                'Asked again, give the same facts plainly, so the story holds.',
             soundFor: {'m06_open_short_version'},
           ),
           Reason(
-            id: 'm06_open_why_reframe',
-            text: 'It reframes it as a data problem I spotted.',
-            soundFor: {'m06_open_data_issue'},
+            id: 'm06_open_why_spin',
+            text: 'Recasting a mistake as a problem I spotted makes me look better.',
+            tempts: {'m06_open_data_issue'},
           ),
           Reason(
-            id: 'm06_open_why_consistent',
-            text:
-                'It repeats my STAR answer to Marcus, so it sounds consistent.',
-            soundFor: {'m06_open_as_i_told'},
+            id: 'm06_open_why_word_for_word',
+            text: "Repeating my earlier structure word for word shows I'm consistent.",
+            tempts: {'m06_open_as_i_told'},
           ),
         ],
       ),
@@ -171,19 +171,19 @@ const missionTheFollowUpTrap = Mission(
         line: SceneLine(speakerId: lenaId, text: 'Why give me that?'),
         reasons: [
           Reason(
-            id: 'm06_evidence_why_numbers',
-            text: 'It gives the exact numbers, so the story holds up.',
+            id: 'm06_evidence_why_adds_up',
+            text: 'Exact numbers that add up are what make a retold story believable.',
             soundFor: {'m06_evidence_rows'},
           ),
           Reason(
-            id: 'm06_evidence_why_move_on',
-            text: 'It moves on to what I learned, not the details.',
-            soundFor: {'m06_evidence_doesnt_matter'},
+            id: 'm06_evidence_why_mature',
+            text: 'Moving past the details to the lesson shows maturity.',
+            tempts: {'m06_evidence_doesnt_matter'},
           ),
           Reason(
-            id: 'm06_evidence_why_pressure',
-            text: 'It explains the pressure I was under.',
-            soundFor: {'m06_evidence_three_weeks'},
+            id: 'm06_evidence_why_context',
+            text: 'Explaining the pressure I was under makes the mistake understandable.',
+            tempts: {'m06_evidence_three_weeks'},
           ),
         ],
       ),
@@ -250,19 +250,20 @@ const missionTheFollowUpTrap = Mission(
         line: SceneLine(speakerId: lenaId, text: 'Why end there?'),
         reasons: [
           Reason(
-            id: 'm06_land_why_unchanged',
-            text: 'It confirms the story is unchanged, and what I do now.',
+            id: 'm06_land_why_confirm',
+            text:
+                "Confirm it's the same story, and show what has changed since.",
             soundFor: {'m06_land_same_story'},
           ),
           Reason(
-            id: 'm06_land_why_unsure',
-            text: 'It admits I might be remembering it wrong.',
-            soundFor: {'m06_land_lead_caught_it'},
+            id: 'm06_land_why_doubt',
+            text: "Admitting I might misremember shows I'm open and honest.",
+            tempts: {'m06_land_lead_caught_it'},
           ),
           Reason(
-            id: 'm06_land_why_offer',
-            text: 'It offers to go through any part again.',
-            soundFor: {'m06_land_anything_else'},
+            id: 'm06_land_why_nothing_hidden',
+            text: "Offering to explain more shows I've got nothing to hide.",
+            tempts: {'m06_land_anything_else'},
           ),
         ],
       ),

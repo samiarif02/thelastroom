@@ -35,19 +35,19 @@ const missionShowMeTheEvidence = Mission(
         line: SceneLine(speakerId: marcusId, text: 'Why start there?'),
         reasons: [
           Reason(
-            id: 'm04_open_why_noticed',
-            text: 'It sets up one problem I noticed and what I did about it.',
+            id: 'm04_open_why_mine',
+            text: 'Open with the specific problem I noticed, so the story is clearly mine.',
             soundFor: {'m04_open_same_question'},
           ),
           Reason(
-            id: 'm04_open_why_team_spotted',
-            text: 'It shows the whole team spotted the problem.',
-            soundFor: {'m04_open_team_realised'},
+            id: 'm04_open_why_collaborative',
+            text: "Starting with the team shows I'm collaborative, which every manager wants.",
+            tempts: {'m04_open_team_realised'},
           ),
           Reason(
-            id: 'm04_open_why_approach',
-            text: 'It explains how I work before I give the example.',
-            soundFor: {'m04_open_data_lead'},
+            id: 'm04_open_why_frame',
+            text: 'Stating my approach first frames the example the right way.',
+            tempts: {'m04_open_data_lead'},
           ),
         ],
       ),
@@ -114,19 +114,20 @@ const missionShowMeTheEvidence = Mission(
         line: SceneLine(speakerId: marcusId, text: 'Why those details?'),
         reasons: [
           Reason(
-            id: 'm04_evidence_why_count',
-            text: 'It gives the count, the finding and what I built.',
+            id: 'm04_evidence_why_numbers',
+            text: 'He asked about data, so give the actual numbers and what I did with them.',
             soundFor: {'m04_evidence_tagged'},
           ),
           Reason(
-            id: 'm04_evidence_why_result',
-            text: 'It gives the result the team got.',
-            soundFor: {'m04_evidence_we_cut'},
+            id: 'm04_evidence_why_share_credit',
+            text:
+                'Sharing credit with the team is the professional thing to do.',
+            tempts: {'m04_evidence_we_cut'},
           ),
           Reason(
-            id: 'm04_evidence_why_overview',
-            text: 'It gives the patterns without listing every number.',
-            soundFor: {'m04_evidence_patterns'},
+            id: 'm04_evidence_why_summary',
+            text: 'Summarising the findings is clearer than burying him in figures.',
+            tempts: {'m04_evidence_patterns'},
           ),
         ],
       ),
@@ -193,19 +194,20 @@ const missionShowMeTheEvidence = Mission(
         line: SceneLine(speakerId: marcusId, text: 'Why end there?'),
         reasons: [
           Reason(
-            id: 'm04_land_why_lesson',
-            text: "It gives the result and the habit I'd repeat here.",
+            id: 'm04_land_why_measured',
+            text: "Close with the measured result and what I'd carry into this job.",
             soundFor: {'m04_land_quarter'},
           ),
           Reason(
-            id: 'm04_land_why_impact',
-            text: 'It shows the size of the impact I can bring.',
-            soundFor: {'m04_land_huge_impact'},
+            id: 'm04_land_why_big_claim',
+            text: 'Big claims about impact are what make an answer memorable.',
+            tempts: {'m04_land_huge_impact'},
           ),
           Reason(
-            id: 'm04_land_why_team_happy',
-            text: 'It shows the team was happy with the work.',
-            soundFor: {'m04_land_team_proud'},
+            id: 'm04_land_why_everyone_happy',
+            text:
+                'Ending on how pleased everyone was proves the work went well.',
+            tempts: {'m04_land_team_proud'},
           ),
         ],
       ),

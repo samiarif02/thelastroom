@@ -50,24 +50,26 @@ const missionTheOpportunity = Mission(
         ),
         reasons: [
           Reason(
-            id: 'm01_open_why_fit',
-            text: 'It ties what I enjoy to the two halves of this role.',
+            id: 'm01_open_why_the_question',
+            text: 'It answers what she actually asked: why this role, not why this company.',
             soundFor: {'m01_open_role_fit'},
           ),
           Reason(
-            id: 'm01_open_why_purpose',
-            text: "It shows I care about Northstar's purpose.",
-            soundFor: {'m01_open_believe'},
+            id: 'm01_open_why_passion',
+            text: 'Passion for the company is what wins an interviewer over.',
+            tempts: {'m01_open_believe'},
           ),
           Reason(
-            id: 'm01_open_why_honest',
-            text: "It's honest about what I need from my first job.",
-            soundFor: {'m01_open_first_job'},
+            id: 'm01_open_why_candour',
+            text:
+                'Saying what suits me is honest, and honesty is always safest.',
+            tempts: {'m01_open_first_job'},
           ),
           Reason(
-            id: 'm01_open_why_checklist',
-            text: "It proves I've checked every point on the job ad.",
-            soundFor: {'m01_open_job_ad'},
+            id: 'm01_open_why_boxes',
+            text:
+                "Interviewers want to hear you've ticked every box on the ad.",
+            tempts: {'m01_open_job_ad'},
           ),
         ],
       ),
@@ -148,24 +150,24 @@ const missionTheOpportunity = Mission(
         line: SceneLine(speakerId: priyaId, text: 'Why that example?'),
         reasons: [
           Reason(
-            id: 'm01_evidence_why_my_part',
-            text: "It's one project, my part in it, and the result in numbers.",
+            id: 'm01_evidence_why_one_story',
+            text: 'One story with my own part and a number beats a list of strengths.',
             soundFor: {'m01_evidence_sign_up'},
           ),
           Reason(
-            id: 'm01_evidence_why_team_result',
-            text: "It gives the team's result, with real numbers behind it.",
-            soundFor: {'m01_evidence_team_did'},
+            id: 'm01_evidence_why_modest',
+            text: "Saying 'we' sounds more modest than saying 'I'.",
+            tempts: {'m01_evidence_team_did'},
           ),
           Reason(
-            id: 'm01_evidence_why_habit',
-            text: "It shows the same habit across everything I've done.",
-            soundFor: {'m01_evidence_always'},
+            id: 'm01_evidence_why_pattern',
+            text: 'A pattern across my whole life is stronger than a single example.',
+            tempts: {'m01_evidence_always'},
           ),
           Reason(
-            id: 'm01_evidence_why_journey',
-            text: 'It shows how my interest grew, step by step.',
-            soundFor: {'m01_evidence_whole_story'},
+            id: 'm01_evidence_why_background',
+            text: "The full background helps her see where I'm coming from.",
+            tempts: {'m01_evidence_whole_story'},
           ),
         ],
       ),
@@ -247,24 +249,26 @@ const missionTheOpportunity = Mission(
         line: SceneLine(speakerId: priyaId, text: 'And why finish there?'),
         reasons: [
           Reason(
-            id: 'm01_land_why_daily_work',
-            text: 'It turns my story into the daily work I want here.',
+            id: 'm01_land_why_tie_back',
+            text:
+                "A good close ties my story back to the job she's hiring for.",
             soundFor: {'m01_land_bring_habit'},
           ),
           Reason(
             id: 'm01_land_why_promise',
-            text: 'It promises her team the same kind of results.',
-            soundFor: {'m01_land_same_impact'},
+            text: 'A confident promise of results is the strongest way to finish.',
+            tempts: {'m01_land_same_impact'},
           ),
           Reason(
-            id: 'm01_land_why_keen',
-            text: 'It shows how much I want to work at Northstar.',
-            soundFor: {'m01_land_any_role'},
+            id: 'm01_land_why_eager',
+            text:
+                "Showing I'd take anything proves how much I want to be here.",
+            tempts: {'m01_land_any_role'},
           ),
           Reason(
-            id: 'm01_land_why_more',
-            text: 'It offers more examples in case she wants them.',
-            soundFor: {'m01_land_trail_off'},
+            id: 'm01_land_why_offer_more',
+            text: 'Offering more examples shows I have plenty to talk about.',
+            tempts: {'m01_land_trail_off'},
           ),
         ],
       ),

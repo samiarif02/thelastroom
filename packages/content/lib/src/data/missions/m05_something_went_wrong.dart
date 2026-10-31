@@ -34,19 +34,18 @@ const missionSomethingWentWrong = Mission(
         reasons: [
           Reason(
             id: 'm05_open_why_name_it',
-            text:
-                'It names the actual mistake straight away, with the numbers.',
+            text: 'A real mistake, named plainly with its numbers, is what builds trust.',
             soundFor: {'m05_open_half_not_third'},
           ),
           Reason(
-            id: 'm05_open_why_star',
-            text: "It follows the STAR structure, so it's easy to follow.",
-            soundFor: {'m05_open_star_labels'},
+            id: 'm05_open_why_labels',
+            text: 'Labelling each STAR step shows I know how to structure an answer.',
+            tempts: {'m05_open_star_labels'},
           ),
           Reason(
-            id: 'm05_open_why_helpful',
-            text: "It's a mistake that also shows I'm helpful.",
-            soundFor: {'m05_open_too_much'},
+            id: 'm05_open_why_safe_flaw',
+            text: "The safest mistake to share is one that's secretly a strength.",
+            tempts: {'m05_open_too_much'},
           ),
         ],
       ),
@@ -114,18 +113,19 @@ const missionSomethingWentWrong = Mission(
         reasons: [
           Reason(
             id: 'm05_evidence_why_own_it',
-            text: 'It owns the cause and says how quickly I told my lead.',
+            text: 'Owning the cause and how fast I spoke up matters more than the error.',
             soundFor: {'m05_evidence_told_lead'},
           ),
           Reason(
-            id: 'm05_evidence_why_not_mine',
-            text: "It explains the error wasn't really my fault.",
-            soundFor: {'m05_evidence_export_tool'},
+            id: 'm05_evidence_why_explain',
+            text: "Explaining what really went wrong shows I wasn't careless.",
+            tempts: {'m05_evidence_export_tool'},
           ),
           Reason(
-            id: 'm05_evidence_why_caught',
-            text: 'It shows it was caught in review, so no harm was done.',
-            soundFor: {'m05_evidence_we_caught'},
+            id: 'm05_evidence_why_checks',
+            text:
+                'Saying the team caught it shows we had good checks in place.',
+            tempts: {'m05_evidence_we_caught'},
           ),
         ],
       ),
@@ -190,18 +190,18 @@ const missionSomethingWentWrong = Mission(
         reasons: [
           Reason(
             id: 'm05_land_why_habit',
-            text: 'It shows the habit I changed, and that I still use it.',
+            text: 'Show the habit I changed and still use, so the lesson is believable.',
             soundFor: {'m05_land_check_now'},
           ),
           Reason(
-            id: 'm05_land_why_learned',
-            text: 'It shows I learned and it never happened again.',
-            soundFor: {'m05_land_never_again'},
+            id: 'm05_land_why_never',
+            text: "Saying it never happened again proves I've fully learned.",
+            tempts: {'m05_land_never_again'},
           ),
           Reason(
-            id: 'm05_land_why_small',
-            text: 'It shows the damage was small in the end.',
-            soundFor: {'m05_land_not_big_deal'},
+            id: 'm05_land_why_downplay',
+            text: 'Downplaying the damage keeps the mistake from looking serious.',
+            tempts: {'m05_land_not_big_deal'},
           ),
         ],
       ),

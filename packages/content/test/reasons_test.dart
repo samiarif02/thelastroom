@@ -23,7 +23,7 @@ void main() {
         beat: beat.kind,
         choice: best.scored,
         decidedIn: decidedIn,
-        reason: reason.pickFor(best.id),
+        reason: beat.reasonPick(reason, best.id),
       );
     }
 
@@ -56,6 +56,39 @@ void main() {
         final unsound = play(mission, decidedIn: thinking, soundReason: false);
         expect(unsound.total, lessThan(sound.total));
         expect(unsound.beatCredits, everyElement(PickCredit.unsoundReason));
+      });
+
+      test('a weak line keeps its own points, whatever the reason', () {
+        for (final beat in mission.beats) {
+          for (final weak in beat.options.where(
+            (o) => !beat.isStrongest(o.id),
+          )) {
+            for (final reason in beat.why!.reasons) {
+              final pick = BeatPick(
+                beat: beat.kind,
+                choice: weak.scored,
+                decidedIn: thinking,
+                reason: beat.reasonPick(reason, weak.id),
+              );
+              expect(PickCredit.of(pick), PickCredit.full);
+            }
+          }
+        }
+      });
+
+      test('every weak line is tempted by one named misconception', () {
+        for (final beat in mission.beats) {
+          final reasons = beat.why!.reasons;
+          for (final weak in beat.options.where(
+            (o) => !beat.isStrongest(o.id),
+          )) {
+            expect(
+              reasons.where((r) => r.tempts.contains(weak.id)),
+              hasLength(1),
+            );
+          }
+          expect(reasons.where((r) => r.soundFor.isNotEmpty), hasLength(1));
+        }
       });
 
       test('the interviewer who asks the question asks why and reacts', () {

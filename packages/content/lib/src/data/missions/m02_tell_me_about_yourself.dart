@@ -32,19 +32,19 @@ const missionTellMeAboutYourself = Mission(
         line: SceneLine(speakerId: priyaId, text: 'Why start there?'),
         reasons: [
           Reason(
-            id: 'm02_open_why_study',
-            text: 'It starts with what I studied and the part that points to this job.',
+            id: 'm02_open_why_fit_first',
+            text: 'Start with what makes me fit this job, not with my whole life.',
             soundFor: {'m02_open_graduate'},
           ),
           Reason(
-            id: 'm02_open_why_roots',
-            text: "It's personal, so she remembers where my interest began.",
-            soundFor: {'m02_open_hometown'},
+            id: 'm02_open_why_origin',
+            text: 'A personal origin story makes me memorable from the first line.',
+            tempts: {'m02_open_hometown'},
           ),
           Reason(
-            id: 'm02_open_why_words',
-            text: 'It sums me up in three words she can remember.',
-            soundFor: {'m02_open_adjectives'},
+            id: 'm02_open_why_qualities',
+            text: 'Naming my best qualities is the clearest way to introduce myself.',
+            tempts: {'m02_open_adjectives'},
           ),
         ],
       ),
@@ -111,19 +111,19 @@ const missionTellMeAboutYourself = Mission(
         line: SceneLine(speakerId: priyaId, text: 'Why that example?'),
         reasons: [
           Reason(
-            id: 'm02_evidence_why_one_change',
-            text: 'One internship, one problem, and the number I changed.',
+            id: 'm02_evidence_why_one_result',
+            text: 'One result I caused, with a number, proves more than a long list.',
             soundFor: {'m02_evidence_tickets'},
           ),
           Reason(
             id: 'm02_evidence_why_range',
-            text: "It shows how much I've already done.",
-            soundFor: {'m02_evidence_whole_cv'},
+            text: 'Covering everything on my CV shows the full range I offer.',
+            tempts: {'m02_evidence_whole_cv'},
           ),
           Reason(
-            id: 'm02_evidence_why_teamwork',
-            text: "It shows I'm a team player outside work too.",
-            soundFor: {'m02_evidence_hobbies'},
+            id: 'm02_evidence_why_rounded',
+            text: 'Life outside work shows the well-rounded person behind the CV.',
+            tempts: {'m02_evidence_hobbies'},
           ),
         ],
       ),
@@ -190,19 +190,20 @@ const missionTellMeAboutYourself = Mission(
         line: SceneLine(speakerId: priyaId, text: 'And why end on that?'),
         reasons: [
           Reason(
-            id: 'm02_land_why_role',
-            text: 'It ties my story to what this role does every day.',
+            id: 'm02_land_why_connect',
+            text:
+                'End by connecting who I am to what the role does day to day.',
             soundFor: {'m02_land_this_role'},
           ),
           Reason(
             id: 'm02_land_why_ambition',
-            text: "It shows I'm ambitious and planning ahead.",
-            soundFor: {'m02_land_five_years'},
+            text: 'A long-term career plan shows ambition and commitment.',
+            tempts: {'m02_land_five_years'},
           ),
           Reason(
-            id: 'm02_land_why_hand_back',
-            text: 'It hands the conversation back to her.',
-            soundFor: {'m02_land_trail'},
+            id: 'm02_land_why_inviting',
+            text: "Inviting questions at the end shows I'm open and easy to talk to.",
+            tempts: {'m02_land_trail'},
           ),
         ],
       ),
