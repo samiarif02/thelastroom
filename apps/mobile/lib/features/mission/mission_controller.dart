@@ -12,6 +12,7 @@ import '../../core/analytics/event_value.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../core/progress/progress_repository.dart';
 import 'mission_lookup.dart';
+import 'mission_resume.dart';
 
 /// A new attempt's shuffle seed. The only randomness in a mission, drawn once per attempt and
 /// stored with it; tests override it to pin the order.
@@ -23,6 +24,36 @@ final attemptSeedProvider = Provider<int Function()>((ref) {
 /// Seeds are 31-bit, so they're the same number on the VM and the web.
 const int _seedRange = 0x7FFFFFFF;
 
+/// Reasons shuffle with their own salts, clear of the beats' (0–2) and the reply's (3).
+const int _reasonSalt = 10;
+
+/// One beat as played: the line, how long the player took to pick it once the cards were up,
+/// and the reason they gave when asked "why that line?".
+class BeatPlay {
+  const BeatPlay({required this.option, this.decidedIn, this.reason});
+
+  final AnswerOption option;
+  final Duration? decidedIn;
+
+  /// Null until given, and for good on a beat with no why step.
+  final Reason? reason;
+
+  /// The engine's view of this play in [beat]. The beat builds the reason pick, so the wrong
+  /// principle only costs a strongest line (brief 19's `reasonPick`).
+  BeatPick pick(Beat beat) => BeatPick(
+    beat: beat.kind,
+    choice: option.scored,
+    decidedIn: decidedIn,
+    reason: switch (reason) {
+      final r? => beat.reasonPick(r, option.id),
+      null => null,
+    },
+  );
+
+  BeatPlay _withReason(Reason reason) =>
+      BeatPlay(option: option, decidedIn: decidedIn, reason: reason);
+}
+
 /// One attempt at a mission, as far as it has got. Everything here is game state: the scene's
 /// camera, typing and timing are the screen's own.
 class MissionState {
@@ -33,7 +64,9 @@ class MissionState {
     required this.scene,
     required this.question,
     this.playerName = PlayerProfile.fallbackName,
-    this.picks = const [],
+    this.plays = const [],
+    this.resumed = false,
+    this.saved,
     this.draft,
     this.earlierDraft,
     this.draftDone = false,
@@ -66,26 +99,68 @@ class MissionState {
   /// What the dossier shows as "Your first try": this attempt's words, else an earlier one's.
   String? get firstTry => draft ?? earlierDraft;
 
+  /// The beats played so far, in beat order.
+  final List<BeatPlay> plays;
+
+  /// This attempt was picked up where the player left it.
+  final bool resumed;
+
+  /// A part-played attempt the player left earlier: the screen offers to continue it.
+  final SavedAttempt? saved;
+
   /// The lines locked in so far, one per beat, in beat order.
-  final List<AnswerOption> picks;
+  List<AnswerOption> get picks => [for (final p in plays) p.option];
+
+  /// The engine's picks so far, with the time taken and the reasons given.
+  List<BeatPick> get beatPicks => [
+    for (var i = 0; i < plays.length; i++) plays[i].pick(mission.beats[i]),
+  ];
+
+  /// The last line is picked and its beat asks why, but no reason is given yet.
+  bool get awaitingWhy =>
+      plays.isNotEmpty &&
+      plays.last.reason == null &&
+      mission.beats[plays.length - 1].why != null;
   final bool draftDone;
   final FollowUp? followUp;
   final AnswerOption? reply;
   final MissionScore? score;
 
   /// The beat being answered: 0 open, 1 evidence, 2 land; 3 once all are locked.
-  int get beatIndex => picks.length;
-  bool get beatsDone => picks.length == mission.beats.length;
+  int get beatIndex => plays.length;
+
+  /// Every beat has its line and, where asked, its reason.
+  bool get beatsDone => plays.length == mission.beats.length && !awaitingWhy;
   Beat? get beat => beatsDone ? null : mission.beats[beatIndex];
 
   /// The current beat's options in this attempt's order, never the file's.
   List<AnswerOption> get beatOptions =>
-      beatsDone ? const [] : optionsForBeat(beatIndex);
+      plays.length == mission.beats.length || awaitingWhy
+      ? const []
+      : optionsForBeat(beatIndex);
 
   /// Beat [index]'s options in this attempt's order: the same order every time it's asked,
   /// so the screen can keep showing a beat after its line is locked.
   List<AnswerOption> optionsForBeat(int index) =>
       shuffled(mission.beats[index].options, seed: seed, salt: index);
+
+  /// Beat [index]'s reasons for "why that line?", in this attempt's order (never the file's,
+  /// where the right one could sit in the same place every time).
+  List<Reason> reasonsForBeat(int index) {
+    final why = mission.beats[index].why;
+    if (why == null) return const [];
+    return shuffled(why.reasons, seed: seed, salt: _reasonSalt + index);
+  }
+
+  /// How the interviewer takes beat [index]'s play (strong, weak or a guess).
+  PickQuality qualityOf(int index) {
+    final beat = mission.beats[index];
+    final play = plays[index];
+    return judgePick(
+      play.pick(beat),
+      strongestOption: beat.isStrongest(play.option.id),
+    );
+  }
 
   /// The follow-up's replies in this attempt's order.
   List<AnswerOption> get replyOptions {
@@ -94,14 +169,15 @@ class MissionState {
     return shuffled(followUp.replies, seed: seed, salt: mission.beats.length);
   }
 
-  /// The trust meter, from the engine (`trustAfter`).
-  int get trust => trustAfter([for (final p in picks) p.scored]);
+  /// The trust meter, from the engine (`trustAfterPicks`): guesses and unsound reasons cost
+  /// trust.
+  int get trust => trustAfterPicks(beatPicks);
 
   /// The follow-up's line, addressed to the player.
   SceneLine? get followUpLine => followUp?.line.addressedTo(playerName);
 
   MissionState _copy({
-    List<AnswerOption>? picks,
+    List<BeatPlay>? plays,
     String? draft,
     bool? draftDone,
     FollowUp? followUp,
@@ -116,7 +192,9 @@ class MissionState {
     playerName: playerName,
     draft: draft ?? this.draft,
     earlierDraft: earlierDraft,
-    picks: picks ?? this.picks,
+    plays: plays ?? this.plays,
+    resumed: resumed,
+    saved: saved,
     draftDone: draftDone ?? this.draftDone,
     followUp: followUp ?? this.followUp,
     reply: reply ?? this.reply,
@@ -149,8 +227,12 @@ class MissionController extends AsyncNotifier<MissionState> {
     // A rebuild is a new attempt (Riverpod keeps the notifier between builds).
     _started = false;
     _completing = false;
-    final mission = missionByNumber(number);
+    final mission = missionByNumber(
+      number,
+      catalog: ref.read(missionCatalogProvider),
+    );
     if (mission == null) throw MissionNotFound(number);
+    final saved = await _loadSaved(mission);
     final previous = await _progress.attempts(missionId: mission.id);
     final name = (await ref.read(profileProvider.future)).displayName;
     return MissionState(
@@ -164,7 +246,139 @@ class MissionController extends AsyncNotifier<MissionState> {
       question: mission.question.addressedTo(name),
       playerName: name,
       earlierDraft: previous.map((a) => a.draft).nonNulls.firstOrNull,
+      saved: saved == null ? null : _validated(mission, saved),
     );
+  }
+
+  /// Runs a resume-store write; a failure is logged, never thrown at the player.
+  Future<void> _guarded(Future<void> Function() write) async {
+    try {
+      await write();
+    } on Object catch (error) {
+      ref.read(logProvider).warn('resume store unwritable', {
+        'error': '${error.runtimeType}',
+      });
+    }
+  }
+
+  /// The attempt left part-way, if any. The store is a convenience: if it can't be read the
+  /// player simply starts afresh, never stuck at a closed door.
+  Future<SavedAttempt?> _loadSaved(Mission mission) async {
+    try {
+      return await ref.read(resumeStoreProvider).load(mission.id);
+    } on Object catch (error) {
+      ref.read(logProvider).warn('resume store unreadable', {
+        'error': '${error.runtimeType}',
+      });
+      return null;
+    }
+  }
+
+  /// [saved] if every id in it still exists in [mission] (content can change between versions);
+  /// otherwise null, and the player starts afresh.
+  SavedAttempt? _validated(Mission mission, SavedAttempt saved) {
+    if (saved.plays.length > mission.beats.length) return null;
+    for (var i = 0; i < saved.plays.length; i++) {
+      final beat = mission.beats[i];
+      final play = saved.plays[i];
+      if (!beat.options.any((o) => o.id == play.optionId)) return null;
+      final reasonId = play.reasonId;
+      if (reasonId != null &&
+          !(beat.why?.reasons.any((r) => r.id == reasonId) ?? false)) {
+        return null;
+      }
+    }
+    return saved;
+  }
+
+  /// "Continue where you left off": the saved attempt replaces this fresh one, with its seed
+  /// (the same card order), its picks and its draft.
+  void resume() {
+    final now = _now;
+    final saved = now.saved;
+    if (saved == null) return;
+    final plays = [
+      for (var i = 0; i < saved.plays.length; i++)
+        BeatPlay(
+          option: now.mission.beats[i].options.firstWhere(
+            (o) => o.id == saved.plays[i].optionId,
+          ),
+          decidedIn: saved.plays[i].decidedIn,
+          reason: now.mission.beats[i].why?.reasons
+              .where((r) => r.id == saved.plays[i].reasonId)
+              .firstOrNull,
+        ),
+    ];
+    _started = true;
+    state = AsyncData(
+      MissionState(
+        mission: now.mission,
+        seed: saved.seed,
+        attemptNumber: saved.attemptNumber,
+        scene: now.scene,
+        question: now.question,
+        playerName: now.playerName,
+        earlierDraft: now.earlierDraft,
+        draft: saved.draft,
+        draftDone: saved.draftDone,
+        plays: plays,
+        resumed: true,
+        followUp: _followUpFor(now.mission, plays),
+      ),
+    );
+    _analytics.track(AnalyticsEvent.missionResumed, {
+      'mission_id': EventValue.id(now.mission),
+      'beat': EventValue.count(plays.length),
+    });
+  }
+
+  /// "Start again": the saved attempt is dropped.
+  Future<void> startAfresh() async {
+    final now = _now;
+    if (now.saved == null) return;
+    state = AsyncData(
+      MissionState(
+        mission: now.mission,
+        seed: now.seed,
+        attemptNumber: now.attemptNumber,
+        scene: now.scene,
+        question: now.question,
+        playerName: now.playerName,
+        earlierDraft: now.earlierDraft,
+      ),
+    );
+    await _guarded(() => ref.read(resumeStoreProvider).clear(now.mission.id));
+  }
+
+  /// "Leave the interview?" → Leave: the attempt so far is kept on the device.
+  Future<void> leave() async {
+    final now = _now;
+    if (_completing || now.score != null) return;
+    await _guarded(
+      () => ref
+          .read(resumeStoreProvider)
+          .save(
+            SavedAttempt(
+              missionId: now.mission.id,
+              seed: now.seed,
+              attemptNumber: now.attemptNumber,
+              draft: now.draft,
+              draftDone: now.draftDone,
+              plays: [
+                for (final p in now.plays)
+                  SavedPlay(
+                    optionId: p.option.id,
+                    decidedIn: p.decidedIn,
+                    reasonId: p.reason?.id,
+                  ),
+              ],
+            ),
+          ),
+    );
+    _analytics.track(AnalyticsEvent.missionLeft, {
+      'mission_id': EventValue.id(now.mission),
+      'beat': EventValue.count(now.plays.length),
+    });
   }
 
   /// Mission 6 quotes the costliest line of the latest attempt at the mission it calls back to.
@@ -204,22 +418,50 @@ class MissionController extends AsyncNotifier<MissionState> {
     state = AsyncData(_now._copy(draft: draft, draftDone: true));
   }
 
-  /// Locks [option] in as the current beat's line. After the third, the engine picks the
-  /// interviewer's follow-up from the weakest line.
-  void lock(AnswerOption option) {
+  /// Locks [option] in as the current beat's line, picked [decidedIn] after the cards were up.
+  /// When the beat asks why, the reason comes next ([giveReason]); after the last beat the
+  /// engine picks the interviewer's follow-up from the weakest line.
+  void lock(AnswerOption option, {Duration? decidedIn}) {
     final now = _now;
-    if (now.beatsDone || !now.beatOptions.contains(option)) return;
-    final picks = [...now.picks, option];
-    FollowUp? followUp;
-    if (picks.length == now.mission.beats.length) {
-      followUp = now.mission.followUpById(
-        selectFollowUp(
-          picks: _beatPicks(now.mission, picks),
-          candidates: [for (final f in now.mission.followUps) f.candidate],
-        ),
-      );
-    }
-    state = AsyncData(now._copy(picks: picks, followUp: followUp));
+    if (!now.beatOptions.contains(option)) return;
+    final plays = [
+      ...now.plays,
+      BeatPlay(option: option, decidedIn: decidedIn),
+    ];
+    state = AsyncData(
+      now._copy(plays: plays, followUp: _followUpFor(now.mission, plays)),
+    );
+  }
+
+  /// The player's answer to "why that line?" for the beat just picked.
+  void giveReason(Reason reason) {
+    final now = _now;
+    if (!now.awaitingWhy) return;
+    final beat = now.mission.beats[now.plays.length - 1];
+    if (!beat.why!.reasons.contains(reason)) return;
+    final plays = [
+      ...now.plays.take(now.plays.length - 1),
+      now.plays.last._withReason(reason),
+    ];
+    state = AsyncData(
+      now._copy(plays: plays, followUp: _followUpFor(now.mission, plays)),
+    );
+  }
+
+  /// The engine's follow-up once every beat is played and explained; null before.
+  FollowUp? _followUpFor(Mission mission, List<BeatPlay> plays) {
+    if (plays.length != mission.beats.length) return null;
+    final last = plays.last;
+    if (mission.beats.last.why != null && last.reason == null) return null;
+    return mission.followUpById(
+      selectFollowUp(
+        picks: [
+          for (var i = 0; i < plays.length; i++)
+            plays[i].pick(mission.beats[i]),
+        ],
+        candidates: [for (final f in mission.followUps) f.candidate],
+      ),
+    );
   }
 
   /// The soft timer ran out on the current beat (FR-13). Nothing is forced and no score moves.
@@ -247,7 +489,7 @@ class MissionController extends AsyncNotifier<MissionState> {
     });
     final score = scoreAttempt(
       AttemptInput(
-        picks: _beatPicks(now.mission, now.picks),
+        picks: now.beatPicks,
         followUpReply: reply.scored,
         hinted: now.mission.hinted,
       ),
@@ -255,6 +497,7 @@ class MissionController extends AsyncNotifier<MissionState> {
     // The dossier shows at once; storing never holds the scene up.
     state = AsyncData(now._copy(reply: reply, score: score));
 
+    await _guarded(() => ref.read(resumeStoreProvider).clear(now.mission.id));
     final firstEver = (await _progress.attempts()).isEmpty;
     final firstBaseline =
         now.mission.isBaseline && await _progress.baseline() == null;
@@ -286,11 +529,6 @@ class MissionController extends AsyncNotifier<MissionState> {
     if (firstEver) _analytics.track(AnalyticsEvent.userActivated);
   }
 }
-
-List<BeatPick> _beatPicks(Mission mission, List<AnswerOption> picks) => [
-  for (var i = 0; i < picks.length; i++)
-    BeatPick(beat: mission.beats[i].kind, choice: picks[i].scored),
-];
 
 /// The route named a mission that doesn't exist (a stale deep link).
 class MissionNotFound implements Exception {

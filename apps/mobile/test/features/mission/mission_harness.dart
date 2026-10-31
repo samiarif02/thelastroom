@@ -13,10 +13,15 @@ import 'package:the_last_room/core/audio/game_sounds.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
 import 'package:the_last_room/features/mission/mission_controller.dart';
+import 'package:the_last_room/features/mission/mission_lookup.dart';
+import 'package:the_last_room/features/mission/mission_resume.dart';
 import 'package:the_last_room/features/mission/scene/mission_card.dart';
 import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/ui/film_kit.dart';
+
+/// How long the harness "reads" the cards before picking: well past `guessThreshold`.
+const Duration readFor = Duration(milliseconds: 2500);
 
 /// The seed every harness attempt is shuffled with.
 const int testSeed = 42;
@@ -140,6 +145,7 @@ class MissionRig {
   final RecordingAnalytics analytics = RecordingAnalytics();
   final RecordingSounds sounds = RecordingSounds();
   final InMemoryProgressRepository progress = InMemoryProgressRepository();
+  final InMemoryResumeStore resume = InMemoryResumeStore();
   late final ProviderContainer container;
 
   static const Size phone = Size(375, 667);
@@ -162,6 +168,7 @@ class MissionRig {
         progressRepositoryProvider.overrideWithValue(progress),
         profileRepositoryProvider.overrideWithValue(profile),
         attemptSeedProvider.overrideWithValue(() => testSeed),
+        resumeStoreProvider.overrideWithValue(resume),
         routerProvider.overrideWithValue(router),
       ],
     );
@@ -255,9 +262,69 @@ class MissionRig {
   }
 
   /// Picks [option] on screen: a tap to choose it, a tap to say it.
-  Future<void> say(AnswerOption option) async {
-    final card = find.widgetWithText(AnswerCard, option.text);
+  ///
+  /// The player reads first: the tap comes [readFor] after the cards arrive, past the engine's
+  /// guess threshold. [guess] taps the moment the card is there, as a random clicker would.
+  ///
+  /// A beat line whose beat asks "why that line?" is then explained: with the reasoning that's
+  /// sound for it, or with [reason] when given.
+  Future<void> say(Object option, {bool guess = false, Reason? reason}) async {
+    await pick(option, guess: guess);
+    if (option is! AnswerOption) return;
+    final why = _beatOf(option)?.why;
+    if (why == null) return;
+    await pick(
+      reason ??
+          why.reasons.firstWhere(
+            (r) => r.isSoundFor(option.id),
+            orElse: () => why.reasons.first,
+          ),
+    );
+  }
+
+  /// The beat [option] belongs to, in the catalog being played.
+  Beat? _beatOf(AnswerOption option) {
+    for (final m in container.read(missionCatalogProvider)) {
+      for (final b in m.beats) {
+        if (b.options.contains(option)) return b;
+      }
+    }
+    return null;
+  }
+
+  /// One tap on [option]'s card (on the part that's on screen), and nothing more.
+  Future<void> tapOnce(Object option) async {
+    final card = find.widgetWithText(AnswerCard, _textOf(option));
     await until(card);
+    await tester.ensureVisible(card);
+    await tester.pump();
+    await tester.tapAt(_visibleCentre(card));
+    await tester.pump();
+  }
+
+  static String _textOf(Object option) => switch (option) {
+    AnswerOption(:final text) => text,
+    Reason(:final text) => text,
+    _ => throw ArgumentError.value(option, 'option'),
+  };
+
+  Offset _visibleCentre(Finder card) {
+    final view = tester.getRect(
+      find.ancestor(of: card, matching: find.byType(SingleChildScrollView)),
+    );
+    return tester.getRect(card).intersect(view).center;
+  }
+
+  /// Picks [option] (a line, a reply or a reason) and says it, without answering "why".
+  Future<void> pick(Object option, {bool guess = false}) async {
+    final text = switch (option) {
+      AnswerOption(:final text) => text,
+      Reason(:final text) => text,
+      _ => throw ArgumentError.value(option, 'option'),
+    };
+    final card = find.widgetWithText(AnswerCard, text);
+    await until(card);
+    if (!guess) await run(readFor);
     await tester.ensureVisible(card);
     await tester.pump();
     // At 2x text (and the test font's square glyphs) a card can be taller than the lower

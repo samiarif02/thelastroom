@@ -2,6 +2,7 @@ import 'package:brand/brand.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
+import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
@@ -28,8 +29,22 @@ void main() {
 
     final mission = rig.state(1).mission;
     final beats = mission.beats;
-    await rig.say(beats.first.options.first);
+    final open = beats.first;
+    final strongest = open.options.firstWhere((o) => open.isStrongest(o.id));
+    await rig.pick(strongest);
     expect(face(rig), InterviewerExpression.nod);
+
+    // "Why that line?": curious.
+    final name = rig.state(1).playerName;
+    await rig.until(find.text(open.why!.line.addressedTo(name).text));
+    expect(face(rig), InterviewerExpression.hmm);
+
+    // A strong line with the right reasoning: she warms.
+    await rig.pick(
+      open.why!.reasons.firstWhere((r) => r.isSoundFor(strongest.id)),
+    );
+    await rig.until(find.text(open.reaction!.strong.addressedTo(name).text));
+    expect(face(rig), InterviewerExpression.smile);
 
     for (final beat in beats.skip(1)) {
       await rig.say(beat.options.first);

@@ -29,7 +29,13 @@ enum AnalyticsEvent {
   waitlistJoined('waitlist_joined'),
 
   /// The first `mission_completed` for a user: the activation event.
-  userActivated('user_activated');
+  userActivated('user_activated'),
+
+  /// The player leaves a mission part-way (back button, "Leave"); the attempt is kept.
+  missionLeft('mission_left'),
+
+  /// The player picks up a mission they left ("Continue where you left off").
+  missionResumed('mission_resumed');
 
   const AnalyticsEvent(this.wireName);
 

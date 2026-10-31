@@ -147,7 +147,8 @@ void main() {
       expect(s.count('subtitleCompleted'), greaterThan(0));
       expect(s.count('questionLands'), 1);
       expect(s.count('choiceTapped'), 4);
-      expect(s.count('answerLocked'), 4);
+      // Three lines and a reply said, and three reasons given (every Mission 1 beat asks why).
+      expect(s.count('answerLocked'), 7);
       expect(s.count('trustChanged'), greaterThan(0));
       expect(s.argsOf('followUpChallenge'), [
         ['priya'],
