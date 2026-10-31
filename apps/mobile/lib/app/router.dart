@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../core/audio/dev/sound_board_routes.dart';
 import '../features/dev_catalog/dev_catalog_routes.dart';
 import '../features/intro/character_screen.dart';
-import '../features/intro/intro_screen.dart';
 import '../features/mission/mission_screen.dart';
 import '../features/onboarding/home_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
@@ -14,7 +13,6 @@ import '../features/progress/progress_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/title/wrong_floor_screen.dart';
 import '../features/tower/tower_screen.dart';
-import 'back_to_exit.dart';
 
 /// Route paths. Notification deep links (brief §8) resolve to these.
 ///
@@ -55,10 +53,8 @@ const bool devRoutesEnabled = !kReleaseMode;
 /// tools are one line each.
 List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
   GoRoute(path: Routes.home, builder: (context, state) => const HomeGate()),
-  GoRoute(
-    path: Routes.intro,
-    builder: (context, state) => const BackToExit(child: IntroScreen()),
-  ),
+  // The welcome cards went in brief 20 (onboarding explains the game); old links land there.
+  GoRoute(path: Routes.intro, redirect: (context, state) => Routes.onboarding),
   GoRoute(
     path: Routes.onboarding,
     builder: (context, state) => const OnboardingScreen(),

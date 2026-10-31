@@ -8,7 +8,6 @@ import '../../app/router.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../mission/mission_screen.dart';
-import '../mission/widgets/cue_button.dart';
 
 /// The practice CV, on the desk before Mission 1 (brief 13): the content's character sheet,
 /// headed with the player's name, so it reads as *your practice CV for this role*. The facts
@@ -40,36 +39,35 @@ class CharacterScreen extends ConsumerWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: const Alignment(0.6, -0.7),
-              radius: 1.3,
-              colors: [grade.tint, BrandColors.surface, BrandColors.void_],
-              stops: const [0, 0.5, 1],
-            ),
-          ),
-        ),
+        const VividBackdrop(grade: grade),
         SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(BrandSpace.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const BrassOrnament(text: eyebrow),
-                const SizedBox(height: BrandSpace.lg),
-                _CvSheet(character: player, name: name),
-                const SizedBox(height: BrandSpace.lg),
                 Text(
-                  yourWords,
+                  eyebrow,
                   textAlign: TextAlign.center,
-                  style: BrandType.body.copyWith(
-                    color: BrandColors.textSecondary,
+                  style: BrandVividType.kicker.copyWith(
+                    color: BrandVivid.accent,
                   ),
                 ),
                 const SizedBox(height: BrandSpace.lg),
-                CueButton(
+                StaggeredEntrance(
+                  index: 0,
+                  child: _CvSheet(character: player, name: name),
+                ),
+                const SizedBox(height: BrandSpace.lg),
+                const Text(
+                  yourWords,
+                  textAlign: TextAlign.center,
+                  style: BrandVividType.body,
+                ),
+                const SizedBox(height: BrandSpace.lg),
+                VividButton.play(
                   label: enter,
+                  expand: true,
                   onPressed: () =>
                       context.go(Routes.mission(firstMissionNumber)),
                 ),
@@ -105,7 +103,7 @@ class _CvSheet extends StatelessWidget {
           color: BrandColors.paper,
           boxShadow: [
             BoxShadow(
-              color: BrandColors.void_.withValues(alpha: 0.8),
+              color: BrandVivid.night.withValues(alpha: 0.6),
               blurRadius: _shadowBlur,
               offset: _shadowOffset,
             ),

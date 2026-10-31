@@ -1,26 +1,20 @@
 import 'package:flutter/widgets.dart';
 
-import '../../ui/film_kit.dart';
+import 'vivid_title.dart';
 
-/// The app's home until the tower exists (brief 13): The Last Room's own title card, so a fresh
-/// `flutter run` already looks like the film. The banker's lamp below the title is the room
-/// waiting for you. It fires no events until the intro exists (brief 10).
+/// The Last Room's own title (brief 20): the tower lighting up on the evening sky, then the
+/// name. The first launch puts "Begin" under it (`TitleGate`); a returning player sees it for a
+/// moment over the tower (`StartTitle`).
 class TitleScreen extends StatelessWidget {
-  const TitleScreen({super.key});
+  const TitleScreen({super.key, this.footer, this.onLanded});
 
-  static const String eyebrow = 'NORTHSTAR LABS';
-  static const String title = 'THE LAST ROOM';
-  static const String tagline = 'One room left between you and the offer.';
+  final Widget? footer;
+  final VoidCallback? onLanded;
 
-  static const double _lampWidth = 112;
+  static const String title = VividTitle.title;
+  static const String tagline = VividTitle.tagline;
 
   @override
-  Widget build(BuildContext context) {
-    return const ChapterTitleCard(
-      eyebrow: eyebrow,
-      title: title,
-      subtitle: tagline,
-      footer: SizedBox(width: _lampWidth, child: BankersLamp()),
-    );
-  }
+  Widget build(BuildContext context) =>
+      VividTitle(footer: footer, onLanded: onLanded);
 }

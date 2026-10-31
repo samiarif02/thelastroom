@@ -3,10 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
+import 'package:the_last_room/features/intro/title_gate.dart';
 import 'package:the_last_room/features/onboarding/name_field.dart';
 import 'package:the_last_room/features/onboarding/onboarding_copy.dart';
 import 'package:the_last_room/features/onboarding/onboarding_screen.dart';
-import 'package:the_last_room/features/title/title_screen.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
 
 import '../mission/mission_harness.dart';
@@ -129,7 +129,7 @@ void main() {
     final rig = MissionRig(tester);
     await rig.boot(Routes.home);
     await rig.until(find.byType(TowerScreen));
-    expect(find.byType(TitleScreen), findsNothing);
+    expect(find.byType(TitleGate), findsNothing);
     expect(find.byType(OnboardingScreen), findsNothing);
   });
 
