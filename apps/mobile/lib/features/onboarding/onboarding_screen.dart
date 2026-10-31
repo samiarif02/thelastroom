@@ -220,10 +220,7 @@ class _Heading extends StatelessWidget {
       ),
       if (line case final l?) ...[
         const SizedBox(height: BrandSpace.sm),
-        StaggeredEntrance(
-          index: 2,
-          child: Text(l, style: BrandVividType.body),
-        ),
+        StaggeredEntrance(index: 2, child: Text(l, style: BrandVividType.body)),
       ],
       const SizedBox(height: BrandSpace.lg),
       below,

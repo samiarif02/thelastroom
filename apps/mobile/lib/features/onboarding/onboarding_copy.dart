@@ -1,55 +1,36 @@
-import '../../core/profile/profile_repository.dart';
-
-/// What onboarding says. The host's lines are short: the whole flow fits in a minute.
+/// What onboarding says (brief 17): three short steps, the whole flow in well under a minute.
 abstract final class OnboardingCopy {
   static const String skip = 'Skip';
+  static const String next = 'Next';
+  static const String letsGo = 'Let’s go';
 
-  static const String askName = 'Before we start: what should I call you?';
-  static String askExperience(String name) =>
-      'Good to meet you, $name. Where are you right now?';
-  static const String askRole = 'And what kind of role are you going for?';
-  static const String askNerves =
-      'Be honest with me: how nervous do interviews make you?';
-  static const String askGoal = 'How often do you want to practise?';
-
-  static const Map<Experience, String> experience = {
-    Experience.student: 'Still studying',
-    Experience.freshGraduate: 'Just graduated',
-    Experience.earlyCareer: 'One or two years in',
-    Experience.switchingCareers: 'Switching careers',
-  };
-
-  static const Map<TargetRole, String> role = {
-    TargetRole.product: 'Product',
-    TargetRole.design: 'Design or research',
-    TargetRole.data: 'Data or analytics',
-    TargetRole.engineering: 'Engineering',
-    TargetRole.marketing: 'Marketing or sales',
-    TargetRole.notSure: 'Not sure yet',
-  };
-
-  /// One line per level, 1 (calm) to 5.
-  static const List<String> nerves = [
-    '1 · Not at all',
-    '2 · A little',
-    '3 · Some',
-    '4 · Quite nervous',
-    '5 · Very nervous',
+  // Step 1: the game.
+  static const String gameKicker = 'THE LAST ROOM';
+  static const String gameTitle = 'One room left between you and the offer.';
+  static const List<({String title, String line})> gameIdeas = [
+    (
+      title: 'Build your answer',
+      line: 'Line by line: open, prove it, land it.',
+    ),
+    (
+      title: 'Handle the push-back',
+      line: 'They follow up. You answer that too.',
+    ),
+    (
+      title: 'See what landed',
+      line: 'Every line is scored, and you learn why.',
+    ),
   ];
 
-  /// The weekly goal as named tiers, not a number field (Duolingo's daily goal).
-  static const List<({int sessions, String label})> goals = [
-    (sessions: 1, label: 'Easy · 1 session a week'),
-    (sessions: 3, label: 'Steady · 3 sessions a week'),
-    (sessions: 5, label: 'Serious · 5 sessions a week'),
-  ];
+  // Step 2: the cast.
+  static const String castKicker = 'ACROSS THE DESK';
+  static const String castTitle = 'Meet your interviewers.';
+  static const String castLine =
+      'Friendly, fair and fictional. They want you to do well.';
+  static String castChapter(int chapter) => 'Chapter $chapter';
 
-  static const String readyEyebrow = 'FLOOR ONE';
-  static const String ready = 'Your first interview is waiting.';
-  static String readyLine(String name, String host) =>
-      '$host has your file, $name. One question, a few lines, and you see exactly '
-      'what landed.';
-  static const String calmOn =
-      'Calm mode is on: no answer timers. You can change it in your file.';
-  static const String toTower = 'Go to the tower';
+  // Step 3: the name.
+  static const String nameKicker = 'LAST THING';
+  static const String nameTitle = 'What should we call you?';
+  static const String nameLine = 'Just a first name. It stays on this device.';
 }
