@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 12+ draws its own splash from these: void, and the brass monogram in place of the
+<!-- Android 12+ draws its own splash from these: the evening sky, and the sunflower monogram in place of the
      launcher icon on white. -->
 <resources>
     <style name="LaunchTheme.Boardroom" parent="LaunchTheme">

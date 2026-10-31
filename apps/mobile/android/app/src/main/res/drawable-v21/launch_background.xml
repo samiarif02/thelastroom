@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Before Android 12: void with the brass monogram centred, matching the first Flutter frame. -->
+<!-- Before Android 12: the evening sky with the sunflower monogram centred, matching the first Flutter frame. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/brand_void" />
     <item>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Mirrors packages/brand BrandColors (Android resources can't read Dart tokens). -->
+<!-- Mirrors packages/brand BrandVivid (Android resources can't read Dart tokens). -->
 <resources>
-    <!-- BrandColors.void_: the launch screen, so the jump to Flutter's first frame is invisible. -->
-    <color name="brand_void">#FFFFFCF6</color>
+    <!-- BrandVivid.skyTop: the launch screen and the window behind Flutter, the colour the
+         first frame (the title on the evening sky) starts from, so the jump is invisible. -->
+    <color name="brand_void">#FF0B1E33</color>
 </resources>
