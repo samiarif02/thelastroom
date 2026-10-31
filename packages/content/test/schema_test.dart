@@ -211,6 +211,8 @@ void main() {
     final beats = [...base.beats];
     beats[0] = Beat(
       kind: BeatKind.open,
+      why: base.beats.first.why,
+      reaction: base.beats.first.reaction,
       options: [
         option('o1', text: List.filled(maxOptionWords + 1, 'word').join(' ')),
         option('o2', text: List.filled(maxOptionWords, 'word').join(' ')),
@@ -241,6 +243,8 @@ void main() {
     final beats = [...base.beats];
     beats[0] = Beat(
       kind: BeatKind.open,
+      why: base.beats.first.why,
+      reaction: base.beats.first.reaction,
       options: [
         option(
           'o1',
@@ -459,6 +463,13 @@ void main() {
 
     List<String> problemsWith(Beat open) =>
         problems(withMission(beats: [open, ...base.beats.skip(1)]));
+
+    test('every beat needs a why step and a reaction', () {
+      final open = base.beats.first;
+      expect(problemsWith(Beat(kind: open.kind, options: open.options)), [
+        'm_fixture open beat: needs a why step and a reaction',
+      ]);
+    });
 
     test('a well-formed why step and reaction pass', () {
       expect(problemsWith(openWith()), isEmpty);

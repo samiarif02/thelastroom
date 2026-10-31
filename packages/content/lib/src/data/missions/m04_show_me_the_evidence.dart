@@ -31,6 +31,40 @@ const missionShowMeTheEvidence = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why start there?'),
+        reasons: [
+          Reason(
+            id: 'm04_open_why_noticed',
+            text: 'It sets up one problem I noticed and what I did about it.',
+            soundFor: {'m04_open_same_question'},
+          ),
+          Reason(
+            id: 'm04_open_why_team_spotted',
+            text: 'It shows the whole team spotted the problem.',
+            soundFor: {'m04_open_team_realised'},
+          ),
+          Reason(
+            id: 'm04_open_why_approach',
+            text: 'It explains how I work before I give the example.',
+            soundFor: {'m04_open_data_lead'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: 'Fine. You noticed something. Go on.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: "Noted. I'll need you and a number.",
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'That took under two seconds. Read them.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm04_open_same_question',
@@ -76,6 +110,40 @@ const missionShowMeTheEvidence = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why those details?'),
+        reasons: [
+          Reason(
+            id: 'm04_evidence_why_count',
+            text: 'It gives the count, the finding and what I built.',
+            soundFor: {'m04_evidence_tagged'},
+          ),
+          Reason(
+            id: 'm04_evidence_why_result',
+            text: 'It gives the result the team got.',
+            soundFor: {'m04_evidence_we_cut'},
+          ),
+          Reason(
+            id: 'm04_evidence_why_overview',
+            text: 'It gives the patterns without listing every number.',
+            soundFor: {'m04_evidence_patterns'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: '600 tickets, one in three. Good. Numbers.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: "I'd want the actual count. And whose it was.",
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'Too quick to have read them. Again, slowly.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm04_evidence_tagged',
@@ -121,6 +189,40 @@ const missionShowMeTheEvidence = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why end there?'),
+        reasons: [
+          Reason(
+            id: 'm04_land_why_lesson',
+            text: "It gives the result and the habit I'd repeat here.",
+            soundFor: {'m04_land_quarter'},
+          ),
+          Reason(
+            id: 'm04_land_why_impact',
+            text: 'It shows the size of the impact I can bring.',
+            soundFor: {'m04_land_huge_impact'},
+          ),
+          Reason(
+            id: 'm04_land_why_team_happy',
+            text: 'It shows the team was happy with the work.',
+            soundFor: {'m04_land_team_proud'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: 'A quarter fewer, and a lesson. That I believe.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: "That's a claim, not a result.",
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'You rushed the ending. Results matter most.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm04_land_quarter',

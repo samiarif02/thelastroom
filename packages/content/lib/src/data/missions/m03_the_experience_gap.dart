@@ -40,6 +40,40 @@ const missionTheExperienceGap = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why answer it that way?'),
+        reasons: [
+          Reason(
+            id: 'm03_open_why_both_halves',
+            text: "It admits the concern, then shows I've done both halves of the job.",
+            soundFor: {'m03_open_fair_concern'},
+          ),
+          Reason(
+            id: 'm03_open_why_fresh',
+            text: 'It turns my lack of experience into a fresh perspective.',
+            soundFor: {'m03_open_fresh_eyes'},
+          ),
+          Reason(
+            id: 'm03_open_why_modest',
+            text: "It's modest, so I don't come across as arrogant.",
+            soundFor: {'m03_open_not_strongest'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: 'Good. You took the worry seriously.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: 'Hm. Most graduates say something like that.',
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: 'Slow down. That question deserves a real pick.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm03_open_fair_concern',
@@ -85,6 +119,40 @@ const missionTheExperienceGap = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why that example?'),
+        reasons: [
+          Reason(
+            id: 'm03_evidence_why_own_work',
+            text: "It's my own work, with a number that changed because of it.",
+            soundFor: {'m03_evidence_tickets'},
+          ),
+          Reason(
+            id: 'm03_evidence_why_big_result',
+            text: "It's a big result, with real numbers behind it.",
+            soundFor: {'m03_evidence_we_project'},
+          ),
+          Reason(
+            id: 'm03_evidence_why_trusted',
+            text: 'It shows people trust me quickly wherever I go.',
+            soundFor: {'m03_evidence_quick_learner'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: "Your help page, your number. That's convincing.",
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: 'I still need to hear what you did, Jordan.',
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: 'You picked before reading. Want another look?',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm03_evidence_tickets',
@@ -130,6 +198,40 @@ const missionTheExperienceGap = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why close on that?'),
+        reasons: [
+          Reason(
+            id: 'm03_land_why_gap',
+            text: "It names my gap and shows how I'm already closing it.",
+            soundFor: {'m03_land_closing_gap'},
+          ),
+          Reason(
+            id: 'm03_land_why_commitment',
+            text: "It shows how committed I'll be.",
+            soundFor: {'m03_land_work_harder'},
+          ),
+          Reason(
+            id: 'm03_land_why_open',
+            text: 'It leaves room for whatever the team needs.',
+            soundFor: {'m03_land_trail'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: 'Halfway through SQL already. Good answer.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: "Hm. That doesn't quite answer my worry.",
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: "Don't rush the close. It's what I'll remember.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm03_land_closing_gap',

@@ -87,6 +87,41 @@ const missionTheFollowUpTrap = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: lenaId, text: 'Why start like that?'),
+        reasons: [
+          Reason(
+            id: 'm06_open_why_plain',
+            text: 'It gives the facts plainly, the same as before.',
+            soundFor: {'m06_open_short_version'},
+          ),
+          Reason(
+            id: 'm06_open_why_reframe',
+            text: 'It reframes it as a data problem I spotted.',
+            soundFor: {'m06_open_data_issue'},
+          ),
+          Reason(
+            id: 'm06_open_why_consistent',
+            text:
+                'It repeats my STAR answer to Marcus, so it sounds consistent.',
+            soundFor: {'m06_open_as_i_told'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: lenaId,
+          text: "'Told my lead that afternoon.' Same as before.",
+        ),
+        weak: SceneLine(
+          speakerId: lenaId,
+          text: "Hm. 'As I told Marcus.' And what's missing?",
+        ),
+        guessed: SceneLine(
+          speakerId: lenaId,
+          text: "Fast. I'm not timing you. I'm listening.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm06_open_short_version',
@@ -132,6 +167,40 @@ const missionTheFollowUpTrap = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: lenaId, text: 'Why give me that?'),
+        reasons: [
+          Reason(
+            id: 'm06_evidence_why_numbers',
+            text: 'It gives the exact numbers, so the story holds up.',
+            soundFor: {'m06_evidence_rows'},
+          ),
+          Reason(
+            id: 'm06_evidence_why_move_on',
+            text: 'It moves on to what I learned, not the details.',
+            soundFor: {'m06_evidence_doesnt_matter'},
+          ),
+          Reason(
+            id: 'm06_evidence_why_pressure',
+            text: 'It explains the pressure I was under.',
+            soundFor: {'m06_evidence_three_weeks'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: lenaId,
+          text: "'900 rows, 300 duplicates.' It adds up.",
+        ),
+        weak: SceneLine(
+          speakerId: lenaId,
+          text: 'I asked what happened. Not why it was hard.',
+        ),
+        guessed: SceneLine(
+          speakerId: lenaId,
+          text: "You didn't read those. I'll wait.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm06_evidence_rows',
@@ -177,6 +246,40 @@ const missionTheFollowUpTrap = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: lenaId, text: 'Why end there?'),
+        reasons: [
+          Reason(
+            id: 'm06_land_why_unchanged',
+            text: 'It confirms the story is unchanged, and what I do now.',
+            soundFor: {'m06_land_same_story'},
+          ),
+          Reason(
+            id: 'm06_land_why_unsure',
+            text: 'It admits I might be remembering it wrong.',
+            soundFor: {'m06_land_lead_caught_it'},
+          ),
+          Reason(
+            id: 'm06_land_why_offer',
+            text: 'It offers to go through any part again.',
+            soundFor: {'m06_land_anything_else'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: lenaId,
+          text: "'The same story.' Good. It is.",
+        ),
+        weak: SceneLine(
+          speakerId: lenaId,
+          text: "Now I'm less sure of the story than before.",
+        ),
+        guessed: SceneLine(
+          speakerId: lenaId,
+          text: "You're rushing. That worries me more than the mistake.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm06_land_same_story',

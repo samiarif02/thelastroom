@@ -221,8 +221,13 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
       final beatId = '${mission.id} ${beat.kind.name} beat';
       checkOptions(beatId, beat.options);
       final why = beat.why;
-      if (why != null) checkWhy(beatId, beat, why);
       final reaction = beat.reaction;
+      // Wave 5: every beat asks why and reacts, so no pick can score without thought. (Every
+      // mission sits in a playable chapter, checked below, so this covers all of them.)
+      if (why == null || reaction == null) {
+        issue(beatId, 'needs a why step and a reaction');
+      }
+      if (why != null) checkWhy(beatId, beat, why);
       if (reaction != null) {
         for (final line in [reaction.strong, reaction.weak, reaction.guessed]) {
           checkSpeaker(beatId, line);

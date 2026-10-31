@@ -28,6 +28,40 @@ const missionTellMeAboutYourself = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why start there?'),
+        reasons: [
+          Reason(
+            id: 'm02_open_why_study',
+            text: 'It starts with what I studied and the part that points to this job.',
+            soundFor: {'m02_open_graduate'},
+          ),
+          Reason(
+            id: 'm02_open_why_roots',
+            text: "It's personal, so she remembers where my interest began.",
+            soundFor: {'m02_open_hometown'},
+          ),
+          Reason(
+            id: 'm02_open_why_words',
+            text: 'It sums me up in three words she can remember.',
+            soundFor: {'m02_open_adjectives'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: 'Good, straight to the part that matters here.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: "Okay. Let's get to the bit about the job.",
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: 'Hold on, Jordan. You barely looked at those.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm02_open_graduate',
@@ -73,6 +107,40 @@ const missionTellMeAboutYourself = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why that example?'),
+        reasons: [
+          Reason(
+            id: 'm02_evidence_why_one_change',
+            text: 'One internship, one problem, and the number I changed.',
+            soundFor: {'m02_evidence_tickets'},
+          ),
+          Reason(
+            id: 'm02_evidence_why_range',
+            text: "It shows how much I've already done.",
+            soundFor: {'m02_evidence_whole_cv'},
+          ),
+          Reason(
+            id: 'm02_evidence_why_teamwork',
+            text: "It shows I'm a team player outside work too.",
+            soundFor: {'m02_evidence_hobbies'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: '600 tickets and a quarter fewer. I like that.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: "Mm. I'd rather hear one thing properly.",
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: 'That was a quick pick. Read them, then choose.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm02_evidence_tickets',
@@ -118,6 +186,40 @@ const missionTellMeAboutYourself = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'And why end on that?'),
+        reasons: [
+          Reason(
+            id: 'm02_land_why_role',
+            text: 'It ties my story to what this role does every day.',
+            soundFor: {'m02_land_this_role'},
+          ),
+          Reason(
+            id: 'm02_land_why_ambition',
+            text: "It shows I'm ambitious and planning ahead.",
+            soundFor: {'m02_land_five_years'},
+          ),
+          Reason(
+            id: 'm02_land_why_hand_back',
+            text: 'It hands the conversation back to her.',
+            soundFor: {'m02_land_trail'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: 'There it is: users and numbers. Nicely done.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: "Hm. Let's bring it back to this role.",
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: 'You rushed that ending, Jordan. Take a second.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm02_land_this_role',

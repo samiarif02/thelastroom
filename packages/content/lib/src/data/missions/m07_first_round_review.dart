@@ -40,6 +40,40 @@ const missionFirstRoundReview = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why that one?'),
+        reasons: [
+          Reason(
+            id: 'm07_open_why_unasked',
+            text: "It's a problem nobody had asked me to fix.",
+            soundFor: {'m07_open_cafe_late'},
+          ),
+          Reason(
+            id: 'm07_open_why_research',
+            text: "It's my strongest project, with real research behind it.",
+            soundFor: {'m07_open_supervisor_asked'},
+          ),
+          Reason(
+            id: 'm07_open_why_trait',
+            text: "It tells him I'm proactive before I give the example.",
+            soundFor: {'m07_open_proactive'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: "Nobody asked. Good, that's the question.",
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: "That's not quite what I asked for.",
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'You picked that fast. Read them first.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm07_open_cafe_late',
@@ -85,6 +119,40 @@ const missionFirstRoundReview = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why tell it like that?'),
+        reasons: [
+          Reason(
+            id: 'm07_evidence_why_measured',
+            text: 'It says what I measured, what I made and how I tested it.',
+            soundFor: {'m07_evidence_checklist'},
+          ),
+          Reason(
+            id: 'm07_evidence_why_agreed',
+            text: 'It shows everyone agreed and followed the new routine.',
+            soundFor: {'m07_evidence_team_routine'},
+          ),
+          Reason(
+            id: 'm07_evidence_why_example',
+            text: 'It shows my work ethic set an example.',
+            soundFor: {'m07_evidence_harder'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: 'You timed it, then you tested it. Good.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: 'And what did you change, exactly?',
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'Too quick. I want the thinking, not the click.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm07_evidence_checklist',
@@ -130,6 +198,40 @@ const missionFirstRoundReview = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why close on that?'),
+        reasons: [
+          Reason(
+            id: 'm07_land_why_lasting',
+            text: 'It gives the result, and how the fix outlasted my shifts.',
+            soundFor: {'m07_land_on_time'},
+          ),
+          Reason(
+            id: 'm07_land_why_leader',
+            text: "It shows the leadership I'd bring to Northstar.",
+            soundFor: {'m07_land_natural_leader'},
+          ),
+          Reason(
+            id: 'm07_land_why_modest',
+            text: "It's modest about a small example.",
+            soundFor: {'m07_land_small_thing'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: 'On time all term, and three trained. Solid.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: "Hm. I'd rather hear what it changed.",
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: "Don't rush the end. That's where results go.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm07_land_on_time',

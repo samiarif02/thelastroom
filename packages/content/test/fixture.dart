@@ -51,6 +51,15 @@ const fixture = ContentBundle(
       beats: [
         Beat(
           kind: BeatKind.open,
+          why: ReasonPrompt(
+            line: SceneLine(speakerId: 'priya', text: 'Why that line?'),
+            reasons: [
+              Reason(id: 'o_r1', text: 'It is specific.', soundFor: {'o1'}),
+              Reason(id: 'o_r2', text: 'It is modest.', soundFor: {'o2'}),
+              Reason(id: 'o_r3', text: 'It is safe.', soundFor: {'o3'}),
+            ],
+          ),
+          reaction: _reaction,
           options: [
             AnswerOption(id: 'o1', text: 'A strong line.', scores: _strong),
             AnswerOption(
@@ -65,6 +74,15 @@ const fixture = ContentBundle(
         ),
         Beat(
           kind: BeatKind.evidence,
+          why: ReasonPrompt(
+            line: SceneLine(speakerId: 'priya', text: 'Why that line?'),
+            reasons: [
+              Reason(id: 'e_r1', text: 'It is specific.', soundFor: {'e1'}),
+              Reason(id: 'e_r2', text: 'It is modest.', soundFor: {'e2'}),
+              Reason(id: 'e_r3', text: 'It is safe.', soundFor: {'e3'}),
+            ],
+          ),
+          reaction: _reaction,
           options: [
             AnswerOption(id: 'e1', text: 'A strong line.', scores: _strong),
             AnswerOption(
@@ -79,6 +97,15 @@ const fixture = ContentBundle(
         ),
         Beat(
           kind: BeatKind.land,
+          why: ReasonPrompt(
+            line: SceneLine(speakerId: 'priya', text: 'Why that line?'),
+            reasons: [
+              Reason(id: 'l_r1', text: 'It is specific.', soundFor: {'l1'}),
+              Reason(id: 'l_r2', text: 'It is modest.', soundFor: {'l2'}),
+              Reason(id: 'l_r3', text: 'It is safe.', soundFor: {'l3'}),
+            ],
+          ),
+          reaction: _reaction,
           options: [
             AnswerOption(id: 'l1', text: 'A strong line.', scores: _strong),
             AnswerOption(
@@ -156,4 +183,10 @@ const _weak = DimensionScores(
   specificity: 1,
   structure: 1,
   adaptability: 1,
+);
+
+const _reaction = BeatReaction(
+  strong: SceneLine(speakerId: 'priya', text: 'Good.'),
+  weak: SceneLine(speakerId: 'priya', text: 'Hm.'),
+  guessed: SceneLine(speakerId: 'priya', text: 'Too quick.'),
 );
