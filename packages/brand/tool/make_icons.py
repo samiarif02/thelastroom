@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Draws The Last Room's platform icons and launch marks: a leaf-green "LR" monogram in
-Cormorant Garamond on warm cream with a pool of morning sun (Morning Office, brief 16; the
-layout is brief 06's, DESIGN.md "Platform edges").
+"""Draws The Last Room's platform icons and launch marks: a sunflower "LR" monogram in Manrope
+ExtraBold on the evening sky, with the sun just below the horizon (the vivid layer, brief 17;
+brief 20 put the icon and splash on it; the layout is brief 06's, DESIGN.md "Platform edges").
 
 Run from the repo root after changing the mark:  python3 packages/brand/tool/make_icons.py
 Needs Pillow (`pip3 install pillow`). The outputs are committed; nothing runs this at build time.
 
-The colours mirror `lib/src/colors.dart` (BrandColors, ChapterGrade.lobby); this script can't
-import Dart tokens, so keep them in step by hand.
+The colours mirror `lib/src/vivid.dart` (BrandVivid); this script can't import Dart tokens, so
+keep them in step by hand.
 """
 
 from pathlib import Path
@@ -15,34 +15,35 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parents[3]
-FONT = ROOT / 'packages/brand/fonts/cormorant_garamond/CormorantGaramond-SemiBold.ttf'
+FONT = ROOT / 'packages/brand/fonts/manrope/Manrope-ExtraBold.ttf'
 APP = ROOT / 'apps/mobile'
 
-VOID = (0xFF, 0xFC, 0xF6)  # BrandColors.void_
-WALNUT = (0xF8, 0xF1, 0xE4)  # BrandColors.surface (the name dates from the Boardroom)
-TINT = (0xFF, 0xE7, 0xAE)  # ChapterGrade.lobbyTint
-BRASS = (0x2C, 0x73, 0x56)  # ChapterGrade.lobbyKey (the name dates from the Boardroom)
+VOID = (0x0B, 0x1E, 0x33)  # BrandVivid.skyTop: the splash ground and the icon's edges
+SKY_MID = (0x15, 0x40, 0x5A)  # BrandVivid.skyMid
+SKY_LOW = (0x1A, 0x52, 0x58)  # BrandVivid.skyLow
+TINT = (0xF2, 0x99, 0x4A)  # BrandVivid.horizon: the sun below the horizon
+BRASS = (0xFF, 0xC2, 0x3D)  # BrandVivid.accent: the mark (the name dates from the Boardroom)
 
 MASTER = 1024  # every image is drawn at this size (x SUPER) and scaled down
 SUPER = 2
 
 
 def _walnut(size):
-    """Walnut with the lamp's warm pool low in frame, falling to void at the edges."""
-    img = Image.new('RGB', (size, size), WALNUT)
+    """The evening sky, top to bottom, with the sun's warm glow low in frame and the edges
+    falling to the top of the sky. (The name dates from the Boardroom.)"""
+    img = Image.new('RGB', (size, size), VOID)
+    d = ImageDraw.Draw(img)
+    for y in range(size):
+        t = y / (size - 1)
+        a, b, u = (VOID, SKY_MID, t * 2) if t < 0.5 else (SKY_MID, SKY_LOW, t * 2 - 1)
+        d.line((0, y, size, y), fill=tuple(round(a[i] + (b[i] - a[i]) * u) for i in range(3)))
     glow = Image.new('L', (size, size), 0)
-    d = ImageDraw.Draw(glow)
-    r = size * 0.62
-    cx, cy = size / 2, size * 0.78
-    d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=150)
-    glow = glow.filter(ImageFilter.GaussianBlur(size * 0.18))
-    img = Image.composite(Image.new('RGB', (size, size), TINT), img, glow)
-    edge = Image.new('L', (size, size), 0)
-    d = ImageDraw.Draw(edge)
-    inset = size * 0.08
-    d.rectangle((inset, inset, size - inset, size - inset), fill=255)
-    edge = edge.filter(ImageFilter.GaussianBlur(size * 0.12))
-    return Image.composite(img, Image.new('RGB', (size, size), VOID), edge)
+    g = ImageDraw.Draw(glow)
+    r = size * 0.42
+    cx, cy = size * 0.62, size * 1.12
+    g.ellipse((cx - r, cy - r, cx + r, cy + r), fill=170)
+    glow = glow.filter(ImageFilter.GaussianBlur(size * 0.1))
+    return Image.composite(Image.new('RGB', (size, size), TINT), img, glow)
 
 
 def _monogram(size, scale):
@@ -52,7 +53,7 @@ def _monogram(size, scale):
     d = ImageDraw.Draw(img)
     font = ImageFont.truetype(str(FONT), int(size * scale))
     text = 'LR'
-    tracking = size * scale * 0.06
+    tracking = size * scale * 0.02
     widths = [d.textlength(c, font=font) for c in text]
     total = sum(widths) + tracking * (len(text) - 1)
     bbox = d.textbbox((0, 0), 'L', font=font)
@@ -146,7 +147,7 @@ def main():
     circle = Image.new('L', (432, 432), 0)
     ImageDraw.Draw(circle).ellipse((36, 36, 396, 396), fill=255)
     sheet.paste(adaptive, (1064, 40), circle)
-    out = ROOT / '.pr-screenshots/06/06b/icons.jpg'
+    out = ROOT / '.pr-screenshots/20/icons.jpg'
     out.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(out, quality=85)
 

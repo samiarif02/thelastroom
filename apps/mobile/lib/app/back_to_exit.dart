@@ -67,40 +67,52 @@ class _BackToExitState extends State<BackToExit> {
   );
 }
 
-/// The hint, a night pill with a sunflower edge low in the frame, fading in.
+/// The hint: an opaque night pill with a sunflower edge and a deep shadow, well above the
+/// bottom of the frame, rising in. Never faded, so nothing behind it shows through (the lead's
+/// phone review of #22).
 class _ExitToast extends StatelessWidget {
   const _ExitToast();
+
+  /// How far above the bottom inset it sits: clear of a list's last row.
+  static const double lift = 96;
+  static const double _rise = 16;
 
   @override
   Widget build(BuildContext context) => Positioned(
     left: BrandSpace.lg,
     right: BrandSpace.lg,
-    bottom: MediaQuery.paddingOf(context).bottom + BrandSpace.xl,
+    bottom: MediaQuery.paddingOf(context).bottom + lift,
     child: IgnorePointer(
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
         duration: MediaQuery.disableAnimationsOf(context)
-            ? BrandMotion.reducedMotionFade
+            ? Duration.zero
             : BrandMotion.quick,
-        builder: (context, t, child) => Opacity(opacity: t, child: child),
+        curve: BrandMotion.enter,
+        builder: (context, t, child) => Transform.translate(
+          offset: Offset(0, _rise * (1 - t)),
+          child: child,
+        ),
         child: Semantics(
           liveRegion: true,
           child: Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: BrandSpace.lg,
-                vertical: BrandSpace.sm + 4,
-              ),
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 color: BrandVivid.night,
                 borderRadius: BorderRadius.circular(BrandRadius.pill),
                 border: Border.all(color: BrandVivid.accent, width: 1.5),
-                boxShadow: BrandVivid.cardShadow,
+                boxShadow: BrandVivid.glowShadow(BrandVivid.night),
               ),
-              child: const Text(
-                BackToExit.hint,
-                textAlign: TextAlign.center,
-                style: BrandVividType.row,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: BrandSpace.lg,
+                  vertical: BrandSpace.sm + 4,
+                ),
+                child: Text(
+                  BackToExit.hint,
+                  textAlign: TextAlign.center,
+                  style: BrandVividType.row,
+                ),
               ),
             ),
           ),

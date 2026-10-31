@@ -4,63 +4,64 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/app.dart';
 import 'package:the_last_room/features/title/title_screen.dart';
+import 'package:the_last_room/features/title/vivid_title.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
 void main() {
-  Future<void> boot(WidgetTester tester, {double textScale = 1}) async {
+  Future<void> boot(
+    WidgetTester tester, {
+    double textScale = 1,
+    bool reduceMotion = false,
+  }) async {
     tester.view.physicalSize =
         const Size(375, 667) * tester.view.devicePixelRatio;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       MediaQuery(
-        data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
+        data: MediaQueryData(
+          textScaler: TextScaler.linear(textScale),
+          disableAnimations: reduceMotion,
+        ),
         child: const ProviderScope(child: TheLastRoomApp()),
       ),
     );
-    // The room never settles (grain, lamp, dust), so pump through the card.
-    for (var e = Duration.zero; e < BrandMotion.titleCard; e += _step) {
+    // The sky never settles (its lights drift), so pump through the title.
+    for (var e = Duration.zero; e < VividTitle.length * 2; e += _step) {
       await tester.pump(_step);
       expect(tester.takeException(), isNull);
     }
   }
 
-  testWidgets('the app opens on the Boardroom title card', (tester) async {
-    await boot(tester);
-    expect(find.byType(TitleScreen), findsOneWidget);
-    final words = tester
-        .widgetList<Text>(
-          find.descendant(
-            of: find.byType(TrackedTitle),
-            matching: find.byType(Text),
-          ),
-        )
-        .map((t) => t.data)
-        .join(' ');
-    expect(words, TitleScreen.title);
-    expect(find.text(TitleScreen.tagline), findsOneWidget);
-    expect(find.byType(BankersLamp), findsOneWidget);
-  });
-
-  testWidgets('every frame is grained; the vignette never lies over text', (
+  testWidgets('a first launch opens on the vivid title, the tower lit', (
     tester,
   ) async {
     await boot(tester);
-    expect(find.byType(AmbientClock), findsOneWidget);
-    final overlays = tester
-        .widgetList<FilmOverlay>(find.byType(FilmOverlay))
-        .toList();
-    expect(overlays.where((o) => o.grain > 0), hasLength(1));
-    expect(overlays.where((o) => o.vignette > 0), isNotEmpty);
-    // A vignette over text would dim edge text below AA.
-    for (final overlay in overlays.where((o) => o.vignette > 0)) {
-      expect(
-        find.descendant(
-          of: find.byWidget(overlay),
-          matching: find.byType(Text),
-        ),
-        findsNothing,
-      );
-    }
+    expect(find.byType(TitleScreen), findsOneWidget);
+    expect(find.byType(VividBackdrop), findsWidgets);
+    expect(find.text(TitleScreen.title), findsOneWidget);
+    expect(find.text(TitleScreen.tagline), findsOneWidget);
+    final tower = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((p) => p.painter)
+        .whereType<TowerPainter>()
+        .single;
+    expect(tower.lit, 1);
+  });
+
+  testWidgets('the title lasts about a second and a half', (tester) async {
+    expect(VividTitle.length, lessThanOrEqualTo(const Duration(seconds: 2)));
+  });
+
+  testWidgets('under reduced motion it shows its last frame at once', (
+    tester,
+  ) async {
+    await boot(tester, reduceMotion: true);
+    final tower = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((p) => p.painter)
+        .whereType<TowerPainter>()
+        .single;
+    expect(tower.lit, 1);
   });
 
   testWidgets('text inherits the brand style, not the debug fallback', (
@@ -75,19 +76,17 @@ void main() {
     expect(style.fontFamily, BrandType.body.fontFamily);
   });
 
-  testWidgets('the title card survives 2x text without overflow', (
-    tester,
-  ) async {
+  testWidgets('the title survives 2x text without overflow', (tester) async {
     await boot(tester, textScale: 2);
     expect(find.byType(TitleScreen), findsOneWidget);
   });
 
-  testWidgets('announced as one header', (tester) async {
+  testWidgets('the name is announced as a header', (tester) async {
     final handle = tester.ensureSemantics();
     await boot(tester);
     expect(
-      find.bySemanticsLabel('${TitleScreen.eyebrow}: ${TitleScreen.title}'),
-      findsOneWidget,
+      tester.getSemantics(find.text(TitleScreen.title)),
+      isSemantics(isHeader: true),
     );
     handle.dispose();
   });

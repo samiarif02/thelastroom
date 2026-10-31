@@ -9,6 +9,7 @@ import 'package:the_last_room/features/dev_catalog/catalog_entries.dart';
 import 'package:the_last_room/features/dev_catalog/catalog_screen.dart';
 import 'package:the_last_room/features/dev_catalog/catalog_stage_screen.dart';
 import 'package:the_last_room/features/dev_catalog/dev_catalog_routes.dart';
+import 'package:the_last_room/features/title/title_screen.dart';
 import 'package:the_last_room/features/title/wrong_floor_screen.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
@@ -134,7 +135,7 @@ void main() {
     await tester.pump();
     await tester.pump(BrandMotion.cinematic);
     expect(find.byType(CatalogStageScreen), findsOneWidget);
-    expect(find.byType(ChapterTitleCard), findsOneWidget);
+    expect(find.byType(TitleScreen), findsOneWidget);
     await _tapControl(tester, '‹');
     expect(find.byType(CatalogScreen), findsOneWidget);
   });
