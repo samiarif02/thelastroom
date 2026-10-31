@@ -247,6 +247,39 @@ Rules the new look adds:
   face (owner, 2026-10-30).
 - No dust in daylight; grain at 3.5%.
 
+## The vivid layer: the building around the room (brief 17, 2026-10-31)
+
+After playing Morning Office on the realme 8 the owner called the tower and onboarding "white
+screen, grey text, no attraction". The **room** keeps Morning Office (the mission scene, the
+dossier); the **building around it** (the tower, onboarding, your file) moves onto colour with
+depth. Tokens: `packages/brand/lib/src/vivid.dart` and `vivid_type.dart`.
+
+- **Ground:** an evening sky, full bleed (`BrandVivid.sky`: navy → teal-blue → teal), a warm
+  horizon glow at the bottom, the city's lights out of focus. Never plain white.
+- **Chapters own a colour** (`ChapterVivid`): Ch 1 emerald `#137049`→`#0B4532`, Ch 2 royal blue
+  `#2C50B0`→`#172C6E`, Ch 3 raspberry `#A62B55`→`#5A1230`, each with a light `glow`
+  (`#9BF2C6`, `#A9CEFF`, `#FFB0C8`) for rings and numerals.
+- **One accent:** sunflower `#FFC23D` (ink `#2B1B00`, 10.4:1) for the action that matters (Play,
+  Next, Let's go), stars and the current mission's outline.
+- **Depth:** cards in a chapter gradient with a 24 px radius, a soft deep shadow
+  (`BrandVivid.cardShadow`), the hero and Play lit by a glow (`glowShadow`).
+- **Type:** Manrope ExtraBold (800, bundled) for titles that read like a game's
+  (`BrandVividType.hero/title/numeral/button`); Manrope for body. Text on colour is white or
+  soft white `#E3EEF3` (≥ 5.2:1 everywhere); glow and sunflower as text only on the sky or a
+  chapter's deeper shade. All pairs: `packages/brand/test/vivid_contrast_test.dart`.
+- **Motion:** cards arrive staggered (`StaggeredEntrance`, 70 ms apart), every tappable sinks
+  under the finger (`Pressable`), rings draw in, onboarding's steps slide; reduced motion makes
+  each one immediate or a fade.
+- **Kit:** `lib/ui/vivid/` (`VividBackdrop`, `VividButton`, `Pressable`, `ProgressRing`,
+  `StaggeredEntrance`, `InterviewerBadge`, `SkillRadar`, `LockGlyph`); in `/dev/catalog` as
+  "Vivid kit" and "Tower cards", with goldens.
+
+Screens: the **tower** is a hero card (the next mission, its interviewer, one Play: one tap to
+the mission), then the chapters 1 → 3 as colour cards with a ring and their interviewer, rooms
+1 → 7 with stars, then the last room and the Recall Room, under an opaque greeting band. **Onboarding**
+is three steps (the game, the cast, your name). **Your file** is a ring and stats, a skill radar
+and a card per mission. Stills: `.pr-screenshots/17/`.
+
 ## Previous direction: C, The Boardroom (owner, 2026-10-30; replaced the same day)
 
 *Kept for the record. Its palette, walnut set, banker's lamp and silhouettes are gone (brief

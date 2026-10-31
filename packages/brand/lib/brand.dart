@@ -8,3 +8,5 @@ export 'src/layout.dart';
 export 'src/motion.dart';
 export 'src/theme.dart';
 export 'src/typography.dart';
+export 'src/vivid.dart';
+export 'src/vivid_type.dart';

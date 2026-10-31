@@ -2,18 +2,17 @@ import 'package:brand/brand.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../mission/widgets/cue_button.dart';
+import '../../ui/film_kit.dart';
 
-/// The first-name question: a ruled line to write on (like the draft panel), "That's me", and
-/// "Skip, call me Candidate". [onDone] gets the trimmed name, or null for the skip.
+/// The first-name question (brief 17): a big glassy field on colour, "Let's go" in sunflower,
+/// and "Skip, call me Candidate". [onDone] gets the trimmed name, or null for the skip.
 class NameField extends StatefulWidget {
-  const NameField({super.key, required this.onDone, required this.grade});
+  const NameField({super.key, required this.onDone});
 
   final ValueChanged<String?> onDone;
-  final ChapterGrade grade;
 
   static const String label = 'Your first name';
-  static const String confirm = "That's me";
+  static const String confirm = 'Let’s go';
   static const String skip = 'Skip, call me Candidate';
 
   /// A first name, not a bio.
@@ -28,7 +27,8 @@ class _NameFieldState extends State<NameField> {
   final FocusNode _focus = FocusNode();
   bool _done = false;
 
-  static const double _hairline = 0.8;
+  static const double _fieldAlpha = 0.14;
+  static const double _fontSize = 22;
 
   @override
   void initState() {
@@ -60,22 +60,27 @@ class _NameFieldState extends State<NameField> {
 
   @override
   Widget build(BuildContext context) {
-    final brass = widget.grade.key;
     final name = _name;
+    final focused = _focus.hasFocus;
+    final style = BrandVividType.title.copyWith(fontSize: _fontSize);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         GestureDetector(
           onTap: _focus.requestFocus,
-          child: Container(
-            constraints: const BoxConstraints(minHeight: BrandSpace.minTarget),
-            padding: const EdgeInsets.symmetric(vertical: BrandSpace.sm),
+          child: AnimatedContainer(
+            duration: BrandMotion.quick,
+            constraints: const BoxConstraints(minHeight: BrandSpace.xxl),
+            padding: const EdgeInsets.symmetric(
+              horizontal: BrandSpace.md,
+              vertical: BrandSpace.md,
+            ),
             decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: brass.withValues(alpha: _focus.hasFocus ? 0.9 : 0.4),
-                  width: _hairline,
-                ),
+              color: BrandVivid.onDeep.withValues(alpha: _fieldAlpha),
+              borderRadius: BorderRadius.circular(BrandRadius.lg),
+              border: Border.all(
+                color: focused ? BrandVivid.accent : BrandVivid.hairline(0.3),
+                width: focused ? 2 : 1,
               ),
             ),
             child: Stack(
@@ -86,8 +91,9 @@ class _NameFieldState extends State<NameField> {
                     child: Text(
                       NameField.label,
                       textAlign: TextAlign.center,
-                      style: BrandType.choice.copyWith(
-                        color: BrandColors.textSecondary,
+                      style: style.copyWith(
+                        color: BrandVivid.onDeepSoft,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -102,10 +108,10 @@ class _NameFieldState extends State<NameField> {
                       focusNode: _focus,
                       autofocus: true,
                       textAlign: TextAlign.center,
-                      style: BrandType.choice,
-                      cursorColor: brass,
-                      backgroundCursorColor: BrandColors.textSecondary,
-                      selectionColor: brass.withValues(alpha: 0.3),
+                      style: style,
+                      cursorColor: BrandVivid.accent,
+                      backgroundCursorColor: BrandVivid.onDeepSoft,
+                      selectionColor: BrandVivid.accent.withValues(alpha: 0.4),
                       keyboardAppearance: Brightness.dark,
                       textCapitalization: TextCapitalization.words,
                       autofillHints: const [AutofillHints.givenName],
@@ -125,17 +131,18 @@ class _NameFieldState extends State<NameField> {
           ),
         ),
         const SizedBox(height: BrandSpace.lg),
-        CueButton(
+        VividButton(
           label: NameField.confirm,
-          grade: widget.grade,
+          expand: true,
           onPressed: name == null ? null : () => _finish(name),
         ),
         const SizedBox(height: BrandSpace.sm),
-        CueButton(
-          label: NameField.skip,
-          quiet: true,
-          grade: widget.grade,
-          onPressed: () => _finish(null),
+        Center(
+          child: VividButton(
+            label: NameField.skip,
+            primary: false,
+            onPressed: () => _finish(null),
+          ),
         ),
       ],
     );
