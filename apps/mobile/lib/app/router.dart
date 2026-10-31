@@ -11,16 +11,22 @@ import '../features/mission/mission_screen.dart';
 import '../features/onboarding/home_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/progress/progress_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/title/wrong_floor_screen.dart';
 import '../features/tower/tower_screen.dart';
+import 'back_to_exit.dart';
 
 /// Route paths. Notification deep links (brief §8) resolve to these.
+///
+/// Every screen you reach from the tower is the tower's child (brief 20), so `context.go` builds
+/// a real back stack and the system back button returns to the tower instead of closing the
+/// app. The tower itself, the title and onboarding are roots: back there asks "press back again
+/// to exit" (`BackToExit`). The old top-level paths redirect, so deep links still open with the
+/// tower underneath.
 abstract final class Routes {
   static const String home = '/';
   static const String intro = '/intro';
-  static const String character = '/character';
   static const String onboarding = '/onboarding';
-  static const String progress = '/progress';
 
   /// The Tower; [lit] is the mission just finished, whose room lights up.
   static String tower({int? lit}) =>
@@ -28,9 +34,17 @@ abstract final class Routes {
   static const String _towerPath = '/tower';
   static const String _litParam = 'lit';
 
-  /// A mission by campaign number: `/mission/1`.
-  static String mission(int number) => '/mission/$number';
-  static const String _missionPattern = '/mission/:number';
+  static const String progress = '$_towerPath/$_progress';
+  static const String settings = '$_towerPath/$_settings';
+  static const String character = '$_towerPath/$_character';
+
+  /// A mission by campaign number: `/tower/mission/1`.
+  static String mission(int number) => '$_towerPath/$_mission/$number';
+
+  static const String _progress = 'progress';
+  static const String _settings = 'settings';
+  static const String _character = 'character';
+  static const String _mission = 'mission';
 }
 
 /// Dev tools (`/dev/...`) exist in debug and profile builds only. In a release build this is a
@@ -41,7 +55,10 @@ const bool devRoutesEnabled = !kReleaseMode;
 /// tools are one line each.
 List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
   GoRoute(path: Routes.home, builder: (context, state) => const HomeGate()),
-  GoRoute(path: Routes.intro, builder: (context, state) => const IntroScreen()),
+  GoRoute(
+    path: Routes.intro,
+    builder: (context, state) => const BackToExit(child: IntroScreen()),
+  ),
   GoRoute(
     path: Routes.onboarding,
     builder: (context, state) => const OnboardingScreen(),
@@ -49,24 +66,40 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
   GoRoute(
     path: Routes._towerPath,
     builder: (context, state) => TowerScreen(
-      key: ValueKey(state.uri),
       lit: int.tryParse(state.uri.queryParameters[Routes._litParam] ?? ''),
     ),
+    routes: [
+      GoRoute(
+        path: Routes._progress,
+        builder: (context, state) => const ProgressScreen(),
+      ),
+      GoRoute(
+        path: Routes._settings,
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: Routes._character,
+        builder: (context, state) => const CharacterScreen(),
+      ),
+      GoRoute(
+        path: '${Routes._mission}/:number',
+        builder: (context, state) => MissionScreen(
+          // A bad number reaches the mission screen's locked-door state, not a crash.
+          number: int.tryParse(state.pathParameters['number'] ?? '') ?? 0,
+        ),
+      ),
+    ],
   ),
-  GoRoute(
-    path: Routes.progress,
-    builder: (context, state) => const ProgressScreen(),
-  ),
-  GoRoute(
-    path: Routes.character,
-    builder: (context, state) => const CharacterScreen(),
-  ),
-  GoRoute(
-    path: Routes._missionPattern,
-    builder: (context, state) => MissionScreen(
-      // A bad number reaches the mission screen's locked-door state, not a crash.
-      number: int.tryParse(state.pathParameters['number'] ?? '') ?? 0,
+  // The paths before brief 20, for old deep links and notifications.
+  for (final child in [Routes._progress, Routes._settings, Routes._character])
+    GoRoute(
+      path: '/$child',
+      redirect: (context, state) => '${Routes._towerPath}/$child',
     ),
+  GoRoute(
+    path: '/${Routes._mission}/:number',
+    redirect: (context, state) =>
+        Routes.mission(int.tryParse(state.pathParameters['number'] ?? '') ?? 0),
   ),
   if (devRoutes) ...DevCatalogRoutes.routes,
   if (devRoutes) ...SoundBoardRoutes.routes,
