@@ -40,6 +40,40 @@ const missionTheExperienceGap = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why answer it that way?'),
+        reasons: [
+          Reason(
+            id: 'm03_open_why_face_it',
+            text: "Admit the real concern, then answer it with what I've actually done.",
+            soundFor: {'m03_open_fair_concern'},
+          ),
+          Reason(
+            id: 'm03_open_why_reframe',
+            text: 'Turning a weakness into a strength is the smart way to handle it.',
+            tempts: {'m03_open_fresh_eyes'},
+          ),
+          Reason(
+            id: 'm03_open_why_humble',
+            text: 'Being humble about my chances makes me more likeable.',
+            tempts: {'m03_open_not_strongest'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: 'Good. You took the worry seriously.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: 'Hm. Most graduates say something like that.',
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: 'Slow down. That question deserves a real pick.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm03_open_fair_concern',
@@ -85,6 +119,41 @@ const missionTheExperienceGap = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why that example?'),
+        reasons: [
+          Reason(
+            id: 'm03_evidence_why_proof',
+            text:
+                'Proof of my own impact answers doubts better than any claim.',
+            soundFor: {'m03_evidence_tickets'},
+          ),
+          Reason(
+            id: 'm03_evidence_why_biggest',
+            text: 'The biggest result I was part of is the most impressive to share.',
+            tempts: {'m03_evidence_we_project'},
+          ),
+          Reason(
+            id: 'm03_evidence_why_reassure',
+            text: "Saying I learn fast reassures her I'll catch up soon.",
+            tempts: {'m03_evidence_quick_learner'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: "Your help page, your number. That's convincing.",
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: 'I still need to hear what you did, Jordan.',
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: 'You picked before reading. Want another look?',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm03_evidence_tickets',
@@ -130,6 +199,40 @@ const missionTheExperienceGap = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why close on that?'),
+        reasons: [
+          Reason(
+            id: 'm03_land_why_plan',
+            text: 'Naming my gap and my plan for it shows self-awareness she can trust.',
+            soundFor: {'m03_land_closing_gap'},
+          ),
+          Reason(
+            id: 'm03_land_why_outwork',
+            text: 'Promising to outwork everyone shows how much I want this.',
+            tempts: {'m03_land_work_harder'},
+          ),
+          Reason(
+            id: 'm03_land_why_unsure',
+            text: "Admitting I'm unsure what the team needs keeps me humble.",
+            tempts: {'m03_land_trail'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: 'Halfway through SQL already. Good answer.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: "Hm. That doesn't quite answer my worry.",
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: "Don't rush the close. It's what I'll remember.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm03_land_closing_gap',

@@ -3,6 +3,7 @@ import 'dimension.dart';
 import 'dimension_scores.dart';
 import 'flag.dart';
 import 'line_cost.dart';
+import 'pick_credit.dart';
 
 /// Everything one mission attempt produced, as the engine scores it.
 class AttemptInput {
@@ -33,6 +34,11 @@ class MissionScore {
     required this.total,
     required this.optionIdsByCost,
     required this.flags,
+    this.beatCredits = const [
+      PickCredit.full,
+      PickCredit.full,
+      PickCredit.full,
+    ],
   });
 
   /// Each dimension normalised to 0–100.
@@ -52,6 +58,19 @@ class MissionScore {
   /// Every flag raised across the beats and the reply, for the lesson and recall cards.
   final Set<Flag> flags;
 
+  /// What each beat kept of its line's points, in beat order (open, evidence, land): the
+  /// debrief explains every one that isn't [PickCredit.full].
+  final List<PickCredit> beatCredits;
+
+  /// The beats the player guessed (picked before [guessThreshold]); each scored 0.
+  List<BeatKind> get guessedBeats => [
+    for (var i = 0; i < beatCredits.length; i++)
+      if (beatCredits[i] == PickCredit.guessed) BeatKind.values[i],
+  ];
+
+  /// Whether any beat was a guess: the debrief's "you were guessing" flag.
+  bool get guessed => beatCredits.contains(PickCredit.guessed);
+
   @override
   bool operator ==(Object other) =>
       other is MissionScore &&
@@ -60,7 +79,8 @@ class MissionScore {
       other.dimensions.length == dimensions.length &&
       _sameList(other.optionIdsByCost, optionIdsByCost) &&
       other.flags.length == flags.length &&
-      other.flags.containsAll(flags);
+      other.flags.containsAll(flags) &&
+      _sameList(other.beatCredits, beatCredits);
 
   @override
   int get hashCode => Object.hash(
@@ -68,15 +88,17 @@ class MissionScore {
     Object.hashAll(Dimension.values.map((d) => dimensions[d])),
     Object.hashAll(optionIdsByCost),
     Object.hashAllUnordered(flags),
+    Object.hashAll(beatCredits),
   );
 
   @override
   String toString() =>
       'MissionScore(total: $total, dimensions: $dimensions, '
-      'optionIdsByCost: $optionIdsByCost, flags: $flags)';
+      'optionIdsByCost: $optionIdsByCost, flags: $flags, '
+      'beatCredits: $beatCredits)';
 }
 
-bool _sameList(List<String> a, List<String> b) =>
+bool _sameList<T>(List<T> a, List<T> b) =>
     a.length == b.length &&
     Iterable<int>.generate(a.length).every((i) => a[i] == b[i]);
 
@@ -96,6 +118,15 @@ bool _sameList(List<String> a, List<String> b) =>
 ///   - an evenly middling answer, beats 2, 2, 2: min 2 → 2 / 3 × 100 = 66.7 → **67**.
 /// - **Adaptability**: the follow-up reply's adaptability score.
 ///
+/// **Reasons and guesses (wave 5).** Before anything is averaged, each beat's points are
+/// multiplied by its [PickCredit]: a guessed beat keeps 0 %, a line given with an unsound reason
+/// keeps [unsoundReasonKeepPercent] %, anything else keeps 100 %. The follow-up reply is always
+/// at 100 %. Worked example (the "reasons and guesses" tests): beats 3, 3, 3 and a perfect
+/// reply score 100; give the evidence beat an unsound reason and relevance and specificity
+/// become (3 + 1.8 + 3 + 3) / 12 = 90 %, structure the weakest beat 1.8 / 3 = 60 %; guess it
+/// instead and they become 75 % and 0 %. Picks saved before wave 5 carry no timing and no
+/// reason, so they keep 100 % and score exactly as they did.
+///
 /// Each 0–3 dimension is scaled to 0–100 and rounded half up; [MissionScore.total] is those
 /// four rounded scores weighted by [Dimension.weightPercent], rounded half up once more, so the
 /// dossier's total can be checked by hand from the four numbers it shows. The same input always
@@ -105,24 +136,34 @@ bool _sameList(List<String> a, List<String> b) =>
 /// order: a malformed attempt is a bug in the caller, not a score of zero.
 MissionScore scoreAttempt(AttemptInput input) {
   final beats = _beatChoices(input.picks);
+  final credits = [for (final p in input.picks) PickCredit.of(p)];
   final reply = input.followUpReply;
   final answer = [...beats, reply];
+  // Each line's keep percent: the beats' credits, then the reply at full.
+  final keep = [for (final c in credits) c.keepPercent, fullCreditPercent];
+
+  // Points in hundredths, after credit, so 60 % of a 1 stays an exact integer.
+  int credited(int index, Dimension d) => answer[index].scores[d] * keep[index];
+  const outOf = DimensionScores.max * fullCreditPercent;
 
   int meanOf(Dimension d) => _percent(
-    answer.fold(0, (sum, c) => sum + c.scores[d]),
-    answer.length * DimensionScores.max,
+    Iterable<int>.generate(answer.length)
+        .fold(0, (sum, i) => sum + credited(i, d)),
+    answer.length * outOf,
   );
 
   final dimensions = <Dimension, int>{
     Dimension.relevance: meanOf(Dimension.relevance),
     Dimension.specificity: meanOf(Dimension.specificity),
     Dimension.structure: _percent(
-      beats.map((c) => c.scores.structure).reduce((a, b) => a < b ? a : b),
-      DimensionScores.max,
+      Iterable<int>.generate(beats.length)
+          .map((i) => credited(i, Dimension.structure))
+          .reduce((a, b) => a < b ? a : b),
+      outOf,
     ),
     Dimension.adaptability: _percent(
-      reply.scores.adaptability,
-      DimensionScores.max,
+      credited(answer.length - 1, Dimension.adaptability),
+      outOf,
     ),
   };
 
@@ -132,8 +173,9 @@ MissionScore scoreAttempt(AttemptInput input) {
   );
 
   final shortfalls = [
-    for (final beat in beats) weightedShortfall(beat, beatDimensions),
-    weightedShortfall(reply, replyDimensions),
+    for (var i = 0; i < beats.length; i++)
+      creditedShortfall(beats[i], beatDimensions, keepPercent: keep[i]),
+    creditedShortfall(reply, replyDimensions),
   ];
 
   return MissionScore(
@@ -143,6 +185,7 @@ MissionScore scoreAttempt(AttemptInput input) {
       indexesByCost(shortfalls).map((i) => answer[i].optionId),
     ),
     flags: Set.unmodifiable({for (final c in answer) ...c.flags}),
+    beatCredits: List.unmodifiable(credits),
   );
 }
 
@@ -202,6 +245,29 @@ int trustAfter(List<ScoredChoice> picksSoFar) => picksSoFar.fold(
 
 int _trustPoints(ScoredChoice pick) =>
     beatDimensions.fold(0, (sum, d) => sum + pick.scores[d]);
+
+/// [trustAfter] for the mission player, which knows how each line was picked: every pick's
+/// points count at its [PickCredit], so the meter drops on a guess (a 0 line: −24) and moves
+/// less for a line given with an unsound reason. The arithmetic is [trustAfter]'s in hundredths
+/// of a point, rounded half up to a whole trust point after each pick, so picks without timing
+/// or a reason move the meter exactly as [trustAfter] does.
+int trustAfterPicks(
+  List<BeatPick> picksSoFar,
+) => picksSoFar.fold(initialTrust, (trust, pick) {
+  final credited = _trustPoints(pick.choice) * PickCredit.of(pick).keepPercent;
+  final delta =
+      trustStepPerPoint * (credited - middlingLinePoints * fullCreditPercent);
+  return (trust + _roundHalfUpSigned(delta, fullCreditPercent)).clamp(
+    0,
+    maxMissionScore,
+  );
+});
+
+/// [_roundHalfUp] for a numerator that may be negative (a trust step down), rounding half away
+/// from zero so a step down mirrors the same step up.
+int _roundHalfUpSigned(int numerator, int denominator) => numerator < 0
+    ? -_roundHalfUp(-numerator, denominator)
+    : _roundHalfUp(numerator, denominator);
 
 /// The top of every normalised score: dimensions, mission totals and the trust meter.
 const int maxMissionScore = 100;

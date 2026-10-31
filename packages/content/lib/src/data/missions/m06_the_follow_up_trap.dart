@@ -87,6 +87,41 @@ const missionTheFollowUpTrap = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: lenaId, text: 'Why start like that?'),
+        reasons: [
+          Reason(
+            id: 'm06_open_why_same_facts',
+            text:
+                'Asked again, give the same facts plainly, so the story holds.',
+            soundFor: {'m06_open_short_version'},
+          ),
+          Reason(
+            id: 'm06_open_why_spin',
+            text: 'Recasting a mistake as a problem I spotted makes me look better.',
+            tempts: {'m06_open_data_issue'},
+          ),
+          Reason(
+            id: 'm06_open_why_word_for_word',
+            text: "Repeating my earlier structure word for word shows I'm consistent.",
+            tempts: {'m06_open_as_i_told'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: lenaId,
+          text: "'Told my lead that afternoon.' Same as before.",
+        ),
+        weak: SceneLine(
+          speakerId: lenaId,
+          text: "Hm. 'As I told Marcus.' And what's missing?",
+        ),
+        guessed: SceneLine(
+          speakerId: lenaId,
+          text: "Fast. I'm not timing you. I'm listening.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm06_open_short_version',
@@ -132,6 +167,40 @@ const missionTheFollowUpTrap = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: lenaId, text: 'Why give me that?'),
+        reasons: [
+          Reason(
+            id: 'm06_evidence_why_adds_up',
+            text: 'Exact numbers that add up are what make a retold story believable.',
+            soundFor: {'m06_evidence_rows'},
+          ),
+          Reason(
+            id: 'm06_evidence_why_mature',
+            text: 'Moving past the details to the lesson shows maturity.',
+            tempts: {'m06_evidence_doesnt_matter'},
+          ),
+          Reason(
+            id: 'm06_evidence_why_context',
+            text: 'Explaining the pressure I was under makes the mistake understandable.',
+            tempts: {'m06_evidence_three_weeks'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: lenaId,
+          text: "'900 rows, 300 duplicates.' It adds up.",
+        ),
+        weak: SceneLine(
+          speakerId: lenaId,
+          text: 'I asked what happened. Not why it was hard.',
+        ),
+        guessed: SceneLine(
+          speakerId: lenaId,
+          text: "You didn't read those. I'll wait.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm06_evidence_rows',
@@ -177,6 +246,41 @@ const missionTheFollowUpTrap = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: lenaId, text: 'Why end there?'),
+        reasons: [
+          Reason(
+            id: 'm06_land_why_confirm',
+            text:
+                "Confirm it's the same story, and show what has changed since.",
+            soundFor: {'m06_land_same_story'},
+          ),
+          Reason(
+            id: 'm06_land_why_doubt',
+            text: "Admitting I might misremember shows I'm open and honest.",
+            tempts: {'m06_land_lead_caught_it'},
+          ),
+          Reason(
+            id: 'm06_land_why_nothing_hidden',
+            text: "Offering to explain more shows I've got nothing to hide.",
+            tempts: {'m06_land_anything_else'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: lenaId,
+          text: "'The same story.' Good. It is.",
+        ),
+        weak: SceneLine(
+          speakerId: lenaId,
+          text: "Now I'm less sure of the story than before.",
+        ),
+        guessed: SceneLine(
+          speakerId: lenaId,
+          text: "You're rushing. That worries me more than the mistake.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm06_land_same_story',

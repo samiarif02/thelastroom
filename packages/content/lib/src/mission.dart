@@ -132,10 +132,103 @@ class SceneLine {
 
 /// One beat of the answer: 3–4 plausible lines to pick from (FR-12).
 class Beat {
-  const Beat({required this.kind, required this.options});
+  const Beat({
+    required this.kind,
+    required this.options,
+    this.why,
+    this.reaction,
+  });
 
   final BeatKind kind;
   final List<AnswerOption> options;
+
+  /// After the pick the interviewer asks why (wave 5: picking at random stops paying). `null`:
+  /// this beat has no why step.
+  final ReasonPrompt? why;
+
+  /// The interviewer's line straight after the pick, by how it landed. `null`: no reaction.
+  final BeatReaction? reaction;
+
+  /// THE way to build the [ReasonPick] for [reason] given after picking [optionId]. The reason
+  /// only counts (can cost 40 %) on a strongest line; a weak line keeps its own points, and
+  /// [Reason.tempts] tells the debrief which misconception the player fell for.
+  ReasonPick reasonPick(Reason reason, String optionId) => ReasonPick(
+    reasonId: reason.id,
+    sound: reason.isSoundFor(optionId),
+    counts: isStrongest(optionId),
+  );
+
+  /// Whether [optionId] is a strongest line of this beat: the smallest weighted shortfall on
+  /// relevance, specificity and structure (the measure the debrief's red pen uses). Lines tied
+  /// for best are all strongest. The mission player passes this to `judgePick`.
+  bool isStrongest(String optionId) {
+    int shortfall(AnswerOption o) =>
+        weightedShortfall(o.scored, beatDimensions);
+    final best = options.map(shortfall).reduce((a, b) => a < b ? a : b);
+    return options.any((o) => o.id == optionId && shortfall(o) == best);
+  }
+}
+
+/// "Why that line?": the question and 3–4 reasons. Reasons are principles about interviewing,
+/// never a restatement of a line: one is the real reason the strongest line works, the others
+/// are the misconceptions that tempt people into the weak lines.
+class ReasonPrompt {
+  const ReasonPrompt({required this.line, required this.reasons});
+
+  /// What the interviewer asks ("Why lead with that?").
+  final SceneLine line;
+  final List<Reason> reasons;
+}
+
+/// One reason the player can give for a pick.
+class Reason implements Identified {
+  const Reason({
+    required this.id,
+    required this.text,
+    this.soundFor = const {},
+    this.tempts = const {},
+  });
+
+  @override
+  final String id;
+  final String text;
+
+  /// The option ids this reason correctly explains: only the beat's strongest line(s). Empty: a
+  /// misconception, never sound.
+  final Set<String> soundFor;
+
+  /// The weak option ids this misconception leads people to, so the debrief can say "You fell
+  /// for: …". Empty on the sound reason.
+  final Set<String> tempts;
+
+  /// Whether this is the right reasoning for [optionId].
+  bool isSoundFor(String optionId) => soundFor.contains(optionId);
+
+  /// Kept for compatibility. The mission player uses [Beat.reasonPick], which also knows
+  /// whether the reason can cost the pick anything.
+  ReasonPick pickFor(String optionId) =>
+      ReasonPick(reasonId: id, sound: isSoundFor(optionId));
+}
+
+/// What the interviewer says straight after a pick, for each [PickQuality].
+class BeatReaction {
+  const BeatReaction({
+    required this.strong,
+    required this.weak,
+    required this.guessed,
+  });
+
+  final SceneLine strong;
+  final SceneLine weak;
+
+  /// For a pick made before the player could have read the options.
+  final SceneLine guessed;
+
+  SceneLine forQuality(PickQuality quality) => switch (quality) {
+    PickQuality.strong => strong,
+    PickQuality.weak => weak,
+    PickQuality.guessed => guessed,
+  };
 }
 
 /// A line the player can pick. Distractors are realistic mistakes, never jokes (FR-12).

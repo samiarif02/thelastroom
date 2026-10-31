@@ -29,6 +29,40 @@ const missionSomethingWentWrong = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why open like that?'),
+        reasons: [
+          Reason(
+            id: 'm05_open_why_name_it',
+            text: 'A real mistake, named plainly with its numbers, is what builds trust.',
+            soundFor: {'m05_open_half_not_third'},
+          ),
+          Reason(
+            id: 'm05_open_why_labels',
+            text: 'Labelling each STAR step shows I know how to structure an answer.',
+            tempts: {'m05_open_star_labels'},
+          ),
+          Reason(
+            id: 'm05_open_why_safe_flaw',
+            text: "The safest mistake to share is one that's secretly a strength.",
+            tempts: {'m05_open_too_much'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: 'Half instead of a third. Clear. Go on.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: 'Hm. I asked about an actual mistake.',
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'That was fast. Did you read them?',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm05_open_half_not_third',
@@ -74,6 +108,38 @@ const missionSomethingWentWrong = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why tell it that way?'),
+        reasons: [
+          Reason(
+            id: 'm05_evidence_why_own_it',
+            text: 'Owning the cause and how fast I spoke up matters more than the error.',
+            soundFor: {'m05_evidence_told_lead'},
+          ),
+          Reason(
+            id: 'm05_evidence_why_explain',
+            text: "Explaining what really went wrong shows I wasn't careless.",
+            tempts: {'m05_evidence_export_tool'},
+          ),
+          Reason(
+            id: 'm05_evidence_why_checks',
+            text:
+                'Saying the team caught it shows we had good checks in place.',
+            tempts: {'m05_evidence_we_caught'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: 'Same afternoon, before the meeting. Good.',
+        ),
+        weak: SceneLine(speakerId: marcusId, text: 'So whose mistake was it?'),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'You picked that blind. Take your time.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm05_evidence_told_lead',
@@ -119,6 +185,40 @@ const missionSomethingWentWrong = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why finish there?'),
+        reasons: [
+          Reason(
+            id: 'm05_land_why_habit',
+            text: 'Show the habit I changed and still use, so the lesson is believable.',
+            soundFor: {'m05_land_check_now'},
+          ),
+          Reason(
+            id: 'm05_land_why_never',
+            text: "Saying it never happened again proves I've fully learned.",
+            tempts: {'m05_land_never_again'},
+          ),
+          Reason(
+            id: 'm05_land_why_downplay',
+            text: 'Downplaying the damage keeps the mistake from looking serious.',
+            tempts: {'m05_land_not_big_deal'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: "A habit you still use. That's what I wanted.",
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: 'Everyone says they learned. Show me how.',
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'Rushed. The ending is the part I remember.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm05_land_check_now',

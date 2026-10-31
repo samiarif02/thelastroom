@@ -43,6 +43,50 @@ const missionTheOpportunity = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(
+          speakerId: priyaId,
+          text: 'Why lead with that, Jordan?',
+        ),
+        reasons: [
+          Reason(
+            id: 'm01_open_why_the_question',
+            text: 'It answers what she actually asked: why this role, not why this company.',
+            soundFor: {'m01_open_role_fit'},
+          ),
+          Reason(
+            id: 'm01_open_why_passion',
+            text: 'Passion for the company is what wins an interviewer over.',
+            tempts: {'m01_open_believe'},
+          ),
+          Reason(
+            id: 'm01_open_why_candour',
+            text:
+                'Saying what suits me is honest, and honesty is always safest.',
+            tempts: {'m01_open_first_job'},
+          ),
+          Reason(
+            id: 'm01_open_why_boxes',
+            text:
+                "Interviewers want to hear you've ticked every box on the ad.",
+            tempts: {'m01_open_job_ad'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: "Good. You're talking about the job itself, not just us.",
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: 'Hm. I hear that one a lot. Go on.',
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: "That was quick, Jordan. Slow down, I've got time.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm01_open_role_fit',
@@ -102,6 +146,45 @@ const missionTheOpportunity = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why that example?'),
+        reasons: [
+          Reason(
+            id: 'm01_evidence_why_one_story',
+            text: 'One story with my own part and a number beats a list of strengths.',
+            soundFor: {'m01_evidence_sign_up'},
+          ),
+          Reason(
+            id: 'm01_evidence_why_modest',
+            text: "Saying 'we' sounds more modest than saying 'I'.",
+            tempts: {'m01_evidence_team_did'},
+          ),
+          Reason(
+            id: 'm01_evidence_why_pattern',
+            text: 'A pattern across my whole life is stronger than a single example.',
+            tempts: {'m01_evidence_always'},
+          ),
+          Reason(
+            id: 'm01_evidence_why_background',
+            text: "The full background helps her see where I'm coming from.",
+            tempts: {'m01_evidence_whole_story'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: "Twelve interviews, two screens, 75%. That's what I wanted.",
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: "Okay. I'll want more of you in that, though.",
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: "You picked that before you'd read it. Want to think again?",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm01_evidence_sign_up',
@@ -162,6 +245,47 @@ const missionTheOpportunity = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'And why finish there?'),
+        reasons: [
+          Reason(
+            id: 'm01_land_why_tie_back',
+            text:
+                "A good close ties my story back to the job she's hiring for.",
+            soundFor: {'m01_land_bring_habit'},
+          ),
+          Reason(
+            id: 'm01_land_why_promise',
+            text: 'A confident promise of results is the strongest way to finish.',
+            tempts: {'m01_land_same_impact'},
+          ),
+          Reason(
+            id: 'm01_land_why_eager',
+            text:
+                "Showing I'd take anything proves how much I want to be here.",
+            tempts: {'m01_land_any_role'},
+          ),
+          Reason(
+            id: 'm01_land_why_offer_more',
+            text: 'Offering more examples shows I have plenty to talk about.',
+            tempts: {'m01_land_trail_off'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: 'Nice. You came back to the role. That lands.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: "Right. Let's leave it there for now.",
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: "You're rushing the ending, Jordan. Finish it properly.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm01_land_bring_habit',

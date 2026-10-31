@@ -1,6 +1,7 @@
 import 'beat.dart';
 import 'dimension.dart';
 import 'dimension_scores.dart';
+import 'pick_credit.dart';
 
 /// The dimensions a beat pick counts towards. Adaptability isn't one: only the follow-up reply
 /// earns it (brief §4).
@@ -29,6 +30,23 @@ int weightedShortfall(ScoredChoice choice, Set<Dimension> counted) =>
       (sum, d) =>
           sum + d.weightPercent * (DimensionScores.max - choice.scores[d]),
     );
+
+/// [weightedShortfall] after a pick's credit: [choice]'s points kept at [keepPercent], in
+/// hundredths of a point so 60 % of a 1 stays exact. With full credit it is exactly
+/// `weightedShortfall × 100`, so the order of lines from attempts saved before wave 5 is
+/// unchanged.
+int creditedShortfall(
+  ScoredChoice choice,
+  Set<Dimension> counted, {
+  int keepPercent = fullCreditPercent,
+}) => counted.fold(
+  0,
+  (sum, d) =>
+      sum +
+      d.weightPercent *
+          (DimensionScores.max * fullCreditPercent -
+              choice.scores[d] * keepPercent),
+);
 
 /// The indexes of [shortfalls], costliest first. Ties keep their original order, so the
 /// earliest pick wins (Dart's `List.sort` isn't stable, hence the index tie-break).

@@ -40,6 +40,40 @@ const missionFirstRoundReview = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why that one?'),
+        reasons: [
+          Reason(
+            id: 'm07_open_why_fits',
+            text: 'Pick an example that fits the question exactly: nobody asked me.',
+            soundFor: {'m07_open_cafe_late'},
+          ),
+          Reason(
+            id: 'm07_open_why_impressive',
+            text: 'My most impressive project is the best example, whatever the question.',
+            tempts: {'m07_open_supervisor_asked'},
+          ),
+          Reason(
+            id: 'm07_open_why_trait_first',
+            text: 'Naming the trait first tells him what the story proves.',
+            tempts: {'m07_open_proactive'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: "Nobody asked. Good, that's the question.",
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: "That's not quite what I asked for.",
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'You picked that fast. Read them first.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm07_open_cafe_late',
@@ -85,6 +119,40 @@ const missionFirstRoundReview = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why tell it like that?'),
+        reasons: [
+          Reason(
+            id: 'm07_evidence_why_tested',
+            text: 'Show what I measured, what I built and how I tested it.',
+            soundFor: {'m07_evidence_checklist'},
+          ),
+          Reason(
+            id: 'm07_evidence_why_consensus',
+            text: 'Getting everyone to agree is the real sign of a good improvement.',
+            tempts: {'m07_evidence_team_routine'},
+          ),
+          Reason(
+            id: 'm07_evidence_why_effort',
+            text: 'Setting an example with effort is how real change happens.',
+            tempts: {'m07_evidence_harder'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: 'You timed it, then you tested it. Good.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: 'And what did you change, exactly?',
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'Too quick. I want the thinking, not the click.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm07_evidence_checklist',
@@ -130,6 +198,42 @@ const missionFirstRoundReview = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why close on that?'),
+        reasons: [
+          Reason(
+            id: 'm07_land_why_lasted',
+            text: 'End with the result that lasted, so the improvement is proven.',
+            soundFor: {'m07_land_on_time'},
+          ),
+          Reason(
+            id: 'm07_land_why_about_me',
+            text:
+                'Drawing out what it says about me makes the ending stronger.',
+            tempts: {'m07_land_natural_leader'},
+          ),
+          Reason(
+            id: 'm07_land_why_modest',
+            text:
+                'Playing down a small example keeps me from sounding arrogant.',
+            tempts: {'m07_land_small_thing'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: 'On time all term, and three trained. Solid.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: "Hm. I'd rather hear what it changed.",
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: "Don't rush the end. That's where results go.",
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm07_land_on_time',

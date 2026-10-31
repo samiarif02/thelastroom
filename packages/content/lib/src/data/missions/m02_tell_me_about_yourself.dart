@@ -28,6 +28,40 @@ const missionTellMeAboutYourself = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why start there?'),
+        reasons: [
+          Reason(
+            id: 'm02_open_why_fit_first',
+            text: 'Start with what makes me fit this job, not with my whole life.',
+            soundFor: {'m02_open_graduate'},
+          ),
+          Reason(
+            id: 'm02_open_why_origin',
+            text: 'A personal origin story makes me memorable from the first line.',
+            tempts: {'m02_open_hometown'},
+          ),
+          Reason(
+            id: 'm02_open_why_qualities',
+            text: 'Naming my best qualities is the clearest way to introduce myself.',
+            tempts: {'m02_open_adjectives'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: 'Good, straight to the part that matters here.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: "Okay. Let's get to the bit about the job.",
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: 'Hold on, Jordan. You barely looked at those.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm02_open_graduate',
@@ -73,6 +107,40 @@ const missionTellMeAboutYourself = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'Why that example?'),
+        reasons: [
+          Reason(
+            id: 'm02_evidence_why_one_result',
+            text: 'One result I caused, with a number, proves more than a long list.',
+            soundFor: {'m02_evidence_tickets'},
+          ),
+          Reason(
+            id: 'm02_evidence_why_range',
+            text: 'Covering everything on my CV shows the full range I offer.',
+            tempts: {'m02_evidence_whole_cv'},
+          ),
+          Reason(
+            id: 'm02_evidence_why_rounded',
+            text: 'Life outside work shows the well-rounded person behind the CV.',
+            tempts: {'m02_evidence_hobbies'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: '600 tickets and a quarter fewer. I like that.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: "Mm. I'd rather hear one thing properly.",
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: 'That was a quick pick. Read them, then choose.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm02_evidence_tickets',
@@ -118,6 +186,41 @@ const missionTellMeAboutYourself = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: priyaId, text: 'And why end on that?'),
+        reasons: [
+          Reason(
+            id: 'm02_land_why_connect',
+            text:
+                'End by connecting who I am to what the role does day to day.',
+            soundFor: {'m02_land_this_role'},
+          ),
+          Reason(
+            id: 'm02_land_why_ambition',
+            text: 'A long-term career plan shows ambition and commitment.',
+            tempts: {'m02_land_five_years'},
+          ),
+          Reason(
+            id: 'm02_land_why_inviting',
+            text: "Inviting questions at the end shows I'm open and easy to talk to.",
+            tempts: {'m02_land_trail'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: priyaId,
+          text: 'There it is: users and numbers. Nicely done.',
+        ),
+        weak: SceneLine(
+          speakerId: priyaId,
+          text: "Hm. Let's bring it back to this role.",
+        ),
+        guessed: SceneLine(
+          speakerId: priyaId,
+          text: 'You rushed that ending, Jordan. Take a second.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm02_land_this_role',

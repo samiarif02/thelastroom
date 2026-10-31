@@ -31,6 +31,40 @@ const missionShowMeTheEvidence = Mission(
   beats: [
     Beat(
       kind: BeatKind.open,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why start there?'),
+        reasons: [
+          Reason(
+            id: 'm04_open_why_mine',
+            text: 'Open with the specific problem I noticed, so the story is clearly mine.',
+            soundFor: {'m04_open_same_question'},
+          ),
+          Reason(
+            id: 'm04_open_why_collaborative',
+            text: "Starting with the team shows I'm collaborative, which every manager wants.",
+            tempts: {'m04_open_team_realised'},
+          ),
+          Reason(
+            id: 'm04_open_why_frame',
+            text: 'Stating my approach first frames the example the right way.',
+            tempts: {'m04_open_data_lead'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: 'Fine. You noticed something. Go on.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: "Noted. I'll need you and a number.",
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'That took under two seconds. Read them.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm04_open_same_question',
@@ -76,6 +110,41 @@ const missionShowMeTheEvidence = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why those details?'),
+        reasons: [
+          Reason(
+            id: 'm04_evidence_why_numbers',
+            text: 'He asked about data, so give the actual numbers and what I did with them.',
+            soundFor: {'m04_evidence_tagged'},
+          ),
+          Reason(
+            id: 'm04_evidence_why_share_credit',
+            text:
+                'Sharing credit with the team is the professional thing to do.',
+            tempts: {'m04_evidence_we_cut'},
+          ),
+          Reason(
+            id: 'm04_evidence_why_summary',
+            text: 'Summarising the findings is clearer than burying him in figures.',
+            tempts: {'m04_evidence_patterns'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: '600 tickets, one in three. Good. Numbers.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: "I'd want the actual count. And whose it was.",
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'Too quick to have read them. Again, slowly.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm04_evidence_tagged',
@@ -121,6 +190,41 @@ const missionShowMeTheEvidence = Mission(
     ),
     Beat(
       kind: BeatKind.land,
+      why: ReasonPrompt(
+        line: SceneLine(speakerId: marcusId, text: 'Why end there?'),
+        reasons: [
+          Reason(
+            id: 'm04_land_why_measured',
+            text: "Close with the measured result and what I'd carry into this job.",
+            soundFor: {'m04_land_quarter'},
+          ),
+          Reason(
+            id: 'm04_land_why_big_claim',
+            text: 'Big claims about impact are what make an answer memorable.',
+            tempts: {'m04_land_huge_impact'},
+          ),
+          Reason(
+            id: 'm04_land_why_everyone_happy',
+            text:
+                'Ending on how pleased everyone was proves the work went well.',
+            tempts: {'m04_land_team_proud'},
+          ),
+        ],
+      ),
+      reaction: BeatReaction(
+        strong: SceneLine(
+          speakerId: marcusId,
+          text: 'A quarter fewer, and a lesson. That I believe.',
+        ),
+        weak: SceneLine(
+          speakerId: marcusId,
+          text: "That's a claim, not a result.",
+        ),
+        guessed: SceneLine(
+          speakerId: marcusId,
+          text: 'You rushed the ending. Results matter most.',
+        ),
+      ),
       options: [
         AnswerOption(
           id: 'm04_land_quarter',
