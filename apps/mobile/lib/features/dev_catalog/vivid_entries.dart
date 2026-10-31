@@ -103,7 +103,7 @@ abstract final class VividEntries {
           children: [
             TowerHero(room: _rooms[2], onPlay: () {}),
             const SizedBox(height: BrandSpace.md),
-            const RecallRoomCard(),
+            const RecallRoomCardView(due: 3),
           ],
         ),
       ),
