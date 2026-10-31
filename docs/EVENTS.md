@@ -40,3 +40,5 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `notification_opened` | A local notification is tapped | `type`, `variant` |
 | `waitlist_joined` | The player joins the Chapter 2 waitlist | |
 | `user_activated` | The first `mission_completed` for a user | |
+| `mission_left` | The player leaves a mission part-way (back, then "Leave"); the attempt is saved on the device | `mission_id`, `beat` |
+| `mission_resumed` | The player continues a mission they left | `mission_id`, `beat` |
