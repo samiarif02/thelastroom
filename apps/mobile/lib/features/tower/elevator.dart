@@ -3,9 +3,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../ui/film_kit.dart';
 
-/// The ride from the Tower to a room (brief 13): brass doors close from both sides while the
-/// floor indicator climbs to the mission's number, about [BrandMotion.elevator] long. A tap
-/// skips it. Under reduced motion it's a plain cross-fade to black.
+/// The ride from the Tower to a room (brief 13, vivid in brief 17): doors in the chapter's
+/// colour close from both sides while the floor indicator climbs to the mission's number in
+/// sunflower, about [BrandMotion.elevator] long. A tap skips it. Under reduced motion it's a
+/// plain cross-fade.
 class Elevator extends StatelessWidget {
   const Elevator({
     super.key,
@@ -25,6 +26,7 @@ class Elevator extends StatelessWidget {
   static const double _doorsShut = 0.55;
   static const double _climbFrom = 0.1;
   static const double _climbTo = 0.8;
+  static const double _floorSize = 72;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +48,7 @@ class Elevator extends StatelessWidget {
             if (still) {
               return Opacity(
                 opacity: t,
-                child: const ColoredBox(color: BrandColors.void_),
+                child: const ColoredBox(color: BrandVivid.night),
               );
             }
             final close = cue(t, 0, _doorsShut, BrandMotion.camera);
@@ -62,13 +64,9 @@ class Elevator extends StatelessWidget {
                     height: box.maxHeight,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [BrandColors.surfaceRaised, grade.shadow],
-                        ),
+                        gradient: LinearGradient(colors: grade.cardGradient),
                         border: Border.symmetric(
-                          vertical: BorderSide(
-                            color: grade.key.withValues(alpha: 0.5),
-                          ),
+                          vertical: BorderSide(color: BrandVivid.hairline(0.4)),
                         ),
                       ),
                     ),
@@ -78,7 +76,7 @@ class Elevator extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     ColoredBox(
-                      color: BrandColors.void_.withValues(alpha: 0.6 * close),
+                      color: BrandVivid.night.withValues(alpha: 0.6 * close),
                     ),
                     door(Alignment.centerLeft),
                     door(Alignment.centerRight),
@@ -86,7 +84,10 @@ class Elevator extends StatelessWidget {
                       alignment: const Alignment(0, -0.6),
                       child: Text(
                         '$shown',
-                        style: BrandType.display.copyWith(color: grade.key),
+                        style: BrandVividType.numeral.copyWith(
+                          color: BrandVivid.accent,
+                          fontSize: _floorSize,
+                        ),
                       ),
                     ),
                   ],

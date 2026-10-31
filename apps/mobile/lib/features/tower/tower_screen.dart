@@ -14,16 +14,18 @@ import '../../core/audio/game_sounds.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
-import '../mission/widgets/cue_button.dart';
 import 'elevator.dart';
-import 'room_window.dart';
+import 'tower_chapter_card.dart';
+import 'tower_extras.dart';
+import 'tower_hero.dart';
 import 'tower_rooms.dart';
 
-/// Home (FR-31, brief §9 "the building"): a tall tower at night. Chapter 1's seven rooms at the
-/// bottom, climbing up; Chapters 2 and 3 as dark floors above with their titles; the last room
-/// at the top, always in sight. Finished rooms are lit with their best score, the next one
-/// glows with "Enter", the rest are locked. [lit] is the mission just finished: its window
-/// lights up as the Tower opens (the reward moment).
+/// Home (FR-31, brief §9 "the building", rebuilt in brief 17): the evening sky over the city,
+/// and on it, top to bottom: the mission to play next as a hero card with one "Play" (one tap
+/// starts it), then the chapters 1, 2, 3 as cards in their own colours, Chapter 1's rooms
+/// 1 → 7 inside, then the last room and the Recall Room. A pinned header (the greeting and
+/// "Your file") sits on its own ground, so nothing scrolls through it. [lit] is the mission
+/// just finished: its row lights up as the Tower opens (the reward moment).
 class TowerScreen extends ConsumerStatefulWidget {
   const TowerScreen({super.key, this.lit});
 
@@ -31,13 +33,16 @@ class TowerScreen extends ConsumerStatefulWidget {
 
   static const String eyebrow = 'THE TOWER';
   static const String progress = 'Your file';
-  static const String lastRoom = 'The Last Room';
-  static const String lastRoomLine = 'The offer is decided here.';
-  static const String recallRoom = 'Recall Room';
-  static const String comingSoon = 'Coming soon';
-  static const String floorLocked = 'Locked';
 
-  static String greeting(String name) => 'Good evening, $name.';
+  /// By the hour on the player's clock.
+  static String greeting(String name, int hour) => hour < _noon
+      ? 'Good morning, $name.'
+      : hour < _evening
+      ? 'Good afternoon, $name.'
+      : 'Good evening, $name.';
+
+  static const int _noon = 12;
+  static const int _evening = 18;
   static String lockedNotice(Mission before) =>
       'Finish “${before.title}” to open this room.';
   static String litNotice(Mission m) => 'Room ${m.number} is lit.';
@@ -48,10 +53,6 @@ class TowerScreen extends ConsumerStatefulWidget {
 
 class _TowerScreenState extends ConsumerState<TowerScreen>
     with TickerProviderStateMixin {
-  late final AnimationController _pulse = AnimationController(
-    vsync: this,
-    duration: BrandMotion.dolly,
-  );
   late final AnimationController _lighting = AnimationController(
     vsync: this,
     duration: BrandMotion.cinematic,
@@ -83,20 +84,12 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (MediaQuery.disableAnimationsOf(context)) {
-      _pulse
-        ..stop()
-        ..value = 1;
-      _lighting.value = 1;
-    } else if (!_pulse.isAnimating) {
-      unawaited(_pulse.repeat(reverse: true));
-    }
+    if (MediaQuery.disableAnimationsOf(context)) _lighting.value = 1;
   }
 
   @override
   void dispose() {
     _noticeTimer?.cancel();
-    _pulse.dispose();
     _lighting.dispose();
     super.dispose();
   }
@@ -142,13 +135,8 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     final room = _riding;
     if (room == null || !mounted) return;
     _riding = null;
-    // A brand-new player meets their practice CV before the first room.
-    final firstEver =
-        room.mission.number == missions.first.number &&
-        room.state == RoomState.current;
-    context.go(
-      firstEver ? Routes.character : Routes.mission(room.mission.number),
-    );
+    // Straight into the room: one tap from the tower (brief 17).
+    context.go(Routes.mission(room.mission.number));
   }
 
   @override
@@ -157,33 +145,14 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     final name =
         ref.watch(profileProvider).value?.displayName ??
         PlayerProfile.fallbackName;
-    const grade = ChapterGrade.lobby;
     return Stack(
       fit: StackFit.expand,
       children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [BrandColors.void_, grade.shadow, grade.tint],
-              stops: const [0, 0.7, 1],
-            ),
-          ),
-        ),
-        FilmOverlay(
-          grain: 0,
-          vignetteColor: grade.shadow,
-          child: Opacity(
-            opacity: 0.35,
-            child: Bokeh(colors: [grade.key, BrandColors.textPrimary], seed: 7),
-          ),
-        ),
+        const VividBackdrop(),
         switch (rooms) {
-          AsyncData(:final value) => _Facade(
+          AsyncData(:final value) => _Tower(
             rooms: value,
             name: name,
-            pulse: _pulse,
             lighting: _lighting,
             lit: widget.lit,
             onReady: () => _open(value),
@@ -205,11 +174,10 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
   }
 }
 
-class _Facade extends StatefulWidget {
-  const _Facade({
+class _Tower extends StatefulWidget {
+  const _Tower({
     required this.rooms,
     required this.name,
-    required this.pulse,
     required this.lighting,
     required this.lit,
     required this.onReady,
@@ -219,7 +187,6 @@ class _Facade extends StatefulWidget {
 
   final List<TowerRoom> rooms;
   final String name;
-  final Animation<double> pulse;
   final Animation<double> lighting;
   final int? lit;
   final VoidCallback onReady;
@@ -227,15 +194,13 @@ class _Facade extends StatefulWidget {
   final VoidCallback onProgress;
 
   @override
-  State<_Facade> createState() => _FacadeState();
+  State<_Tower> createState() => _TowerState();
 }
 
-class _FacadeState extends State<_Facade> {
-  final GlobalKey _focusRoom = GlobalKey();
+class _TowerState extends State<_Tower> {
+  final GlobalKey _litRow = GlobalKey();
 
-  static const double _maxWidth = 460;
-  static const int _greetingLines = 2;
-  static const double _hairline = 0.8;
+  static const double _maxWidth = 520;
 
   @override
   void initState() {
@@ -243,113 +208,70 @@ class _FacadeState extends State<_Facade> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       widget.onReady();
-      // Bring the room that matters into view: the one just lit, else the current one.
-      final target = _focusRoom.currentContext;
+      // A just-finished room scrolls into view; otherwise the hero card is already on top.
+      final target = _litRow.currentContext;
       if (target != null) {
         unawaited(Scrollable.ensureVisible(target, alignment: 0.5));
       }
     });
   }
 
-  int? get _focusNumber {
-    if (widget.lit != null) return widget.lit;
-    for (final r in widget.rooms) {
-      if (r.state == RoomState.current) return r.mission.number;
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
-    const grade = ChapterGrade.lobby;
-    final chapterOne = chapters.first;
-    final focus = _focusNumber;
+    final hero = heroRoom(widget.rooms);
+    var i = 0;
+    Widget enter(Widget child) => Padding(
+      padding: const EdgeInsets.only(bottom: BrandSpace.md),
+      child: StaggeredEntrance(index: i++, child: child),
+    );
     return SafeArea(
+      bottom: false,
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              BrandSpace.lg,
-              BrandSpace.sm,
-              BrandSpace.sm,
-              0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Wraps at 2x text rather than squeezing the button.
-                Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      TowerScreen.eyebrow,
-                      style: BrandType.eyebrow.copyWith(color: grade.key),
-                    ),
-                    CueButton(
-                      label: TowerScreen.progress,
-                      quiet: true,
-                      onPressed: widget.onProgress,
-                    ),
-                  ],
-                ),
-                Semantics(
-                  header: true,
-                  child: Text(
-                    TowerScreen.greeting(widget.name),
-                    maxLines: _greetingLines,
-                    overflow: TextOverflow.ellipsis,
-                    style: BrandType.subtitle,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _Header(name: widget.name, onProgress: widget.onProgress),
           Expanded(
-            child: SingleChildScrollView(
-              reverse: true,
-              padding: const EdgeInsets.all(BrandSpace.lg),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: _maxWidth),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const _Penthouse(),
-                      for (final chapter in chapters.reversed.where(
-                        (c) => !c.playable,
-                      ))
-                        _DarkFloor(chapter: chapter),
-                      _FloorFrame(
-                        grade: grade,
-                        title: 'CHAPTER ${chapterOne.number}',
-                        subtitle: chapterOne.title,
-                        child: Column(
-                          children: [
-                            for (final room in widget.rooms.reversed)
-                              AnimatedBuilder(
-                                key: room.mission.number == focus
-                                    ? _focusRoom
-                                    : null,
-                                animation: Listenable.merge([
-                                  widget.pulse,
-                                  widget.lighting,
-                                ]),
-                                builder: (context, _) => RoomWindow(
-                                  room: room,
-                                  grade: room.mission.grade,
-                                  pulse: widget.pulse.value,
-                                  lighting: room.mission.number == widget.lit
-                                      ? widget.lighting.value
-                                      : 1,
-                                  onTap: () => widget.onTapRoom(room),
-                                ),
+            child: _FadeUnderHeader(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  BrandSpace.md,
+                  BrandSpace.md,
+                  BrandSpace.md,
+                  BrandSpace.lg + MediaQuery.paddingOf(context).bottom,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _maxWidth),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (hero != null)
+                          enter(
+                            TowerHero(
+                              room: hero,
+                              onPlay: () => widget.onTapRoom(hero),
+                            ),
+                          ),
+                        for (final chapter in chapters)
+                          enter(
+                            AnimatedBuilder(
+                              animation: widget.lighting,
+                              builder: (context, _) => ChapterCard(
+                                chapter: chapter,
+                                rooms: [
+                                  for (final r in widget.rooms)
+                                    if (r.mission.chapter == chapter.number) r,
+                                ],
+                                lit: widget.lit,
+                                lighting: widget.lighting.value,
+                                litRowKey: _litRow,
+                                onTapRoom: widget.onTapRoom,
                               ),
-                          ],
-                        ),
-                      ),
-                      const _Lobby(),
-                    ],
+                            ),
+                          ),
+                        enter(const LastRoomCard()),
+                        enter(const RecallRoomCard()),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -361,121 +283,58 @@ class _FacadeState extends State<_Facade> {
   }
 }
 
-/// One floor of the facade: a brass-edged band with its title.
-class _FloorFrame extends StatelessWidget {
-  const _FloorFrame({
-    required this.grade,
-    required this.title,
-    required this.subtitle,
-    required this.child,
-    this.dim = false,
-  });
+/// The greeting band: on its own ground (the top of the sky, opaque), so the cards scrolling
+/// up pass beneath it instead of showing through the words.
+class _Header extends StatelessWidget {
+  const _Header({required this.name, required this.onProgress});
 
-  final ChapterGrade grade;
-  final String title;
-  final String subtitle;
-  final Widget child;
-  final bool dim;
+  final String name;
+  final VoidCallback onProgress;
 
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: BrandColors.surface.withValues(alpha: dim ? 0.7 : 0.9),
-      border: Border.all(
-        color: grade.key.withValues(alpha: dim ? 0.15 : 0.4),
-        width: _FacadeState._hairline,
-      ),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(BrandSpace.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Semantics(
-            header: true,
-            child: Text(
-              '$title · ${subtitle.toUpperCase()}',
-              style: BrandType.label.copyWith(
-                color: dim ? BrandColors.textSecondary : grade.key,
-              ),
-            ),
-          ),
-          const SizedBox(height: BrandSpace.sm),
-          child,
-        ],
-      ),
-    ),
-  );
-}
-
-/// A locked chapter: dark windows, the titles of its missions as a teaser (FR-31).
-class _DarkFloor extends StatelessWidget {
-  const _DarkFloor({required this.chapter});
-
-  final Chapter chapter;
+  static const int _greetingLines = 2;
 
   @override
   Widget build(BuildContext context) {
-    final grade = ChapterGrade.values[chapter.number - 1];
-    return _FloorFrame(
-      grade: grade,
-      dim: true,
-      title: 'CHAPTER ${chapter.number}',
-      subtitle: chapter.title,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const LockGlyph(color: BrandColors.textSecondary),
-              const SizedBox(width: BrandSpace.sm),
-              Text(
-                TowerScreen.floorLocked.toUpperCase(),
-                style: BrandType.label.copyWith(
-                  color: BrandColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: BrandSpace.xs),
-          Text(
-            chapter.missionTitles.join('  ·  '),
-            style: BrandType.body.copyWith(
-              color: BrandColors.textSecondary.withValues(alpha: 0.7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The top of the tower: the last room, always in sight, always out of reach (for now).
-class _Penthouse extends StatelessWidget {
-  const _Penthouse();
-
-  static const double _lampWidth = 48;
-
-  @override
-  Widget build(BuildContext context) {
-    const grade = ChapterGrade.finalRound;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: BrandSpace.xl),
-      child: _FloorFrame(
-        grade: grade,
-        title: 'THE TOP FLOOR',
-        subtitle: TowerScreen.lastRoom,
-        child: Column(
+    final hour = DateTime.now().hour;
+    return ColoredBox(
+      color: BrandVivid.skyTop,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          BrandSpace.lg,
+          BrandSpace.sm,
+          BrandSpace.md,
+          BrandSpace.sm,
+        ),
+        child: Row(
           children: [
-            const SizedBox(
-              width: _lampWidth,
-              child: BankersLamp(grade: grade, lit: false),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    TowerScreen.eyebrow,
+                    style: BrandVividType.kicker.copyWith(
+                      color: BrandVivid.accent,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      TowerScreen.greeting(name, hour),
+                      maxLines: _greetingLines,
+                      overflow: TextOverflow.ellipsis,
+                      style: BrandVividType.title,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: BrandSpace.sm),
-            Text(
-              TowerScreen.lastRoomLine,
-              textAlign: TextAlign.center,
-              style: BrandType.body.copyWith(color: BrandColors.textSecondary),
+            const SizedBox(width: BrandSpace.sm),
+            VividButton(
+              label: TowerScreen.progress,
+              primary: false,
+              onPressed: onProgress,
             ),
           ],
         ),
@@ -484,30 +343,40 @@ class _Penthouse extends StatelessWidget {
   }
 }
 
-/// The ground floor: the Recall Room's door, not open yet.
-class _Lobby extends StatelessWidget {
-  const _Lobby();
+/// The top of the scroll fades from the header's colour to clear, so a card slides under the
+/// header softly and never with a hard cut through its words.
+class _FadeUnderHeader extends StatelessWidget {
+  const _FadeUnderHeader({required this.child});
+
+  final Widget child;
+
+  static const double _fade = BrandSpace.md;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: BrandSpace.sm),
-    child: Semantics(
-      label: '${TowerScreen.recallRoom}, ${TowerScreen.comingSoon}',
-      excludeSemantics: true,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const LockGlyph(color: BrandColors.textSecondary),
-          const SizedBox(width: BrandSpace.sm),
-          Flexible(
-            child: Text(
-              '${TowerScreen.recallRoom.toUpperCase()} · ${TowerScreen.comingSoon.toUpperCase()}',
-              style: BrandType.label.copyWith(color: BrandColors.textSecondary),
+  Widget build(BuildContext context) => Stack(
+    children: [
+      Positioned.fill(child: child),
+      Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        height: _fade,
+        child: IgnorePointer(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  BrandVivid.skyTop,
+                  BrandVivid.skyTop.withValues(alpha: 0),
+                ],
+              ),
             ),
           ),
-        ],
+        ),
       ),
-    ),
+    ],
   );
 }
 
@@ -531,18 +400,18 @@ class _Notice extends StatelessWidget {
         builder: (context, t, child) => Opacity(opacity: t, child: child),
         child: Semantics(
           liveRegion: true,
-          child: DecoratedBox(
+          child: Container(
+            padding: const EdgeInsets.all(BrandSpace.md),
             decoration: BoxDecoration(
-              color: BrandColors.surfaceRaised,
-              border: Border.all(color: ChapterGrade.lobby.key),
+              color: BrandVivid.night,
+              borderRadius: BorderRadius.circular(BrandRadius.lg),
+              border: Border.all(color: BrandVivid.accent, width: 1.5),
+              boxShadow: BrandVivid.cardShadow,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(BrandSpace.md),
-              child: Text(
-                text,
-                textAlign: TextAlign.center,
-                style: BrandType.body,
-              ),
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              style: BrandVividType.row,
             ),
           ),
         ),
