@@ -16,4 +16,13 @@ abstract final class BrandRadius {
   static const double none = 0;
   static const double sm = 2;
   static const double md = 6;
+
+  /// The vivid layer's cards (brief 17): soft and friendly, like a game's.
+  static const double card = 24;
+
+  /// Rows and badges inside a card.
+  static const double lg = 16;
+
+  /// Buttons: fully round ends.
+  static const double pill = 999;
 }

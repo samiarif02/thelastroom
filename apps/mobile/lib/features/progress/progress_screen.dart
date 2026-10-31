@@ -11,23 +11,28 @@ import '../../core/analytics/event_value.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../debrief/debrief_facts.dart';
-import '../debrief/red_pen_slip.dart';
-import '../mission/widgets/cue_button.dart';
+import '../mission/mission_lookup.dart';
+import '../tower/tower_hero.dart';
+import '../tower/tower_rooms.dart';
 import 'progress_facts.dart';
 
 /// Where the progress file was opened from (`progress_report_viewed`'s `source`).
 enum ProgressSource { tower }
 
-/// Progress (FR-16, FR-41), as a candidate file on the desk like the dossier (the owner's
-/// favourite look): the Chapter 1 summary on the letterhead, then each mission's slip with its
-/// best and latest score, the four dimensions, the attempts and the lesson still to work on.
-/// The player's two play settings sit at the end of the file.
+/// Progress (FR-16, FR-41), in the tower's language (brief 17): a pinned header with the way
+/// back, then a summary card in Chapter 1's colour (missions done as a ring, the average, the
+/// change since Mission 1), the skill radar, each mission as a colourful card with its stars,
+/// best and latest, attempts and the lesson still to work on, and the two play settings.
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key});
 
-  static const String title = 'Candidate file';
-  static const String back = 'Back to the tower';
+  static const String title = 'Your file';
+  static const String back = 'Tower';
   static const String notPlayed = 'Not played yet';
+  static const String skills = 'YOUR SKILLS';
+  static const String skillsEmpty = 'Play a mission to see your skills here.';
+  static const String missions = 'MISSIONS';
+  static const String workOn = 'STILL TO WORK ON';
   static const String settings = 'HOW YOU PLAY';
   static const String autoAdvance = 'Lines move on by themselves';
   static const String calmMode = 'Calm mode: no answer timer';
@@ -48,134 +53,188 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     });
   }
 
+  static const double _maxWidth = 520;
+
   @override
   Widget build(BuildContext context) {
-    const grade = ChapterGrade.lobby;
     final report = ref.watch(progressReportProvider).value;
     final profile = ref.watch(profileProvider).value ?? const PlayerProfile();
     final profiles = ref.read(profileProvider.notifier);
+    var i = 0;
+    Widget enter(Widget child) => Padding(
+      padding: const EdgeInsets.only(bottom: BrandSpace.md),
+      child: StaggeredEntrance(index: i++, child: child),
+    );
     return Stack(
       fit: StackFit.expand,
       children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: const Alignment(-0.7, -0.6),
-              radius: 1.3,
-              colors: [grade.tint, BrandColors.surface, BrandColors.void_],
-              stops: const [0, 0.55, 1],
-            ),
-          ),
-        ),
+        const VividBackdrop(grade: ChapterGrade.lobby),
         SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(BrandSpace.lg),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: _maxWidth),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: CueButton(
-                        label: ProgressScreen.back,
-                        quiet: true,
-                        onPressed: () => context.go(Routes.tower()),
+          bottom: false,
+          child: Column(
+            children: [
+              _Header(onBack: () => context.go(Routes.tower())),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    BrandSpace.md,
+                    BrandSpace.md,
+                    BrandSpace.md,
+                    BrandSpace.lg + MediaQuery.paddingOf(context).bottom,
+                  ),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: _maxWidth),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (report != null) ...[
+                            enter(
+                              _Summary(
+                                report: report,
+                                name: profile.displayName,
+                              ),
+                            ),
+                            enter(_Skills(skills: report.skills)),
+                            enter(const _Section(ProgressScreen.missions)),
+                            for (final line in report.missions)
+                              enter(_MissionCard(line: line)),
+                          ],
+                          enter(const _Section(ProgressScreen.settings)),
+                          enter(
+                            _Panel(
+                              child: Column(
+                                children: [
+                                  _Setting(
+                                    label: ProgressScreen.autoAdvance,
+                                    on: profile.autoAdvance,
+                                    onChanged: (v) => profiles.change(
+                                      (p) => p.copyWith(autoAdvance: v),
+                                    ),
+                                  ),
+                                  _Setting(
+                                    label: ProgressScreen.calmMode,
+                                    on: profile.calmMode,
+                                    onChanged: (v) => profiles.change(
+                                      (p) => p.copyWith(calmMode: v),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: BrandSpace.sm),
-                    if (report != null) ...[
-                      _Summary(report: report, name: profile.displayName),
-                      for (final line in report.missions) ...[
-                        const SizedBox(height: BrandSpace.md),
-                        _MissionSlip(line: line),
-                      ],
-                    ],
-                    const SizedBox(height: BrandSpace.lg),
-                    const BrassOrnament(text: ProgressScreen.settings),
-                    const SizedBox(height: BrandSpace.sm),
-                    _Setting(
-                      label: ProgressScreen.autoAdvance,
-                      on: profile.autoAdvance,
-                      onChanged: (v) =>
-                          profiles.change((p) => p.copyWith(autoAdvance: v)),
-                    ),
-                    _Setting(
-                      label: ProgressScreen.calmMode,
-                      on: profile.calmMode,
-                      onChanged: (v) =>
-                          profiles.change((p) => p.copyWith(calmMode: v)),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ],
     );
   }
-
-  static const double _maxWidth = 520;
 }
 
-/// The letterhead: who, and Chapter 1 at a glance.
+/// The back button and the title, on their own ground (nothing scrolls through them).
+class _Header extends StatelessWidget {
+  const _Header({required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) => ColoredBox(
+    color: BrandVivid.skyTop,
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(
+        BrandSpace.md,
+        BrandSpace.sm,
+        BrandSpace.md,
+        BrandSpace.sm,
+      ),
+      child: Row(
+        children: [
+          VividButton(
+            label: '‹  ${ProgressScreen.back}',
+            primary: false,
+            onPressed: onBack,
+          ),
+          const SizedBox(width: BrandSpace.md),
+          Expanded(
+            child: Semantics(
+              header: true,
+              child: const Text(
+                ProgressScreen.title,
+                style: BrandVividType.title,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Who, and Chapter 1 at a glance: the ring, the average, the change since Mission 1.
 class _Summary extends StatelessWidget {
   const _Summary({required this.report, required this.name});
 
   final ProgressReport report;
   final String name;
 
-  static const double _titleSize = 30;
+  static const double _ring = 96;
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: BrandColors.inkSoft);
+    const grade = ChapterGrade.lobby;
     final delta = report.sinceBaseline?.totalDelta;
-    return PaperSlip(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return _Panel(
+      colors: grade.cardGradient,
+      glow: grade.glow,
+      child: Row(
         children: [
-          Text('NORTHSTAR LABS', textAlign: TextAlign.center, style: soft),
-          const SizedBox(height: BrandSpace.sm),
-          Semantics(
-            header: true,
-            child: Text(
-              ProgressScreen.title,
-              textAlign: TextAlign.center,
-              style: BrandType.display.copyWith(
-                color: BrandColors.ink,
-                fontSize: _titleSize,
+          ProgressRing(
+            value: report.total == 0 ? 0 : report.done / report.total,
+            color: BrandVivid.accent,
+            size: _ring,
+            stroke: 9,
+            child: Semantics(
+              label: '${report.done} of ${report.total} missions done',
+              excludeSemantics: true,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${report.done}/${report.total}',
+                    style: BrandVividType.title,
+                  ),
+                  Text('DONE', style: BrandVividType.kicker),
+                ],
               ),
             ),
           ),
-          Text(
-            '$name · Chapter 1',
-            textAlign: TextAlign.center,
-            style: BrandType.body.copyWith(color: BrandColors.inkSoft),
+          const SizedBox(width: BrandSpace.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('$name · CHAPTER 1', style: BrandVividType.kicker),
+                const SizedBox(height: BrandSpace.sm),
+                Wrap(
+                  spacing: BrandSpace.lg,
+                  runSpacing: BrandSpace.sm,
+                  children: [
+                    _Stat(label: 'AVERAGE', value: '${report.average ?? '–'}'),
+                    _Stat(
+                      label: 'SINCE MISSION 1',
+                      value: delta == null ? '–' : _signed(delta),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: BrandSpace.md),
-          const DoubleRule(color: BrandColors.inkSoft),
-          const SizedBox(height: BrandSpace.sm),
-          Wrap(
-            alignment: WrapAlignment.spaceAround,
-            spacing: BrandSpace.md,
-            runSpacing: BrandSpace.sm,
-            children: [
-              _Figure(
-                label: 'MISSIONS DONE',
-                value: '${report.done} of ${report.total}',
-              ),
-              _Figure(label: 'AVERAGE', value: '${report.average ?? '–'}'),
-              _Figure(
-                label: 'SINCE MISSION 1',
-                value: delta == null ? '–' : _signed(delta),
-              ),
-            ],
-          ),
-          const SizedBox(height: BrandSpace.sm),
-          const DoubleRule(color: BrandColors.inkSoft),
         ],
       ),
     );
@@ -184,78 +243,136 @@ class _Summary extends StatelessWidget {
 
 String _signed(int n) => n > 0 ? '+$n' : '$n';
 
-class _Figure extends StatelessWidget {
-  const _Figure({required this.label, required this.value});
+class _Stat extends StatelessWidget {
+  const _Stat({required this.label, required this.value});
 
   final String label;
   final String value;
+
+  static const double _size = 34;
 
   @override
   Widget build(BuildContext context) => Semantics(
     label: '$label: $value',
     excludeSemantics: true,
     child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(value, style: BrandType.score),
-        Text(
-          label,
-          style: BrandType.label.copyWith(color: BrandColors.inkSoft),
-        ),
+        Text(value, style: BrandVividType.numeral.copyWith(fontSize: _size)),
+        Text(label, style: BrandVividType.kicker),
       ],
     ),
   );
 }
 
-/// One mission's slip.
-class _MissionSlip extends StatelessWidget {
-  const _MissionSlip({required this.line});
+/// The four skills as a radar, averaged over the latest attempts.
+class _Skills extends StatelessWidget {
+  const _Skills({required this.skills});
+
+  final Map<Dimension, int>? skills;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = skills;
+    return _Panel(
+      colors: const [BrandVivid.night, BrandVivid.skyMid],
+      glow: BrandVivid.accent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            ProgressScreen.skills,
+            style: BrandVividType.kicker.copyWith(color: BrandVivid.accent),
+          ),
+          const SizedBox(height: BrandSpace.sm),
+          if (s == null)
+            Text(ProgressScreen.skillsEmpty, style: BrandVividType.body)
+          else
+            Center(
+              child: SkillRadar(
+                values: [for (final d in Dimension.values) s[d] ?? 0],
+                labels: [for (final d in Dimension.values) dimensionLabel(d)],
+                color: ChapterGrade.lobby.glow,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Section extends StatelessWidget {
+  const _Section(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: BrandSpace.sm, left: BrandSpace.xs),
+    child: Semantics(
+      header: true,
+      child: Text(
+        text,
+        style: BrandVividType.kicker.copyWith(color: BrandVivid.accent),
+      ),
+    ),
+  );
+}
+
+/// One mission: in its chapter's colour once played, slate before.
+class _MissionCard extends StatelessWidget {
+  const _MissionCard({required this.line});
 
   final MissionProgress line;
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: BrandColors.inkSoft);
+    final m = line.mission;
+    final grade = m.grade;
     final latest = line.latest;
     final lesson = line.lessonToWorkOn;
-    return PaperSlip(
+    final best = line.best;
+    return _Panel(
+      colors: latest == null
+          ? const [BrandVivid.locked, BrandVivid.night]
+          : grade.cardGradient,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('MISSION ${line.mission.number}', style: soft),
-          Semantics(
-            header: true,
-            child: Text(
-              line.mission.title,
-              style: BrandType.choice.copyWith(color: BrandColors.ink),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('MISSION ${m.number}', style: BrandVividType.kicker),
+                    Semantics(
+                      header: true,
+                      child: Text(m.title, style: BrandVividType.row),
+                    ),
+                  ],
+                ),
+              ),
+              if (best != null) StarRow(stars: starsFor(best), best: best),
+            ],
           ),
-          const SizedBox(height: BrandSpace.sm),
-          if (latest == null)
-            Text(
-              ProgressScreen.notPlayed,
-              style: BrandType.body.copyWith(color: BrandColors.inkSoft),
-            )
-          else ...[
+          if (latest == null) ...[
+            const SizedBox(height: BrandSpace.xs),
+            Text(ProgressScreen.notPlayed, style: BrandVividType.body),
+          ] else ...[
+            const SizedBox(height: BrandSpace.sm),
             Wrap(
-              spacing: BrandSpace.md,
+              spacing: BrandSpace.xs,
               runSpacing: BrandSpace.xs,
               children: [
-                _Pair('BEST', '${line.best}'),
-                _Pair('LATEST', '${latest.total}'),
-                _Pair(
+                _Chip('LATEST', '${latest.total}'),
+                _Chip(
                   line.attemptCount == 1 ? 'ATTEMPT' : 'ATTEMPTS',
                   '${line.attemptCount}',
                 ),
-              ],
-            ),
-            const SizedBox(height: BrandSpace.xs),
-            Wrap(
-              spacing: BrandSpace.md,
-              runSpacing: BrandSpace.xs,
-              children: [
                 for (final d in Dimension.values)
-                  _Pair(
+                  _Chip(
                     dimensionLabel(d).toUpperCase(),
                     '${latest.dimensions[d]}',
                   ),
@@ -263,10 +380,24 @@ class _MissionSlip extends StatelessWidget {
             ),
             if (lesson != null) ...[
               const SizedBox(height: BrandSpace.sm),
-              Text('STILL TO WORK ON', style: soft),
-              Text(
-                lesson.title,
-                style: BrandType.body.copyWith(color: BrandColors.redPen),
+              Container(
+                padding: const EdgeInsets.all(BrandSpace.sm + 4),
+                decoration: BoxDecoration(
+                  color: grade.deeper,
+                  borderRadius: BorderRadius.circular(BrandRadius.lg),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ProgressScreen.workOn,
+                      style: BrandVividType.kicker.copyWith(
+                        color: BrandVivid.accent,
+                      ),
+                    ),
+                    Text(lesson.title, style: BrandVividType.row),
+                  ],
+                ),
               ),
             ],
           ],
@@ -276,35 +407,80 @@ class _MissionSlip extends StatelessWidget {
   }
 }
 
-/// "BEST 72": a ledger label and its stamped number.
-class _Pair extends StatelessWidget {
-  const _Pair(this.label, this.value);
+/// "BEST 72": a label and its number in a translucent pill.
+class _Chip extends StatelessWidget {
+  const _Chip(this.label, this.value);
 
   final String label;
   final String value;
+
+  static const double _alpha = 0.3;
 
   @override
   Widget build(BuildContext context) => Semantics(
     label: '$label $value',
     excludeSemantics: true,
-    child: Text.rich(
-      TextSpan(
-        children: [
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        color: BrandVivid.night.withValues(alpha: _alpha),
+        borderRadius: BorderRadius.circular(BrandRadius.pill),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: BrandSpace.sm + 2,
+          vertical: BrandSpace.xs,
+        ),
+        child: Text.rich(
           TextSpan(
-            text: '$label ',
-            style: BrandType.label.copyWith(color: BrandColors.inkSoft),
+            children: [
+              TextSpan(
+                text: '$label ',
+                style: BrandVividType.kicker.copyWith(letterSpacing: 1),
+              ),
+              TextSpan(
+                text: value,
+                style: BrandVividType.row.copyWith(fontWeight: FontWeight.w800),
+              ),
+            ],
           ),
-          TextSpan(
-            text: value,
-            style: BrandType.choice.copyWith(color: BrandColors.ink),
-          ),
-        ],
+        ),
       ),
     ),
   );
 }
 
-/// One play setting: its line and an On/Off plate.
+/// A rounded card on the sky, in [colors] (night by default).
+class _Panel extends StatelessWidget {
+  const _Panel({
+    required this.child,
+    this.colors = const [BrandVivid.locked, BrandVivid.night],
+    this.glow,
+  });
+
+  final Widget child;
+  final List<Color> colors;
+  final Color? glow;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(BrandSpace.md),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(BrandRadius.card),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: colors,
+      ),
+      border: Border.all(color: BrandVivid.hairline()),
+      boxShadow: glow == null
+          ? BrandVivid.cardShadow
+          : BrandVivid.glowShadow(glow!),
+    ),
+    child: child,
+  );
+}
+
+/// One play setting: its line and a switch drawn in the accent.
 class _Setting extends StatelessWidget {
   const _Setting({
     required this.label,
@@ -316,30 +492,58 @@ class _Setting extends StatelessWidget {
   final bool on;
   final ValueChanged<bool> onChanged;
 
+  static const double _trackW = 52;
+  static const double _trackH = 30;
+  static const double _knob = 24;
+
   @override
-  Widget build(BuildContext context) => Semantics(
-    toggled: on,
-    label: label,
-    excludeSemantics: true,
-    onTap: () => onChanged(!on),
-    child: GestureDetector(
-      behavior: HitTestBehavior.opaque,
+  Widget build(BuildContext context) {
+    final still = MediaQuery.disableAnimationsOf(context);
+    return Semantics(
+      toggled: on,
+      label: label,
+      excludeSemantics: true,
       onTap: () => onChanged(!on),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: BrandSpace.minTarget),
-        child: Row(
-          children: [
-            Expanded(child: Text(label, style: BrandType.body)),
-            const SizedBox(width: BrandSpace.sm),
-            Text(
-              (on ? ProgressScreen.on : ProgressScreen.off).toUpperCase(),
-              style: BrandType.eyebrow.copyWith(
-                color: on ? ChapterGrade.lobby.key : BrandColors.textSecondary,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onChanged(!on),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: BrandSpace.minTarget),
+          child: Row(
+            children: [
+              Expanded(child: Text(label, style: BrandVividType.row)),
+              const SizedBox(width: BrandSpace.sm),
+              ExcludeSemantics(
+                child: Text(
+                  (on ? ProgressScreen.on : ProgressScreen.off).toUpperCase(),
+                  style: BrandVividType.kicker,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: BrandSpace.sm),
+              AnimatedContainer(
+                duration: still ? Duration.zero : BrandMotion.quick,
+                width: _trackW,
+                height: _trackH,
+                padding: const EdgeInsets.all((_trackH - _knob) / 2),
+                alignment: on ? Alignment.centerRight : Alignment.centerLeft,
+                decoration: BoxDecoration(
+                  color: on ? BrandVivid.accent : BrandVivid.locked,
+                  borderRadius: BorderRadius.circular(BrandRadius.pill),
+                  border: Border.all(color: BrandVivid.hairline(0.3)),
+                ),
+                child: Container(
+                  width: _knob,
+                  height: _knob,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: BrandVivid.onDeep,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
