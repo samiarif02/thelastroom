@@ -1,6 +1,7 @@
 # 0003. Deterministic scoring; AI only for free text
 
-- **Status:** accepted (2026-10-29)
+- **Status:** accepted (2026-10-29); partly superseded by [0006](0006-ai-scoring.md) (2026-10-31): an AI
+  recruiter now scores the mission's answer, with the engine as the offline score.
 - **Memory:** [`docs/memory/decision-engine-and-coach.md`](../memory/decision-engine-and-coach.md)
 
 ## Context

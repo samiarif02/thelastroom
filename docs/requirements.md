@@ -171,7 +171,20 @@ new email form.**
   - Structure is the **lowest** structure score of the three beats: an answer is as well built as
     its weakest beat. Unit test: a 3-3-0 answer scores 0 on structure, not 67.
 - **FR-23** **[15]** The weights are documented as a hypothesis in the README.
-- **FR-24** **[12]** The coach grades content only, never accent, grammar polish or style; the UI says so.
+- **FR-24** **[22]** An AI senior recruiter scores the mission's answer (ADR 0006): relevance,
+  specificity, structure and adaptability 0–100 plus an overall 0–100, each with one sentence of
+  basis (why this score, never advice), on content only (never accent, grammar polish or style).
+  - The `score` Edge Function calls Gemini (`GEMINI_MODEL`) at temperature 0 with a JSON schema,
+    validates and repairs the verdict on the server, needs the player's JWT and allows 30 a day
+    per player (`claim_ai_score`); Deno unit tests with the API mocked.
+  - It is sent each beat's line, the reason given and whether it was guessed, the follow-up and
+    the reply: never the player's name or anything they typed.
+  - The dossier says "Scored by AI · Senior recruiter" and shows the basis; while it waits,
+    "The panel is deliberating…", for at most 8 s.
+  - No backend, no session, no network, a timeout, a spent quota or an error: the engine's
+    score, labelled "Offline score", never an error (widget tests for each path).
+  - The engine still scores every attempt for offline play, the traps, the Recall Room and
+    progress; each verdict is stored in `ai_scores` (owner-only RLS, pgTAP tested).
 - **FR-25** **[19]** A guessed beat scores nothing. A pick made less than 1.5 s
   (`guessThreshold`) after the options appear is a guess: that beat counts as 0 on every
   dimension, whatever line was picked, and the score says which beats were guessed
