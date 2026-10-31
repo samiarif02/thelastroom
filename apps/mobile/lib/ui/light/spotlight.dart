@@ -6,8 +6,8 @@ import '../film/ambient_clock.dart';
 import 'dust.dart';
 import 'flicker.dart';
 
-/// A pool of warm lamp light falling on the set at [center], flickering with the lamp, with
-/// dust drifting in its beam. The grade decides its colour, so Chapter 2's pool is cold.
+/// A pool of sunlight falling on the set at [center], breathing gently, with optional
+/// dust in its beam. The grade decides its colour, so Chapter 2's pool is cold.
 class Spotlight extends StatelessWidget {
   const Spotlight({
     super.key,
@@ -15,7 +15,7 @@ class Spotlight extends StatelessWidget {
     this.center = const Alignment(-0.7, 0.1),
     this.radius = 0.9,
     this.intensity = 0.8,
-    this.dust = true,
+    this.dust = false,
   });
 
   final ChapterGrade grade;
@@ -29,7 +29,7 @@ class Spotlight extends StatelessWidget {
   /// Peak opacity of the pool, 0–1.
   final double intensity;
 
-  /// Motes in the beam. Off for still frames that don't need them.
+  /// Motes in the beam. Off by default: in daylight they don't show.
   final bool dust;
 
   @override

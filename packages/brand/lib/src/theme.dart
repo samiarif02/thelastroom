@@ -8,23 +8,21 @@ import 'typography.dart';
 /// renders in brand colours with no ripple and no stock transitions, so nothing looks like a
 /// default Material app (brief §9). Screens are built from our own components, not from this.
 abstract final class BrandTheme {
-  static ThemeData dark({ChapterGrade grade = ChapterGrade.lobby}) {
-    final scheme = ColorScheme.dark(
+  static ThemeData light({ChapterGrade grade = ChapterGrade.lobby}) {
+    final scheme = ColorScheme.light(
       primary: grade.key,
-      onPrimary: BrandColors.void_,
       secondary: grade.key,
-      onSecondary: BrandColors.void_,
+      onSecondary: BrandColors.surfaceRaised,
       surface: BrandColors.surface,
       onSurface: BrandColors.textPrimary,
       error: BrandColors.redPen,
-      onError: BrandColors.textPrimary,
       outline: BrandColors.line,
     );
     return ThemeData(
       useMaterial3: true,
       fontFamily: BrandFonts.sans,
       package: BrandFonts.package,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       colorScheme: scheme,
       scaffoldBackgroundColor: BrandColors.surface,
       canvasColor: BrandColors.surface,

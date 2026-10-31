@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Draws The Last Room's platform icons and launch marks: a brass "LR" monogram in Cormorant
-Garamond on walnut (DESIGN.md "Brand the platform edges", brief 06 item 9).
+"""Draws The Last Room's platform icons and launch marks: a leaf-green "LR" monogram in
+Cormorant Garamond on warm cream with a pool of morning sun (Morning Office, brief 16; the
+layout is brief 06's, DESIGN.md "Platform edges").
 
 Run from the repo root after changing the mark:  python3 packages/brand/tool/make_icons.py
 Needs Pillow (`pip3 install pillow`). The outputs are committed; nothing runs this at build time.
@@ -17,10 +18,10 @@ ROOT = Path(__file__).resolve().parents[3]
 FONT = ROOT / 'packages/brand/fonts/cormorant_garamond/CormorantGaramond-SemiBold.ttf'
 APP = ROOT / 'apps/mobile'
 
-VOID = (0x0C, 0x08, 0x06)  # BrandColors.void_
-WALNUT = (0x1F, 0x17, 0x12)  # BrandColors.surfaceRaised
-TINT = (0x5A, 0x35, 0x18)  # ChapterGrade.lobbyTint
-BRASS = (0xE2, 0xAE, 0x62)  # ChapterGrade.lobbyKey
+VOID = (0xFF, 0xFC, 0xF6)  # BrandColors.void_
+WALNUT = (0xF8, 0xF1, 0xE4)  # BrandColors.surface (the name dates from the Boardroom)
+TINT = (0xFF, 0xE7, 0xAE)  # ChapterGrade.lobbyTint
+BRASS = (0x2C, 0x73, 0x56)  # ChapterGrade.lobbyKey (the name dates from the Boardroom)
 
 MASTER = 1024  # every image is drawn at this size (x SUPER) and scaled down
 SUPER = 2

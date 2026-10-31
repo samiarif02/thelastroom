@@ -2,5 +2,5 @@
 <!-- Mirrors packages/brand BrandColors (Android resources can't read Dart tokens). -->
 <resources>
     <!-- BrandColors.void_: the launch screen, so the jump to Flutter's first frame is invisible. -->
-    <color name="brand_void">#FF0C0806</color>
+    <color name="brand_void">#FFFFFCF6</color>
 </resources>

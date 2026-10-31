@@ -39,6 +39,15 @@ class _BoardroomSceneState extends State<BoardroomScene> {
   int? _picked;
   bool _locked = false;
 
+  /// The interviewer's face through the beats (a friendly look shows it): a smile as she
+  /// asks, thinking while you read, a nod when you lock in, "hmm" for the follow-up.
+  InterviewerExpression get _expression => switch (_beat) {
+    _Beat.opening || _Beat.line || _Beat.push => InterviewerExpression.smile,
+    _Beat.choices when _locked => InterviewerExpression.nod,
+    _Beat.choices => InterviewerExpression.thinking,
+    _Beat.followUp => InterviewerExpression.hmm,
+  };
+
   @override
   void initState() {
     super.initState();
@@ -127,6 +136,7 @@ class _BoardroomSceneState extends State<BoardroomScene> {
                     figureLabel:
                         '${SampleMission.interviewer}, the ${SampleMission.interviewerRole.toLowerCase()}',
                     tight: followUp,
+                    expression: _expression,
                   ),
                 ),
               ),
@@ -230,7 +240,22 @@ class _Overlay extends StatelessWidget {
             Expanded(
               child: AnchoredScroll(
                 children: [
-                  if (beat.index >= _Beat.line.index)
+                  // While the cards are up the question shrinks to a one-line recap, so the
+                  // cards never push it up over her face (owner, 2026-10-30).
+                  if (beat == _Beat.choices)
+                    SpeechPanel(
+                      child: Text(
+                        SampleMission.line,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: BrandType.body.copyWith(
+                          fontStyle: FontStyle.italic,
+                          color: BrandColors.textSecondary,
+                        ),
+                      ),
+                    )
+                  else if (beat.index >= _Beat.line.index)
                     TypewriterSubtitle(
                       key: ValueKey(followUp),
                       speaker: SampleMission.interviewer,

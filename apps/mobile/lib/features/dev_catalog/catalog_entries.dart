@@ -17,7 +17,7 @@ abstract final class CatalogEntries {
     _title,
     _scene,
     _camera,
-    _figures,
+    _people,
     _light,
     _letterbox,
     _subtitle,
@@ -42,7 +42,6 @@ abstract final class CatalogEntries {
   static const Duration _midLine = Duration(milliseconds: 900);
   static const Duration _lampSettles = Duration(milliseconds: 200);
 
-  static const double _figureWidth = 220;
   static const double _lampWidth = 180;
   static const double _sealSize = 96;
   static const double _stampAngle = -0.08;
@@ -51,7 +50,7 @@ abstract final class CatalogEntries {
     id: 'title',
     name: 'Title card',
     note:
-        'ChapterTitleCard + TrackedTitle: lamp, brass frame, a title that never breaks a word. '
+        'ChapterTitleCard + TrackedTitle: the mug, a double frame, a title that never breaks a word. '
         'onTitleLanded, onFinished. The chapter shots keep their own grade.',
     shots: [
       CatalogShot(
@@ -141,31 +140,32 @@ abstract final class CatalogEntries {
     ],
   );
 
-  static final CatalogEntry _figures = CatalogEntry(
-    id: 'figures',
-    name: 'Silhouettes',
+  static final CatalogEntry _people = CatalogEntry(
+    id: 'people',
+    name: 'The cast',
     note:
-        'InterviewerSilhouette: rim-lit, code-drawn (D2), idle = breath, slow head turn, rim '
-        'flicker.',
+        'FriendlyInterviewer (brief 16): Priya, Marcus and Lena drawn in code, five '
+        'expressions, idle = breath, blink, a little sway. Reduced motion stills it.',
     shots: [
-      for (final (id, figure) in [
-        ('priya', SilhouetteFigure.priya),
-        ('marcus', SilhouetteFigure.marcus),
-      ])
+      for (final expression in InterviewerExpression.values)
         CatalogShot(
-          id: id,
-          label: id[0].toUpperCase() + id.substring(1),
+          id: expression.name,
+          label:
+              expression.name[0].toUpperCase() + expression.name.substring(1),
           build: (grade) => CatalogDesk(
             grade: grade,
             children: [
-              Center(
-                child: SizedBox(
-                  width: _figureWidth,
-                  child: AspectRatio(
-                    aspectRatio: SilhouetteFigure.aspectRatio,
-                    child: InterviewerSilhouette(figure: figure, grade: grade),
-                  ),
-                ),
+              Row(
+                children: [
+                  for (final figure in FriendlyFigure.byId.values)
+                    Expanded(
+                      child: FriendlyInterviewer(
+                        figure: figure,
+                        expression: expression,
+                        grade: grade,
+                      ),
+                    ),
+                ],
               ),
             ],
           ),
@@ -176,12 +176,14 @@ abstract final class CatalogEntries {
   static final CatalogEntry _light = CatalogEntry(
     id: 'light',
     name: 'Light',
-    note: 'BankersLamp (lit / off), Spotlight with dust, Bokeh: the city behind the glass.',
+    note:
+        'BankersLamp: the desk mug (hot / cold for offline), Spotlight: the pool of sun, '
+        'Bokeh.',
     shots: [
       for (final lit in [true, false])
         CatalogShot(
           id: lit ? 'lamp-lit' : 'lamp-off',
-          label: lit ? 'Lamp' : 'Lamp off',
+          label: lit ? 'Mug' : 'Mug, cold',
           settle: _lampSettles,
           build: (grade) => CatalogDesk(
             grade: grade,

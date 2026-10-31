@@ -161,27 +161,28 @@ class _TypewriterSubtitleState extends State<TypewriterSubtitle>
       TextAlign.right || TextAlign.end => CrossAxisAlignment.end,
       _ => CrossAxisAlignment.center,
     };
+    final lines = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: align,
+      children: [
+        Text(
+          widget.speaker,
+          textAlign: widget.textAlign,
+          style: BrandType.speaker.copyWith(color: widget.grade.key),
+        ),
+        const SizedBox(height: BrandSpace.xs),
+        TypewriterText(
+          text: widget.line,
+          characters: _shown,
+          style: BrandType.subtitle,
+          textAlign: widget.textAlign,
+        ),
+      ],
+    );
     final subtitle = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _skip,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: align,
-        children: [
-          Text(
-            widget.speaker,
-            textAlign: widget.textAlign,
-            style: BrandType.speaker.copyWith(color: widget.grade.key),
-          ),
-          const SizedBox(height: BrandSpace.xs),
-          TypewriterText(
-            text: widget.line,
-            characters: _shown,
-            style: BrandType.subtitle,
-            textAlign: widget.textAlign,
-          ),
-        ],
-      ),
+      child: SpeechPanel(child: lines),
     );
     if (!still) return subtitle;
     return TweenAnimationBuilder<double>(
@@ -193,4 +194,31 @@ class _TypewriterSubtitleState extends State<TypewriterSubtitle>
       child: subtitle,
     );
   }
+}
+
+/// The interviewer is in colour, so a line can fall over her jacket: it sits on a soft panel
+/// of void, near-opaque, so the speaker's name and the line keep the contrast they are tested
+/// at on void (brief 16, text over colour; `packages/brand/test/contrast_test.dart`).
+class SpeechPanel extends StatelessWidget {
+  const SpeechPanel({super.key, required this.child});
+
+  final Widget child;
+
+  static const double _alpha = 0.94;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: BrandColors.void_.withValues(alpha: _alpha),
+      borderRadius: BorderRadius.circular(BrandSpace.md),
+      border: Border.all(color: BrandColors.line),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BrandSpace.md,
+        vertical: BrandSpace.sm,
+      ),
+      child: child,
+    ),
+  );
 }

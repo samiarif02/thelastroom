@@ -11,7 +11,8 @@ Redraw after a visual change, from the repo root, in an x64 Linux container on C
 ```bash
 mkdir -p /tmp/goldens && git archive HEAD | tar -x -C /tmp/goldens
 docker run --rm --platform linux/amd64 -v /tmp/goldens:/work -w /work ubuntu:24.04 bash -c '
-  apt-get update -qq && apt-get install -y -qq curl git xz-utils unzip ca-certificates >/dev/null &&
+  apt-get update -qq && apt-get install -y -qq curl git xz-utils unzip ca-certificates \
+    clang cmake ninja-build pkg-config build-essential libasound2-dev >/dev/null &&
   curl -sSfL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.47.8-stable.tar.xz | tar -xJ -C /opt &&
   git config --global --add safe.directory "*" && export PATH=/opt/flutter/bin:$PATH &&
   flutter pub get && cd apps/mobile &&
@@ -19,4 +20,5 @@ docker run --rm --platform linux/amd64 -v /tmp/goldens:/work -w /work ubuntu:24.
 cp /tmp/goldens/apps/mobile/test/features/dev_catalog/goldens/*.png apps/mobile/test/features/dev_catalog/goldens/
 ```
 
-Then look at every changed image before committing.
+The C toolchain and ALSA headers are for the audio engine's native build (the sound PR); CI's
+runner has them already. Then look at every changed image before committing.

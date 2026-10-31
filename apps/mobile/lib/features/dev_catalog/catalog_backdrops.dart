@@ -24,7 +24,6 @@ class CatalogDesk extends StatelessWidget {
               grade: grade,
               center: const Alignment(0, -0.5),
               intensity: 0.45,
-              dust: false,
             ),
           ),
           SafeArea(

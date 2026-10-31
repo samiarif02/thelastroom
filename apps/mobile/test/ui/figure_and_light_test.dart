@@ -6,36 +6,29 @@ import 'package:the_last_room/ui/film_kit.dart';
 import 'harness.dart';
 
 void main() {
-  group('rim-lit silhouette', () {
-    test('there is a figure for each Chapter 1 interviewer', () {
-      expect(SilhouetteFigure.byId.keys, containsAll(['priya', 'marcus']));
+  group('the interviewer', () {
+    test('there is a figure for each interviewer', () {
+      expect(
+        SilhouetteFigure.byId.keys,
+        containsAll(['priya', 'marcus', 'lena']),
+      );
     });
 
     test('the idle is deterministic, gentle and bounded', () {
       for (var s = 0.0; s < 60; s += 0.37) {
-        final p = SilhouettePainter.pose(s);
+        final p = FaceGesture.pose(s);
         expect(p.breath.abs(), lessThanOrEqualTo(1));
         expect(p.turn.abs(), lessThanOrEqualTo(1));
-        expect(SilhouettePainter.pose(s), p);
+        expect(FaceGesture.pose(s), p);
       }
       // It really moves: the head is somewhere else ten seconds on.
       expect(
-        SilhouettePainter.pose(3).turn,
-        isNot(closeTo(SilhouettePainter.pose(13).turn, 0.05)),
+        FaceGesture.pose(3).turn,
+        isNot(closeTo(FaceGesture.pose(13).turn, 0.05)),
       );
     });
 
-    test('the head and body are separate, so the head can turn', () {
-      for (final f in SilhouetteFigure.byId.values) {
-        final head = f.head().getBounds();
-        final body = f.body().getBounds();
-        expect(head.bottom, lessThanOrEqualTo(body.bottom));
-        expect(head.top, lessThan(body.top + 1), reason: f.id);
-        expect(f.headLines().getBounds().isEmpty, isFalse);
-      }
-    });
-
-    for (final figure in [SilhouetteFigure.priya, SilhouetteFigure.marcus]) {
+    for (final figure in SilhouetteFigure.byId.values) {
       for (final grade in ChapterGrade.values) {
         testWidgets('${figure.id} idles in the ${grade.label} grade', (
           tester,
@@ -58,13 +51,13 @@ void main() {
       }
     }
 
-    testWidgets('a labelled silhouette is announced as an image', (
+    testWidgets('a labelled interviewer is announced as an image', (
       tester,
     ) async {
       final handle = tester.ensureSemantics();
       await pumpKit(
         tester,
-        Center(
+        const Center(
           child: SizedBox(
             width: 120,
             child: InterviewerSilhouette(
@@ -83,7 +76,7 @@ void main() {
     ) async {
       await pumpKit(
         tester,
-        Center(
+        const Center(
           child: SizedBox(
             width: 120,
             child: InterviewerSilhouette(
@@ -99,7 +92,7 @@ void main() {
           matching: find.byType(CustomPaint),
         ),
       );
-      expect((paint.painter! as SilhouettePainter).clock, isNull);
+      expect((paint.painter! as FriendlyPainter).clock, isNull);
     });
   });
 
@@ -148,7 +141,7 @@ void main() {
               onTap: () => taps++,
               child: const SizedBox.expand(),
             ),
-            const Positioned.fill(child: Spotlight()),
+            const Positioned.fill(child: Spotlight(dust: true)),
           ],
         ),
       );
