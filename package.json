@@ -9,6 +9,7 @@
     "format:check": "dart format --output=none --set-exit-if-changed apps packages",
     "analyze": "flutter analyze --fatal-infos",
     "test": "node --test scripts/*.test.mjs && node scripts/test-packages.mjs",
+    "test:functions": "deno lint supabase/functions && deno fmt --check --line-width 120 --single-quote supabase/functions && deno test --no-prompt supabase/functions",
     "check:secrets": "node scripts/check-secrets.mjs --all",
     "check:standards": "node scripts/check-standards.mjs",
     "check:events": "node scripts/check-events.mjs",
