@@ -11,6 +11,8 @@ export 'src/dimension.dart';
 export 'src/dimension_scores.dart';
 export 'src/flag.dart';
 export 'src/follow_up.dart';
+export 'src/line_cost.dart';
+export 'src/pick_credit.dart';
 export 'src/recall.dart';
 export 'src/scoring.dart';
 export 'src/shuffle.dart';
