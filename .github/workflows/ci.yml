@@ -83,6 +83,15 @@ jobs:
       - name: Tests
         run: npm run test
 
+      # The Edge Functions (Deno): lint, format and unit tests, with the AI API mocked, so no
+      # key or network is involved (ADR 0006). Pinned to the version the tests were written on.
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.8
+
+      - name: Edge Function tests
+        run: npm run test:functions
+
       # Build check: the web build is the reviewers' demo link, so it must always build.
       - name: Build web
         run: npm run build:web

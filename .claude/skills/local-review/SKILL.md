@@ -32,8 +32,12 @@ npm run check:events     # enum ↔ docs/EVENTS.md, no string event names; unfir
 npm run check:env        # env.dart ↔ env/dev.example.json ↔ .env.example ↔ Edge Functions
 npm run check:rls        # every create table enables RLS and has a policy, in the same migration
 npm run test             # gate-script tests, then every workspace package's Dart tests
+npm run test:functions   # Edge Functions (Deno 2.9.8): lint, format, unit tests with the AI API mocked
 npm run build:web        # flutter build web --release: a compile check only, nothing is deployed
 ```
+
+No Deno on the machine? Run the same gate in Docker:
+`docker run --rm -v "$PWD:/repo" -w /repo denoland/deno:2.9.8 sh -c 'deno lint supabase/functions && deno fmt --check --line-width 120 --single-quote supabase/functions && deno test --no-prompt supabase/functions'`.
 
 Then the commit messages, the same check CI's `commits` job runs over the branch:
 
