@@ -2,6 +2,7 @@ import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/back_to_exit.dart';
 import '../../core/profile/profile_repository.dart';
 import '../intro/title_gate.dart';
 import '../tower/tower_screen.dart';
@@ -16,7 +17,7 @@ class HomeGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) =>
       switch (ref.watch(profileProvider)) {
         AsyncData(:final value) when value.onboarded => const TowerScreen(),
-        AsyncData() || AsyncError() => const TitleGate(),
+        AsyncData() || AsyncError() => const BackToExit(child: TitleGate()),
         _ => const ColoredBox(color: BrandColors.void_),
       };
 }

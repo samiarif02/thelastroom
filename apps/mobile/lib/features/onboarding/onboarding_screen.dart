@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/back_to_exit.dart';
 import '../../app/providers.dart';
 import '../../app/router.dart';
 import '../../core/analytics/analytics_event.dart';
@@ -82,8 +83,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (mounted) context.go(Routes.tower());
   }
 
+  /// Android back steps back a step; on the first step it's the root's exit hint.
+  bool _stepBack() {
+    if (_step == OnboardingStep.values.first) return false;
+    _go(OnboardingStep.values[_step.index - 1]);
+    return true;
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      BackToExit(onBack: _stepBack, child: _screen(context));
+
+  Widget _screen(BuildContext context) {
     final still = MediaQuery.disableAnimationsOf(context);
     final fade = still ? BrandMotion.reducedMotionFade : BrandMotion.standard;
     final last = _step == OnboardingStep.name;

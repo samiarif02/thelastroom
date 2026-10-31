@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/back_to_exit.dart';
 import '../../app/providers.dart';
 import '../../app/router.dart';
 import '../../core/analytics/analytics_event.dart';
@@ -15,6 +16,7 @@ import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
 import 'elevator.dart';
+import 'settings_gear.dart';
 import 'tower_chapter_card.dart';
 import 'tower_extras.dart';
 import 'tower_hero.dart';
@@ -61,6 +63,9 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
 
   late final GameSounds _sounds = ref.read(gameSoundsProvider);
   bool _opened = false;
+
+  /// The rooms once loaded, kept so the tower can open when it next becomes the visible route.
+  List<TowerRoom>? _loaded;
   TowerRoom? _riding;
   String? _notice;
   Timer? _noticeTimer;
@@ -85,7 +90,30 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (MediaQuery.disableAnimationsOf(context)) _lighting.value = 1;
+    // Depends on the route's status: runs again when a child (a mission, the file) is popped
+    // and the tower is on top once more.
+    if (_isCurrent && _loaded != null && !_opened) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _open(_loaded!));
+    }
   }
+
+  @override
+  void didUpdateWidget(TowerScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Back from a finished mission (`/tower?lit=N`): the same tower, now lighting room N.
+    if (widget.lit != oldWidget.lit && widget.lit != null) {
+      _opened = false;
+      _loaded = null;
+      if (!MediaQuery.disableAnimationsOf(context)) _lighting.value = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.invalidate(towerRoomsProvider);
+      });
+    }
+  }
+
+  /// Under a mission or the file (the tower's children) the tower is built but not seen: it
+  /// opens (event, sound, reward) only when it's the route on top.
+  bool get _isCurrent => ModalRoute.of(context)?.isCurrent ?? true;
 
   @override
   void dispose() {
@@ -96,7 +124,8 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
 
   /// Once the rooms are known: the event, the sound, and the reward moment.
   void _open(List<TowerRoom> rooms) {
-    if (_opened) return;
+    _loaded = rooms;
+    if (_opened || !mounted || !_isCurrent) return;
     _opened = true;
     _sounds.towerOpened();
     ref.read(analyticsProvider).track(AnalyticsEvent.towerOpened, {
@@ -145,37 +174,43 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     final name =
         ref.watch(profileProvider).value?.displayName ??
         PlayerProfile.fallbackName;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        const VividBackdrop(),
-        switch (rooms) {
-          AsyncData(:final value) => _Tower(
-            rooms: value,
-            name: name,
-            lighting: _lighting,
-            lit: widget.lit,
-            onReady: () => _open(value),
-            onTapRoom: (r) => _tapRoom(r, value),
-            onProgress: () => context.go(Routes.progress),
-          ),
-          _ => const SizedBox.shrink(),
-        },
-        if (_notice case final notice?)
-          _Notice(key: ValueKey(notice), text: notice),
-        if (_riding case final room?)
-          Elevator(
-            floor: room.mission.number,
-            grade: room.mission.grade,
-            onArrived: _arrived,
-          ),
-      ],
+    return BackToExit(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          const VividBackdrop(),
+          switch (rooms) {
+            AsyncData(:final value) => _Tower(
+              // A new `lit` replays the arrival: scroll to the room, then open.
+              key: ValueKey(widget.lit),
+              rooms: value,
+              name: name,
+              lighting: _lighting,
+              lit: widget.lit,
+              onReady: () => _open(value),
+              onTapRoom: (r) => _tapRoom(r, value),
+              onProgress: () => context.go(Routes.progress),
+              onSettings: () => context.go(Routes.settings),
+            ),
+            _ => const SizedBox.shrink(),
+          },
+          if (_notice case final notice?)
+            _Notice(key: ValueKey(notice), text: notice),
+          if (_riding case final room?)
+            Elevator(
+              floor: room.mission.number,
+              grade: room.mission.grade,
+              onArrived: _arrived,
+            ),
+        ],
+      ),
     );
   }
 }
 
 class _Tower extends StatefulWidget {
   const _Tower({
+    super.key,
     required this.rooms,
     required this.name,
     required this.lighting,
@@ -183,6 +218,7 @@ class _Tower extends StatefulWidget {
     required this.onReady,
     required this.onTapRoom,
     required this.onProgress,
+    required this.onSettings,
   });
 
   final List<TowerRoom> rooms;
@@ -192,6 +228,7 @@ class _Tower extends StatefulWidget {
   final VoidCallback onReady;
   final ValueChanged<TowerRoom> onTapRoom;
   final VoidCallback onProgress;
+  final VoidCallback onSettings;
 
   @override
   State<_Tower> createState() => _TowerState();
@@ -228,7 +265,11 @@ class _TowerState extends State<_Tower> {
       bottom: false,
       child: Column(
         children: [
-          _Header(name: widget.name, onProgress: widget.onProgress),
+          _Header(
+            name: widget.name,
+            onProgress: widget.onProgress,
+            onSettings: widget.onSettings,
+          ),
           Expanded(
             child: _FadeUnderHeader(
               child: SingleChildScrollView(
@@ -286,10 +327,15 @@ class _TowerState extends State<_Tower> {
 /// The greeting band: on its own ground (the top of the sky, opaque), so the cards scrolling
 /// up pass beneath it instead of showing through the words.
 class _Header extends StatelessWidget {
-  const _Header({required this.name, required this.onProgress});
+  const _Header({
+    required this.name,
+    required this.onProgress,
+    required this.onSettings,
+  });
 
   final String name;
   final VoidCallback onProgress;
+  final VoidCallback onSettings;
 
   static const int _greetingLines = 2;
 
@@ -305,36 +351,40 @@ class _Header extends StatelessWidget {
           BrandSpace.md,
           BrandSpace.sm,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
                     TowerScreen.eyebrow,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: BrandVividType.kicker.copyWith(
                       color: BrandVivid.accent,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Semantics(
-                    header: true,
-                    child: Text(
-                      TowerScreen.greeting(name, hour),
-                      maxLines: _greetingLines,
-                      overflow: TextOverflow.ellipsis,
-                      style: BrandVividType.title,
-                    ),
+                ),
+                SettingsGear(onTap: onSettings),
+                const SizedBox(width: BrandSpace.xs),
+                Flexible(
+                  child: VividButton(
+                    label: TowerScreen.progress,
+                    primary: false,
+                    onPressed: onProgress,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(width: BrandSpace.sm),
-            VividButton(
-              label: TowerScreen.progress,
-              primary: false,
-              onPressed: onProgress,
+            Semantics(
+              header: true,
+              child: Text(
+                TowerScreen.greeting(name, hour),
+                maxLines: _greetingLines,
+                overflow: TextOverflow.ellipsis,
+                style: BrandVividType.title,
+              ),
             ),
           ],
         ),
