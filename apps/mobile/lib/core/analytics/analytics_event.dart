@@ -41,7 +41,16 @@ enum AnalyticsEvent {
   recallRoomOpened('recall_room_opened'),
 
   /// One recall card answered: its kind, how the answer counted, and the box it was in.
-  recallCardAnswered('recall_card_answered');
+  recallCardAnswered('recall_card_answered'),
+
+  /// The debrief asks the AI recruiter to score the answer (brief 22).
+  aiScoreRequested('ai_score_requested'),
+
+  /// The AI's verdict is on the dossier.
+  aiScoreShown('ai_score_shown'),
+
+  /// No AI verdict (no backend, offline, a timeout or an error): the engine's "Offline score".
+  aiScoreFallback('ai_score_fallback');
 
   const AnalyticsEvent(this.wireName);
 
