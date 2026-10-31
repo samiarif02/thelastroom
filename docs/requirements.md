@@ -163,6 +163,25 @@ new email form.**
     its weakest beat. Unit test: a 3-3-0 answer scores 0 on structure, not 67.
 - **FR-23** **[15]** The weights are documented as a hypothesis in the README.
 - **FR-24** **[12]** The coach grades content only, never accent, grammar polish or style; the UI says so.
+- **FR-25** **[19]** A guessed beat scores nothing. A pick made less than 1.5 s
+  (`guessThreshold`) after the options appear is a guess: that beat counts as 0 on every
+  dimension, whatever line was picked, and the score says which beats were guessed
+  (`MissionScore.guessed`, `guessedBeats`) so the debrief can explain the drop.
+  - The player measures the time (`BeatPick.decidedIn`); the engine never reads a clock.
+  - A guessed beat is also the weakest line for the red pen and the follow-up (FR-14, FR-15),
+    and the trust meter treats it as a 0 line (`trustAfterPicks`).
+  - Unit tests: a guessed evidence beat in an otherwise perfect answer gives relevance and
+    specificity 75, structure 0; exactly 1.5 s is not a guess.
+- **FR-26** **[19]** The reason counts. After each pick the interviewer asks "why that line?"
+  and offers 3–4 reasons. Each option is explained by exactly one sound reason; the others are
+  realistic misreadings. A sound reason keeps the beat's points; an unsound one keeps
+  **60 %** (`unsoundReasonKeepPercent`), and the score names it (`PickCredit.unsoundReason`).
+  - Points are credited in integer hundredths, so the score stays exact and reproducible.
+  - **Attempts saved before wave 5** (no timing, no reason) keep 100 % and score exactly as they
+    did. Unit test: every 0–3 combination scores identically with and without a sound reason.
+  - Content: every beat of every mission has a why step and a reaction (strong, weak, guessed)
+    in the interviewer's voice; the validator enforces it, and that each option has exactly one
+    sound reason and each reason names only options of its own beat.
 
 ### Campaign and progression (brief §6)
 
