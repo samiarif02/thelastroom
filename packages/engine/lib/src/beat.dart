@@ -45,11 +45,20 @@ class BeatPick {
 
 /// The reason the player gave for a pick, and whether it's the right reasoning for that pick.
 class ReasonPick {
-  const ReasonPick({required this.reasonId, required this.sound});
+  const ReasonPick({
+    required this.reasonId,
+    required this.sound,
+    this.counts = true,
+  });
 
   /// The content id of the reason, for the debrief and analytics.
   final String reasonId;
   final bool sound;
+
+  /// Whether the reason can cost points: only on a strongest line, where the wrong principle
+  /// means the player got lucky. A weak line keeps its own (low) points whatever the reason;
+  /// the debrief explains the misconception instead. Content's `Beat.reasonPick` sets it.
+  final bool counts;
 }
 
 /// Picks made sooner than this after the options appear are guesses: nobody reads three

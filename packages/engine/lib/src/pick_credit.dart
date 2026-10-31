@@ -7,10 +7,12 @@ import 'beat.dart';
 /// 1. **Guessed** (picked before [guessThreshold]): the beat scores **0** on every dimension,
 ///    whatever line was picked. Nobody reads three interview answers in under a second and a
 ///    half, so a good line picked that fast is luck, not judgement.
-/// 2. **Unsound reason** (the player picked a line, then gave the wrong reasoning for it when
-///    the interviewer asked "why that line?"): the beat keeps **60 %** of its points. The line
-///    still did its job in the room, but the player couldn't say why it works, so they can't
-///    repeat it on purpose.
+/// 2. **Unsound reason** (the player picked a strongest line, then gave the wrong principle for
+///    it when the interviewer asked "why that line?"): the beat keeps **60 %** of its points.
+///    The line did its job in the room, but the player got lucky: they can't say why it works,
+///    so they can't repeat it on purpose. The reason step never deepens a weak line
+///    ([ReasonPick.counts] is false there): it scores its own points, and the debrief explains
+///    the misconception instead.
 /// 3. Otherwise (a sound reason, or no why step, or an attempt saved before wave 5): **full**
 ///    points.
 ///
@@ -29,7 +31,7 @@ enum PickCredit {
   static PickCredit of(BeatPick pick) {
     if (pick.guessed) return guessed;
     final reason = pick.reason;
-    if (reason != null && !reason.sound) return unsoundReason;
+    if (reason != null && reason.counts && !reason.sound) return unsoundReason;
     return full;
   }
 }

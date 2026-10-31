@@ -44,6 +44,26 @@ void main() {
       }
     });
 
+    test('the reason only counts on a strongest line (ReasonPick.counts)', () {
+      // A weak line given with any reason keeps its own points: the debrief explains the
+      // misconception instead of charging for it twice.
+      final weak = BeatPick(
+        beat: BeatKind.open,
+        choice: even('w', 1),
+        decidedIn: const Duration(milliseconds: thinking),
+        reason: const ReasonPick(reasonId: 'myth', sound: false, counts: false),
+      );
+      expect(PickCredit.of(weak), PickCredit.full);
+      // A strongest line with the wrong principle got lucky: 60 %.
+      final lucky = BeatPick(
+        beat: BeatKind.open,
+        choice: perfect,
+        decidedIn: const Duration(milliseconds: thinking),
+        reason: const ReasonPick(reasonId: 'myth', sound: false),
+      );
+      expect(PickCredit.of(lucky), PickCredit.unsoundReason);
+    });
+
     test('the guess threshold is exclusive: exactly 1.5 s is thinking', () {
       expect(
         PickCredit.of(timed(BeatKind.open, perfect, ms: 1499)),
