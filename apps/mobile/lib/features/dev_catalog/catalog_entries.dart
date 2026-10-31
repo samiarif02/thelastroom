@@ -8,6 +8,7 @@ import 'boardroom_scene_demo.dart';
 import 'catalog_backdrops.dart';
 import 'catalog_entry.dart';
 import 'sample_mission.dart';
+import 'vivid_entries.dart';
 
 /// Every film-kit component in every state worth seeing: the catalog's pages, and the golden
 /// tests' list (`test/features/dev_catalog/catalog_golden_test.dart`), so a component added
@@ -26,6 +27,8 @@ abstract final class CatalogEntries {
     _brass,
     _states,
     _film,
+    VividEntries.kit,
+    VividEntries.tower,
   ];
 
   static CatalogEntry? byId(String id) {
