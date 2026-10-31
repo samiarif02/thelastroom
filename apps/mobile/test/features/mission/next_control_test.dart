@@ -4,6 +4,8 @@ import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/scene/mission_card.dart';
 import 'package:the_last_room/features/mission/widgets/beat_timer.dart';
+import 'package:the_last_room/features/mission/widgets/choice_card.dart';
+import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
@@ -109,7 +111,7 @@ void main() {
     await rig.playLines(1);
     await rig.run(const Duration(seconds: 20));
     // Still on the draft step: nothing moved the player on.
-    expect(find.text('SKIP'), findsOneWidget);
+    expect(find.text(DraftPanel.skip), findsOneWidget);
   });
 
   testWidgets('calm mode hides the answer timer on a timed mission', (
@@ -121,7 +123,7 @@ void main() {
     );
     await rig.boot(Routes.mission(2));
     await rig.playLines(2);
-    await rig.until(find.byType(AnswerCard));
+    await rig.until(find.byType(ChoiceCard));
     await rig.run(const Duration(seconds: 70));
     expect(find.byType(BeatTimer), findsNothing);
     expect(rig.sounds.count('timerPulse'), 0);

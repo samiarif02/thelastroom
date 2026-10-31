@@ -23,9 +23,9 @@ class FirstTrySlip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: BrandColors.inkSoft);
+    final soft = BrandType.label.copyWith(color: SlipInk.soft);
     final quote = BrandType.choice.copyWith(
-      color: BrandColors.ink,
+      color: SlipInk.text,
       fontStyle: FontStyle.italic,
     );
     return PaperSlip(
@@ -38,7 +38,7 @@ class FirstTrySlip extends StatelessWidget {
           const SizedBox(height: BrandSpace.md),
           const DecoratedBox(
             decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: BrandColors.inkSoft)),
+              border: Border(top: BorderSide(color: SlipInk.soft)),
             ),
             child: SizedBox(width: double.infinity),
           ),

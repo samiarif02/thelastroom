@@ -10,7 +10,6 @@ import '../../ui/film_kit.dart';
 import 'mission_controller.dart';
 import 'mission_lookup.dart';
 import 'mission_player.dart';
-import 'widgets/cue_button.dart';
 import 'widgets/scene_notes.dart';
 
 /// The route for mission [number]: the scene once the attempt is ready, a dark room with the
@@ -70,7 +69,7 @@ class _DarkRoom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ColoredBox(
-    color: BrandColors.void_,
+    color: BrandVivid.night,
     child: Center(
       child: Semantics(
         label: 'The room is being prepared',
@@ -104,41 +103,44 @@ class _LockedDoorState extends State<_LockedDoor> {
   }
 
   @override
-  Widget build(BuildContext context) => ColoredBox(
-    color: BrandColors.void_,
-    child: SafeArea(
-      minimum: const EdgeInsets.all(BrandSpace.lg),
-      child: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Semantics(
-                header: true,
-                child: Text(
-                  _LockedDoor.title,
-                  textAlign: TextAlign.center,
-                  style: BrandType.eyebrow.copyWith(
-                    color: ChapterGrade.lobby.key,
+  Widget build(BuildContext context) => Stack(
+    fit: StackFit.expand,
+    children: [
+      const VividBackdrop(),
+      SafeArea(
+        minimum: const EdgeInsets.all(BrandSpace.lg),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(
+                    _LockedDoor.title,
+                    textAlign: TextAlign.center,
+                    style: BrandVividType.kicker.copyWith(
+                      color: ChapterGrade.lobby.glow,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: BrandSpace.md),
-              const Text(
-                _LockedDoor.line,
-                textAlign: TextAlign.center,
-                style: BrandType.subtitle,
-              ),
-              const SizedBox(height: BrandSpace.lg),
-              CueButton(
-                label: _LockedDoor.back,
-                onPressed: () => context.go(Routes.tower()),
-              ),
-            ],
+                const SizedBox(height: BrandSpace.md),
+                const Text(
+                  _LockedDoor.line,
+                  textAlign: TextAlign.center,
+                  style: BrandVividType.title,
+                ),
+                const SizedBox(height: BrandSpace.lg),
+                VividButton(
+                  label: _LockedDoor.back,
+                  onPressed: () => context.go(Routes.tower()),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
+    ],
   );
 }
 

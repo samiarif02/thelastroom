@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/features/mission/widgets/beat_timer.dart';
-import 'package:the_last_room/ui/film_kit.dart';
+import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 
 import 'mission_harness.dart';
 
@@ -16,7 +16,7 @@ void main() {
       final rig = MissionRig(tester);
       await rig.boot(Routes.mission(2));
       await rig.playLines(2); // hinted: no draft step
-      await rig.until(find.byType(AnswerCard));
+      await rig.until(find.byType(ChoiceCard));
       expect(find.byType(BeatTimer), findsOneWidget);
 
       const step = Duration(milliseconds: 250);

@@ -3,7 +3,7 @@ import 'package:content/content.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'cue_button.dart';
+import '../../../ui/film_kit.dart';
 
 /// Draft first (FR-11): before Jordan's lines appear, the player may start the answer in their
 /// own words. A sheet of the candidate's notepad on the desk: the prompt, a ruled line to
@@ -37,6 +37,7 @@ class _DraftPanelState extends State<DraftPanel> {
   bool _done = false;
 
   static const int _maxLines = 4;
+  static const double _radius = 18;
   static const double _hairline = 0.8;
 
   @override
@@ -64,12 +65,20 @@ class _DraftPanelState extends State<DraftPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final brass = widget.grade.key;
+    final grade = widget.grade;
+    final brass = grade.glow;
     final hasText = _text.text.trim().isNotEmpty;
     return DecoratedBox(
+      // A vivid card like the answers': the player's own page, lifted off the scene.
       decoration: BoxDecoration(
-        color: BrandColors.surfaceRaised.withValues(alpha: 0.94),
-        border: Border.all(color: brass.withValues(alpha: 0.35)),
+        borderRadius: BorderRadius.circular(_radius),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: grade.cardGradient,
+        ),
+        border: Border.all(color: BrandVivid.hairline()),
+        boxShadow: BrandVivid.cardShadow,
       ),
       child: Padding(
         padding: const EdgeInsets.all(BrandSpace.md),
@@ -81,14 +90,11 @@ class _DraftPanelState extends State<DraftPanel> {
               header: true,
               child: Text(
                 DraftPanel.heading,
-                style: BrandType.label.copyWith(color: brass),
+                style: BrandVividType.kicker.copyWith(color: brass),
               ),
             ),
             const SizedBox(height: BrandSpace.sm),
-            Text(
-              draftPrompt,
-              style: BrandType.body.copyWith(color: BrandColors.textSecondary),
-            ),
+            const Text(draftPrompt, style: BrandVividType.body),
             const SizedBox(height: BrandSpace.md),
             GestureDetector(
               onTap: _focus.requestFocus,
@@ -113,8 +119,8 @@ class _DraftPanelState extends State<DraftPanel> {
                       ExcludeSemantics(
                         child: Text(
                           DraftPanel.placeholder,
-                          style: BrandType.choice.copyWith(
-                            color: BrandColors.textSecondary,
+                          style: BrandVividType.row.copyWith(
+                            color: BrandVivid.onDeepSoft,
                           ),
                         ),
                       ),
@@ -127,9 +133,9 @@ class _DraftPanelState extends State<DraftPanel> {
                         child: EditableText(
                           controller: _text,
                           focusNode: _focus,
-                          style: BrandType.choice,
+                          style: BrandVividType.row,
                           cursorColor: brass,
-                          backgroundCursorColor: BrandColors.textSecondary,
+                          backgroundCursorColor: BrandVivid.onDeepSoft,
                           selectionColor: brass.withValues(alpha: 0.3),
                           minLines: 1,
                           maxLines: _maxLines,
@@ -152,18 +158,18 @@ class _DraftPanelState extends State<DraftPanel> {
             Row(
               children: [
                 Expanded(
-                  child: CueButton(
+                  child: VividButton(
                     label: DraftPanel.skip,
-                    quiet: true,
-                    grade: widget.grade,
+                    primary: false,
+                    expand: true,
                     onPressed: () => _finish(null),
                   ),
                 ),
                 const SizedBox(width: BrandSpace.sm),
                 Expanded(
-                  child: CueButton(
+                  child: VividButton(
                     label: DraftPanel.keep,
-                    grade: widget.grade,
+                    expand: true,
                     onPressed: hasText ? () => _finish(_text.text) : null,
                   ),
                 ),

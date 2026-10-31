@@ -8,6 +8,7 @@ import 'package:the_last_room/features/debrief/debrief_view.dart';
 import 'package:the_last_room/features/debrief/red_pen_slip.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/widgets/beat_timer.dart';
+import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
@@ -170,7 +171,7 @@ void main() {
     await rig.boot(Routes.mission(1));
     await rig.playLines(1);
     await rig.skipDraft();
-    await rig.until(find.byType(AnswerCard));
+    await rig.until(find.byType(ChoiceCard));
     expect(find.byType(BeatTimer), findsNothing);
     // A minute and more passes: no timer starts and nothing expires.
     await rig.run(
@@ -188,9 +189,9 @@ void main() {
       await rig.boot(Routes.mission(1));
       await rig.playLines(1);
       await rig.skipDraft();
-      await rig.until(find.byType(AnswerCard));
+      await rig.until(find.byType(ChoiceCard));
       final shown = tester
-          .widgetList<AnswerCard>(find.byType(AnswerCard))
+          .widgetList<ChoiceCard>(find.byType(ChoiceCard))
           .map((c) => c.text)
           .toList();
       final seeded = shuffled(
@@ -219,10 +220,7 @@ void main() {
       expect(find.byType(DebriefView), findsOneWidget);
       // The dossier is settled at once; the slip and the way on are there.
       expect(find.byType(RedPenSlip), findsOneWidget);
-      expect(
-        find.text(DebriefView.continueLabel.toUpperCase()),
-        findsOneWidget,
-      );
+      expect(find.text(DebriefView.continueLabel), findsOneWidget);
     },
   );
 
@@ -231,7 +229,7 @@ void main() {
   ) async {
     final rig = await playMissionOne(tester);
     await rig.settleDossier();
-    final back = find.text(DebriefView.continueLabel.toUpperCase());
+    final back = find.text(DebriefView.continueLabel);
     await tester.ensureVisible(back);
     await tester.tap(back);
     await rig.until(find.byType(TowerScreen));

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
+import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
 import 'mission_harness.dart';
@@ -24,7 +25,7 @@ void main() {
 
     await rig.playLines(1);
     await rig.skipDraft();
-    await rig.until(find.byType(AnswerCard));
+    await rig.until(find.byType(ChoiceCard));
     expect(face(rig), InterviewerExpression.thinking);
 
     final mission = rig.state(1).mission;

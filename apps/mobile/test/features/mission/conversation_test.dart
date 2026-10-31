@@ -10,6 +10,7 @@ import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
+import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
 import 'package:the_last_room/features/mission/widgets/trust_meter.dart';
 import 'package:the_last_room/ui/film_kit.dart';
@@ -45,7 +46,7 @@ void main() {
     await rig.boot(Routes.mission(1), size: size, textScale: textScale);
     await rig.playLines(1);
     await rig.skipDraft();
-    await rig.until(find.byType(AnswerCard));
+    await rig.until(find.byType(ChoiceCard));
     return rig;
   }
 
@@ -107,7 +108,7 @@ void main() {
       final rig = MissionRig(tester);
       await rig.boot(Routes.mission(1), size: realme8);
       await rig.until(find.byType(TypewriterSubtitle));
-      expect(find.byType(AnswerCard), findsNothing);
+      expect(find.byType(ChoiceCard), findsNothing);
     });
   });
 
@@ -183,7 +184,7 @@ void main() {
       ); // the reasons wait for her line
       await rig.until(find.text(reasonLabel));
       final reasons = tester
-          .widgetList<AnswerCard>(find.byType(AnswerCard))
+          .widgetList<ChoiceCard>(find.byType(ChoiceCard))
           .map((c) => c.text)
           .toSet();
       expect(reasons, {for (final r in openBeat.why!.reasons) r.text});
@@ -226,13 +227,13 @@ void main() {
         expect(find.text(LeaveSheet.title), findsOneWidget);
 
         // Resume: nothing lost.
-        await tester.tap(find.text(LeaveSheet.resume.toUpperCase()));
+        await tester.tap(find.text(LeaveSheet.resume));
         await tester.pump();
         expect(find.text(LeaveSheet.title), findsNothing);
 
         await tester.binding.handlePopRoute();
         await tester.pump();
-        await tester.tap(find.text(LeaveSheet.leave.toUpperCase()));
+        await tester.tap(find.text(LeaveSheet.leave));
         await rig.run(const Duration(seconds: 1));
         final saved = await rig.resume.load(mission.id);
         expect(saved!.plays.single.optionId, strongest.id);
@@ -244,8 +245,8 @@ void main() {
         // Back in: continue where you left off, at the evidence beat, same order.
         rig.container.read(routerProvider).go(Routes.mission(1));
         await rig.until(find.text(ResumeSheet.title));
-        await tester.tap(find.text(ResumeSheet.resume.toUpperCase()));
-        await rig.until(find.byType(AnswerCard));
+        await tester.tap(find.text(ResumeSheet.resume));
+        await rig.until(find.byType(ChoiceCard));
         expect(rig.state(1).resumed, isTrue);
         expect(rig.state(1).plays.single.option, strongest);
         expect(
@@ -269,7 +270,7 @@ void main() {
       );
       await rig.boot(Routes.mission(1), size: realme8);
       await rig.until(find.text(ResumeSheet.title));
-      await tester.tap(find.text(ResumeSheet.restart.toUpperCase()));
+      await tester.tap(find.text(ResumeSheet.restart));
       await rig.until(find.byType(ChapterTitleCard));
       expect(await rig.resume.load(mission.id), isNull);
       expect(rig.state(1).plays, isEmpty);

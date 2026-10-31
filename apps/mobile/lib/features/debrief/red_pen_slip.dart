@@ -29,7 +29,7 @@ class RedPenSlip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: BrandColors.inkSoft);
+    final soft = BrandType.label.copyWith(color: SlipInk.soft);
     return PaperSlip(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -45,14 +45,18 @@ class RedPenSlip extends StatelessWidget {
               children: [
                 child!,
                 Positioned.fill(
-                  child: PenStroke(t: play ? t : 0, path: PenStroke.underline),
+                  child: PenStroke(
+                    t: play ? t : 0,
+                    path: PenStroke.underline,
+                    color: SlipInk.mark,
+                  ),
                 ),
               ],
             ),
             child: Text(
               '“$line”',
               style: BrandType.choice.copyWith(
-                color: BrandColors.ink,
+                color: SlipInk.text,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -60,7 +64,7 @@ class RedPenSlip extends StatelessWidget {
           const SizedBox(height: BrandSpace.md),
           Text(
             lesson.flaw,
-            style: BrandType.body.copyWith(color: BrandColors.redPen),
+            style: BrandType.body.copyWith(color: SlipInk.mark),
           ),
           const SizedBox(height: BrandSpace.md),
           Text(nextTime, style: soft),
@@ -70,7 +74,7 @@ class RedPenSlip extends StatelessWidget {
             child: Text(
               lesson.title,
               style: BrandType.display.copyWith(
-                color: BrandColors.ink,
+                color: SlipInk.text,
                 fontSize: _lessonTitleSize,
               ),
             ),
@@ -78,7 +82,7 @@ class RedPenSlip extends StatelessWidget {
           const SizedBox(height: BrandSpace.xs),
           Text(
             lesson.takeaway,
-            style: BrandType.body.copyWith(color: BrandColors.ink),
+            style: BrandType.body.copyWith(color: SlipInk.text),
           ),
         ],
       ),
@@ -95,7 +99,7 @@ class CleanRunSlip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PaperSlip(
-    child: Text(text, style: BrandType.body.copyWith(color: BrandColors.ink)),
+    child: Text(text, style: BrandType.body.copyWith(color: SlipInk.text)),
   );
 }
 
@@ -125,43 +129,55 @@ class GuessedSlip extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          heading,
-          style: BrandType.label.copyWith(color: BrandColors.inkSoft),
-        ),
+        Text(heading, style: BrandType.label.copyWith(color: SlipInk.soft)),
         const SizedBox(height: BrandSpace.sm),
-        Text(
-          line(beats),
-          style: BrandType.body.copyWith(color: BrandColors.redPen),
-        ),
+        Text(line(beats), style: BrandType.body.copyWith(color: SlipInk.mark)),
         const SizedBox(height: BrandSpace.sm),
-        Text(takeaway, style: BrandType.body.copyWith(color: BrandColors.ink)),
+        Text(takeaway, style: BrandType.body.copyWith(color: SlipInk.text)),
       ],
     ),
   );
 }
 
-/// A cream slip of paper on the desk, under the file: the debrief's slips and the progress file's.
+/// A slip under the file, as a vivid card (brief 17's look): the chapter's deepest colour,
+/// lifted off the sky with a soft shadow. Text on it is white; what went wrong is in sunset
+/// orange ([SlipInk]).
 class PaperSlip extends StatelessWidget {
-  const PaperSlip({super.key, required this.child});
+  const PaperSlip({
+    super.key,
+    required this.child,
+    this.grade = ChapterGrade.lobby,
+  });
 
   final Widget child;
+  final ChapterGrade grade;
 
-  static const double _shadowBlur = 20;
-  static const Offset _shadowOffset = Offset(-4, 12);
+  static const double _radius = 18;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
-      color: BrandColors.paper,
-      boxShadow: [
-        BoxShadow(
-          color: BrandColors.void_.withValues(alpha: 0.7),
-          blurRadius: _shadowBlur,
-          offset: _shadowOffset,
-        ),
-      ],
+      borderRadius: BorderRadius.circular(_radius),
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [grade.deeper, BrandVivid.night],
+      ),
+      border: Border.all(color: BrandVivid.hairline()),
+      boxShadow: BrandVivid.cardShadow,
     ),
     child: Padding(padding: const EdgeInsets.all(BrandSpace.md), child: child),
   );
+}
+
+/// The slips' inks on the chapter's deepest colour (each pair AA on `deeper` and on `night`).
+abstract final class SlipInk {
+  /// Body text and quoted lines.
+  static const Color text = BrandVivid.onDeep;
+
+  /// Small caps headings.
+  static const Color soft = BrandVivid.onDeepSoft;
+
+  /// What went wrong: the red pen's job, in sunset orange.
+  static const Color mark = BrandVivid.horizon;
 }
