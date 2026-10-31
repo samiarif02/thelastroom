@@ -12,6 +12,7 @@ import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/core/audio/game_sounds.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
+import 'package:the_last_room/features/debrief/ai_score.dart';
 import 'package:the_last_room/features/mission/mission_controller.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
@@ -149,6 +150,9 @@ class MissionRig {
   final InMemoryResumeStore resume = InMemoryResumeStore();
   late final ProviderContainer container;
 
+  /// The debrief's AI scorer; null keeps the app's (no backend in tests: "Offline score").
+  AiScorer? scorer;
+
   static const Size phone = Size(375, 667);
 
   Future<void> boot(
@@ -171,6 +175,7 @@ class MissionRig {
         attemptSeedProvider.overrideWithValue(() => testSeed),
         resumeStoreProvider.overrideWithValue(resume),
         routerProvider.overrideWithValue(router),
+        if (scorer case final s?) aiScorerProvider.overrideWithValue(s),
       ],
     );
     addTearDown(container.dispose);

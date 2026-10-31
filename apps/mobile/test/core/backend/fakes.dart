@@ -78,6 +78,21 @@ class FakeBackend implements Backend {
     return profile;
   }
 
+  /// What the `score` function answers; null means it's never been set up (503).
+  Future<Object?> Function(Map<String, Object?> request)? scorer;
+
+  /// Every request the app sent to `score`.
+  final List<Map<String, Object?>> scoreRequests = [];
+
+  @override
+  Future<Object?> scoreAnswer(Map<String, Object?> request) async {
+    _network();
+    scoreRequests.add(request);
+    final scorer = this.scorer;
+    if (scorer == null) throw const ScoreRefused(503, 'not_configured');
+    return scorer(request);
+  }
+
   static const String guestId = '00000000-0000-4000-8000-000000000001';
 
   final Future<BackendSession> Function() _restore;
