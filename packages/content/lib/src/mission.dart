@@ -132,10 +132,75 @@ class SceneLine {
 
 /// One beat of the answer: 3–4 plausible lines to pick from (FR-12).
 class Beat {
-  const Beat({required this.kind, required this.options});
+  const Beat({
+    required this.kind,
+    required this.options,
+    this.why,
+    this.reaction,
+  });
 
   final BeatKind kind;
   final List<AnswerOption> options;
+
+  /// After the pick the interviewer asks why (wave 5: picking at random stops paying). `null`:
+  /// this beat has no why step.
+  final ReasonPrompt? why;
+
+  /// The interviewer's line straight after the pick, by how it landed. `null`: no reaction.
+  final BeatReaction? reaction;
+}
+
+/// "Why that line?": the question and 3–4 reasons, one of them the right reasoning for each
+/// option.
+class ReasonPrompt {
+  const ReasonPrompt({required this.line, required this.reasons});
+
+  /// What the interviewer asks ("Why lead with that?").
+  final SceneLine line;
+  final List<Reason> reasons;
+}
+
+/// One reason the player can give for a pick.
+class Reason implements Identified {
+  const Reason({
+    required this.id,
+    required this.text,
+    this.soundFor = const {},
+  });
+
+  @override
+  final String id;
+  final String text;
+
+  /// The option ids this reason correctly explains. Empty: a common misconception, never sound.
+  final Set<String> soundFor;
+
+  /// Whether this is the right reasoning for [optionId].
+  bool isSoundFor(String optionId) => soundFor.contains(optionId);
+
+  ReasonPick pickFor(String optionId) =>
+      ReasonPick(reasonId: id, sound: isSoundFor(optionId));
+}
+
+/// What the interviewer says straight after a pick, for each [PickQuality].
+class BeatReaction {
+  const BeatReaction({
+    required this.strong,
+    required this.weak,
+    required this.guessed,
+  });
+
+  final SceneLine strong;
+  final SceneLine weak;
+
+  /// For a pick made before the player could have read the options.
+  final SceneLine guessed;
+
+  SceneLine forQuality(PickQuality quality) => switch (quality) {
+    PickQuality.strong => strong,
+    PickQuality.weak => weak,
+    PickQuality.guessed => guessed,
+  };
 }
 
 /// A line the player can pick. Distractors are realistic mistakes, never jokes (FR-12).
