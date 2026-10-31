@@ -45,7 +45,18 @@ void main() {
       c.finishDraft(draft);
     }
     for (final beat in container.read(provider).requireValue.mission.beats) {
-      c.lock(beat.options[pick]);
+      final option = beat.options[pick];
+      c.lock(option, decidedIn: _read);
+      final why = beat.why;
+      if (why != null) {
+        // The principle for the strongest line; a weak line's own temptation otherwise.
+        c.giveReason(
+          why.reasons.firstWhere(
+            (r) => r.isSoundFor(option.id) || r.tempts.contains(option.id),
+            orElse: () => why.reasons.first,
+          ),
+        );
+      }
     }
     final state = container.read(provider).requireValue;
     await c.answerFollowUp(state.followUp!.replies[pick]);
@@ -126,7 +137,9 @@ void main() {
     c.lock(m.beats[1].options.first); // not the open beat's
     expect(container.read(provider).requireValue.picks, isEmpty);
     for (final b in m.beats) {
-      c.lock(b.options.first);
+      c
+        ..lock(b.options.first, decidedIn: _read)
+        ..giveReason(b.why!.reasons.first);
     }
     final replies = container.read(provider).requireValue.followUp!.replies;
     await c.answerFollowUp(replies.first);
@@ -263,3 +276,6 @@ void main() {
 
 int _points(AnswerOption o) =>
     o.scores.relevance + o.scores.specificity + o.scores.structure;
+
+/// A pick made after reading: well past the guess threshold.
+const Duration _read = Duration(seconds: 4);

@@ -1,5 +1,4 @@
 import 'package:brand/brand.dart';
-import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 
@@ -67,42 +66,51 @@ const Map<BeatKind, String> _beatNames = {
 /// Above the follow-up's replies.
 const String replyLabel = 'YOUR REPLY';
 
-/// One beat's lines as engraved plaques, arriving one after another. Tap one to choose it, tap
-/// it again to say it; once one is [locked], the others go dark.
-class AnswerCards extends StatelessWidget {
+/// Above the reasons, when the interviewer asks why.
+const String reasonLabel = 'YOUR REASON';
+
+/// Replaces the label while a pick can still be changed.
+const String changeHint = 'TAP ANOTHER LINE TO CHANGE';
+
+/// Lines as engraved plaques, arriving one after another: a beat's answers, a follow-up's
+/// replies or the reasons for "why that line?". **One tap picks** ([onPick]); the picked card
+/// lights ([selected]) and, once [locked], the others go dark. [onArrived] fires when the last
+/// card has arrived: the moment the player can read them all, when the stopwatch starts.
+///
+/// No instruction text sits under the cards to be scrolled to: the [label] above them says
+/// what the cards are, and the screen swaps it for a short hint while a pick can be changed.
+class AnswerCards<T extends Object> extends StatelessWidget {
   const AnswerCards({
     super.key,
     required this.label,
-    required this.options,
+    required this.items,
+    required this.textOf,
     required this.grade,
-    required this.selected,
-    required this.locked,
     required this.onPick,
-    this.hint,
+    this.selected,
+    this.locked,
+    this.onArrived,
   });
 
   final String label;
 
   /// In the attempt's shuffled order.
-  final List<AnswerOption> options;
+  final List<T> items;
+  final String Function(T) textOf;
   final ChapterGrade grade;
-  final AnswerOption? selected;
-  final AnswerOption? locked;
-  final ValueChanged<AnswerOption> onPick;
-
-  /// Under the cards while one is selected but not yet said.
-  final String? hint;
+  final T? selected;
+  final T? locked;
+  final ValueChanged<T> onPick;
+  final VoidCallback? onArrived;
 
   static const double _stagger = 0.16;
   static const double _arriveFrom = 0.97;
 
-  AnswerCardState _stateOf(AnswerOption option) {
+  AnswerCardState _stateOf(T item) {
     if (locked != null) {
-      return option == locked
-          ? AnswerCardState.locked
-          : AnswerCardState.disabled;
+      return item == locked ? AnswerCardState.locked : AnswerCardState.disabled;
     }
-    return option == selected ? AnswerCardState.selected : AnswerCardState.idle;
+    return item == selected ? AnswerCardState.selected : AnswerCardState.idle;
   }
 
   @override
@@ -112,6 +120,7 @@ class AnswerCards extends StatelessWidget {
       children: [
         Semantics(
           header: true,
+          liveRegion: true,
           child: Text(
             label,
             textAlign: TextAlign.center,
@@ -121,14 +130,15 @@ class AnswerCards extends StatelessWidget {
         const SizedBox(height: BrandSpace.sm),
         Timeline(
           duration: BrandMotion.cinematic,
+          onFinished: onArrived,
           builder: (context, t, _) {
-            final last = options.length - 1;
+            final last = items.length - 1;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (var i = 0; i < options.length; i++)
+                for (var i = 0; i < items.length; i++)
                   Padding(
-                    padding: EdgeInsets.only(top: i == 0 ? 0 : BrandSpace.sm),
+                    padding: EdgeInsets.only(top: i == 0 ? 0 : BrandSpace.xs),
                     child: _arrive(
                       cue(
                         t,
@@ -138,28 +148,16 @@ class AnswerCards extends StatelessWidget {
                       ),
                       AnswerCard(
                         numeral: AnswerCard.numeralFor(i),
-                        text: options[i].text,
+                        text: textOf(items[i]),
                         grade: grade,
-                        state: _stateOf(options[i]),
-                        onTap: () => onPick(options[i]),
+                        state: _stateOf(items[i]),
+                        onTap: () => onPick(items[i]),
                       ),
                     ),
                   ),
               ],
             );
           },
-        ),
-        // Holds its height with no hint, so the cards don't jump when one is chosen.
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: BrandSpace.lg),
-          child: Padding(
-            padding: const EdgeInsets.only(top: BrandSpace.sm),
-            child: Text(
-              hint ?? '',
-              textAlign: TextAlign.center,
-              style: BrandType.label.copyWith(color: BrandColors.textSecondary),
-            ),
-          ),
         ),
       ],
     );

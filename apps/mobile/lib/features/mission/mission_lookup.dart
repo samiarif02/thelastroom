@@ -1,5 +1,6 @@
 import 'package:brand/brand.dart';
 import 'package:content/content.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Lookups the mission player needs over the content bundle. Content is const data, so these
 /// are plain searches; a miss means a content bug, and `validateContent` already rules those
@@ -32,7 +33,7 @@ extension MissionLookup on Mission {
 
   /// Whether this mission opens its chapter (its title card plays the chapter's sound).
   bool get opensChapter =>
-      missions.firstWhere((m) => m.chapter == chapter) == this;
+      missions.firstWhere((m) => m.chapter == chapter).number == number;
 
   /// The mission after this one in campaign order, or null after the last playable one.
   Mission? get next {
@@ -71,9 +72,13 @@ Lesson? lessonById(String? id) {
   return null;
 }
 
-/// The mission at campaign [number] (1-based), or null if there's none.
-Mission? missionByNumber(int number) {
-  for (final mission in missions) {
+/// The missions the player plays: the content's. Tests override it with fixture content (the
+/// why step and reactions before brief 19's content lands).
+final missionCatalogProvider = Provider<List<Mission>>((ref) => missions);
+
+/// The mission at campaign [number] (1-based) in [catalog], or null if there's none.
+Mission? missionByNumber(int number, {List<Mission> catalog = missions}) {
+  for (final mission in catalog) {
     if (mission.number == number) return mission;
   }
   return null;

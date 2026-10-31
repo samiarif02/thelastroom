@@ -54,8 +54,14 @@ void main() {
     final slip = find.byType(FirstTrySlip);
     await tester.ensureVisible(slip);
     expect(find.text('“$words”'), findsOneWidget);
+    // The reasoning slip may quote the same line; this checks the first-try slip's.
     expect(
-      find.text('“${strongestOpening(missionTheOpportunity).text}”'),
+      find.descendant(
+        of: slip,
+        matching: find.text(
+          '“${strongestOpening(missionTheOpportunity).text}”',
+        ),
+      ),
       findsOneWidget,
     );
     expect(find.text(FirstTrySlip.yours), findsOneWidget);

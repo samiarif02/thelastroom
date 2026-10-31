@@ -11,6 +11,7 @@ import '../mission/widgets/cue_button.dart';
 import '../mission/widgets/trust_meter.dart';
 import 'debrief_facts.dart';
 import 'first_try_slip.dart';
+import 'reasoning_slip.dart';
 import 'red_pen_slip.dart';
 
 /// The debrief (FR-15): the candidate file slides across the walnut into the lamp's pool, the
@@ -24,6 +25,7 @@ class DebriefView extends ConsumerStatefulWidget {
     required this.trust,
     required this.onContinue,
     this.firstTry,
+    this.reasoning = const [],
   });
 
   final Mission mission;
@@ -35,6 +37,9 @@ class DebriefView extends ConsumerStatefulWidget {
 
   /// The player's own words from the draft-first step, shown beside a stronger version.
   final String? firstTry;
+
+  /// Each beat's line and the reasoning the player gave (empty: the slip isn't shown).
+  final List<BeatReasoning> reasoning;
 
   static const String title = 'Candidate assessment';
   static const String continueLabel = 'Back to the tower';
@@ -141,8 +146,16 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                         lesson: lesson!,
                         play: _settled,
                       )
+                    else if (widget.score.guessed)
+                      GuessedSlip(beats: widget.score.guessedBeats)
                     else
                       const CleanRunSlip(),
+                    if (widget.reasoning.any(
+                      (b) => b.guessed || b.given != null,
+                    )) ...[
+                      const SizedBox(height: BrandSpace.md),
+                      ReasoningSlip(beats: widget.reasoning),
+                    ],
                     if (widget.firstTry case final words?) ...[
                       const SizedBox(height: BrandSpace.md),
                       FirstTrySlip(

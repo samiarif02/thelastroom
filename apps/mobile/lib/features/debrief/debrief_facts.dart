@@ -1,6 +1,7 @@
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 
+import '../mission/mission_controller.dart';
 import '../mission/mission_lookup.dart';
 
 /// What the dossier shows for one scored attempt, read straight off the engine's
@@ -77,3 +78,63 @@ AnswerOption strongestOpening(Mission mission) {
 /// "Relevance" for [Dimension.relevance].
 String dimensionLabel(Dimension d) =>
     '${d.name[0].toUpperCase()}${d.name.substring(1)}';
+
+/// One beat of the answer as the debrief retells it: the line, how fast it was picked, the
+/// principle the player gave, the principle that holds, and the misconception a weak line
+/// fell for.
+class BeatReasoning {
+  const BeatReasoning({
+    required this.kind,
+    required this.line,
+    required this.strongest,
+    required this.guessed,
+    this.decidedIn,
+    this.given,
+    this.principle,
+    this.fellFor,
+  });
+
+  final BeatKind kind;
+  final AnswerOption line;
+
+  /// The line was the beat's strongest.
+  final bool strongest;
+
+  /// Picked before the player could have read the options (`BeatPick.guessed`).
+  final bool guessed;
+  final Duration? decidedIn;
+
+  /// The reason the player gave; null on a beat that didn't ask why.
+  final Reason? given;
+
+  /// The beat's one sound principle; null when the beat didn't ask why.
+  final Reason? principle;
+
+  /// The misconception that leads to [line] when it's a weak one (`Reason.tempts`).
+  final Reason? fellFor;
+
+  /// Whether the player's reason is the sound principle for their line; null with no why step.
+  bool? get sound => given?.isSoundFor(line.id);
+}
+
+/// The reasoning slip's rows, from the plays the controller kept, in beat order.
+List<BeatReasoning> reasoningOf(Mission mission, List<BeatPlay> plays) => [
+  for (var i = 0; i < plays.length; i++) _reasoning(mission.beats[i], plays[i]),
+];
+
+BeatReasoning _reasoning(Beat beat, BeatPlay play) {
+  final reasons = beat.why?.reasons ?? const <Reason>[];
+  final strongest = beat.isStrongest(play.option.id);
+  return BeatReasoning(
+    kind: beat.kind,
+    line: play.option,
+    strongest: strongest,
+    guessed: isGuess(play.decidedIn),
+    decidedIn: play.decidedIn,
+    given: play.reason,
+    principle: reasons.where((r) => r.soundFor.isNotEmpty).firstOrNull,
+    fellFor: strongest
+        ? null
+        : reasons.where((r) => r.tempts.contains(play.option.id)).firstOrNull,
+  );
+}

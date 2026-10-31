@@ -30,7 +30,7 @@ abstract final class MissionSet {
   // The close-ups are the kit's framings carried higher in frame by [_lift], every plane by
   // the same amount so the interviewer stays seated behind the desk: the lower half is the
   // subtitles' and the answer cards', and on a small phone it needs every line it can get.
-  static const double _lift = 0.14;
+  static const double _lift = 0.31;
 
   static CameraShot _lifted(CameraShot shot) => CameraShot(
     scale: shot.scale,

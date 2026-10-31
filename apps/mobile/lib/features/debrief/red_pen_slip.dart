@@ -1,5 +1,6 @@
 import 'package:brand/brand.dart';
 import 'package:content/content.dart';
+import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../ui/film_kit.dart';
@@ -95,6 +96,48 @@ class CleanRunSlip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => PaperSlip(
     child: Text(text, style: BrandType.body.copyWith(color: BrandColors.ink)),
+  );
+}
+
+/// No line had a lesson, but some were guessed: the guess is what cost the points, so that's
+/// what the slip says. Never "nothing to mark" over a guessed beat.
+class GuessedSlip extends StatelessWidget {
+  const GuessedSlip({super.key, required this.beats});
+
+  /// The guessed beats, in order ("the open", "the evidence").
+  final List<BeatKind> beats;
+
+  static const String heading = 'WHAT COST YOU';
+  static const String takeaway =
+      'Read every line before you answer. A line picked before you could have read it earns '
+      'nothing, however good it is.';
+
+  static String line(List<BeatKind> beats) {
+    final names = [for (final b in beats) 'the ${b.name}'];
+    final list = names.length == 1
+        ? names.single
+        : '${names.take(names.length - 1).join(', ')} and ${names.last}';
+    return 'You picked $list before you could have read the options.';
+  }
+
+  @override
+  Widget build(BuildContext context) => PaperSlip(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          heading,
+          style: BrandType.label.copyWith(color: BrandColors.inkSoft),
+        ),
+        const SizedBox(height: BrandSpace.sm),
+        Text(
+          line(beats),
+          style: BrandType.body.copyWith(color: BrandColors.redPen),
+        ),
+        const SizedBox(height: BrandSpace.sm),
+        Text(takeaway, style: BrandType.body.copyWith(color: BrandColors.ink)),
+      ],
+    ),
   );
 }
 

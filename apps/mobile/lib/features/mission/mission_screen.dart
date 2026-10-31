@@ -8,8 +8,10 @@ import '../../app/providers.dart';
 import '../../app/router.dart';
 import '../../ui/film_kit.dart';
 import 'mission_controller.dart';
+import 'mission_lookup.dart';
 import 'mission_player.dart';
 import 'widgets/cue_button.dart';
+import 'widgets/scene_notes.dart';
 
 /// The route for mission [number]: the scene once the attempt is ready, a dark room with the
 /// lamp warming while it loads, and a locked door if it can't be played. Nothing here waits on
@@ -23,11 +25,28 @@ class MissionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final attempt = ref.watch(missionControllerProvider(number));
     return switch (attempt) {
+      // A mission left part-way: continue it, or start again.
+      AsyncData(:final value) when value.saved != null => Stack(
+        fit: StackFit.expand,
+        children: [
+          const _DarkRoom(),
+          ResumeSheet(
+            grade: value.mission.grade,
+            onContinue: ref
+                .read(missionControllerProvider(number).notifier)
+                .resume,
+            onRestart: () => ref
+                .read(missionControllerProvider(number).notifier)
+                .startAfresh(),
+          ),
+        ],
+      ),
       AsyncData() => MissionPlayer(
         key: ValueKey(number),
         number: number,
         // The Tower lights this room and shows the next one glowing (brief 13).
         onExit: () => context.go(Routes.tower(lit: number)),
+        onLeave: () => context.go(Routes.tower()),
       ),
       AsyncError(:final error, :final stackTrace) => _LockedDoor(
         onLog: () => ref
