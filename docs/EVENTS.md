@@ -42,3 +42,5 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `user_activated` | The first `mission_completed` for a user | |
 | `mission_left` | The player leaves a mission part-way (back, then "Leave"); the attempt is saved on the device | `mission_id`, `beat` |
 | `mission_resumed` | The player continues a mission they left | `mission_id`, `beat` |
+| `recall_room_opened` | The Recall Room opens, from the tower | `due_cards` |
+| `recall_card_answered` | A Recall Room card is answered | `card_kind` (`trap`, `lesson`), `verdict` (`known`, `guessed`, `missed`), `box` (`one`, `three`, `seven`) |

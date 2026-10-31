@@ -35,7 +35,13 @@ enum AnalyticsEvent {
   missionLeft('mission_left'),
 
   /// The player picks up a mission they left ("Continue where you left off").
-  missionResumed('mission_resumed');
+  missionResumed('mission_resumed'),
+
+  /// The Recall Room opens (brief 21), with how many cards are due.
+  recallRoomOpened('recall_room_opened'),
+
+  /// One recall card answered: its kind, how the answer counted, and the box it was in.
+  recallCardAnswered('recall_card_answered');
 
   const AnalyticsEvent(this.wireName);
 
