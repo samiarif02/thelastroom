@@ -79,7 +79,11 @@ void main() {
     await rig.run(const Duration(milliseconds: 500));
     expect(find.text('THIS ROOM IS LOCKED'), findsOneWidget);
     expect(find.textContaining('MissionNotFound'), findsNothing);
-    await tapText(rig, 'Back to the tower');
+    // The locked door's button is a vivid one, in sentence case (brief 18b).
+    final back = find.text('Back to the tower');
+    await rig.until(back);
+    await tester.tap(back);
+    await tester.pump();
     await rig.until(find.byType(TowerScreen));
   });
 }

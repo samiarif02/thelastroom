@@ -3,6 +3,7 @@ import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../ui/film_kit.dart';
+import '../widgets/choice_card.dart';
 
 /// The lower third of the frame: subtitles and cards sit low, like film subtitles, and scroll
 /// from the top only when they don't fit (2x text on a small phone), so the first card is
@@ -124,7 +125,7 @@ class AnswerCards<T extends Object> extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: BrandType.label.copyWith(color: grade.key),
+            style: BrandVividType.kicker.copyWith(color: grade.glow),
           ),
         ),
         const SizedBox(height: BrandSpace.sm),
@@ -146,7 +147,7 @@ class AnswerCards<T extends Object> extends StatelessWidget {
                         1 - _stagger * (last - i),
                         BrandMotion.enter,
                       ),
-                      AnswerCard(
+                      ChoiceCard(
                         numeral: AnswerCard.numeralFor(i),
                         text: textOf(items[i]),
                         grade: grade,

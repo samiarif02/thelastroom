@@ -543,7 +543,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const ColoredBox(color: BrandColors.void_),
+          const ColoredBox(color: BrandVivid.night),
           FilmOverlay(
             grain: 0,
             vignetteColor: grade.shadow,
@@ -577,7 +577,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
               builder: (context, dim, left) =>
                   _TimerShade(dim: dim, left: left),
             ),
-          SceneScrim(from: regionTop / size.height),
+          SceneScrim(from: regionTop / size.height, grade: grade),
           // Taps on the scene itself (anywhere the cards and the draft aren't).
           Semantics(
             button: true,
@@ -588,7 +588,11 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
               onTap: _tap,
             ),
           ),
-          AnimatedLetterbox(shown: _bars, onSettled: _barsSettled),
+          AnimatedLetterbox(
+            shown: _bars,
+            color: BrandVivid.night,
+            onSettled: _barsSettled,
+          ),
           _Overlay(
             regionTop: regionTop,
             trust: _stage.index >= SceneStage.beats.index ? game.trust : null,
@@ -862,7 +866,7 @@ class _TimerShade extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          ColoredBox(color: BrandColors.void_.withValues(alpha: dim)),
+          ColoredBox(color: BrandVivid.night.withValues(alpha: dim)),
           if (left != null)
             Positioned(
               top: MediaQuery.paddingOf(context).top + BrandSpace.sm,
@@ -873,9 +877,7 @@ class _TimerShade extends StatelessWidget {
                 excludeSemantics: true,
                 child: Text(
                   '$left',
-                  style: BrandType.score.copyWith(
-                    color: BrandColors.textPrimary,
-                  ),
+                  style: BrandType.score.copyWith(color: BrandVivid.onDeep),
                 ),
               ),
             ),

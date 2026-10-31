@@ -6,9 +6,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../../ui/film_kit.dart';
 
-/// The trust meter as a heartbeat (FR-15): a brass trace across the top of the frame whose
-/// beat is calm and strong when the interviewer trusts the answer, and thin and flat when they
-/// don't. [trust] is the engine's `trustAfter`; this only draws it. When it changes the trace
+/// The trust meter as a heartbeat (FR-15): a trace across the top of the frame whose beat is
+/// calm, strong and in the chapter's glow when the interviewer trusts the answer, and thin,
+/// flat and sunset orange when they don't. [trust] is the engine's `trustAfter`; this only draws it. When it changes the trace
 /// jumps once, so a pick is felt within the beat.
 ///
 /// Still under reduced motion (the [AmbientClock] stops): the trace holds its shape.
@@ -35,7 +35,7 @@ class TrustMeter extends StatelessWidget {
       excludeSemantics: true,
       child: Row(
         children: [
-          Text(label, style: BrandType.label.copyWith(color: grade.key)),
+          Text(label, style: BrandVividType.kicker.copyWith(color: grade.glow)),
           const SizedBox(width: _labelGap),
           Expanded(
             child: SizedBox(
@@ -52,7 +52,13 @@ class TrustMeter extends StatelessWidget {
                         clock: AmbientClock.of(context),
                         level: level,
                         jolt: jolt,
-                        color: grade.key,
+                        // Sunset orange when she's losing faith, the chapter's glow
+                        // when she trusts the answer.
+                        color: Color.lerp(
+                          BrandVivid.horizon,
+                          grade.glow,
+                          level,
+                        )!,
                       ),
                     ),
                   ),

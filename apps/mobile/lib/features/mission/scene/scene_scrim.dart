@@ -6,7 +6,14 @@ import 'package:flutter/widgets.dart';
 /// starts at [from], the top of the lower third, which is already below the face: it never
 /// darkens the interviewer.
 class SceneScrim extends StatelessWidget {
-  const SceneScrim({super.key, required this.from});
+  const SceneScrim({
+    super.key,
+    required this.from,
+    this.grade = ChapterGrade.lobby,
+  });
+
+  /// The chapter: the lower third falls to its deepest colour.
+  final ChapterGrade grade;
 
   /// Where the lower third starts, as a share of the frame's height.
   final double from;
@@ -31,11 +38,11 @@ class SceneScrim extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              BrandColors.void_.withValues(alpha: _topAlpha),
-              BrandColors.void_.withValues(alpha: 0),
-              BrandColors.void_.withValues(alpha: 0),
-              BrandColors.void_.withValues(alpha: _lowerAlpha),
-              BrandColors.void_.withValues(alpha: _bottomAlpha),
+              grade.deeper.withValues(alpha: _topAlpha),
+              grade.deeper.withValues(alpha: 0),
+              grade.deeper.withValues(alpha: 0),
+              grade.deeper.withValues(alpha: _lowerAlpha),
+              grade.deeper.withValues(alpha: _bottomAlpha),
             ],
             stops: [0, _topReach, begin, full, 1],
           ),

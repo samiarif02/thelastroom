@@ -6,6 +6,7 @@ import 'package:the_last_room/app/app.dart';
 import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
 import 'package:the_last_room/features/mission/scene/mission_set.dart';
+import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/trust_meter.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
@@ -160,7 +161,7 @@ void main() {
         await rig.boot(Routes.mission(1), viewPadding: insets);
         await rig.playLines(1);
         await rig.skipDraft();
-        await rig.until(find.byType(AnswerCard));
+        await rig.until(find.byType(ChoiceCard));
         await rig.run(const Duration(seconds: 1));
 
         // The set fills the whole screen, bars included: no flat black bands.

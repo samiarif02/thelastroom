@@ -45,7 +45,7 @@ void main() {
     await rig.until(find.byType(DraftPanel));
     await tester.enterText(find.byType(EditableText), words);
     await tester.pump();
-    final keep = find.text(DraftPanel.keep.toUpperCase());
+    final keep = find.text(DraftPanel.keep);
     await tester.ensureVisible(keep);
     await tester.tap(keep);
     await tester.pump();

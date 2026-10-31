@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/audio/game_sounds.dart';
 import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
-import '../mission/widgets/cue_button.dart';
 import '../mission/widgets/trust_meter.dart';
 import 'debrief_facts.dart';
 import 'first_try_slip.dart';
@@ -81,25 +80,8 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
       fit: StackFit.expand,
       children: [
         // Walnut, and the lamp's warm pool on it.
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: const Alignment(-0.7, -0.6),
-              radius: 1.3,
-              colors: [grade.tint, BrandColors.surface, BrandColors.void_],
-              stops: const [0, 0.55, 1],
-            ),
-          ),
-        ),
-        FilmOverlay(
-          grain: 0,
-          vignetteColor: grade.shadow,
-          child: Spotlight(
-            grade: grade,
-            center: const Alignment(-0.7, -0.6),
-            intensity: 0.4,
-          ),
-        ),
+        // The evening sky in the chapter's colour (brief 17), the file and the slips on it.
+        VividBackdrop(grade: grade),
         SafeArea(
           child: AnchoredScroll(
             alignment: MainAxisAlignment.center,
@@ -164,9 +146,9 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                       ),
                     ],
                     const SizedBox(height: BrandSpace.lg),
-                    CueButton(
+                    VividButton(
                       label: DebriefView.continueLabel,
-                      grade: grade,
+                      expand: true,
                       onPressed: _settled ? widget.onContinue : null,
                     ),
                   ],

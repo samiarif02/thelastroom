@@ -133,10 +133,11 @@ abstract final class MissionSet {
   }) {
     final kit = BoardroomSet.layers(figure: figure, grade: grade);
     return [
+      // The evening sky in the chapter's colour (brief 17's look), not the kit's cream room.
       CameraLayer(
         wide: wide,
         close: tight ? _backTight : _backClose,
-        child: kit[0].child,
+        child: VividBackdrop(grade: grade),
       ),
       CameraLayer(
         wide: wide,

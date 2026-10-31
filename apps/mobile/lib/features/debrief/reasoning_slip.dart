@@ -35,7 +35,7 @@ class ReasoningSlip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: BrandColors.inkSoft);
+    final soft = BrandType.label.copyWith(color: SlipInk.soft);
     return PaperSlip(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -61,8 +61,8 @@ class _BeatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: BrandColors.inkSoft);
-    final ink = BrandType.body.copyWith(color: BrandColors.ink);
+    final soft = BrandType.label.copyWith(color: SlipInk.soft);
+    final ink = BrandType.body.copyWith(color: SlipInk.text);
     final given = beat.given;
     final principle = beat.principle;
     final fellFor = beat.fellFor;
@@ -72,8 +72,8 @@ class _BeatRow extends StatelessWidget {
         border: Border(
           left: BorderSide(
             color: beat.guessed || sound == false || !beat.strongest
-                ? BrandColors.redPen
-                : BrandColors.inkSoft.withValues(alpha: 0.4),
+                ? SlipInk.mark
+                : SlipInk.soft.withValues(alpha: 0.4),
             width: _bar,
           ),
         ),
@@ -88,7 +88,7 @@ class _BeatRow extends StatelessWidget {
             Text(
               '“${beat.line.text}”',
               style: BrandType.choice.copyWith(
-                color: BrandColors.ink,
+                color: SlipInk.text,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -96,7 +96,7 @@ class _BeatRow extends StatelessWidget {
               const SizedBox(height: BrandSpace.xs),
               Text(
                 ReasoningSlip.guessedNote(beat.decidedIn),
-                style: BrandType.label.copyWith(color: BrandColors.redPen),
+                style: BrandType.label.copyWith(color: SlipInk.mark),
               ),
             ],
             // The misconception the line fell for says it all when it's what the player said.
@@ -106,7 +106,7 @@ class _BeatRow extends StatelessWidget {
               Text(
                 sound! ? ReasoningSlip.sound : ReasoningSlip.unsound,
                 style: BrandType.label.copyWith(
-                  color: sound ? BrandColors.inkSoft : BrandColors.redPen,
+                  color: sound ? SlipInk.soft : SlipInk.mark,
                 ),
               ),
             ],
@@ -114,7 +114,7 @@ class _BeatRow extends StatelessWidget {
               const SizedBox(height: BrandSpace.xs),
               Text(
                 '${ReasoningSlip.fellFor}: ${fellFor.text}',
-                style: ink.copyWith(color: BrandColors.redPen),
+                style: ink.copyWith(color: SlipInk.mark),
               ),
             ],
             if (principle != null && sound != true) ...[

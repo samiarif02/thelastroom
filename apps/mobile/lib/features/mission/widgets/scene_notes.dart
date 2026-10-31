@@ -1,7 +1,7 @@
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
-import 'cue_button.dart';
+import '../../../ui/film_kit.dart';
 
 /// "Too fast: read before you answer": a guessed pick, called out on screen as the
 /// interviewer calls it out in words. A dark plaque with a red-pen bar, so it reads over the
@@ -27,10 +27,11 @@ class GuessCue extends StatelessWidget {
         excludeSemantics: true,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: BrandColors.void_.withValues(alpha: 0.9),
+            color: BrandVivid.night.withValues(alpha: 0.92),
             border: const Border(
-              left: BorderSide(color: BrandColors.redPen, width: _bar),
+              left: BorderSide(color: BrandVivid.horizon, width: _bar),
             ),
+            boxShadow: BrandVivid.cardShadow,
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -40,7 +41,7 @@ class GuessCue extends StatelessWidget {
             child: Text(
               text.toUpperCase(),
               textAlign: TextAlign.center,
-              style: BrandType.label.copyWith(color: BrandColors.textPrimary),
+              style: BrandVividType.kicker.copyWith(color: BrandVivid.onDeep),
             ),
           ),
         ),
@@ -71,6 +72,7 @@ class _SceneSheet extends StatelessWidget {
   final ChapterGrade grade;
 
   static const double _scrim = 0.72;
+  static const double _radius = 24;
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +80,7 @@ class _SceneSheet extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        ColoredBox(color: BrandColors.void_.withValues(alpha: _scrim)),
+        ColoredBox(color: BrandVivid.night.withValues(alpha: _scrim)),
         Positioned(
           left: 0,
           right: 0,
@@ -90,10 +92,15 @@ class _SceneSheet extends StatelessWidget {
             label: title,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: BrandColors.surfaceRaised,
-                border: Border(
-                  top: BorderSide(color: grade.key.withValues(alpha: 0.6)),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [grade.deep, grade.deeper],
                 ),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(_radius),
+                ),
+                boxShadow: BrandVivid.cardShadow,
               ),
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
@@ -111,30 +118,26 @@ class _SceneSheet extends StatelessWidget {
                       child: Text(
                         title,
                         textAlign: TextAlign.center,
-                        style: BrandType.display.copyWith(
-                          color: BrandColors.textPrimary,
-                        ),
+                        style: BrandVividType.title,
                       ),
                     ),
                     const SizedBox(height: BrandSpace.sm),
                     Text(
                       line,
                       textAlign: TextAlign.center,
-                      style: BrandType.body.copyWith(
-                        color: BrandColors.textSecondary,
-                      ),
+                      style: BrandVividType.body,
                     ),
                     const SizedBox(height: BrandSpace.lg),
-                    CueButton(
+                    VividButton(
                       label: primary,
-                      grade: grade,
+                      expand: true,
                       onPressed: onPrimary,
                     ),
                     const SizedBox(height: BrandSpace.sm),
-                    CueButton(
+                    VividButton(
                       label: secondary,
-                      grade: grade,
-                      quiet: true,
+                      primary: false,
+                      expand: true,
                       onPressed: onSecondary,
                     ),
                   ],

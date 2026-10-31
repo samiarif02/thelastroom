@@ -16,6 +16,7 @@ import 'package:the_last_room/features/mission/mission_controller.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
 import 'package:the_last_room/features/mission/scene/mission_card.dart';
+import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/ui/film_kit.dart';
@@ -294,7 +295,7 @@ class MissionRig {
 
   /// One tap on [option]'s card (on the part that's on screen), and nothing more.
   Future<void> tapOnce(Object option) async {
-    final card = find.widgetWithText(AnswerCard, _textOf(option));
+    final card = find.widgetWithText(ChoiceCard, _textOf(option));
     await until(card);
     await tester.ensureVisible(card);
     await tester.pump();
@@ -322,7 +323,7 @@ class MissionRig {
       Reason(:final text) => text,
       _ => throw ArgumentError.value(option, 'option'),
     };
-    final card = find.widgetWithText(AnswerCard, text);
+    final card = find.widgetWithText(ChoiceCard, text);
     await until(card);
     if (!guess) await run(readFor);
     await tester.ensureVisible(card);
@@ -345,7 +346,7 @@ class MissionRig {
 
   /// The draft step, skipped.
   Future<void> skipDraft() async {
-    final skip = find.text(DraftPanel.skip.toUpperCase());
+    final skip = find.text(DraftPanel.skip);
     await until(skip);
     await tester.ensureVisible(skip);
     await tester.tap(skip);

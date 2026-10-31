@@ -124,7 +124,7 @@ void main() {
     );
     await rig.settleDossier();
     final total = rig.state(1).score!.total;
-    final back = find.text(DebriefView.continueLabel.toUpperCase());
+    final back = find.text(DebriefView.continueLabel);
     await tester.ensureVisible(back);
     await tester.tap(back);
     await rig.until(find.byType(TowerScreen));
