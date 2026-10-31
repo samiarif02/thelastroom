@@ -42,7 +42,7 @@ class VividTitle extends StatelessWidget {
           onFinished: onLanded,
           builder: (context, t, _) {
             final at = still ? 1.0 : t;
-            final lights = cue(at, 0, _lightsTo, BrandMotion.enter);
+            final lights = cue(at, 0, _lightsTo, BrandMotion.camera);
             final name = cue(at, _nameFrom, 1, BrandMotion.enter);
             final foot = cue(at, _footFrom, 1, BrandMotion.enter);
             return SafeArea(

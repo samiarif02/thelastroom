@@ -338,6 +338,7 @@ class _Header extends StatelessWidget {
   final VoidCallback onSettings;
 
   static const int _greetingLines = 2;
+  static const double _buttonShare = 0.55;
 
   @override
   Widget build(BuildContext context) {
@@ -354,28 +355,34 @@ class _Header extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    TowerScreen.eyebrow,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: BrandVividType.kicker.copyWith(
-                      color: BrandVivid.accent,
+            LayoutBuilder(
+              // The button keeps its own width, capped so at 2x text it wraps, never overflows.
+              builder: (context, box) => Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      TowerScreen.eyebrow,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: BrandVividType.kicker.copyWith(
+                        color: BrandVivid.accent,
+                      ),
                     ),
                   ),
-                ),
-                SettingsGear(onTap: onSettings),
-                const SizedBox(width: BrandSpace.xs),
-                Flexible(
-                  child: VividButton(
-                    label: TowerScreen.progress,
-                    primary: false,
-                    onPressed: onProgress,
+                  SettingsGear(onTap: onSettings),
+                  const SizedBox(width: BrandSpace.xs),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: box.maxWidth * _buttonShare,
+                    ),
+                    child: VividButton(
+                      label: TowerScreen.progress,
+                      primary: false,
+                      onPressed: onProgress,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Semantics(
               header: true,
