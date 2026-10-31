@@ -5,6 +5,7 @@ import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/features/debrief/debrief_facts.dart';
 import 'package:the_last_room/features/progress/progress_facts.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
+import 'package:the_last_room/features/tower/tower_rooms.dart';
 
 import '../mission/mission_harness.dart';
 import '../tower/played_attempt.dart';
@@ -69,7 +70,7 @@ void main() {
     await rig.until(find.byType(ProgressScreen));
     await rig.run(const Duration(milliseconds: 300));
     final report = ProgressReport.of(missions, attempts, first);
-    expect(find.bySemanticsLabel('MISSIONS DONE: 2 of 7'), findsOneWidget);
+    expect(find.bySemanticsLabel('2 of 7 missions done'), findsOneWidget);
     expect(find.bySemanticsLabel('AVERAGE: ${report.average}'), findsOneWidget);
     final delta = report.sinceBaseline!.totalDelta;
     expect(
@@ -78,9 +79,19 @@ void main() {
       ),
       findsOneWidget,
     );
+    final best = report.missions[0].best!;
     expect(
-      find.bySemanticsLabel('BEST ${report.missions[0].best}'),
-      findsWidgets,
+      find.bySemanticsLabel('${starsFor(best)} of 3 stars, best $best'),
+      findsOneWidget,
+    );
+    // The radar: each skill averaged over the latest attempts.
+    final skills = report.skills!;
+    expect(
+      find.bySemanticsLabel(
+        [for (final d in Dimension.values) '${dimensionLabel(d)} ${skills[d]}']
+            .join(', '),
+      ),
+      findsOneWidget,
     );
     expect(
       find.bySemanticsLabel('LATEST ${second.score.total}'),
@@ -104,11 +115,14 @@ void main() {
     final rig = MissionRig(tester);
     await rig.boot(Routes.progress);
     await rig.until(find.byType(ProgressScreen));
+    await rig.run(const Duration(seconds: 1));
     final auto = find.bySemanticsLabel(ProgressScreen.autoAdvance);
     await tester.ensureVisible(auto);
     await tester.tap(auto);
     await tester.pump();
     final calm = find.bySemanticsLabel(ProgressScreen.calmMode);
+    await tester.ensureVisible(calm);
+    await tester.pump();
     await tester.tap(calm);
     await tester.pump();
     final saved = await rig.profile.load();

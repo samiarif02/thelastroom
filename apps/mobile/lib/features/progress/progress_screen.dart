@@ -209,7 +209,7 @@ class _Summary extends StatelessWidget {
                     '${report.done}/${report.total}',
                     style: BrandVividType.title,
                   ),
-                  Text('DONE', style: BrandVividType.kicker),
+                  const Text('DONE', style: BrandVividType.kicker),
                 ],
               ),
             ),
@@ -287,7 +287,7 @@ class _Skills extends StatelessWidget {
           ),
           const SizedBox(height: BrandSpace.sm),
           if (s == null)
-            Text(ProgressScreen.skillsEmpty, style: BrandVividType.body)
+            const Text(ProgressScreen.skillsEmpty, style: BrandVividType.body)
           else
             Center(
               child: SkillRadar(
@@ -359,7 +359,7 @@ class _MissionCard extends StatelessWidget {
           ),
           if (latest == null) ...[
             const SizedBox(height: BrandSpace.xs),
-            Text(ProgressScreen.notPlayed, style: BrandVividType.body),
+            const Text(ProgressScreen.notPlayed, style: BrandVividType.body),
           ] else ...[
             const SizedBox(height: BrandSpace.sm),
             Wrap(

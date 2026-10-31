@@ -78,6 +78,22 @@ class ProgressReport {
   }
 }
 
+extension ProgressSkills on ProgressReport {
+  /// Each dimension averaged over the played missions' latest attempts, 0–100, rounded: the
+  /// skill radar (brief 17). Null before any mission is played.
+  Map<Dimension, int>? get skills {
+    final latest = [for (final m in this.missions) ?m.latest];
+    if (latest.isEmpty) return null;
+    return {
+      for (final d in Dimension.values)
+        d:
+            (latest.map((s) => s.dimensions[d] ?? 0).reduce((a, b) => a + b) /
+                    latest.length)
+                .round(),
+    };
+  }
+}
+
 /// The report from the progress store.
 final progressReportProvider = FutureProvider.autoDispose<ProgressReport>((
   ref,
