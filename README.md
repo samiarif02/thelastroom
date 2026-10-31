@@ -56,6 +56,25 @@ flutter run --dart-define-from-file=env/dev.json
 With no keys, or keys but no network, every backend feature is silently off and the game is
 unaffected ([ADR 0005](docs/decisions/0005-zero-setup-offline-backend-optional.md)).
 
+### AI scoring locally (optional)
+
+The debrief can be scored by an AI senior recruiter (Gemini, through the `score` Edge Function;
+[ADR 0006](docs/decisions/0006-ai-scoring.md)). There's no hosted backend, so it runs on your
+Mac, and a phone on the same Wi-Fi reaches it. Without it the game shows the built-in
+"Offline score", exactly as before.
+
+1. **Key:** put your Gemini key in a gitignored `.env` at the repo root (`cp .env.example .env`,
+   then fill in `GEMINI_API_KEY=`). It stays on the server: the app never sees it.
+2. **Backend on the Mac:** `supabase start`, then `supabase functions serve score --env-file .env`
+   (leave it running). `supabase status` prints the local anon key, which is public.
+3. **App:** in `apps/mobile/env/dev.json` set `SUPABASE_URL` to `http://<your Mac's LAN IP>:54321`
+   (on macOS: `ipconfig getifaddr en0`) and `SUPABASE_ANON_KEY` to that anon key, then
+   `flutter run --dart-define-from-file=env/dev.json`. Debug and profile builds may use plain
+   HTTP on the LAN; release builds stay HTTPS-only.
+
+If the Mac is off, the Wi-Fi drops or the panel takes longer than 8 seconds, the debrief shows
+the "Offline score" instead. Each player gets 30 AI scores a day.
+
 ### Gates (what CI runs on every PR)
 
 ```bash

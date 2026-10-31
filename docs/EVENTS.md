@@ -44,3 +44,6 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `mission_resumed` | The player continues a mission they left | `mission_id`, `beat` |
 | `recall_room_opened` | The Recall Room opens, from the tower | `due_cards` |
 | `recall_card_answered` | A Recall Room card is answered | `card_kind` (`trap`, `lesson`), `verdict` (`known`, `guessed`, `missed`), `box` (`one`, `three`, `seven`) |
+| `ai_score_requested` | The debrief asks the AI recruiter (the `score` function) to score the answer | `mission_id` |
+| `ai_score_shown` | The AI's verdict is shown on the dossier | `mission_id`, `score_bucket` |
+| `ai_score_fallback` | No AI verdict, so the dossier shows the engine's "Offline score" | `mission_id`, `reason` (`noBackend`, `noSession`, `timeout`, `limited`, `error`) |

@@ -20,6 +20,7 @@ class SupabaseBackend implements Backend {
 
   static const String _attempts = 'mission_attempts';
   static const String _profiles = 'profiles';
+  static const String _scoreFunction = 'score';
 
   @override
   Future<BackendSession> restoreSession() async {
@@ -72,6 +73,23 @@ class SupabaseBackend implements Backend {
   Future<RemoteProfile?> fetchProfile() async {
     final row = await (await _client()).from(_profiles).select().maybeSingle();
     return row == null ? null : RemoteProfile.fromRow(row);
+  }
+
+  @override
+  Future<Object?> scoreAnswer(Map<String, Object?> request) async {
+    // The session's JWT goes with the call (supabase-dart sets it); the function checks it.
+    try {
+      final response = await (await _client()).functions.invoke(
+        _scoreFunction,
+        body: request,
+      );
+      final Object? data = response.data;
+      return data;
+    } on FunctionException catch (error) {
+      final Object? details = error.details;
+      final code = details is Map<String, Object?> ? details['error'] : null;
+      throw ScoreRefused(error.status, code is String ? code : null);
+    }
   }
 
   Future<void> dispose() async => _authEvents?.cancel();

@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/audio/game_sounds.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
+import '../debrief/ai_score.dart';
 import '../debrief/debrief_facts.dart';
 import '../debrief/debrief_view.dart';
 import 'mission_controller.dart';
@@ -530,6 +531,15 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
         trust: game.trust,
         firstTry: game.firstTry,
         reasoning: reasoningOf(mission, game.plays),
+        // The answer for the AI recruiter (brief 22); the dossier falls back by itself.
+        scoreRequest: game.followUp != null && game.reply != null
+            ? ScoreRequest(
+                mission: mission,
+                plays: game.plays,
+                followUp: game.followUp!,
+                reply: game.reply!,
+              )
+            : null,
         onContinue: widget.onExit,
       );
     }

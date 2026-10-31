@@ -4,4 +4,9 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Brief 22: in debug and profile builds only, the app may reach the Mac's local Supabase
+         over plain HTTP on the LAN (http://<lan-ip>:54321 in env/dev.json) for AI scoring. The
+         address changes per network, so it can't be pinned in a network security config.
+         Release builds keep Android's default: HTTPS only. -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

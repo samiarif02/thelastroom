@@ -54,6 +54,23 @@ abstract interface class Backend {
 
   /// The signed-in player's profile, or null if they've never synced one.
   Future<RemoteProfile?> fetchProfile();
+
+  /// Asks the `score` Edge Function (brief 22) to grade an answer, as the signed-in player.
+  /// [request] is the function's JSON body; the result is its decoded JSON, which the caller
+  /// parses. Throws [ScoreRefused] when the function answers with an error status.
+  Future<Object?> scoreAnswer(Map<String, Object?> request);
+}
+
+/// The `score` function answered with an error status ([status]) and code ([code]): a spent daily
+/// quota (429), a missing key (503), an upstream failure (502/504). The caller falls back.
+class ScoreRefused implements Exception {
+  const ScoreRefused(this.status, [this.code]);
+
+  final int status;
+  final String? code;
+
+  @override
+  String toString() => 'ScoreRefused($status, $code)';
 }
 
 /// The backend answered, but not with what the app needs.
