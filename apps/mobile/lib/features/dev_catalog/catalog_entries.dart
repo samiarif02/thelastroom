@@ -356,34 +356,21 @@ abstract final class CatalogEntries {
   static final CatalogEntry _brass = CatalogEntry(
     id: 'brass',
     name: 'Brass',
-    note: 'BrassOrnament, DoubleRule, BrassButton (onTap; null is disabled).',
+    note:
+        "BrassOrnament and DoubleRule: the room's engraved pieces (the title card, the dossier), "
+        "on the room's own cream. BrassButton is the vivid pill now (see Vivid kit).",
     shots: [
       CatalogShot(
         id: 'ornaments',
         label: 'Ornaments',
-        build: (grade) => CatalogSky(
+        build: (grade) => CatalogDesk(
+          grade: grade,
           children: [
             Center(
               child: BrassOrnament(text: 'CHAPTER ONE', grade: grade),
             ),
             const SizedBox(height: BrandSpace.lg),
             DoubleRule(color: grade.key),
-            const CatalogCaption('button'),
-            Center(
-              child: BrassButton(
-                label: SceneState.retryLabel,
-                onTap: () {},
-                grade: grade,
-              ),
-            ),
-            const CatalogCaption('disabled'),
-            Center(
-              child: BrassButton(
-                label: SceneState.retryLabel,
-                onTap: null,
-                grade: grade,
-              ),
-            ),
           ],
         ),
       ),
