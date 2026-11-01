@@ -84,14 +84,14 @@ class ReminderPrimer extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(kicker, style: BrandVividType.kicker),
+                  Text(kicker, style: BrandVividType.kicker),
                   const SizedBox(height: BrandSpace.sm),
                   Semantics(
                     header: true,
-                    child: const Text(title, style: BrandVividType.title),
+                    child: Text(title, style: BrandVividType.title),
                   ),
                   const SizedBox(height: BrandSpace.sm),
-                  const Text(line, style: BrandVividType.body),
+                  Text(line, style: BrandVividType.body),
                   const SizedBox(height: BrandSpace.lg),
                   VividButton(label: yes, onPressed: onYes, expand: true),
                   const SizedBox(height: BrandSpace.sm),

@@ -46,14 +46,14 @@ class _ReminderSettingsRowState extends ConsumerState<ReminderSettingsRow> {
       children: [
         Semantics(
           header: true,
-          child: const Text(
+          child: Text(
             ReminderSettingsRow.heading,
             style: BrandVividType.kicker,
           ),
         ),
         const SizedBox(height: BrandSpace.sm),
         if (!remindersSupported)
-          const Text(ReminderSettingsRow.webOnly, style: BrandVividType.body)
+          Text(ReminderSettingsRow.webOnly, style: BrandVividType.body)
         else ...[
           VividToggle(
             label: ReminderSettingsRow.label,
