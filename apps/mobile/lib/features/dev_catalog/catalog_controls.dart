@@ -2,6 +2,7 @@ import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../settings/theme/theme_controller.dart';
 import 'catalog_controller.dart';
 
 /// One control in the catalog's pill: a tracked caps label in a 44 pt target.
@@ -109,5 +110,19 @@ List<Widget> catalogToggles(WidgetRef ref) {
       grade: s.grade,
       onTap: n.nextGrade,
     ),
+    _themeControl(ref),
   ];
+}
+
+/// The theme (brief 28): cycles the app's theme, so every catalog page can be seen in each.
+Widget _themeControl(WidgetRef ref) {
+  final theme = ref.watch(themeProvider);
+  const all = VividThemes.all;
+  final next = all[(all.indexOf(theme) + 1) % all.length];
+  return CatalogControl(
+    label: theme.name.toUpperCase(),
+    semantics: 'Theme: ${theme.name}. Tap for ${next.name}',
+    on: true,
+    onTap: () => ref.read(themeProvider.notifier).pick(next),
+  );
 }

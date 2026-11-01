@@ -145,10 +145,7 @@ class _Header extends StatelessWidget {
             Expanded(
               child: Semantics(
                 header: true,
-                child: const Text(
-                  RecallScreen.title,
-                  style: BrandVividType.title,
-                ),
+                child: Text(RecallScreen.title, style: BrandVividType.title),
               ),
             ),
             Semantics(

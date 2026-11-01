@@ -24,7 +24,7 @@ class LastRoomCard extends StatelessWidget {
       kicker: kicker,
       title: title,
       line: line,
-      trailing: const LockGlyph(color: BrandVivid.onDeepSoft, size: 22),
+      trailing: LockGlyph(color: BrandVivid.onDeepSoft, size: 22),
     );
   }
 }

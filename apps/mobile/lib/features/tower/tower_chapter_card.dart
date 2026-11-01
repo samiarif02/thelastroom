@@ -148,7 +148,7 @@ class _LockedTeaser extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _Pill(
-          icon: const LockGlyph(color: BrandVivid.onDeep, size: 14),
+          icon: LockGlyph(color: BrandVivid.onDeep, size: 14),
           text: ChapterCard.opensAfter(chapter.number - 1),
           color: grade.deeper,
         ),
@@ -306,7 +306,7 @@ class MissionRow extends StatelessWidget {
               size: 14,
             ),
             RoomState.current => const _PlayChip(),
-            RoomState.locked => const LockGlyph(
+            RoomState.locked => LockGlyph(
               color: BrandVivid.onDeepSoft,
               size: 18,
             ),

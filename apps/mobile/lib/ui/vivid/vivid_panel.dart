@@ -7,16 +7,15 @@ import 'package:flutter/widgets.dart';
 /// The Recall Room uses it; the tower's feature cards and the progress screen still carry their
 /// own private copies (`_FeatureCard`, `_Panel`) and can move onto this one.
 class VividPanel extends StatelessWidget {
-  const VividPanel({
-    super.key,
-    required this.child,
-    this.colors = const [BrandVivid.locked, BrandVivid.night],
-    this.glow,
-  });
+  const VividPanel({super.key, required this.child, this.colors, this.glow});
 
   final Widget child;
-  final List<Color> colors;
+
+  /// The fill; null is the current theme's slate to night.
+  final List<Color>? colors;
   final Color? glow;
+
+  List<Color> get _fill => colors ?? [BrandVivid.locked, BrandVivid.night];
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +27,7 @@ class VividPanel extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: colors,
+          colors: _fill,
         ),
         border: Border.all(color: BrandVivid.hairline()),
         boxShadow: g == null ? BrandVivid.cardShadow : BrandVivid.glowShadow(g),

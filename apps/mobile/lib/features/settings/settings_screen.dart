@@ -6,6 +6,7 @@ import '../../app/router.dart';
 import '../../core/notifications/reminder_settings_row.dart';
 import '../../ui/film_kit.dart';
 import 'audio/audio_settings_section.dart';
+import 'theme/theme_picker.dart';
 
 /// Settings (brief 20, vivid in brief 23), from the tower's gear: the audio section on a vivid
 /// panel over the evening sky, under a pinned header with the way back. The system back button also returns
@@ -47,7 +48,7 @@ class SettingsScreen extends StatelessWidget {
                     Expanded(
                       child: Semantics(
                         header: true,
-                        child: const Text(title, style: BrandVividType.title),
+                        child: Text(title, style: BrandVividType.title),
                       ),
                     ),
                   ],
@@ -65,11 +66,16 @@ class SettingsScreen extends StatelessWidget {
                       children: [
                         StaggeredEntrance(
                           index: 0,
-                          child: VividPanel(child: AudioSettingsSection()),
+                          child: VividPanel(child: ThemePicker()),
                         ),
                         SizedBox(height: BrandSpace.md),
                         StaggeredEntrance(
                           index: 1,
+                          child: VividPanel(child: AudioSettingsSection()),
+                        ),
+                        SizedBox(height: BrandSpace.md),
+                        StaggeredEntrance(
+                          index: 2,
                           child: VividPanel(child: ReminderSettingsRow()),
                         ),
                       ],

@@ -79,7 +79,7 @@ class VividButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: primary ? BrandVivid.accent : null,
           gradient: primary
-              ? const LinearGradient(
+              ? LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [BrandVivid.accent, BrandVivid.accentPressed],

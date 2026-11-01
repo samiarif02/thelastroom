@@ -36,11 +36,11 @@ class FirstTrySlip extends StatelessWidget {
           const SizedBox(height: BrandSpace.xs),
           Text('“$firstTry”', style: quote),
           const SizedBox(height: BrandSpace.md),
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               border: Border(top: BorderSide(color: SlipInk.soft)),
             ),
-            child: SizedBox(width: double.infinity),
+            child: const SizedBox(width: double.infinity),
           ),
           const SizedBox(height: BrandSpace.md),
           Semantics(header: true, child: Text(strongerHeading, style: soft)),

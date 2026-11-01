@@ -5,14 +5,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/settings/theme/theme_controller.dart';
 import '../ui/film_kit.dart';
 import 'router.dart';
 
 class TheLastRoomApp extends ConsumerWidget {
   const TheLastRoomApp({super.key});
 
+  /// Marks every element below [context] to rebuild. Keys (go_router's navigator has a global
+  /// one) and const widgets would otherwise keep their old colours after a theme change.
+  static void _rebuildAll(BuildContext context) {
+    void mark(Element e) {
+      e
+        ..markNeedsBuild()
+        ..visitChildren(mark);
+    }
+
+    (context as Element).visitChildren(mark);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Every vivid token reads the current theme (brief 28): set it before the tree builds, and
+    // on a change rebuild every screen, so a pick in Settings re-colours the app at once.
+    final theme = ref.watch(themeProvider);
+    BrandVivid.current = theme;
+    ref.listen(themeProvider, (previous, next) {
+      if (previous != next) _rebuildAll(context);
+    });
     return MaterialApp.router(
       title: 'The Last Room',
       debugShowCheckedModeBanner: false,

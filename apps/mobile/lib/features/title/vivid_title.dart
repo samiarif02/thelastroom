@@ -82,7 +82,7 @@ class VividTitle extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(height: BrandSpace.sm),
-                                    const Text(
+                                    Text(
                                       tagline,
                                       textAlign: TextAlign.center,
                                       style: BrandVividType.body,

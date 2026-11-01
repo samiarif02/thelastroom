@@ -22,7 +22,7 @@ class FileTrouble extends StatelessWidget {
     child: DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(_radius),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [BrandVivid.locked, BrandVivid.night],
@@ -37,18 +37,14 @@ class FileTrouble extends StatelessWidget {
             Semantics(
               header: true,
               liveRegion: true,
-              child: const Text(
+              child: Text(
                 title,
                 textAlign: TextAlign.center,
                 style: BrandVividType.title,
               ),
             ),
             const SizedBox(height: BrandSpace.sm),
-            const Text(
-              line,
-              textAlign: TextAlign.center,
-              style: BrandVividType.body,
-            ),
+            Text(line, textAlign: TextAlign.center, style: BrandVividType.body),
             const SizedBox(height: BrandSpace.lg),
             VividButton(label: retry, expand: true, onPressed: onRetry),
           ],

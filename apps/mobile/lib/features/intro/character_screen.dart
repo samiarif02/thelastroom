@@ -59,7 +59,7 @@ class CharacterScreen extends ConsumerWidget {
                   child: _CvSheet(character: player, name: name),
                 ),
                 const SizedBox(height: BrandSpace.lg),
-                const Text(
+                Text(
                   yourWords,
                   textAlign: TextAlign.center,
                   style: BrandVividType.body,
@@ -108,7 +108,7 @@ class _CvSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: BrandSpace.sm),
-          const Text(
+          Text(
             CharacterScreen.premise,
             textAlign: TextAlign.center,
             style: BrandVividType.body,

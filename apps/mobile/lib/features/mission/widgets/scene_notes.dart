@@ -28,7 +28,7 @@ class GuessCue extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: BrandVivid.night.withValues(alpha: 0.92),
-            border: const Border(
+            border: Border(
               left: BorderSide(color: BrandVivid.horizon, width: _bar),
             ),
             boxShadow: BrandVivid.cardShadow,

@@ -48,7 +48,7 @@ class Elevator extends StatelessWidget {
             if (still) {
               return Opacity(
                 opacity: t,
-                child: const ColoredBox(color: BrandVivid.night),
+                child: ColoredBox(color: BrandVivid.night),
               );
             }
             final close = cue(t, 0, _doorsShut, BrandMotion.camera);
