@@ -1,6 +1,7 @@
 /// The Last Room's missions, interviewers and lessons, as typed Dart.
 library;
 
+export 'src/build_beat.dart';
 export 'src/data/chapters.dart';
 export 'src/data/game_content.dart';
 export 'src/data/interviewers.dart';

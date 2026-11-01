@@ -651,4 +651,204 @@ void main() {
       },
     );
   });
+
+  group('build your answer (brief 27)', () {
+    Lesson lesson(String id, Flag flag) => Lesson(
+      id: id,
+      title: id,
+      flag: flag,
+      flaw: 'A flaw.',
+      takeaway: 'A takeaway.',
+      recall: RecallCheck(
+        prompt: 'Which?',
+        options: [
+          RecallOption(id: '${id}_a', text: 'A.'),
+          RecallOption(id: '${id}_b', text: 'B.'),
+        ],
+        correctOptionId: '${id}_a',
+      ),
+    );
+
+    const parts = [
+      Fragment(id: 'b_s', text: 'Support was drowning in tickets.'),
+      Fragment(id: 'b_t', text: 'I was asked to find out why.'),
+      Fragment(id: 'b_a', text: 'I tagged 600 of them in a spreadsheet.'),
+      Fragment(id: 'b_r', text: 'Resets fell by a quarter.'),
+    ];
+    const decoy = Fragment(
+      id: 'b_we',
+      text: 'We all pitched in.',
+      flags: {Flag.weNotI},
+      lessonId: 'lesson_name_your_part',
+    );
+
+    BuildBeat build({
+      List<Fragment> parts = parts,
+      List<Fragment> decoys = const [decoy],
+      String orderLessonId = 'lesson_one_story',
+      String missingLessonId = 'lesson_be_concrete',
+    }) => BuildBeat(
+      id: 'b_build',
+      parts: parts,
+      decoys: decoys,
+      orderLessonId: orderLessonId,
+      missingLessonId: missingLessonId,
+    );
+
+    List<String> problemsWith(BuildBeat b) {
+      final beats = [...base.beats];
+      final evidence = beats[1];
+      beats[1] = Beat(
+        kind: evidence.kind,
+        options: evidence.options,
+        why: evidence.why,
+        reaction: evidence.reaction,
+        build: b,
+      );
+      final bundle = withMission(beats: beats);
+      return problems(
+        ContentBundle(
+          chapters: bundle.chapters,
+          interviewers: bundle.interviewers,
+          lessons: [
+            ...bundle.lessons,
+            lesson('lesson_one_story', Flag.rambling),
+            lesson('lesson_be_concrete', Flag.vague),
+          ],
+          missions: bundle.missions,
+        ),
+      );
+    }
+
+    test('a well-formed build is valid', () {
+      expect(problemsWith(build()), isEmpty);
+    });
+
+    test('3–4 parts and exactly one decoy', () {
+      expect(
+        problemsWith(build(parts: parts.take(2).toList())),
+        contains('b_build: has 2 parts, needs 3–4'),
+      );
+      expect(
+        problemsWith(build(decoys: const [])),
+        contains('b_build: has 0 decoys, needs exactly 1'),
+      );
+    });
+
+    test('a part is clean; a decoy is flagged and teaches its lesson', () {
+      expect(
+        problemsWith(
+          build(
+            parts: [
+              ...parts.take(3),
+              const Fragment(
+                id: 'b_r',
+                text: 'Resets fell.',
+                flags: {Flag.vague},
+              ),
+            ],
+          ),
+        ),
+        contains(
+          'b_r: is a part of the strong answer, so has no flag or lesson',
+        ),
+      );
+      expect(
+        problemsWith(
+          build(
+            decoys: const [Fragment(id: 'b_we', text: 'We all pitched in.')],
+          ),
+        ),
+        contains('b_we: is a decoy, so needs a flag and its lesson'),
+      );
+      expect(
+        problemsWith(
+          build(
+            decoys: const [
+              Fragment(
+                id: 'b_we',
+                text: 'We all pitched in.',
+                flags: {Flag.blame},
+                lessonId: 'lesson_name_your_part',
+              ),
+            ],
+          ),
+        ),
+        contains(
+          'b_we: teaches lesson_name_your_part, a we_not_i lesson, '
+          'but is not flagged we_not_i',
+        ),
+      );
+    });
+
+    test('the order and gap lessons exist and match their flags', () {
+      expect(
+        problemsWith(build(orderLessonId: 'lesson_be_concrete')),
+        contains(
+          'b_build: teaches lesson_be_concrete, a vague lesson, '
+          'where a rambling one is needed',
+        ),
+      );
+      expect(
+        problemsWith(build(missingLessonId: 'lesson_nope')),
+        contains('b_build: lesson lesson_nope does not exist'),
+      );
+    });
+
+    test('fragments are short, and ids unique and snake_case', () {
+      final long = List.filled(maxFragmentWords + 1, 'word').join(' ');
+      expect(
+        problemsWith(
+          build(
+            parts: [
+              ...parts.take(3),
+              Fragment(id: 'b_r', text: long),
+            ],
+          ),
+        ),
+        contains(
+          'b_r: is ${maxFragmentWords + 1} words, over $maxFragmentWords',
+        ),
+      );
+      expect(
+        problemsWith(
+          build(
+            parts: [
+              ...parts.take(3),
+              const Fragment(id: 'o1', text: 'x'),
+            ],
+          ),
+        ),
+        contains('o1: id is used more than once'),
+      );
+    });
+
+    test('the built answer resolves through the beat, and only a full build is strongest', () {
+      final b = build();
+      final beat = Beat(
+        kind: BeatKind.evidence,
+        options: base.beats[1].options,
+        build: b,
+      );
+      final strong = b.strongAnswer;
+      expect(strong.text, parts.map((p) => p.text).join(' '));
+      expect(strong.lessonId, isNull);
+      expect(beat.optionById(strong.id)?.text, strong.text);
+      expect(beat.isStrongest(strong.id), isTrue);
+
+      final we = b.answerFor(['b_s', 'b_t', 'b_we', 'b_a', 'b_r']);
+      expect(we.flags, {Flag.weNotI});
+      expect(we.lessonId, 'lesson_name_your_part');
+      expect(beat.isStrongest(we.id), isFalse);
+
+      final jumbled = b.answerFor(['b_a', 'b_s', 'b_r', 'b_t']);
+      expect(jumbled.lessonId, 'lesson_one_story');
+      final thin = b.answerFor(['b_s', 'b_a']);
+      expect(thin.lessonId, 'lesson_be_concrete');
+
+      expect(beat.optionById('other_build=b_s'), isNull);
+      final picked = base.beats[1].options.first.id;
+      expect(beat.optionById(picked)?.id, picked);
+    });
+  });
 }

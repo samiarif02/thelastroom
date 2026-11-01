@@ -1,5 +1,6 @@
 import 'package:engine/engine.dart';
 
+import 'build_beat.dart';
 import 'identified.dart';
 import 'interviewer.dart';
 import 'lesson.dart';
@@ -54,6 +55,16 @@ const int maxReasons = 4;
 
 /// A reason is one thought the player can hold at a glance, shorter than an answer line.
 const int maxReasonWords = 16;
+
+/// A build (brief 27) has 3–4 parts (situation, task, action, result) and exactly one decoy,
+/// so the player sorts 4–5 fragments.
+const int minBuildParts = 3;
+const int maxBuildParts = 4;
+const int buildDecoys = 1;
+
+/// A fragment is a chip the player taps: a clause, not a line. The strong answer they add up
+/// to is held to [maxOptionWords] like any line.
+const int maxFragmentWords = 14;
 
 /// A reason may not share a run of this many words with an option of its beat: reasons are
 /// principles, not paraphrases of a line.
@@ -232,6 +243,73 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
     }
   }
 
+  void checkLesson(String ownerId, String lessonId, Flag flag) {
+    final lesson = lessonsById[lessonId];
+    if (lesson == null) {
+      issue(ownerId, 'lesson $lessonId does not exist');
+    } else if (lesson.flag != flag) {
+      issue(
+        ownerId,
+        'teaches $lessonId, a ${lesson.flag.wireName} lesson, '
+        'where a ${flag.wireName} one is needed',
+      );
+    }
+  }
+
+  // Build your answer: 3–4 clean parts in order, one flagged decoy with its lesson, chips short
+  // enough to tap, and a strong answer no longer than a line.
+  void checkBuild(String beatId, BuildBeat build) {
+    checkId(build);
+    if (build.parts.length < minBuildParts ||
+        build.parts.length > maxBuildParts) {
+      issue(
+        build.id,
+        'has ${build.parts.length} parts, needs $minBuildParts–$maxBuildParts',
+      );
+    }
+    if (build.decoys.length != buildDecoys) {
+      issue(
+        build.id,
+        'has ${build.decoys.length} decoys, needs exactly $buildDecoys',
+      );
+    }
+    for (final fragment in build.fragments) {
+      checkId(fragment);
+      final words = wordCount(fragment.text);
+      if (words > maxFragmentWords) {
+        issue(fragment.id, 'is $words words, over $maxFragmentWords');
+      }
+    }
+    for (final part in build.parts) {
+      if (part.flags.isNotEmpty || part.lessonId != null) {
+        issue(
+          part.id,
+          'is a part of the strong answer, so has no flag or lesson',
+        );
+      }
+    }
+    for (final decoy in build.decoys) {
+      final lessonId = decoy.lessonId;
+      if (decoy.flags.isEmpty || lessonId == null) {
+        issue(decoy.id, 'is a decoy, so needs a flag and its lesson');
+      } else {
+        final lesson = lessonsById[lessonId];
+        if (lesson == null) {
+          issue(decoy.id, 'lesson $lessonId does not exist');
+        } else if (!decoy.flags.contains(lesson.flag)) {
+          issue(
+            decoy.id,
+            'teaches $lessonId, a ${lesson.flag.wireName} lesson, '
+            'but is not flagged ${lesson.flag.wireName}',
+          );
+        }
+      }
+    }
+    checkLesson(build.id, build.orderLessonId, Flag.rambling);
+    checkLesson(build.id, build.missingLessonId, Flag.vague);
+    checkWords(build.id, build.strongAnswer.text);
+  }
+
   bundle.interviewers.forEach(checkId);
 
   for (final lesson in bundle.lessons) {
@@ -277,11 +355,14 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
       final why = beat.why;
       final reaction = beat.reaction;
       // Wave 5: every beat asks why and reacts, so no pick can score without thought. (Every
-      // mission sits in a playable chapter, checked below, so this covers all of them.)
+      // mission sits in a playable chapter, checked below, so this covers all of them.) A built
+      // beat isn't asked why in the room, but keeps its why for the Recall Room.
       if (why == null || reaction == null) {
         issue(beatId, 'needs a why step and a reaction');
       }
       if (why != null) checkWhy(beatId, beat, why);
+      final build = beat.build;
+      if (build != null) checkBuild(beatId, build);
       if (reaction != null) {
         for (final line in [reaction.strong, reaction.weak, reaction.guessed]) {
           checkSpeaker(beatId, line);

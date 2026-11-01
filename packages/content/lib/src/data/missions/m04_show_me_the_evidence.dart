@@ -1,5 +1,6 @@
 import 'package:engine/engine.dart';
 
+import '../../build_beat.dart';
 import '../../mission.dart';
 import '../interviewers.dart';
 
@@ -110,6 +111,37 @@ const missionShowMeTheEvidence = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      build: BuildBeat(
+        id: 'm04_evidence_build',
+        parts: [
+          Fragment(
+            id: 'm04_build_why',
+            text: 'I wanted to know why support was swamped.',
+          ),
+          Fragment(
+            id: 'm04_build_tagged',
+            text: 'I tagged 600 tickets in a spreadsheet.',
+          ),
+          Fragment(
+            id: 'm04_build_third',
+            text: 'One in three were password resets.',
+          ),
+          Fragment(
+            id: 'm04_build_page',
+            text: 'So I wrote a step-by-step help page for them.',
+          ),
+        ],
+        decoys: [
+          Fragment(
+            id: 'm04_build_we',
+            text: 'We went through the tickets together as a team.',
+            flags: {Flag.weNotI},
+            lessonId: 'lesson_name_your_part',
+          ),
+        ],
+        orderLessonId: 'lesson_one_story',
+        missingLessonId: 'lesson_be_concrete',
+      ),
       why: ReasonPrompt(
         line: SceneLine(speakerId: marcusId, text: 'Why those details?'),
         reasons: [
