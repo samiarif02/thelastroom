@@ -76,7 +76,11 @@ class _ChapterReportScreenState extends ConsumerState<ChapterReportScreen> {
           bottom: false,
           child: Column(
             children: [
-              _Header(onBack: () => context.go(Routes.tower())),
+              VividHeader(
+                title: ChapterReportScreen.title,
+                backLabel: ChapterReportScreen.back,
+                onBack: () => context.go(Routes.tower()),
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
@@ -109,44 +113,6 @@ class _ChapterReportScreenState extends ConsumerState<ChapterReportScreen> {
       ],
     );
   }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({required this.onBack});
-
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context) => ColoredBox(
-    color: BrandVivid.skyTop,
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(
-        BrandSpace.md,
-        BrandSpace.sm,
-        BrandSpace.md,
-        BrandSpace.sm,
-      ),
-      child: Row(
-        children: [
-          VividButton(
-            label: '‹  ${ChapterReportScreen.back}',
-            primary: false,
-            onPressed: onBack,
-          ),
-          const SizedBox(width: BrandSpace.md),
-          Expanded(
-            child: Semantics(
-              header: true,
-              child: Text(
-                ChapterReportScreen.title,
-                style: BrandVividType.title,
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
 }
 
 /// A rounded card on the sky.

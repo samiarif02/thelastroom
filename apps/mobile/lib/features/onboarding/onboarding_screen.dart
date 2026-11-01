@@ -14,6 +14,7 @@ import '../../core/analytics/event_value.dart';
 import '../../core/audio/game_sounds.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
+import '../mission/mission_lookup.dart';
 import '../tower/tower_chapter_card.dart';
 import 'name_field.dart';
 import 'onboarding_copy.dart';
@@ -335,6 +336,10 @@ class _IdeaCard extends StatelessWidget {
 class _CastStep extends StatelessWidget {
   const _CastStep();
 
+  /// The first mission this interviewer leads (they all appear in Chapter 1).
+  static int _firstMet(Interviewer who) =>
+      missions.firstWhere((m) => m.lead.id == who.id).number;
+
   static const double _badge = 68;
 
   @override
@@ -356,7 +361,7 @@ class _CastStep extends StatelessWidget {
                 index: 3 + i,
                 child: Semantics(
                   label:
-                      '${cast[i].name}, ${cast[i].role}, ${OnboardingCopy.castChapter(i + 1)}',
+                      '${cast[i].name}, ${cast[i].role}, ${OnboardingCopy.castFirstMet(_firstMet(cast[i]))}',
                   excludeSemantics: true,
                   child: _ColourCard(
                     grade: ChapterGrade.values[i],
@@ -374,7 +379,8 @@ class _CastStep extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                OnboardingCopy.castChapter(i + 1).toUpperCase(),
+                                OnboardingCopy.castFirstMet(_firstMet(cast[i]))
+                                    .toUpperCase(),
                                 style: BrandVividType.kicker,
                               ),
                               Text(cast[i].name, style: BrandVividType.title),

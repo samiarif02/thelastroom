@@ -26,6 +26,10 @@ class TowerHero extends StatelessWidget {
       'Mission ${room.mission.number}, ${room.mission.title}';
 
   static const double _badge = 84;
+
+  /// The sunbeam's strength: enough for depth, low enough that the kicker over it stays AA in
+  /// every theme (brief 31).
+  static const double _sunbeam = 0.16;
   static const int _quoteLines = 3;
 
   @override
@@ -58,7 +62,7 @@ class TowerHero extends StatelessWidget {
                     center: Alignment.topRight,
                     radius: 1.1,
                     colors: [
-                      grade.glow.withValues(alpha: 0.35),
+                      grade.glow.withValues(alpha: _sunbeam),
                       grade.glow.withValues(alpha: 0),
                     ],
                   ),

@@ -7,6 +7,7 @@ import '../../app/router.dart';
 import '../../ui/vivid/progress_ring.dart';
 import '../../ui/vivid/vivid_backdrop.dart';
 import '../../ui/vivid/vivid_button.dart';
+import '../../ui/vivid/vivid_header.dart';
 import '../../ui/vivid/vivid_panel.dart';
 import 'recall_card_view.dart';
 import 'recall_controller.dart';
@@ -125,40 +126,18 @@ class _Header extends StatelessWidget {
       RecallFinished() => (1.0, s.bestStreak),
       _ => (0.0, 0),
     };
-    return ColoredBox(
-      color: BrandVivid.skyTop,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          BrandSpace.md,
-          BrandSpace.sm,
-          BrandSpace.md,
-          BrandSpace.sm,
-        ),
-        child: Row(
-          children: [
-            VividButton(
-              label: '‹  ${RecallScreen.back}',
-              primary: false,
-              onPressed: onBack,
-            ),
-            const SizedBox(width: BrandSpace.md),
-            Expanded(
-              child: Semantics(
-                header: true,
-                child: Text(RecallScreen.title, style: BrandVividType.title),
-              ),
-            ),
-            Semantics(
-              label: '$streak ${RecallScreen.streakLabel}',
-              excludeSemantics: true,
-              child: ProgressRing(
-                value: progress,
-                color: BrandVivid.accent,
-                size: _ring,
-                child: Text('$streak', style: BrandVividType.row),
-              ),
-            ),
-          ],
+    return VividHeader(
+      title: RecallScreen.title,
+      backLabel: RecallScreen.back,
+      onBack: onBack,
+      trailing: Semantics(
+        label: '$streak ${RecallScreen.streakLabel}',
+        excludeSemantics: true,
+        child: ProgressRing(
+          value: progress,
+          color: BrandVivid.accent,
+          size: _ring,
+          child: Text('$streak', style: BrandVividType.row),
         ),
       ),
     );

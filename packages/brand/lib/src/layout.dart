@@ -7,8 +7,9 @@ abstract final class BrandSpace {
   static const double xl = 40;
   static const double xxl = 64;
 
-  /// Minimum touch target (brief §9 quality bar: 44 pt).
-  static const double minTarget = 44;
+  /// Minimum touch target: 48 dp, which meets both the brief's 44 pt (iOS) and Android's 48 dp
+  /// (brief 31; Flutter's tap-target guidelines check both).
+  static const double minTarget = 48;
 }
 
 /// Corner radii. Film frames and paper are mostly square; radii stay small.
