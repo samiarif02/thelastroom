@@ -438,6 +438,20 @@ def hook_transcript() -> Optional[Path]:
     return None
 
 
+def project_name(cwd: Path) -> str:
+    """The repository's name, the same from the main checkout and from any worktree."""
+    try:
+        common = subprocess.run(
+            ['git', 'rev-parse', '--path-format=absolute', '--git-common-dir'],
+            cwd=cwd, capture_output=True, text=True, timeout=5,
+        ).stdout.strip()
+        if common:
+            return Path(common).parent.name
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return cwd.name
+
+
 def main():
     cwd = Path(os.environ.get('CLAUDE_CWD', os.getcwd()))
 
@@ -491,7 +505,8 @@ def main():
     lines.append(f"author: {author}")
     lines.append(f"github_user: {github_user}")
     lines.append(f"git_email: {git_email}")
-    lines.append(f"project: {cwd.name}")
+    project = project_name(cwd)
+    lines.append(f"project: {project}")
     lines.append(f"session_status: {session_status}")
     lines.append(f"last_entry_type: {last_entry_type}")
     lines.append(f"total_exchanges: {len([e for e in entries if e[1] == 'user'])}")
@@ -502,7 +517,7 @@ def main():
 
     lines.append("---\n")
     lines.append(f"# Claude Session Log - {date}\n")
-    lines.append(f"Session: `{session_id}` | Project: `{cwd.name}` | Author: `{author}` | GitHub: `{github_user}`\n")
+    lines.append(f"Session: `{session_id}` | Project: `{project}` | Author: `{author}` | GitHub: `{github_user}`\n")
     lines.append("---\n")
 
     prompts_data = []
