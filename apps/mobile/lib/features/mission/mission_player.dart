@@ -20,6 +20,7 @@ import 'scene/mission_card.dart';
 import 'scene/mission_set.dart';
 import 'scene/scene_scrim.dart';
 import 'widgets/beat_timer.dart';
+import 'widgets/build_panel.dart';
 import 'widgets/draft_panel.dart';
 import 'widgets/leave_control.dart';
 import 'widgets/next_control.dart';
@@ -149,8 +150,11 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   Duration? _decidedIn;
   Timer? _changeTimer;
 
-  /// The card said: locked in, the others dark.
+  /// The card said: locked in, the others dark. On a built beat, the built answer.
   AnswerOption? _locked;
+
+  /// A built beat's fragments placed so far, in the order tapped (brief 27).
+  List<String> _placed = const [];
   Reason? _reason;
 
   /// The interviewer's reaction on screen, and how the pick landed.
@@ -379,6 +383,37 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     final before = _game.trust;
     _controller.lock(option, decidedIn: _decidedIn);
     _trustMoved(before);
+    _beatLocked();
+  }
+
+  /// A fragment tapped on a built beat: placed at the end of the answer, or taken out.
+  void _toggleFragment(Fragment fragment) {
+    if (_locked != null) return;
+    _sounds.choiceTapped();
+    setState(
+      () => _placed = _placed.contains(fragment.id)
+          ? [..._placed.where((id) => id != fragment.id)]
+          : [..._placed, fragment.id],
+    );
+  }
+
+  /// "Lock it in" on a built beat: the answer is said, timed from when the chips were up.
+  void _lockBuilt() {
+    if (_locked != null || _placed.isEmpty || !mounted) return;
+    final shownAt = _shownAt;
+    _decidedIn = shownAt == null ? Duration.zero : _now() - shownAt;
+    _sounds.answerLocked();
+    stampThud();
+    final before = _game.trust;
+    _controller.lockBuilt(_placed, decidedIn: _decidedIn);
+    setState(() => _locked = _game.plays.last.option);
+    _trustMoved(before);
+    _beatLocked();
+  }
+
+  /// After a beat's line is locked: a guess is called out first, then the why step or her
+  /// reaction.
+  void _beatLocked() {
     if (isGuess(_decidedIn)) {
       // Caught guessing: called out on screen and in her words, before anything else.
       setState(() => _guessCue = true);
@@ -487,6 +522,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
       _selected = null;
       _decidedIn = null;
       _locked = null;
+      _placed = const [];
       _reason = null;
       _reaction = null;
       _quality = null;
@@ -705,7 +741,22 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
         ];
       case SceneStage.beats:
         final beat = game.mission.beats[_beatShown];
+        final build = beat.build;
         return switch (_phase) {
+          BeatPhase.cards when build != null => [
+            QuestionReminder(text: game.question.text, grade: grade),
+            BuildPanel(
+              key: ValueKey('build-$_beatShown'),
+              label: buildLabel(_beatShown, game.mission.beats.length),
+              fragments: game.fragmentsForBeat(_beatShown),
+              placed: _placed,
+              grade: grade,
+              locked: _locked != null,
+              onArrived: _cardsArrived,
+              onToggle: _toggleFragment,
+              onLockIn: _lockBuilt,
+            ),
+          ],
           BeatPhase.cards => [
             QuestionReminder(text: game.question.text, grade: grade),
             AnswerCards<AnswerOption>(

@@ -40,23 +40,23 @@ class TheLastRoomApp extends ConsumerWidget {
 }
 
 /// Every frame is shot full-bleed: the scene draws under the status and navigation bars, which
-/// are transparent with dark icons on the light look (owner's phone review, 2026-10-30: no
-/// flat bands).
+/// are transparent (owner's phone review, 2026-10-30: no flat bands), with light icons: every
+/// screen is a dark sky now (lead's decision, 2026-11-01).
 /// Screens keep their content clear of the bars with the view padding (`SafeArea`).
 class EdgeToEdge extends StatefulWidget {
   const EdgeToEdge({super.key, required this.child});
 
   final Widget child;
 
-  /// Transparent bars, dark icons over the cream (on iOS `statusBarBrightness` names the
-  /// background: light).
+  /// Transparent bars, light icons over the dark sky (on iOS `statusBarBrightness` names the
+  /// background: dark).
   static const SystemUiOverlayStyle style = SystemUiOverlayStyle(
     statusBarColor: BrandColors.clear,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
     systemNavigationBarColor: BrandColors.clear,
     systemNavigationBarDividerColor: BrandColors.clear,
-    systemNavigationBarIconBrightness: Brightness.dark,
+    systemNavigationBarIconBrightness: Brightness.light,
     systemNavigationBarContrastEnforced: false,
     systemStatusBarContrastEnforced: false,
   );

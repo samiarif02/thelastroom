@@ -1,5 +1,6 @@
 import 'package:engine/engine.dart';
 
+import '../../build_beat.dart';
 import '../../mission.dart';
 import '../interviewers.dart';
 
@@ -167,6 +168,34 @@ const missionTheFollowUpTrap = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      build: BuildBeat(
+        id: 'm06_evidence_build',
+        parts: [
+          Fragment(id: 'm06_build_export', text: 'The export had 900 rows.'),
+          Fragment(
+            id: 'm06_build_duplicates',
+            text: '300 of them were duplicates.',
+          ),
+          Fragment(
+            id: 'm06_build_counted',
+            text: 'I counted every row, duplicates included.',
+          ),
+          Fragment(
+            id: 'm06_build_half',
+            text: 'So resets looked like half of the tickets, not a third.',
+          ),
+        ],
+        decoys: [
+          Fragment(
+            id: 'm06_build_three_weeks',
+            text: "I'd only been there three weeks, and nobody showed me the export.",
+            flags: {Flag.blame},
+            lessonId: 'lesson_own_your_part',
+          ),
+        ],
+        orderLessonId: 'lesson_one_story',
+        missingLessonId: 'lesson_be_concrete',
+      ),
       why: ReasonPrompt(
         line: SceneLine(speakerId: lenaId, text: 'Why give me that?'),
         reasons: [

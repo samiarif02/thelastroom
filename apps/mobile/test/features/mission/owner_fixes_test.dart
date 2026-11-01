@@ -149,8 +149,10 @@ void main() {
       expect(region.value, EdgeToEdge.style);
       expect(region.value.statusBarColor!.a, 0);
       expect(region.value.systemNavigationBarColor!.a, 0);
-      expect(region.value.statusBarIconBrightness, Brightness.dark);
-      expect(region.value.systemNavigationBarIconBrightness, Brightness.dark);
+      // Light icons: every screen is a dark sky (lead, 2026-11-01).
+      expect(region.value.statusBarIconBrightness, Brightness.light);
+      expect(region.value.statusBarBrightness, Brightness.dark);
+      expect(region.value.systemNavigationBarIconBrightness, Brightness.light);
     });
 
     testWidgets(

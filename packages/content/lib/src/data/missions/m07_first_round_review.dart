@@ -1,5 +1,6 @@
 import 'package:engine/engine.dart';
 
+import '../../build_beat.dart';
 import '../../mission.dart';
 import '../interviewers.dart';
 
@@ -119,6 +120,37 @@ const missionFirstRoundReview = Mission(
     ),
     Beat(
       kind: BeatKind.evidence,
+      build: BuildBeat(
+        id: 'm07_evidence_build',
+        parts: [
+          Fragment(
+            id: 'm07_build_timed',
+            text: 'I timed a few morning openings.',
+          ),
+          Fragment(
+            id: 'm07_build_hunting',
+            text: 'The time went on hunting for keys and stock.',
+          ),
+          Fragment(
+            id: 'm07_build_checklist',
+            text: 'So I wrote a one-page opening checklist.',
+          ),
+          Fragment(
+            id: 'm07_build_tested',
+            text: 'I tested it on my own shifts first.',
+          ),
+        ],
+        decoys: [
+          Fragment(
+            id: 'm07_build_team',
+            text: 'We agreed a new morning routine as a team.',
+            flags: {Flag.weNotI},
+            lessonId: 'lesson_name_your_part',
+          ),
+        ],
+        orderLessonId: 'lesson_one_story',
+        missingLessonId: 'lesson_be_concrete',
+      ),
       why: ReasonPrompt(
         line: SceneLine(speakerId: marcusId, text: 'Why tell it like that?'),
         reasons: [

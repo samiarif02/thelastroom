@@ -1,5 +1,6 @@
 import 'package:engine/engine.dart';
 
+import 'build_beat.dart';
 import 'identified.dart';
 
 /// One of the three campaign chapters: a floor of the tower (brief §6).
@@ -130,17 +131,33 @@ class SceneLine {
   final String text;
 }
 
-/// One beat of the answer: 3–4 plausible lines to pick from (FR-12).
+/// One beat of the answer: 3–4 plausible lines to pick from (FR-12), or, when it has a
+/// [build], an answer the player assembles from fragments (brief 27).
 class Beat {
   const Beat({
     required this.kind,
     required this.options,
     this.why,
     this.reaction,
+    this.build,
   });
 
   final BeatKind kind;
   final List<AnswerOption> options;
+
+  /// "Build your answer": when set, the player taps fragments into an answer instead of
+  /// picking one of [options], and there's no why step (putting the parts in order is the
+  /// reasoning). [why] stays in the content for the Recall Room.
+  final BuildBeat? build;
+
+  /// The line [optionId] names: one of [options], or an answer built in [build]. Null when
+  /// it's neither (a stale id from older content).
+  AnswerOption? optionById(String optionId) {
+    for (final o in options) {
+      if (o.id == optionId) return o;
+    }
+    return build?.answerById(optionId);
+  }
 
   /// After the pick the interviewer asks why (wave 5: picking at random stops paying). `null`:
   /// this beat has no why step.
@@ -161,11 +178,15 @@ class Beat {
   /// Whether [optionId] is a strongest line of this beat: the smallest weighted shortfall on
   /// relevance, specificity and structure (the measure the debrief's red pen uses). Lines tied
   /// for best are all strongest. The mission player passes this to `judgePick`.
+  ///
+  /// A built answer is strongest when it scores as well as the best line: every part, in
+  /// order, no decoy.
   bool isStrongest(String optionId) {
     int shortfall(AnswerOption o) =>
         weightedShortfall(o.scored, beatDimensions);
     final best = options.map(shortfall).reduce((a, b) => a < b ? a : b);
-    return options.any((o) => o.id == optionId && shortfall(o) == best);
+    final option = optionById(optionId);
+    return option != null && shortfall(option) <= best;
   }
 }
 

@@ -6,6 +6,7 @@ library;
 
 export 'src/baseline.dart';
 export 'src/beat.dart';
+export 'src/build.dart';
 export 'src/calendar_day.dart';
 export 'src/dimension.dart';
 export 'src/dimension_scores.dart';
