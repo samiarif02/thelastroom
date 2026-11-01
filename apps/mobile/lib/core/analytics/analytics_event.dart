@@ -50,7 +50,11 @@ enum AnalyticsEvent {
   aiScoreShown('ai_score_shown'),
 
   /// No AI verdict (no backend, offline, a timeout or an error): the engine's "Offline score".
-  aiScoreFallback('ai_score_fallback');
+  aiScoreFallback('ai_score_fallback'),
+
+  /// The player locks in an answer built from fragments (brief 27): how many they placed, and
+  /// what cost points (parts missing, parts out of order, the decoy). Counts only, no text.
+  answerBuilt('answer_built');
 
   const AnalyticsEvent(this.wireName);
 
