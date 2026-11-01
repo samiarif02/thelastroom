@@ -15,6 +15,7 @@ import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
 import '../mission/widgets/trust_meter.dart';
 import 'ai_score.dart';
+import 'ai_score_store.dart';
 import 'ai_verdict_cards.dart';
 import 'debrief_facts.dart';
 import 'first_try_slip.dart';
@@ -54,6 +55,9 @@ class DebriefView extends ConsumerStatefulWidget {
 
   static const String title = 'Candidate assessment';
   static const String continueLabel = 'Back to the tower';
+
+  /// The chapter's last mission leads to its report instead (brief 24).
+  static const String reportLabel = 'See your Chapter 1 report';
 
   /// The dossier sheet's largest text scale (the slip and buttons below take the full 2x).
   static const double maxSheetTextScale = 1.5;
@@ -103,6 +107,19 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
     _verdict = verdict;
     switch (verdict) {
       case AiScored(:final score):
+        // Kept for "Your file" (brief 24); a store failure never touches the dossier.
+        unawaited(
+          ref
+              .read(aiScoreStoreProvider)
+              .save(
+                SavedAiScore(
+                  missionId: widget.mission.id,
+                  at: DateTime.now().toUtc(),
+                  score: score,
+                ),
+              )
+              .catchError((Object _) {}),
+        );
         _analytics.track(AnalyticsEvent.aiScoreShown, {
           'mission_id': EventValue.id(widget.mission),
           'score_bucket': EventValue.name(ScoreBucket.of(score.overall.score)),
@@ -227,7 +244,9 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                     ],
                     const SizedBox(height: BrandSpace.lg),
                     VividButton(
-                      label: DebriefView.continueLabel,
+                      label: widget.mission.closesChapter
+                          ? DebriefView.reportLabel
+                          : DebriefView.continueLabel,
                       expand: true,
                       onPressed: _settled ? widget.onContinue : null,
                     ),

@@ -21,6 +21,7 @@ class SupabaseBackend implements Backend {
   static const String _attempts = 'mission_attempts';
   static const String _profiles = 'profiles';
   static const String _scoreFunction = 'score';
+  static const String _aiScores = 'ai_scores';
 
   @override
   Future<BackendSession> restoreSession() async {
@@ -90,6 +91,18 @@ class SupabaseBackend implements Backend {
       final code = details is Map<String, Object?> ? details['error'] : null;
       throw ScoreRefused(error.status, code is String ? code : null);
     }
+  }
+
+  @override
+  Future<List<Object?>> fetchAiScores() async {
+    final rows = await (await _client())
+        .from(_aiScores)
+        .select(
+          'mission_id, model, relevance_score, specificity_score, structure_score, '
+          'adaptability_score, overall_score, basis, created_at',
+        )
+        .order('created_at');
+    return [for (final row in rows) row];
   }
 
   Future<void> dispose() async => _authEvents?.cancel();

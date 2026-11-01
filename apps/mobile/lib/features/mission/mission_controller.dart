@@ -202,6 +202,24 @@ class MissionState {
   );
 }
 
+/// The mission that must be finished before mission [number] opens (the tower's rule: rooms open
+/// in order), or null when it's open. Mission 1 is always open; an unknown number is the
+/// controller's to report.
+final missionBlockerProvider = FutureProvider.autoDispose.family<Mission?, int>(
+  (ref, number) async {
+    final catalog = ref.read(missionCatalogProvider);
+    final mission = missionByNumber(number, catalog: catalog);
+    if (mission == null) return null;
+    final i = catalog.indexOf(mission);
+    if (i <= 0) return null;
+    final before = catalog[i - 1];
+    final played = await ref
+        .read(progressRepositoryProvider)
+        .attempts(missionId: before.id);
+    return played.isEmpty ? before : null;
+  },
+);
+
 /// The mission being played, keyed by campaign number. The engine scores, picks the follow-up
 /// and moves the trust meter; this only keeps the picks, stores the attempt and records events.
 final missionControllerProvider = AsyncNotifierProvider.autoDispose
@@ -499,8 +517,8 @@ class MissionController extends AsyncNotifier<MissionState> {
 
     await _guarded(() => ref.read(resumeStoreProvider).clear(now.mission.id));
     final firstEver = (await _progress.attempts()).isEmpty;
-    final firstBaseline =
-        now.mission.isBaseline && await _progress.baseline() == null;
+    final baseline = await _progress.baseline();
+    final firstBaseline = now.mission.isBaseline && baseline == null;
     await _progress.recordAttempt(
       AttemptRecord(
         missionId: now.mission.id,
@@ -527,6 +545,22 @@ class MissionController extends AsyncNotifier<MissionState> {
       });
     }
     if (firstEver) _analytics.track(AnalyticsEvent.userActivated);
+    // The chapter's review, first time through: how far the player has come since Mission 1.
+    if (now.mission.closesChapter &&
+        now.attemptNumber == 1 &&
+        baseline != null) {
+      _analytics.track(AnalyticsEvent.chapterCompleted, {
+        'chapter': EventValue.count(now.mission.chapter),
+        'score_delta_bucket': EventValue.name(
+          ScoreDeltaBucket.of(
+            compareToBaseline(
+              baseline: baseline.score,
+              latest: score,
+            ).totalDelta,
+          ),
+        ),
+      });
+    }
   }
 }
 

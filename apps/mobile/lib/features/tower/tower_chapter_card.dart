@@ -34,7 +34,12 @@ class ChapterCard extends StatelessWidget {
   final Key? litRowKey;
 
   static const String locked = 'Locked';
-  static String opensAfter(int chapter) => 'Opens after Chapter $chapter';
+
+  /// A locked chapter's pill. Chapters 2 and 3 aren't in this version (FR-31), so it never
+  /// promises they open after the one before (brief 24's audit): the Chapter 1 report has
+  /// their waitlist.
+  static String opensAfter(int chapter) =>
+      'Coming soon · after Chapter $chapter';
 
   /// Which interviewer runs each chapter (the cast's order in onboarding).
   static const List<String> hostIds = ['priya', 'marcus', 'lena'];
