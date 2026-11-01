@@ -59,6 +59,10 @@ abstract interface class Backend {
   /// [request] is the function's JSON body; the result is its decoded JSON, which the caller
   /// parses. Throws [ScoreRefused] when the function answers with an error status.
   Future<Object?> scoreAnswer(Map<String, Object?> request);
+
+  /// The signed-in player's AI verdicts (`ai_scores` rows, oldest first), for "Your file" on a
+  /// fresh install. Raw rows: the caller parses them.
+  Future<List<Object?>> fetchAiScores();
 }
 
 /// The `score` function answered with an error status ([status]) and code ([code]): a spent daily

@@ -1,5 +1,6 @@
 import 'package:brand/brand.dart';
 import 'package:content/content.dart';
+import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +14,7 @@ import 'package:the_last_room/core/audio/game_sounds.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
 import 'package:the_last_room/features/debrief/ai_score.dart';
+import 'package:the_last_room/features/debrief/ai_score_store.dart';
 import 'package:the_last_room/features/mission/mission_controller.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
@@ -49,6 +51,23 @@ class RecordingAnalytics implements Analytics {
 
   RecordedEvent only(AnalyticsEvent event) =>
       events.singleWhere((e) => e.event == event);
+}
+
+/// In-memory progress whose reads can be made to fail: the device store's error states.
+class FlakyProgressRepository extends InMemoryProgressRepository {
+  bool failReads = false;
+
+  @override
+  Future<List<AttemptRecord>> attempts({String? missionId}) {
+    if (failReads) throw StateError('the store is unreadable');
+    return super.attempts(missionId: missionId);
+  }
+
+  @override
+  Future<AttemptRecord?> baseline() {
+    if (failReads) throw StateError('the store is unreadable');
+    return super.baseline();
+  }
 }
 
 /// Records every [GameSounds] call by method name, with its arguments.
@@ -146,8 +165,9 @@ class MissionRig {
   final InMemoryProfileRepository profile;
   final RecordingAnalytics analytics = RecordingAnalytics();
   final RecordingSounds sounds = RecordingSounds();
-  final InMemoryProgressRepository progress = InMemoryProgressRepository();
+  final FlakyProgressRepository progress = FlakyProgressRepository();
   final InMemoryResumeStore resume = InMemoryResumeStore();
+  final InMemoryAiScoreStore aiScores = InMemoryAiScoreStore();
   late final ProviderContainer container;
 
   /// The debrief's AI scorer; null keeps the app's (no backend in tests: "Offline score").
@@ -174,6 +194,7 @@ class MissionRig {
         profileRepositoryProvider.overrideWithValue(profile),
         attemptSeedProvider.overrideWithValue(() => testSeed),
         resumeStoreProvider.overrideWithValue(resume),
+        aiScoreStoreProvider.overrideWithValue(aiScores),
         routerProvider.overrideWithValue(router),
         if (scorer case final s?) aiScorerProvider.overrideWithValue(s),
       ],
@@ -229,6 +250,36 @@ class MissionRig {
 
   MissionState state(int number) =>
       container.read(missionControllerProvider(number)).requireValue;
+
+  /// Records a played attempt (first options, read slowly) at every mission before [number], so
+  /// the tower's rule (rooms open in order) lets a test start at [number]. Call before [boot].
+  Future<void> unlockThrough(int number) async {
+    for (final m in missions.where((m) => m.number < number)) {
+      final beats = [
+        for (final b in m.beats)
+          BeatPick(beat: b.kind, choice: b.options.first.scored),
+      ];
+      final followUp = m.followUps.firstWhere((f) => f.trigger == null);
+      await progress.recordAttempt(
+        AttemptRecord(
+          missionId: m.id,
+          attemptNumber: 1,
+          seed: testSeed,
+          beatOptionIds: [for (final b in m.beats) b.options.first.id],
+          followUpId: followUp.id,
+          replyOptionId: followUp.replies.first.id,
+          score: scoreAttempt(
+            AttemptInput(
+              picks: beats,
+              followUpReply: followUp.replies.first.scored,
+              hinted: m.hinted,
+            ),
+          ),
+          hinted: m.hinted,
+        ),
+      );
+    }
+  }
 
   /// A tap on the scene itself, in the frame's top strip (clear of cards and the meter).
   Future<void> tapScene() async {

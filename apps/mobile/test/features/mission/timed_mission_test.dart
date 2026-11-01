@@ -14,6 +14,7 @@ void main() {
     (tester) async {
       expect(missionTellMeAboutYourself.timed, isTrue);
       final rig = MissionRig(tester);
+      await rig.unlockThrough(2);
       await rig.boot(Routes.mission(2));
       await rig.playLines(2); // hinted: no draft step
       await rig.until(find.byType(ChoiceCard));

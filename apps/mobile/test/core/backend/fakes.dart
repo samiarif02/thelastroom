@@ -78,6 +78,15 @@ class FakeBackend implements Backend {
     return profile;
   }
 
+  /// The server's `ai_scores` rows.
+  final List<Map<String, Object?>> aiScores = [];
+
+  @override
+  Future<List<Object?>> fetchAiScores() async {
+    _network();
+    return [...aiScores];
+  }
+
   /// What the `score` function answers; null means it's never been set up (503).
   Future<Object?> Function(Map<String, Object?> request)? scorer;
 

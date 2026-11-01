@@ -121,6 +121,7 @@ void main() {
       tester,
       profile: onboardedPlayer.copyWith(calmMode: true),
     );
+    await rig.unlockThrough(2);
     await rig.boot(Routes.mission(2));
     await rig.playLines(2);
     await rig.until(find.byType(ChoiceCard));
