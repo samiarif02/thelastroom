@@ -3,9 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/audio/audio_settings.dart';
+import '../../../ui/film_kit.dart';
 
-/// The Sound section of the Settings screen: the master switch and the two volumes. Embedded
-/// by the Settings screen (a later brief) and by the `/dev/sound` board.
+/// The Sound section of the Settings screen: the master switch and the two volumes, in the
+/// vivid look (brief 23: white on colour, sunflower for what's on). Embedded by the Settings
+/// screen and by the `/dev/sound` board; it sits on a vivid panel or the sky.
 class AudioSettingsSection extends ConsumerWidget {
   const AudioSettingsSection({super.key, this.grade = ChapterGrade.lobby});
 
@@ -28,14 +30,13 @@ class AudioSettingsSection extends ConsumerWidget {
           header: true,
           child: Text(
             heading,
-            style: BrandType.eyebrow.copyWith(color: grade.key),
+            style: BrandVividType.kicker.copyWith(color: BrandVivid.accent),
           ),
         ),
         const SizedBox(height: BrandSpace.sm),
-        _ToggleRow(
+        VividToggle(
           label: masterLabel,
           value: settings.enabled,
-          grade: grade,
           onChanged: controller.setEnabled,
         ),
         _VolumeRow(
@@ -57,83 +58,6 @@ class AudioSettingsSection extends ConsumerWidget {
   }
 }
 
-class _ToggleRow extends StatelessWidget {
-  const _ToggleRow({
-    required this.label,
-    required this.value,
-    required this.grade,
-    required this.onChanged,
-  });
-
-  final String label;
-  final bool value;
-  final ChapterGrade grade;
-  final ValueChanged<bool> onChanged;
-
-  static const double _trackWidth = 44;
-  static const double _trackHeight = 24;
-  static const double _knob = 16;
-
-  @override
-  Widget build(BuildContext context) {
-    final duration = MediaQuery.disableAnimationsOf(context)
-        ? Duration.zero
-        : BrandMotion.quick;
-    return Semantics(
-      toggled: value,
-      label: label,
-      onTap: () => onChanged(!value),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => onChanged(!value),
-        child: ExcludeSemantics(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: BrandSpace.minTarget),
-            child: Row(
-              children: [
-                Expanded(child: Text(label, style: BrandType.body)),
-                Text(
-                  value ? 'ON' : 'OFF',
-                  style: BrandType.label.copyWith(
-                    color: value ? grade.key : BrandColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(width: BrandSpace.sm),
-                AnimatedContainer(
-                  duration: duration,
-                  curve: BrandMotion.enter,
-                  width: _trackWidth,
-                  height: _trackHeight,
-                  padding: const EdgeInsets.all((_trackHeight - _knob) / 2 - 1),
-                  alignment: value
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  decoration: BoxDecoration(
-                    color: value
-                        ? grade.key.withValues(alpha: 0.22)
-                        : BrandColors.surface,
-                    border: Border.all(
-                      color: value ? grade.key : BrandColors.line,
-                    ),
-                    borderRadius: BorderRadius.circular(_trackHeight / 2),
-                  ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: value ? grade.key : BrandColors.textSecondary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const SizedBox.square(dimension: _knob),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _VolumeRow extends StatelessWidget {
   const _VolumeRow({
     required this.label,
@@ -151,8 +75,9 @@ class _VolumeRow extends StatelessWidget {
 
   /// One step of the screen reader's increase/decrease actions.
   static const double step = 0.1;
-  static const double _track = 2;
-  static const double _thumb = 14;
+  static const double _track = 4;
+  static const double _thumb = 22;
+  static const double _trackAlpha = 0.25;
   static const double _disabledOpacity = 0.45;
 
   void _setFrom(Offset local, double width) =>
@@ -180,10 +105,14 @@ class _VolumeRow extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: Text(label, style: BrandType.body)),
+                    Expanded(child: Text(label, style: BrandVividType.row)),
                     Text(
                       percent,
-                      style: BrandType.numeral.copyWith(color: grade.key),
+                      style: BrandVividType.row.copyWith(
+                        color: BrandVivid.accent,
+                        fontWeight: FontWeight.w800,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
                   ],
                 ),
@@ -203,8 +132,8 @@ class _VolumeRow extends StatelessWidget {
                         child: CustomPaint(
                           painter: _VolumePainter(
                             value: value,
-                            key: grade.key,
-                            track: BrandColors.line,
+                            key: BrandVivid.accent,
+                            track: BrandVivid.hairline(_trackAlpha),
                             thumb: _thumb,
                             trackHeight: _track,
                           ),
@@ -241,11 +170,21 @@ class _VolumePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final y = size.height / 2;
     final x = (size.width * value).clamp(thumb / 2, size.width - thumb / 2);
-    final line = Paint()..strokeWidth = trackHeight;
+    final line = Paint()
+      ..strokeWidth = trackHeight
+      ..strokeCap = StrokeCap.round;
     canvas
       ..drawLine(Offset(0, y), Offset(size.width, y), line..color = track)
       ..drawLine(Offset(0, y), Offset(x, y), line..color = key)
-      ..drawCircle(Offset(x, y), thumb / 2, Paint()..color = key);
+      ..drawCircle(Offset(x, y), thumb / 2, Paint()..color = BrandVivid.onDeep)
+      ..drawCircle(
+        Offset(x, y),
+        thumb / 2,
+        Paint()
+          ..color = key
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = trackHeight,
+      );
   }
 
   @override

@@ -6,8 +6,8 @@ import '../../app/router.dart';
 import '../../ui/film_kit.dart';
 import 'audio/audio_settings_section.dart';
 
-/// Settings (brief 20), from the tower's gear: the audio section on a light card over the
-/// evening sky, under a pinned header with the way back. The system back button also returns
+/// Settings (brief 20, vivid in brief 23), from the tower's gear: the audio section on a vivid
+/// panel over the evening sky, under a pinned header with the way back. The system back button also returns
 /// to the tower (the route is the tower's child).
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -59,19 +59,9 @@ class SettingsScreen extends StatelessWidget {
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: _maxWidth),
-                    child: StaggeredEntrance(
+                    child: const StaggeredEntrance(
                       index: 0,
-                      // The audio section is drawn for the light room palette; it sits on
-                      // the room's own raised surface, so every pair stays the tested one.
-                      child: Container(
-                        padding: const EdgeInsets.all(BrandSpace.md),
-                        decoration: BoxDecoration(
-                          color: BrandColors.surfaceRaised,
-                          borderRadius: BorderRadius.circular(BrandRadius.card),
-                          boxShadow: BrandVivid.cardShadow,
-                        ),
-                        child: const AudioSettingsSection(),
-                      ),
+                      child: VividPanel(child: AudioSettingsSection()),
                     ),
                   ),
                 ),

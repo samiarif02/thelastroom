@@ -37,7 +37,7 @@ void main() {
     expect(find.text('Your progress is safe on this device.'), findsOneWidget);
   });
 
-  testWidgets('offline switches the lamp off; the others leave it lit', (
+  testWidgets('offline turns the tower dark; the others leave lights on', (
     tester,
   ) async {
     for (final (state, lit) in [
@@ -48,7 +48,13 @@ void main() {
     ]) {
       await pumpKit(tester, state);
       expect(
-        tester.widget<BankersLamp>(find.byType(BankersLamp)).lit,
+        tester
+                .widgetList<CustomPaint>(find.byType(CustomPaint))
+                .map((p) => p.painter)
+                .whereType<TowerPainter>()
+                .single
+                .lit >
+            0,
         lit,
         reason: state.kind.name,
       );
@@ -74,7 +80,7 @@ void main() {
     var taps = 0;
     await pumpKit(tester, SceneState.error(onAction: () => taps++));
     await tester.pump(BrandMotion.cinematic);
-    expect(find.text(SceneState.retryLabel.toUpperCase()), findsOneWidget);
+    expect(find.text(SceneState.retryLabel), findsOneWidget);
     await tester.tap(find.byType(BrassButton));
     expect(taps, 1);
   });

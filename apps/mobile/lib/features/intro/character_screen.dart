@@ -88,73 +88,61 @@ class _CvSheet extends StatelessWidget {
   /// The player's name, at the head of the sheet.
   final String name;
 
-  static const double _shadowBlur = 24;
-  static const Offset _shadowOffset = Offset(-6, 14);
-  static const double _tilt = -0.012;
   static const double _labelWidth = 92;
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: BrandColors.inkSoft);
-    return Transform.rotate(
-      angle: _tilt,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: BrandColors.paper,
-          boxShadow: [
-            BoxShadow(
-              color: BrandVivid.night.withValues(alpha: 0.6),
-              blurRadius: _shadowBlur,
-              offset: _shadowOffset,
+    const grade = ChapterGrade.lobby;
+    return VividPanel(
+      colors: grade.cardGradient,
+      glow: grade.glow,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              name,
+              textAlign: TextAlign.center,
+              style: BrandVividType.hero,
             ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(BrandSpace.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Semantics(
-                header: true,
-                child: Text(
-                  name,
-                  textAlign: TextAlign.center,
-                  style: BrandType.display.copyWith(color: BrandColors.ink),
-                ),
-              ),
-              const SizedBox(height: BrandSpace.sm),
-              Text(
-                CharacterScreen.premise,
-                textAlign: TextAlign.center,
-                style: BrandType.body.copyWith(color: BrandColors.inkSoft),
-              ),
-              const SizedBox(height: BrandSpace.md),
-              const DoubleRule(color: BrandColors.inkSoft),
-              for (final fact in character.facts)
-                Padding(
-                  padding: const EdgeInsets.only(top: BrandSpace.md),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: _labelWidth,
-                        child: Text(fact.label.toUpperCase(), style: soft),
-                      ),
-                      Expanded(
-                        child: Text(
-                          CharacterScreen.cvLine(fact),
-                          style: BrandType.body.copyWith(
-                            color: BrandColors.ink,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
           ),
-        ),
+          const SizedBox(height: BrandSpace.sm),
+          const Text(
+            CharacterScreen.premise,
+            textAlign: TextAlign.center,
+            style: BrandVividType.body,
+          ),
+          const SizedBox(height: BrandSpace.md),
+          Container(height: 1, color: BrandVivid.hairline(_ruleAlpha)),
+          for (final fact in character.facts)
+            Padding(
+              padding: const EdgeInsets.only(top: BrandSpace.md),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: _labelWidth,
+                    child: Text(
+                      fact.label.toUpperCase(),
+                      style: BrandVividType.kicker.copyWith(color: grade.glow),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      CharacterScreen.cvLine(fact),
+                      style: BrandVividType.body.copyWith(
+                        color: BrandVivid.onDeep,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
+
+  static const double _ruleAlpha = 0.25;
 }

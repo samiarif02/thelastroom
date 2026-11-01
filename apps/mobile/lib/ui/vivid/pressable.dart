@@ -14,6 +14,7 @@ class Pressable extends StatefulWidget {
     required this.label,
     this.pressedScale = 0.96,
     this.haptic = true,
+    this.selected,
   });
 
   final Widget child;
@@ -25,6 +26,9 @@ class Pressable extends StatefulWidget {
   /// How far it sinks while held.
   final double pressedScale;
   final bool haptic;
+
+  /// For choices: whether it's the picked one (null: not a choice).
+  final bool? selected;
 
   @override
   State<Pressable> createState() => _PressableState();
@@ -51,6 +55,9 @@ class _PressableState extends State<Pressable> {
     return Semantics(
       button: true,
       enabled: _enabled,
+      selected: widget.selected,
+      // Only an enabled control is a focus stop; null leaves the flag off entirely.
+      focusable: _enabled ? true : null,
       label: widget.label,
       excludeSemantics: true,
       onTap: _enabled ? _tap : null,

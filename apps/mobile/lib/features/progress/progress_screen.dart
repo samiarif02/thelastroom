@@ -42,8 +42,6 @@ class ProgressScreen extends ConsumerStatefulWidget {
   static const String settings = 'HOW YOU PLAY';
   static const String autoAdvance = 'Lines move on by themselves';
   static const String calmMode = 'Calm mode: no answer timer';
-  static const String on = 'On';
-  static const String off = 'Off';
 
   @override
   ConsumerState<ProgressScreen> createState() => _ProgressScreenState();
@@ -132,16 +130,16 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                             _Panel(
                               child: Column(
                                 children: [
-                                  _Setting(
+                                  VividToggle(
                                     label: ProgressScreen.autoAdvance,
-                                    on: profile.autoAdvance,
+                                    value: profile.autoAdvance,
                                     onChanged: (v) => profiles.change(
                                       (p) => p.copyWith(autoAdvance: v),
                                     ),
                                   ),
-                                  _Setting(
+                                  VividToggle(
                                     label: ProgressScreen.calmMode,
-                                    on: profile.calmMode,
+                                    value: profile.calmMode,
                                     onChanged: (v) => profiles.change(
                                       (p) => p.copyWith(calmMode: v),
                                     ),
@@ -599,72 +597,4 @@ class _Panel extends StatelessWidget {
     ),
     child: child,
   );
-}
-
-/// One play setting: its line and a switch drawn in the accent.
-class _Setting extends StatelessWidget {
-  const _Setting({
-    required this.label,
-    required this.on,
-    required this.onChanged,
-  });
-
-  final String label;
-  final bool on;
-  final ValueChanged<bool> onChanged;
-
-  static const double _trackW = 52;
-  static const double _trackH = 30;
-  static const double _knob = 24;
-
-  @override
-  Widget build(BuildContext context) {
-    final still = MediaQuery.disableAnimationsOf(context);
-    return Semantics(
-      toggled: on,
-      label: label,
-      excludeSemantics: true,
-      onTap: () => onChanged(!on),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => onChanged(!on),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: BrandSpace.minTarget),
-          child: Row(
-            children: [
-              Expanded(child: Text(label, style: BrandVividType.row)),
-              const SizedBox(width: BrandSpace.sm),
-              ExcludeSemantics(
-                child: Text(
-                  (on ? ProgressScreen.on : ProgressScreen.off).toUpperCase(),
-                  style: BrandVividType.kicker,
-                ),
-              ),
-              const SizedBox(width: BrandSpace.sm),
-              AnimatedContainer(
-                duration: still ? Duration.zero : BrandMotion.quick,
-                width: _trackW,
-                height: _trackH,
-                padding: const EdgeInsets.all((_trackH - _knob) / 2),
-                alignment: on ? Alignment.centerRight : Alignment.centerLeft,
-                decoration: BoxDecoration(
-                  color: on ? BrandVivid.accent : BrandVivid.locked,
-                  borderRadius: BorderRadius.circular(BrandRadius.pill),
-                  border: Border.all(color: BrandVivid.hairline(0.3)),
-                ),
-                child: Container(
-                  width: _knob,
-                  height: _knob,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: BrandVivid.onDeep,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

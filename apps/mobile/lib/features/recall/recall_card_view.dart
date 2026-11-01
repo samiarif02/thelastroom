@@ -39,7 +39,9 @@ class RecallCardView extends StatelessWidget {
   AnswerCardState _stateOf(RecallQuestion q, RecallChoice choice) {
     if (!playing.answered) return AnswerCardState.idle;
     if (choice.id == q.correctChoiceId) return AnswerCardState.locked;
-    if (choice.id == playing.chosenId) return AnswerCardState.selected;
+    // A wrong pick keeps a bright edge but no sunflower: the sunflower ring is the right answer's
+    // alone, so the two never look alike (brief 23).
+    if (choice.id == playing.chosenId) return AnswerCardState.focused;
     return AnswerCardState.disabled;
   }
 

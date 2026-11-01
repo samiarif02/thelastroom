@@ -86,7 +86,7 @@ class CatalogRoom extends StatelessWidget {
   }
 }
 
-/// A caption above a component in the catalog: "SELECTED".
+/// A caption above a component in the catalog, on the sky: "SELECTED".
 class CatalogCaption extends StatelessWidget {
   const CatalogCaption(this.text, {super.key});
 
@@ -95,6 +95,33 @@ class CatalogCaption extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(top: BrandSpace.md, bottom: BrandSpace.xs),
-    child: Text(text.toUpperCase(), style: BrandType.label),
+    child: Text(text.toUpperCase(), style: BrandVividType.kicker),
+  );
+}
+
+/// Components on the evening sky (the vivid layer), centred, scrolling only at 2x.
+class CatalogSky extends StatelessWidget {
+  const CatalogSky({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    fit: StackFit.expand,
+    children: [
+      const VividBackdrop(lights: false),
+      SafeArea(
+        child: AnchoredScroll(
+          alignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.fromLTRB(
+            BrandSpace.md,
+            CatalogDesk.controlsClearance,
+            BrandSpace.md,
+            BrandSpace.lg,
+          ),
+          children: children,
+        ),
+      ),
+    ],
   );
 }
