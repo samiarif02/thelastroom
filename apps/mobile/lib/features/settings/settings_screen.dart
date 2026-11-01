@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
+import '../../core/notifications/reminder_settings_row.dart';
 import '../../ui/film_kit.dart';
 import 'audio/audio_settings_section.dart';
 
@@ -59,9 +60,19 @@ class SettingsScreen extends StatelessWidget {
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: _maxWidth),
-                    child: const StaggeredEntrance(
-                      index: 0,
-                      child: VividPanel(child: AudioSettingsSection()),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        StaggeredEntrance(
+                          index: 0,
+                          child: VividPanel(child: AudioSettingsSection()),
+                        ),
+                        SizedBox(height: BrandSpace.md),
+                        StaggeredEntrance(
+                          index: 1,
+                          child: VividPanel(child: ReminderSettingsRow()),
+                        ),
+                      ],
                     ),
                   ),
                 ),

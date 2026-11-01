@@ -11,6 +11,7 @@ import 'core/audio/game_sounds.dart';
 import 'core/db/app_database.dart';
 import 'core/env/env.dart';
 import 'core/logging/log.dart';
+import 'core/notifications/reminders.dart';
 import 'core/profile/drift_profile_repository.dart';
 import 'core/profile/profile_repository.dart';
 import 'core/progress/drift_progress_repository.dart';
@@ -66,6 +67,7 @@ void main() {
   startBackendAfterFirstFrame(container);
   startSync(container);
   startAudio(container);
+  startReminders(container);
   runApp(
     UncontrolledProviderScope(
       container: container,
