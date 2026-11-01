@@ -1,7 +1,7 @@
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
-import '../haptics.dart';
+import '../vivid/pressable.dart';
 
 /// The five states of an answer card.
 enum AnswerCardState {
@@ -22,10 +22,13 @@ enum AnswerCardState {
   disabled,
 }
 
-/// An answer as an engraved plaque: walnut, an inset brass hairline, an italic roman numeral.
-/// Brass brightens as the card is focused, selected and locked. At least
-/// [BrandSpace.minTarget] tall; the text wraps (2x text grows the card, never clips it).
-class AnswerCard extends StatefulWidget {
+/// An answer as a vivid card (brief 23: the mission's `ChoiceCard` look, everywhere): the
+/// chapter's gradient lifted off the sky with a soft deep shadow, the italic numeral in the
+/// chapter's glow. Focused, its edge brightens; selected, a sunflower ring lights it; locked, the
+/// ring holds and a sunflower bar marks it; disabled, it fades back. It sinks under the finger
+/// (`Pressable`). At least [BrandSpace.minTarget] tall; the text wraps (2x text grows the card,
+/// never clips it).
+class AnswerCard extends StatelessWidget {
   const AnswerCard({
     super.key,
     required this.numeral,
@@ -49,221 +52,96 @@ class AnswerCard extends StatefulWidget {
 
   static const List<String> _romans = ['i', 'ii', 'iii', 'iv', 'v', 'vi'];
 
-  @override
-  State<AnswerCard> createState() => _AnswerCardState();
-}
-
-class _AnswerCardState extends State<AnswerCard> {
-  bool _hovered = false;
-  bool _focused = false;
-  bool _pressed = false;
+  static const double _radius = 18;
+  static const double _ring = 2;
+  static const double _bar = 4;
+  static const double _numeralWidth = 30;
+  static const double _disabledOpacity = 0.4;
+  static const double _focusedEdge = 0.55;
 
   bool get _interactive =>
-      widget.onTap != null &&
-      widget.state != AnswerCardState.locked &&
-      widget.state != AnswerCardState.disabled;
-
-  AnswerCardState get _shown {
-    if (widget.state == AnswerCardState.idle &&
-        _interactive &&
-        (_hovered || _focused || _pressed)) {
-      return AnswerCardState.focused;
-    }
-    return widget.state;
-  }
-
-  void _tap() {
-    if (!_interactive) return;
-    choiceTick();
-    widget.onTap?.call();
-  }
+      onTap != null &&
+      state != AnswerCardState.locked &&
+      state != AnswerCardState.disabled;
 
   @override
   Widget build(BuildContext context) {
-    final look = _Look.of(_shown);
-    final still = MediaQuery.disableAnimationsOf(context);
-    final duration = still ? BrandMotion.quick : BrandMotion.standard;
-    final brass = widget.grade.key;
-    final plaque = AnimatedOpacity(
+    final lit =
+        state == AnswerCardState.selected || state == AnswerCardState.locked;
+    final focused = state == AnswerCardState.focused;
+    final duration = MediaQuery.disableAnimationsOf(context)
+        ? BrandMotion.quick
+        : BrandMotion.standard;
+    final card = AnimatedOpacity(
       duration: duration,
-      opacity: look.opacity,
+      opacity: state == AnswerCardState.disabled ? _disabledOpacity : 1,
       child: AnimatedContainer(
         duration: duration,
         curve: BrandMotion.enter,
-        padding: const EdgeInsets.all(_bevel),
+        constraints: const BoxConstraints(minHeight: BrandSpace.minTarget),
         decoration: BoxDecoration(
-          color: Color.lerp(
-            BrandColors.surfaceRaised,
-            widget.grade.tint,
-            look.warmth,
-          )!.withValues(alpha: _walnutAlpha),
-          border: Border.all(color: brass.withValues(alpha: look.outer)),
-          boxShadow: [
-            BoxShadow(
-              color: brass.withValues(alpha: look.glow),
-              blurRadius: _glowBlur,
-            ),
-          ],
+          borderRadius: BorderRadius.circular(_radius),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: grade.cardGradient,
+          ),
+          border: Border.all(
+            color: lit
+                ? BrandVivid.accent
+                : BrandVivid.hairline(focused ? _focusedEdge : 0.18),
+            width: lit || focused ? _ring : 1,
+          ),
+          boxShadow: lit
+              ? BrandVivid.glowShadow(BrandVivid.accent)
+              : BrandVivid.cardShadow,
         ),
-        child: AnimatedContainer(
-          duration: duration,
-          curve: BrandMotion.enter,
-          constraints: const BoxConstraints(
-            minHeight: BrandSpace.minTarget - _bevel * 2,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: BrandSpace.md,
-            vertical: _padY,
-          ),
-          decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(
-                color: brass.withValues(alpha: look.bar),
-                width: look.bar > 0 ? _barWidth : _hairline,
-              ),
-              top: BorderSide(
-                color: brass.withValues(alpha: look.inner),
-                width: _hairline,
-              ),
-              right: BorderSide(
-                color: brass.withValues(alpha: look.inner),
-                width: _hairline,
-              ),
-              bottom: BorderSide(
-                color: brass.withValues(alpha: look.inner),
-                width: _hairline,
-              ),
-            ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: _numeralWidth,
-                child: Text(
-                  widget.numeral,
-                  style: BrandType.numeral.copyWith(color: brass),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(_radius - _ring),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AnimatedContainer(
+                  duration: duration,
+                  width: state == AnswerCardState.locked ? _bar : 0,
+                  color: BrandVivid.accent,
                 ),
-              ),
-              Expanded(child: Text(widget.text, style: BrandType.choice)),
-            ],
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: BrandSpace.md,
+                      vertical: BrandSpace.sm + BrandSpace.xs,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: _numeralWidth,
+                          child: Text(
+                            numeral,
+                            style: BrandVividType.row.copyWith(
+                              color: lit ? BrandVivid.accent : grade.glow,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Text(text, style: BrandVividType.row)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
-    return Semantics(
-      button: true,
-      enabled: _interactive,
-      selected:
-          widget.state == AnswerCardState.selected ||
-          widget.state == AnswerCardState.locked,
-      // Only an interactive card is a focus stop; null leaves the flag off entirely.
-      focusable: _interactive ? true : null,
-      focused: _interactive ? _focused : null,
-      label: '${widget.numeral} ${widget.text}',
-      excludeSemantics: true,
-      onTap: _interactive ? _tap : null,
-      child: FocusableActionDetector(
-        enabled: _interactive,
-        mouseCursor: _interactive
-            ? SystemMouseCursors.click
-            : SystemMouseCursors.basic,
-        onShowHoverHighlight: (v) => setState(() => _hovered = v),
-        onShowFocusHighlight: (v) => setState(() => _focused = v),
-        actions: {
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (_) {
-              _tap();
-              return null;
-            },
-          ),
-        },
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: _interactive
-              ? (_) => setState(() => _pressed = true)
-              : null,
-          onTapCancel: () => setState(() => _pressed = false),
-          onTapUp: (_) => setState(() => _pressed = false),
-          onTap: _interactive ? _tap : null,
-          child: plaque,
-        ),
-      ),
+    return Pressable(
+      label: '$numeral $text',
+      selected: lit,
+      onTap: _interactive ? onTap : null,
+      child: card,
     );
   }
-
-  static const double _bevel = 3;
-  static const double _padY = 10;
-  static const double _hairline = 0.6;
-  static const double _barWidth = 3;
-  static const double _numeralWidth = 30;
-  static const double _glowBlur = 18;
-  static const double _walnutAlpha = 0.92;
-}
-
-/// How much brass, warmth and glow each state gets.
-class _Look {
-  const _Look({
-    required this.outer,
-    required this.inner,
-    required this.bar,
-    required this.glow,
-    required this.warmth,
-    required this.opacity,
-  });
-
-  /// Brass alpha on the outer and inner rules, and the locked bar.
-  final double outer;
-  final double inner;
-  final double bar;
-
-  /// The lamp's glow round the plaque.
-  final double glow;
-
-  /// How far the walnut warms toward the grade's tint.
-  final double warmth;
-  final double opacity;
-
-  static _Look of(AnswerCardState state) => switch (state) {
-    AnswerCardState.idle => const _Look(
-      outer: 0.35,
-      inner: 0.14,
-      bar: 0,
-      glow: 0,
-      warmth: 0,
-      opacity: 1,
-    ),
-    AnswerCardState.focused => const _Look(
-      outer: 0.7,
-      inner: 0.3,
-      bar: 0,
-      glow: 0.12,
-      warmth: 0.15,
-      opacity: 1,
-    ),
-    AnswerCardState.selected => const _Look(
-      outer: 0.95,
-      inner: 0.5,
-      bar: 0,
-      glow: 0.22,
-      warmth: 0.35,
-      opacity: 1,
-    ),
-    AnswerCardState.locked => const _Look(
-      outer: 1,
-      inner: 0.6,
-      bar: 1,
-      glow: 0.3,
-      warmth: 0.5,
-      opacity: 1,
-    ),
-    AnswerCardState.disabled => const _Look(
-      outer: 0.2,
-      inner: 0.08,
-      bar: 0,
-      glow: 0,
-      warmth: 0,
-      opacity: 0.42,
-    ),
-  };
 }

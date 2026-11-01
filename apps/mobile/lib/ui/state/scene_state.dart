@@ -7,29 +7,27 @@ import 'package:flutter/widgets.dart';
 import '../choice/brass_button.dart';
 import '../film/ambient_clock.dart';
 import '../film/anchored_scroll.dart';
-import '../film/film_overlay.dart';
-import '../light/bankers_lamp.dart';
-import '../light/spotlight.dart';
-import '../ornament/brass.dart';
+import '../vivid/tower_painter.dart';
+import '../vivid/vivid_backdrop.dart';
 
 /// Which of the four designed states a [SceneState] shows.
 enum SceneStateKind {
-  /// Waiting on something: the lamp is lit and a brass rule breathes.
+  /// Waiting on something: the tower half lit, a sunflower rule breathing.
   loading,
 
-  /// Nothing to show yet: the lamp is lit over a clear desk.
+  /// Nothing to show yet: the tower lit.
   empty,
 
-  /// No connection: the lamp is switched off. Progress is safe on the device (offline-first).
+  /// No connection: the tower dark. Progress is safe on the device (offline-first).
   offline,
 
-  /// Something broke: the lamp gutters. Usually with a way out.
+  /// Something broke: a few windows on. Usually with a way out.
   error,
 }
 
-/// Loading, empty, offline and error, in the film's language (`docs/rules/components.md`
-/// "Every state is designed"): the banker's lamp, an eyebrow between brass rules, one italic
-/// line and a quiet note, over a vignetted pool of light. Never a spinner on a blank screen.
+/// Loading, empty, offline and error, in the vivid language (`docs/rules/components.md`
+/// "Every state is designed"; brief 23): the tower on the evening sky, lit or dark by the state,
+/// a sunflower kicker, one big line and a quiet note. Never a spinner on a blank screen.
 ///
 /// The named constructors carry the house copy; screens override it for their context
 /// ("Your first dossier lands here after Mission 1."). [onAction] adds a [BrassButton].
@@ -103,10 +101,10 @@ class SceneState extends StatelessWidget {
 
   final SceneStateKind kind;
 
-  /// Tracked caps between brass rules.
+  /// Tracked sunflower caps.
   final String eyebrow;
 
-  /// The italic line.
+  /// The big line.
   final String title;
   final String? message;
 
@@ -115,19 +113,25 @@ class SceneState extends StatelessWidget {
   final VoidCallback? onAction;
   final ChapterGrade grade;
 
-  static const double _lampWidth = 104;
+  static const double _towerHeight = 150;
   static const double _ruleWidth = 120;
   static const double _maxWidth = 420;
 
-  bool get _lit => kind != SceneStateKind.offline;
+  /// How much of the tower is lit: the state, at a glance (brief 23). The tower is lit for an
+  /// empty desk, half lit while loading, a few windows on an error, dark when offline.
+  double get towerLit => switch (kind) {
+    SceneStateKind.empty => 1,
+    SceneStateKind.loading => 0.5,
+    SceneStateKind.error => 0.3,
+    SceneStateKind.offline => 0,
+  };
 
   @override
   Widget build(BuildContext context) {
     final still = MediaQuery.disableAnimationsOf(context);
     final label = actionLabel;
-    final secondary = BrandType.body.copyWith(color: BrandColors.textSecondary);
     return ColoredBox(
-      color: BrandColors.void_,
+      color: BrandVivid.skyTop,
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
         duration: still ? BrandMotion.reducedMotionFade : BrandMotion.cinematic,
@@ -136,20 +140,7 @@ class SceneState extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // The pool of light and the vignette, beneath the words.
-            FilmOverlay(
-              grain: 0,
-              vignetteColor: grade.shadow,
-              child: _lit
-                  ? Spotlight(
-                      grade: grade,
-                      center: const Alignment(0, -0.35),
-                      radius: 0.75,
-                      intensity: kind == SceneStateKind.error ? 0.4 : 0.6,
-                      dust: kind != SceneStateKind.error,
-                    )
-                  : const SizedBox.expand(),
-            ),
+            VividBackdrop(grade: grade),
             SafeArea(
               child: Center(
                 child: ConstrainedBox(
@@ -158,29 +149,41 @@ class SceneState extends StatelessWidget {
                     alignment: MainAxisAlignment.center,
                     padding: const EdgeInsets.all(BrandSpace.lg),
                     children: [
-                      Center(
-                        child: SizedBox(
-                          width: _lampWidth,
-                          child: BankersLamp(grade: grade, lit: _lit),
+                      SizedBox(
+                        height: _towerHeight,
+                        child: ExcludeSemantics(
+                          child: CustomPaint(
+                            painter: TowerPainter(lit: towerLit),
+                          ),
                         ),
                       ),
                       const SizedBox(height: BrandSpace.lg),
-                      Center(
-                        child: BrassOrnament(text: eyebrow, grade: grade),
+                      Text(
+                        eyebrow,
+                        textAlign: TextAlign.center,
+                        style: BrandVividType.kicker.copyWith(
+                          color: BrandVivid.accent,
+                        ),
                       ),
-                      const SizedBox(height: BrandSpace.md),
+                      const SizedBox(height: BrandSpace.sm),
                       Semantics(
                         header: true,
                         liveRegion: true,
                         child: Text(
                           title,
                           textAlign: TextAlign.center,
-                          style: BrandType.display,
+                          style: BrandVividType.hero.copyWith(
+                            fontSize: _titleSize,
+                          ),
                         ),
                       ),
                       if (message case final m?) ...[
                         const SizedBox(height: BrandSpace.sm),
-                        Text(m, textAlign: TextAlign.center, style: secondary),
+                        Text(
+                          m,
+                          textAlign: TextAlign.center,
+                          style: BrandVividType.body,
+                        ),
                       ],
                       if (kind == SceneStateKind.loading) ...[
                         const SizedBox(height: BrandSpace.lg),
@@ -211,10 +214,12 @@ class SceneState extends StatelessWidget {
       ),
     );
   }
+
+  static const double _titleSize = 26;
 }
 
-/// An engraved brass hairline with a glint that travels along it and back, on the ambient
-/// clock: the Boardroom's progress indicator (indeterminate). Under reduced motion the glint
+/// A hairline with a sunflower glint that travels along it and back, on the ambient clock:
+/// the progress indicator (indeterminate). Under reduced motion the glint
 /// rests in the middle.
 class LoadingRule extends StatelessWidget {
   const LoadingRule({super.key, this.grade = ChapterGrade.lobby});
@@ -233,7 +238,7 @@ class LoadingRule extends StatelessWidget {
           child: CustomPaint(
             painter: _RulePainter(
               clock: AmbientClock.of(context),
-              color: grade.key,
+              color: BrandVivid.accent,
               still: MediaQuery.disableAnimationsOf(context),
             ),
           ),

@@ -102,13 +102,15 @@ void main() {
     for (final state in AnswerCardState.values) {
       await pumpKit(tester, card(state));
       await tester.pump(BrandMotion.standard);
-      final box = tester.widget<AnimatedContainer>(
-        find.byType(AnimatedContainer).first,
-      );
+      // The card's face and the locked bar beside its text.
+      final boxes = tester
+          .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))
+          .map((c) => '${c.decoration}|${c.constraints}')
+          .join(';');
       final opacity = tester.widget<AnimatedOpacity>(
         find.byType(AnimatedOpacity),
       );
-      looks.add('${box.decoration}|${opacity.opacity}');
+      looks.add('$boxes|${opacity.opacity}');
     }
     expect(looks, hasLength(AnswerCardState.values.length));
   });
