@@ -35,6 +35,12 @@ extension MissionLookup on Mission {
   bool get opensChapter =>
       missions.firstWhere((m) => m.chapter == chapter).number == number;
 
+  /// The last playable mission of its chapter: finishing it opens the chapter report.
+  bool get closesChapter {
+    final after = next;
+    return after == null || after.chapter != chapter;
+  }
+
   /// The mission after this one in campaign order, or null after the last playable one.
   Mission? get next {
     final i = missions.indexOf(this);

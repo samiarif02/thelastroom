@@ -9,6 +9,7 @@ import '../features/intro/character_screen.dart';
 import '../features/mission/mission_screen.dart';
 import '../features/onboarding/home_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
+import '../features/progress/chapter_report_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/recall/recall_screen.dart';
 import '../features/settings/settings_screen.dart';
@@ -34,6 +35,9 @@ abstract final class Routes {
   static const String _litParam = 'lit';
 
   static const String progress = '$_towerPath/$_progress';
+
+  /// The Chapter 1 report (brief 24): after Mission 7, or from "Your file".
+  static const String report = '$_towerPath/$_progress/$_report';
   static const String settings = '$_towerPath/$_settings';
   static const String character = '$_towerPath/$_character';
 
@@ -44,6 +48,7 @@ abstract final class Routes {
   static String mission(int number) => '$_towerPath/$_mission/$number';
 
   static const String _progress = 'progress';
+  static const String _report = 'report';
   static const String _settings = 'settings';
   static const String _character = 'character';
   static const String _mission = 'mission';
@@ -73,6 +78,12 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
       GoRoute(
         path: Routes._progress,
         builder: (context, state) => const ProgressScreen(),
+        routes: [
+          GoRoute(
+            path: Routes._report,
+            builder: (context, state) => const ChapterReportScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: Routes._settings,

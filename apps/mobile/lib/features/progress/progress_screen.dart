@@ -10,14 +10,20 @@ import '../../core/analytics/analytics_event.dart';
 import '../../core/analytics/event_value.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
+import '../debrief/ai_score_store.dart';
+import '../debrief/ai_verdict_cards.dart';
 import '../debrief/debrief_facts.dart';
 import '../mission/mission_lookup.dart';
 import '../tower/tower_hero.dart';
 import '../tower/tower_rooms.dart';
+import 'chapter_report.dart';
+import 'chapter_report_screen.dart';
+import 'file_trouble.dart';
 import 'progress_facts.dart';
 
-/// Where the progress file was opened from (`progress_report_viewed`'s `source`).
-enum ProgressSource { tower }
+/// Where the progress file was opened from (`progress_report_viewed`'s `source`): "Your file"
+/// from the tower, or the Chapter 1 report (brief 24).
+enum ProgressSource { tower, chapterReport }
 
 /// Progress (FR-16, FR-41), in the tower's language (brief 17): a pinned header with the way
 /// back, then a summary card in Chapter 1's colour (missions done as a ring, the average, the
@@ -55,7 +61,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final report = ref.watch(progressReportProvider).value;
+    final reading = ref.watch(progressReportProvider);
+    final report = reading.value;
+    final aiScores =
+        ref.watch(latestAiScoresProvider).value ??
+        const <String, SavedAiScore>{};
     final profile = ref.watch(profileProvider).value ?? const PlayerProfile();
     final profiles = ref.read(profileProvider.notifier);
     var i = 0;
@@ -86,6 +96,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          if (reading.hasError && report == null)
+                            enter(
+                              FileTrouble(
+                                onRetry: () =>
+                                    ref.invalidate(progressReportProvider),
+                              ),
+                            ),
                           if (report != null) ...[
                             enter(
                               _Summary(
@@ -94,9 +111,19 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                               ),
                             ),
                             enter(_Skills(skills: report.skills)),
+                            enter(
+                              _ReportCard(
+                                state: ref.watch(chapterReportProvider).value,
+                              ),
+                            ),
                             enter(const _Section(ProgressScreen.missions)),
                             for (final line in report.missions)
-                              enter(_MissionCard(line: line)),
+                              enter(
+                                _MissionCard(
+                                  line: line,
+                                  ai: _aiFor(line, aiScores),
+                                ),
+                              ),
                           ],
                           enter(const _Section(ProgressScreen.settings)),
                           enter(
@@ -320,9 +347,13 @@ class _Section extends StatelessWidget {
 
 /// One mission: in its chapter's colour once played, slate before.
 class _MissionCard extends StatelessWidget {
-  const _MissionCard({required this.line});
+  const _MissionCard({required this.line, this.ai});
 
   final MissionProgress line;
+
+  /// The AI recruiter's verdict on the latest attempt, when there is one (brief 24); otherwise
+  /// the card shows the engine's, labelled "Offline score", as the debrief does.
+  final SavedAiScore? ai;
 
   @override
   Widget build(BuildContext context) {
@@ -360,11 +391,13 @@ class _MissionCard extends StatelessWidget {
             const Text(ProgressScreen.notPlayed, style: BrandVividType.body),
           ] else ...[
             const SizedBox(height: BrandSpace.sm),
+            _ScoreSource(ai: ai != null),
+            const SizedBox(height: BrandSpace.xs),
             Wrap(
               spacing: BrandSpace.xs,
               runSpacing: BrandSpace.xs,
               children: [
-                _Chip('LATEST', '${latest.total}'),
+                _Chip('LATEST', '${ai?.score.overall.score ?? latest.total}'),
                 _Chip(
                   line.attemptCount == 1 ? 'ATTEMPT' : 'ATTEMPTS',
                   '${line.attemptCount}',
@@ -372,10 +405,14 @@ class _MissionCard extends StatelessWidget {
                 for (final d in Dimension.values)
                   _Chip(
                     dimensionLabel(d).toUpperCase(),
-                    '${latest.dimensions[d]}',
+                    '${ai?.score.dimensions[d]!.score ?? latest.dimensions[d]}',
                   ),
               ],
             ),
+            if (ai case final verdict?) ...[
+              const SizedBox(height: BrandSpace.xs),
+              Text(verdict.score.overall.basis, style: BrandVividType.body),
+            ],
             if (lesson != null) ...[
               const SizedBox(height: BrandSpace.sm),
               Container(
@@ -398,6 +435,90 @@ class _MissionCard extends StatelessWidget {
                 ),
               ),
             ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// The AI verdict for [line]'s latest attempt, if one was given after that attempt was played.
+/// A later attempt played offline shows its own offline score instead.
+SavedAiScore? _aiFor(MissionProgress line, Map<String, SavedAiScore> scores) {
+  final saved = scores[line.mission.id];
+  final latest = line.attempts.isEmpty ? null : line.attempts.last;
+  if (saved == null || latest == null) return null;
+  final played = latest.completedAt;
+  return played == null || !saved.at.isBefore(played) ? saved : null;
+}
+
+/// Who scored a mission's latest attempt, labelled as the debrief labels it.
+class _ScoreSource extends StatelessWidget {
+  const _ScoreSource({required this.ai});
+
+  final bool ai;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    (ai ? ScoreSourceLabel.aiLabel : ScoreSourceLabel.offlineLabel)
+        .toUpperCase(),
+    style: BrandVividType.kicker.copyWith(
+      color: ai ? BrandVivid.accent : BrandVivid.onDeepSoft,
+    ),
+  );
+}
+
+/// The Chapter 1 report's way in: open once the review is played, otherwise what opens it.
+class _ReportCard extends StatelessWidget {
+  const _ReportCard({required this.state});
+
+  final ChapterReportState? state;
+
+  static const String title = 'Chapter 1 report';
+  static const String open =
+      'Your first try against your review, skill by skill.';
+  static const String openButton = 'Open the report';
+
+  @override
+  Widget build(BuildContext context) {
+    final s = state;
+    if (s == null) return const SizedBox.shrink();
+    final ready = s is ReportReady;
+    return _Panel(
+      colors: ready
+          ? const [BrandVivid.skyMid, BrandVivid.night]
+          : const [BrandVivid.locked, BrandVivid.night],
+      glow: ready ? BrandVivid.accent : null,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Semantics(
+                  header: true,
+                  child: const Text(title, style: BrandVividType.row),
+                ),
+                const SizedBox(height: BrandSpace.xs),
+                Text(switch (s) {
+                  ReportReady() => open,
+                  ReportNotYet(:final review) => ChapterReportScreen.notYetLine(
+                    review,
+                  ),
+                }, style: BrandVividType.body),
+                if (ready) ...[
+                  const SizedBox(height: BrandSpace.sm),
+                  VividButton(
+                    label: openButton,
+                    onPressed: () => context.go(Routes.report),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (!ready) ...[
+            const SizedBox(width: BrandSpace.sm),
+            const LockGlyph(color: BrandVivid.onDeepSoft, size: 22),
           ],
         ],
       ),

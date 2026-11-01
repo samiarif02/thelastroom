@@ -21,6 +21,7 @@ import 'scene/mission_set.dart';
 import 'scene/scene_scrim.dart';
 import 'widgets/beat_timer.dart';
 import 'widgets/draft_panel.dart';
+import 'widgets/leave_control.dart';
 import 'widgets/next_control.dart';
 import 'widgets/scene_notes.dart';
 import 'widgets/trust_meter.dart';
@@ -624,6 +625,14 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
               onTap: _cardDone,
               child: MissionCard(mission: mission, onFinished: _cardDone),
             ),
+          if (_stage != SceneStage.card && !_leaving)
+            Positioned(
+              top: MediaQuery.paddingOf(context).top + BrandSpace.xs,
+              right: MediaQuery.paddingOf(context).right + BrandSpace.sm,
+              child: LeaveControl(
+                onPressed: () => setState(() => _leaving = true),
+              ),
+            ),
           if (_leaving)
             LeaveSheet(
               grade: grade,
@@ -879,7 +888,11 @@ class _TimerShade extends StatelessWidget {
           ColoredBox(color: BrandVivid.night.withValues(alpha: dim)),
           if (left != null)
             Positioned(
-              top: MediaQuery.paddingOf(context).top + BrandSpace.sm,
+              // Under the leave control.
+              top:
+                  MediaQuery.paddingOf(context).top +
+                  BrandSpace.xs +
+                  LeaveControl.size,
               right: BrandSpace.lg,
               child: Semantics(
                 liveRegion: true,
