@@ -64,6 +64,12 @@ const Map<BeatKind, String> _beatNames = {
   BeatKind.land: 'LAND',
 };
 
+/// "BUILD YOUR ANSWER · 2 OF 3": above a built beat's fragments (brief 27).
+String buildLabel(int index, int count) =>
+    '$buildKicker  ·  ${index + 1} OF $count';
+
+const String buildKicker = 'BUILD YOUR ANSWER';
+
 /// Above the follow-up's replies.
 const String replyLabel = 'YOUR REPLY';
 

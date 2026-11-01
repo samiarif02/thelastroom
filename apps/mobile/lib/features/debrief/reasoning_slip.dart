@@ -7,7 +7,8 @@ import 'red_pen_slip.dart';
 
 /// "Your reasoning": each beat's line with the reason the player gave, marked right or not, and
 /// the right reasoning beside a wrong one, so the lesson is about thinking, not about which
-/// card was lucky. A guessed beat is marked in red pen with how fast it was picked.
+/// card was lucky. A guessed beat is marked in red pen with how fast it was picked. A built beat
+/// (brief 27) says what its answer lost and sets the strong one beside it.
 class ReasoningSlip extends StatelessWidget {
   const ReasoningSlip({super.key, required this.beats});
 
@@ -19,6 +20,20 @@ class ReasoningSlip extends StatelessWidget {
   static const String fellFor = 'You fell for';
   static const String sound = 'SOUND';
   static const String unsound = 'NOT WHY IT WORKS';
+
+  /// Above the strong answer, beside a built one that wasn't it (brief 27).
+  static const String strongBuild = 'Built strong';
+
+  /// What a built answer lost, piece by piece, or that it lost nothing.
+  static String buildNote(BuildResult built) {
+    if (built.perfect) return 'BUILT IN ORDER, NOTHING MISSING';
+    String pieces(int n) => n == 1 ? '1 PIECE' : '$n PIECES';
+    return [
+      if (built.outOfOrder > 0) '${pieces(built.outOfOrder)} OUT OF ORDER',
+      if (built.missing > 0) '${pieces(built.missing)} LEFT OUT',
+      if (built.decoysUsed.isNotEmpty) 'THE DECOY WENT IN',
+    ].join('  ·  ');
+  }
 
   static String guessedNote(Duration? decidedIn) {
     final ms = decidedIn?.inMilliseconds ?? 0;
@@ -92,6 +107,26 @@ class _BeatRow extends StatelessWidget {
                 fontStyle: FontStyle.italic,
               ),
             ),
+            if (beat.built case final built?) ...[
+              const SizedBox(height: BrandSpace.xs),
+              Text(
+                ReasoningSlip.buildNote(built),
+                style: BrandType.label.copyWith(
+                  color: built.perfect ? SlipInk.soft : SlipInk.mark,
+                ),
+              ),
+            ],
+            if (beat.strongBuild case final strong?) ...[
+              const SizedBox(height: BrandSpace.sm),
+              Text('${ReasoningSlip.strongBuild}:', style: soft),
+              Text(
+                '“${strong.text}”',
+                style: BrandType.choice.copyWith(
+                  color: SlipInk.text,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
             if (beat.guessed) ...[
               const SizedBox(height: BrandSpace.xs),
               Text(

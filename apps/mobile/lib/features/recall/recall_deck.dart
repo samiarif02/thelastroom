@@ -81,7 +81,8 @@ class RecallDeck {
   static const int trapChoices = 3;
 
   /// The cards one finished attempt earned, in the order they happened: the misconception
-  /// behind every weak beat line, then the lesson of a weak follow-up reply.
+  /// behind every weak beat line (the lesson of a weak built answer), then the lesson of a weak
+  /// follow-up reply.
   List<String> missedCardIds(AttemptRecord attempt) {
     final mission = _missionById(attempt.missionId);
     if (mission == null) return const [];
@@ -91,6 +92,12 @@ class RecallDeck {
       final beat = beats[i];
       final optionId = attempt.beatOptionIds[i];
       if (beat.isStrongest(optionId)) continue;
+      // A built answer (brief 27) isn't any reason's temptation: its lesson is the card.
+      final builtLesson = beat.build?.answerById(optionId)?.lessonId;
+      if (builtLesson != null && _lessonById(builtLesson) != null) {
+        ids.add(builtLesson);
+        continue;
+      }
       for (final reason in beat.why?.reasons ?? const <Reason>[]) {
         if (reason.tempts.contains(optionId)) ids.add(reason.id);
       }

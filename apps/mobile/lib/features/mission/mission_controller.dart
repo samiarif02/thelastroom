@@ -27,6 +27,9 @@ const int _seedRange = 0x7FFFFFFF;
 /// Reasons shuffle with their own salts, clear of the beats' (0–2) and the reply's (3).
 const int _reasonSalt = 10;
 
+/// And a built beat's fragments with theirs, clear of the reasons'.
+const int _buildSalt = 20;
+
 /// One beat as played: the line, how long the player took to pick it once the cards were up,
 /// and the reason they gave when asked "why that line?".
 class BeatPlay {
@@ -120,7 +123,7 @@ class MissionState {
   bool get awaitingWhy =>
       plays.isNotEmpty &&
       plays.last.reason == null &&
-      mission.beats[plays.length - 1].why != null;
+      mission.beats[plays.length - 1].asksWhy;
   final bool draftDone;
   final FollowUp? followUp;
   final AnswerOption? reply;
@@ -133,11 +136,25 @@ class MissionState {
   bool get beatsDone => plays.length == mission.beats.length && !awaitingWhy;
   Beat? get beat => beatsDone ? null : mission.beats[beatIndex];
 
-  /// The current beat's options in this attempt's order, never the file's.
+  /// The current beat's options in this attempt's order, never the file's. None on a built
+  /// beat: the player builds its answer from [fragmentsForBeat].
   List<AnswerOption> get beatOptions =>
-      plays.length == mission.beats.length || awaitingWhy
+      plays.length == mission.beats.length ||
+          awaitingWhy ||
+          mission.beats[beatIndex].build != null
       ? const []
       : optionsForBeat(beatIndex);
+
+  /// The current beat is built from fragments (brief 27) and waiting for its answer.
+  BuildBeat? get building => beatsDone || awaitingWhy ? null : beat?.build;
+
+  /// Beat [index]'s fragments in this attempt's order (never the file's, where the parts sit in
+  /// their right order). Empty on a beat that isn't built.
+  List<Fragment> fragmentsForBeat(int index) {
+    final build = mission.beats[index].build;
+    if (build == null) return const [];
+    return shuffled(build.fragments, seed: seed, salt: _buildSalt + index);
+  }
 
   /// Beat [index]'s options in this attempt's order: the same order every time it's asked,
   /// so the screen can keep showing a beat after its line is locked.
@@ -299,7 +316,7 @@ class MissionController extends AsyncNotifier<MissionState> {
     for (var i = 0; i < saved.plays.length; i++) {
       final beat = mission.beats[i];
       final play = saved.plays[i];
-      if (!beat.options.any((o) => o.id == play.optionId)) return null;
+      if (beat.optionById(play.optionId) == null) return null;
       final reasonId = play.reasonId;
       if (reasonId != null &&
           !(beat.why?.reasons.any((r) => r.id == reasonId) ?? false)) {
@@ -318,9 +335,7 @@ class MissionController extends AsyncNotifier<MissionState> {
     final plays = [
       for (var i = 0; i < saved.plays.length; i++)
         BeatPlay(
-          option: now.mission.beats[i].options.firstWhere(
-            (o) => o.id == saved.plays[i].optionId,
-          ),
+          option: now.mission.beats[i].optionById(saved.plays[i].optionId)!,
           decidedIn: saved.plays[i].decidedIn,
           reason: now.mission.beats[i].why?.reasons
               .where((r) => r.id == saved.plays[i].reasonId)
@@ -451,6 +466,32 @@ class MissionController extends AsyncNotifier<MissionState> {
     );
   }
 
+  /// Locks in the answer the player built on the current beat from [placed] (fragment ids, in
+  /// the order tapped), [decidedIn] after the fragments were up. It's a line like any other from
+  /// here on: a built beat asks no why, so her reaction comes next.
+  void lockBuilt(List<String> placed, {Duration? decidedIn}) {
+    final now = _now;
+    final build = now.building;
+    if (build == null || placed.isEmpty) return;
+    final result = scoreBuild(build.spec, placed);
+    final plays = [
+      ...now.plays,
+      BeatPlay(option: build.answerFor(placed), decidedIn: decidedIn),
+    ];
+    state = AsyncData(
+      now._copy(plays: plays, followUp: _followUpFor(now.mission, plays)),
+    );
+    _analytics.track(AnalyticsEvent.answerBuilt, {
+      'mission_id': EventValue.id(now.mission),
+      'beat': EventValue.name(now.beat!.kind),
+      'fragments': EventValue.count(placed.length),
+      'missing': EventValue.count(result.missing),
+      'out_of_order': EventValue.count(result.outOfOrder),
+      'decoy_used': EventValue.flag(result.decoysUsed.isNotEmpty),
+      'guessed': EventValue.flag(isGuess(decidedIn)),
+    });
+  }
+
   /// The player's answer to "why that line?" for the beat just picked.
   void giveReason(Reason reason) {
     final now = _now;
@@ -470,7 +511,7 @@ class MissionController extends AsyncNotifier<MissionState> {
   FollowUp? _followUpFor(Mission mission, List<BeatPlay> plays) {
     if (plays.length != mission.beats.length) return null;
     final last = plays.last;
-    if (mission.beats.last.why != null && last.reason == null) return null;
+    if (mission.beats.last.asksWhy && last.reason == null) return null;
     return mission.followUpById(
       selectFollowUp(
         picks: [

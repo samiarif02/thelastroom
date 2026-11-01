@@ -92,6 +92,8 @@ class BeatReasoning {
     this.given,
     this.principle,
     this.fellFor,
+    this.built,
+    this.strongBuild,
   });
 
   final BeatKind kind;
@@ -113,6 +115,12 @@ class BeatReasoning {
   /// The misconception that leads to [line] when it's a weak one (`Reason.tempts`).
   final Reason? fellFor;
 
+  /// How a built answer scored (brief 27); null on a picked line.
+  final BuildResult? built;
+
+  /// The strong answer to set beside a built one that wasn't it; null otherwise.
+  final AnswerOption? strongBuild;
+
   /// Whether the player's reason is the sound principle for their line; null with no why step.
   bool? get sound => given?.isSoundFor(line.id);
 }
@@ -123,8 +131,22 @@ List<BeatReasoning> reasoningOf(Mission mission, List<BeatPlay> plays) => [
 ];
 
 BeatReasoning _reasoning(Beat beat, BeatPlay play) {
-  final reasons = beat.why?.reasons ?? const <Reason>[];
   final strongest = beat.isStrongest(play.option.id);
+  final build = beat.build;
+  final placed = parseBuildOptionId(play.option.id)?.placed;
+  if (build != null && placed != null) {
+    // Built, not picked: no why was asked, so the slip explains the build instead.
+    return BeatReasoning(
+      kind: beat.kind,
+      line: play.option,
+      strongest: strongest,
+      guessed: isGuess(play.decidedIn),
+      decidedIn: play.decidedIn,
+      built: scoreBuild(build.spec, placed),
+      strongBuild: strongest ? null : build.strongAnswer,
+    );
+  }
+  final reasons = beat.why?.reasons ?? const <Reason>[];
   return BeatReasoning(
     kind: beat.kind,
     line: play.option,

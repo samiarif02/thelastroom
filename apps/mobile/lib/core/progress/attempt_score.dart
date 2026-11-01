@@ -19,7 +19,7 @@ MissionScore? scoreFromPicks({
   final picks = <BeatPick>[];
   for (var i = 0; i < mission.beats.length; i++) {
     final beat = mission.beats[i];
-    final option = _option(beat.options, beatOptionIds[i]);
+    final option = beat.optionById(beatOptionIds[i]);
     if (option == null) return null;
     picks.add(BeatPick(beat: beat.kind, choice: option.scored));
   }

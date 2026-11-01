@@ -19,6 +19,7 @@ import 'package:the_last_room/features/mission/mission_controller.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
 import 'package:the_last_room/features/mission/scene/mission_card.dart';
+import 'package:the_last_room/features/mission/widgets/build_panel.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
@@ -326,6 +327,12 @@ class MissionRig {
   /// A beat line whose beat asks "why that line?" is then explained: with the reasoning that's
   /// sound for it, or with [reason] when given.
   Future<void> say(Object option, {bool guess = false, Reason? reason}) async {
+    if (option is AnswerOption) {
+      if (parseBuildOptionId(option.id) case (:final placed, buildId: _)) {
+        await build(placed, guess: guess);
+        return;
+      }
+    }
     await pick(option, guess: guess);
     if (option is! AnswerOption) return;
     final why = _beatOf(option)?.why;
@@ -347,6 +354,43 @@ class MissionRig {
       }
     }
     return null;
+  }
+
+  /// Builds the answer on a built beat (brief 27): taps the fragments [placed] in that order,
+  /// then "Lock it in". The player reads first unless [guess].
+  Future<void> build(List<String> placed, {bool guess = false}) async {
+    await until(find.byType(FragmentChip));
+    if (!guess) await run(readFor);
+    for (final id in placed) {
+      await tapFragment(id);
+    }
+    final lock = find.text(BuildPanel.lockIn);
+    await tester.ensureVisible(lock);
+    await tester.pump();
+    await tester.tap(lock);
+    await tester.pump();
+  }
+
+  /// One tap on the chip of fragment [id]: places it, or takes it out.
+  Future<void> tapFragment(String id) async {
+    final chip = find.widgetWithText(FragmentChip, fragmentText(id));
+    await until(chip);
+    await tester.ensureVisible(chip);
+    await tester.pump();
+    await tester.tap(chip);
+    await tester.pump();
+  }
+
+  /// The words of fragment [id], in the catalog being played.
+  String fragmentText(String id) {
+    for (final m in container.read(missionCatalogProvider)) {
+      for (final b in m.beats) {
+        for (final f in b.build?.fragments ?? const <Fragment>[]) {
+          if (f.id == id) return f.text;
+        }
+      }
+    }
+    throw ArgumentError.value(id, 'id', 'no such fragment');
   }
 
   /// One tap on [option]'s card (on the part that's on screen), and nothing more.
@@ -420,25 +464,16 @@ class MissionRig {
     final mission = state(number).mission;
     if (draft) await skipDraft();
     for (final id in beats) {
-      await say(mission.allOptionsById[id]!);
+      await say(mission.optionById(id)!);
     }
     // The follow-up's line, after the hard cut: let it type, then complete it.
     await until(find.text(state(number).followUpLine!.text));
     await run(const Duration(milliseconds: 300));
     if (typing) await tapScene();
-    await say(mission.allOptionsById[reply]!);
+    await say(mission.optionById(reply)!);
     await until(find.byType(Dossier));
   }
 
   /// Plays the whole dossier through (stamps, seal, pen) and the slip arriving.
   Future<void> settleDossier() => run(BrandMotion.dossier + BrandMotion.pen);
-}
-
-extension on Mission {
-  Map<String, AnswerOption> get allOptionsById => {
-    for (final beat in beats)
-      for (final o in beat.options) o.id: o,
-    for (final f in followUps)
-      for (final o in f.replies) o.id: o,
-  };
 }

@@ -16,9 +16,14 @@ extension MissionLookup on Mission {
     }
   }
 
+  /// The line [id] names: a beat option, a follow-up reply, or an answer built in a beat
+  /// (brief 27).
   AnswerOption? optionById(String id) {
     for (final option in allOptions) {
       if (option.id == id) return option;
+    }
+    for (final beat in beats) {
+      if (beat.build?.answerById(id) case final built?) return built;
     }
     return null;
   }
@@ -51,6 +56,12 @@ extension MissionLookup on Mission {
   /// the draft is what "then vs. now" sets beside a later answer, so asking on every mission
   /// would only slow the scene.
   bool get offersDraft => !hinted;
+}
+
+extension BeatSteps on Beat {
+  /// Whether the player is asked "why that line?" in the room. A built beat isn't: putting the
+  /// parts in order is the reasoning (its why stays in the content for the Recall Room).
+  bool get asksWhy => why != null && build == null;
 }
 
 extension AddressedLine on SceneLine {

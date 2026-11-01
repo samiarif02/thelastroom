@@ -269,7 +269,10 @@ void main() {
         final followUp = review.followUps.firstWhere((f) => f.trigger == null);
         await rig.play(
           review.number,
-          beats: [for (final b in review.beats) b.options.first.id],
+          beats: [
+            for (final b in review.beats)
+              b.build?.strongAnswer.id ?? b.options.first.id,
+          ],
           reply: followUp.replies.first.id,
         );
         await rig.settleDossier();
