@@ -80,6 +80,8 @@ Flutter 3.47.8; no keys, no network. For AI scoring on a laptop, see the README 
   the weakest beat. Guessed beats score 0, and a strong line with the wrong principle keeps
   60%. It's deterministic and unit-tested, and it's what progress over time is measured with.
   See [FR-20–26](requirements.md).
+- **Verification:** AI scoring is verified with a mocked Gemini (15 Deno tests and the app's
+  fallback tests); the live run with a real key on a phone hasn't been done yet.
 
 ## Quality
 
@@ -96,8 +98,8 @@ Flutter 3.47.8; no keys, no network. For AI scoring on a laptop, see the README 
 ## What's next
 
 - Chapters 2 and 3 (visible now as locked teasers): the panel interview and the final round.
-- The free-text AI coach (FR-24): say your answer in your own words and get it graded on content
-  only.
+- A free-text answer mode (not built): say your answer in your own words and get it graded on
+  content only.
 - Local notifications (the daily nudge, "recall due"), designed in FR-50s.
 - A hosted backend, so AI scoring works away from the laptop.
 - Validating the scoring weights against human-rated answers.

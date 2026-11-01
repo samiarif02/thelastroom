@@ -108,12 +108,14 @@ standards to Flutter (the divergences are listed there).
 
 - **Chapter 1 only.** Seven missions are playable; Chapters 2 and 3 are visible, locked
   teasers.
-- **It teaches choosing, not speaking.** Picking from written lines isn't answering live. The
-  free-text AI coach planned for that (FR-24) isn't built yet.
+- **It teaches choosing, not speaking.** Picking from written lines isn't answering live, and a
+  free-text answer mode isn't built.
 - **The scoring weights are a hypothesis.** They'd need human-rated answers to validate, and
   the AI's score isn't perfectly reproducible (temperature 0 narrows it but doesn't remove it).
 - **AI scoring needs a laptop.** Nothing is hosted, so the AI recruiter runs on a Mac on the
   same Wi-Fi (below). Without it, the game uses the offline score.
+- **AI scoring is verified with a mocked Gemini** (15 Deno tests and the app's fallback tests);
+  the live run with a real key on a phone hasn't been done yet.
 - **Not in stores.** The APK is signed with the debug key, which is fine for installing
   directly, not for Google Play. The game has been played on Android (a realme 8) and in Chrome;
   iOS hasn't been tested.
