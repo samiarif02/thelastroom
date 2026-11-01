@@ -4,11 +4,12 @@ import 'typography.dart';
 import 'vivid.dart';
 
 /// The vivid layer's type (brief 17): Manrope ExtraBold for titles that feel like a game's,
-/// not a form's; Manrope for everything read. White on colour by default ([BrandVivid.onDeep]);
-/// re-colour only to a pair `test/vivid_contrast_test.dart` holds.
+/// not a form's; Manrope for everything read. The current theme's text colour by default
+/// ([BrandVivid.onDeep]); re-colour only to a pair `test/vivid_contrast_test.dart` holds. Getters,
+/// so a theme change reaches them (they can't be `const`).
 abstract final class BrandVividType {
   /// The hero card's mission title and onboarding's big lines.
-  static const TextStyle hero = TextStyle(
+  static TextStyle get hero => TextStyle(
     fontFamily: BrandFonts.sans,
     package: BrandFonts.package,
     fontSize: 32,
@@ -19,7 +20,7 @@ abstract final class BrandVividType {
   );
 
   /// A chapter card's title, a screen's heading.
-  static const TextStyle title = TextStyle(
+  static TextStyle get title => TextStyle(
     fontFamily: BrandFonts.sans,
     package: BrandFonts.package,
     fontSize: 22,
@@ -30,19 +31,22 @@ abstract final class BrandVividType {
   );
 
   /// The big chapter numeral and the stats: tabular lining figures, so digits don't jitter.
-  static const TextStyle numeral = TextStyle(
+  static TextStyle get numeral => TextStyle(
     fontFamily: BrandFonts.sans,
     package: BrandFonts.package,
     fontSize: 44,
     height: 1,
     letterSpacing: -1,
     fontWeight: FontWeight.w800,
-    fontFeatures: [FontFeature.tabularFigures(), FontFeature.liningFigures()],
+    fontFeatures: [
+      const FontFeature.tabularFigures(),
+      const FontFeature.liningFigures(),
+    ],
     color: BrandVivid.onDeep,
   );
 
   /// Small tracked caps over a title: "CHAPTER 1 · MISSION 2". Set in capitals by the caller.
-  static const TextStyle kicker = TextStyle(
+  static TextStyle get kicker => TextStyle(
     fontFamily: BrandFonts.sans,
     package: BrandFonts.package,
     fontSize: 11,
@@ -53,7 +57,7 @@ abstract final class BrandVividType {
   );
 
   /// Body copy on colour.
-  static const TextStyle body = TextStyle(
+  static TextStyle get body => TextStyle(
     fontFamily: BrandFonts.sans,
     package: BrandFonts.package,
     fontSize: 15,
@@ -62,7 +66,7 @@ abstract final class BrandVividType {
   );
 
   /// A row's name: a mission in a chapter's list.
-  static const TextStyle row = TextStyle(
+  static TextStyle get row => TextStyle(
     fontFamily: BrandFonts.sans,
     package: BrandFonts.package,
     fontSize: 16,
@@ -72,7 +76,7 @@ abstract final class BrandVividType {
   );
 
   /// Buttons: "Play", "Next", "Let's go".
-  static const TextStyle button = TextStyle(
+  static TextStyle get button => TextStyle(
     fontFamily: BrandFonts.sans,
     package: BrandFonts.package,
     fontSize: 18,
@@ -83,7 +87,7 @@ abstract final class BrandVividType {
   );
 
   /// Every style, for the font test.
-  static const List<TextStyle> all = [
+  static List<TextStyle> get all => [
     hero,
     title,
     numeral,
