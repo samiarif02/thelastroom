@@ -29,7 +29,7 @@ void main() {
     expect(find.text(WrongFloorScreen.title), findsOneWidget);
     expect(find.text('Page Not Found'), findsNothing);
 
-    await tester.tap(find.text(WrongFloorScreen.action.toUpperCase()));
+    await tester.tap(find.text(WrongFloorScreen.action));
     await tester.pump();
     await tester.pump(BrandMotion.standard);
     expect(find.byType(TitleScreen), findsOneWidget);

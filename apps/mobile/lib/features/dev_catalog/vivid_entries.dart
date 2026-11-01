@@ -1,12 +1,20 @@
 import 'package:brand/brand.dart';
 import 'package:content/content.dart';
+import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/audio/audio_settings.dart';
 import '../../ui/film_kit.dart';
+import '../recall/recall_card_view.dart';
+import '../recall/recall_controller.dart';
+import '../recall/recall_deck.dart';
+import '../settings/audio/audio_settings_section.dart';
 import '../tower/tower_chapter_card.dart';
 import '../tower/tower_extras.dart';
 import '../tower/tower_hero.dart';
 import '../tower/tower_rooms.dart';
+import 'catalog_backdrops.dart';
 import 'catalog_entry.dart';
 
 /// The vivid layer (brief 17) in the catalog: the kit on the sky, and the tower's cards with
@@ -16,13 +24,14 @@ abstract final class VividEntries {
     id: 'vivid',
     name: 'Vivid kit',
     note:
-        'VividBackdrop, VividButton (.play, quiet, disabled), ProgressRing, InterviewerBadge, '
+        'VividBackdrop, VividButton (.play, quiet, disabled), VividToggle, ProgressRing, '
+        'InterviewerBadge, '
         'SkillRadar, LockGlyph: the home screens\' language (brief 17).',
     shots: [
       CatalogShot(
         id: 'buttons',
         label: 'Buttons',
-        build: (_) => _OnSky(
+        build: (_) => CatalogSky(
           children: [
             VividButton.play(expand: true, onPressed: () {}),
             const SizedBox(height: BrandSpace.md),
@@ -37,13 +46,16 @@ abstract final class VividEntries {
             ),
             const SizedBox(height: BrandSpace.md),
             const VividButton(label: 'Let’s go', expand: true, onPressed: null),
+            const SizedBox(height: BrandSpace.md),
+            VividToggle(label: 'Calm mode', value: true, onChanged: (_) {}),
+            VividToggle(label: 'Sound', value: false, onChanged: (_) {}),
           ],
         ),
       ),
       CatalogShot(
         id: 'badges',
         label: 'Badges',
-        build: (_) => _OnSky(
+        build: (_) => CatalogSky(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -99,7 +111,7 @@ abstract final class VividEntries {
       CatalogShot(
         id: 'hero',
         label: 'Hero',
-        build: (_) => _OnSky(
+        build: (_) => CatalogSky(
           children: [
             TowerHero(room: _rooms[2], onPlay: () {}),
             const SizedBox(height: BrandSpace.md),
@@ -110,7 +122,7 @@ abstract final class VividEntries {
       CatalogShot(
         id: 'chapter',
         label: 'Chapter',
-        build: (_) => _OnSky(
+        build: (_) => CatalogSky(
           children: [
             ChapterCard(
               chapter: chapters.first,
@@ -123,7 +135,7 @@ abstract final class VividEntries {
       CatalogShot(
         id: 'locked',
         label: 'Locked',
-        build: (_) => _OnSky(
+        build: (_) => CatalogSky(
           children: [
             ChapterCard(
               chapter: chapters[1],
@@ -136,6 +148,69 @@ abstract final class VividEntries {
         ),
       ),
     ],
+  );
+
+  static final CatalogEntry screens = CatalogEntry(
+    id: 'vivid-screens',
+    name: 'Settings and Recall',
+    note:
+        'The Settings audio section on a VividPanel, and a Recall Room card with the mission\'s '
+        'answer cards, before and after an answer (brief 23).',
+    shots: [
+      CatalogShot(
+        id: 'settings',
+        label: 'Settings',
+        build: (_) => ProviderScope(
+          overrides: [audioSettingsProvider.overrideWith(_CatalogAudio.new)],
+          child: const CatalogSky(
+            children: [VividPanel(child: AudioSettingsSection())],
+          ),
+        ),
+      ),
+      for (final (id, label, chosen) in [
+        ('recall', 'Recall', null),
+        ('recall-answered', 'Answered', 'wrong'),
+      ])
+        CatalogShot(
+          id: id,
+          label: label,
+          build: (_) => CatalogSky(
+            children: [
+              RecallCardView(
+                playing: RecallPlaying(
+                  round: const [_recallCard],
+                  index: 0,
+                  verdicts: chosen == null
+                      ? const []
+                      : const [RecallVerdict.missed],
+                  chosenId: chosen,
+                ),
+                onAnswer: (_) {},
+                onNext: () {},
+              ),
+            ],
+          ),
+        ),
+    ],
+  );
+
+  static const RecallQuestion _recallCard = RecallQuestion(
+    cardId: 'catalog-trap',
+    kind: RecallCardKind.trap,
+    kicker: 'YOU FELL FOR',
+    prompt: 'Saying "we" sounds like a team player.',
+    ask: 'What holds up better?',
+    quote: 'We shipped it in two weeks.',
+    choices: [
+      RecallChoice(
+        id: 'right',
+        text: 'Say what you did, then credit the team.',
+      ),
+      RecallChoice(id: 'wrong', text: 'Keep it humble: the team did it.'),
+      RecallChoice(id: 'other', text: 'Skip the detail, give the result.'),
+    ],
+    correctChoiceId: 'right',
+    takeaway: 'They hire you, not the team: own your part.',
   );
 
   /// Missions 1–2 done (a strong and a middling run), 3 current, the rest locked.
@@ -157,29 +232,8 @@ abstract final class VividEntries {
   ];
 }
 
-/// Components on the evening sky, centred, scrolling only at 2x.
-class _OnSky extends StatelessWidget {
-  const _OnSky({required this.children});
-
-  final List<Widget> children;
-
+/// The audio settings without the saved ones (the catalog has no device store).
+class _CatalogAudio extends AudioSettingsController {
   @override
-  Widget build(BuildContext context) => Stack(
-    fit: StackFit.expand,
-    children: [
-      const VividBackdrop(lights: false),
-      SafeArea(
-        child: AnchoredScroll(
-          alignment: MainAxisAlignment.center,
-          padding: const EdgeInsets.fromLTRB(
-            BrandSpace.md,
-            BrandSpace.xxl,
-            BrandSpace.md,
-            BrandSpace.lg,
-          ),
-          children: children,
-        ),
-      ),
-    ],
-  );
+  AudioSettings build() => const AudioSettings();
 }

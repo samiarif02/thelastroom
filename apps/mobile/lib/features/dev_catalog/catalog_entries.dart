@@ -29,6 +29,7 @@ abstract final class CatalogEntries {
     _film,
     VividEntries.kit,
     VividEntries.tower,
+    VividEntries.screens,
   ];
 
   static CatalogEntry? byId(String id) {
@@ -278,8 +279,7 @@ abstract final class CatalogEntries {
       CatalogShot(
         id: 'states',
         label: 'States',
-        build: (grade) => CatalogDesk(
-          grade: grade,
+        build: (grade) => CatalogSky(
           children: [
             for (final state in AnswerCardState.values) ...[
               CatalogCaption(state.name),
@@ -297,10 +297,7 @@ abstract final class CatalogEntries {
       CatalogShot(
         id: 'try',
         label: 'Try it',
-        build: (grade) => CatalogDesk(
-          grade: grade,
-          children: [AnswerCardDemo(grade: grade)],
-        ),
+        build: (grade) => CatalogSky(children: [AnswerCardDemo(grade: grade)]),
       ),
     ],
   );
@@ -364,8 +361,7 @@ abstract final class CatalogEntries {
       CatalogShot(
         id: 'ornaments',
         label: 'Ornaments',
-        build: (grade) => CatalogDesk(
-          grade: grade,
+        build: (grade) => CatalogSky(
           children: [
             Center(
               child: BrassOrnament(text: 'CHAPTER ONE', grade: grade),
