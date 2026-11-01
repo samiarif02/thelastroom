@@ -180,7 +180,7 @@ class FragmentChip extends StatelessWidget {
                 width: _badge,
                 height: _badge,
                 alignment: Alignment.center,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: BrandVivid.accent,
                   shape: BoxShape.circle,
                 ),

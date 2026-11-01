@@ -82,12 +82,12 @@ class _VividToggleState extends State<VividToggle> {
                     borderRadius: BorderRadius.circular(BrandRadius.pill),
                     border: Border.all(color: BrandVivid.hairline(_edgeAlpha)),
                   ),
-                  child: const DecoratedBox(
+                  child: DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: BrandVivid.onDeep,
                     ),
-                    child: SizedBox.square(dimension: _knob),
+                    child: const SizedBox.square(dimension: _knob),
                   ),
                 ),
               ],

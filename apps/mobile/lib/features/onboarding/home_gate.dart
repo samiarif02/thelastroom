@@ -21,6 +21,6 @@ class HomeGate extends ConsumerWidget {
           child: TowerScreen(),
         ),
         AsyncData() || AsyncError() => const BackToExit(child: TitleGate()),
-        _ => const ColoredBox(color: BrandVivid.skyTop),
+        _ => ColoredBox(color: BrandVivid.skyTop),
       };
 }

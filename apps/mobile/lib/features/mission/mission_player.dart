@@ -590,7 +590,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const ColoredBox(color: BrandVivid.night),
+          ColoredBox(color: BrandVivid.night),
           FilmOverlay(
             grain: 0,
             vignetteColor: grade.shadow,

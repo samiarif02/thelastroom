@@ -30,6 +30,7 @@ abstract final class CatalogEntries {
     VividEntries.kit,
     VividEntries.tower,
     VividEntries.screens,
+    VividEntries.themes,
   ];
 
   static CatalogEntry? byId(String id) {

@@ -41,6 +41,7 @@ export 'vivid/pressable.dart';
 export 'vivid/progress_ring.dart';
 export 'vivid/skill_radar.dart';
 export 'vivid/staggered_entrance.dart';
+export 'vivid/theme_preview.dart';
 export 'vivid/tower_painter.dart';
 export 'vivid/vivid_backdrop.dart';
 export 'vivid/vivid_button.dart';

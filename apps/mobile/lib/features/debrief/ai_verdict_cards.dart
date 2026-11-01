@@ -29,7 +29,7 @@ class DeliberatingCard extends StatelessWidget {
         children: [
           _PulsingLights(grade: grade),
           const SizedBox(height: BrandSpace.md),
-          const ExcludeSemantics(
+          ExcludeSemantics(
             child: Text(
               title,
               textAlign: TextAlign.center,
@@ -37,11 +37,7 @@ class DeliberatingCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: BrandSpace.sm),
-          const Text(
-            line,
-            textAlign: TextAlign.center,
-            style: BrandVividType.body,
-          ),
+          Text(line, textAlign: TextAlign.center, style: BrandVividType.body),
         ],
       ),
     ),

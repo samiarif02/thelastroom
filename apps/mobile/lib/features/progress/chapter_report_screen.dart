@@ -137,7 +137,7 @@ class _Header extends StatelessWidget {
           Expanded(
             child: Semantics(
               header: true,
-              child: const Text(
+              child: Text(
                 ChapterReportScreen.title,
                 style: BrandVividType.title,
               ),
@@ -191,14 +191,14 @@ class _NotYet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _Card(
-    colors: const [BrandVivid.locked, BrandVivid.night],
+    colors: [BrandVivid.locked, BrandVivid.night],
     child: Column(
       children: [
-        const LockGlyph(color: BrandVivid.onDeepSoft, size: 28),
+        LockGlyph(color: BrandVivid.onDeepSoft, size: 28),
         const SizedBox(height: BrandSpace.md),
         Semantics(
           header: true,
-          child: const Text(
+          child: Text(
             ChapterReportScreen.notYetTitle,
             textAlign: TextAlign.center,
             style: BrandVividType.title,
@@ -261,7 +261,7 @@ class _Report extends ConsumerWidget {
                         value: then.total,
                       ),
                     ),
-                    const Text('→', style: BrandVividType.title),
+                    Text('→', style: BrandVividType.title),
                     const SizedBox(width: BrandSpace.md),
                     Expanded(
                       child: _Big(
@@ -284,7 +284,7 @@ class _Report extends ConsumerWidget {
         ),
         enter(
           _Card(
-            colors: const [BrandVivid.night, BrandVivid.skyMid],
+            colors: [BrandVivid.night, BrandVivid.skyMid],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -312,7 +312,7 @@ class _Report extends ConsumerWidget {
           ),
         ),
         enter(
-          const _Card(
+          _Card(
             colors: [BrandVivid.night, BrandVivid.locked],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,7 +321,7 @@ class _Report extends ConsumerWidget {
                   ChapterReportScreen.honestHeading,
                   style: BrandVividType.kicker,
                 ),
-                SizedBox(height: BrandSpace.xs),
+                const SizedBox(height: BrandSpace.xs),
                 Text(ChapterReportScreen.honest, style: BrandVividType.body),
               ],
             ),
@@ -531,7 +531,7 @@ class _NextChapter extends StatelessWidget {
             ],
           ),
           const SizedBox(height: BrandSpace.md),
-          const Text(ChapterReportScreen.nextLine, style: BrandVividType.body),
+          Text(ChapterReportScreen.nextLine, style: BrandVividType.body),
           const SizedBox(height: BrandSpace.md),
           VividButton(
             label: joined

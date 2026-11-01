@@ -94,7 +94,7 @@ class _DraftPanelState extends State<DraftPanel> {
               ),
             ),
             const SizedBox(height: BrandSpace.sm),
-            const Text(draftPrompt, style: BrandVividType.body),
+            Text(draftPrompt, style: BrandVividType.body),
             const SizedBox(height: BrandSpace.md),
             GestureDetector(
               onTap: _focus.requestFocus,

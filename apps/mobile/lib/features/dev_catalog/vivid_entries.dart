@@ -150,6 +150,45 @@ abstract final class VividEntries {
     ],
   );
 
+  static final CatalogEntry themes = CatalogEntry(
+    id: 'themes',
+    name: 'Themes',
+    note:
+        'Every VividPalette side by side (brief 28): its sky, a Chapter 1 card with the accent, '
+        'the three chapters. The THEME control in the pill re-colours the whole catalog.',
+    shots: [
+      CatalogShot(
+        id: 'all',
+        label: 'All',
+        build: (_) => CatalogSky(
+          children: [
+            for (var i = 0; i < VividThemes.all.length; i += 2)
+              Padding(
+                padding: const EdgeInsets.only(bottom: BrandSpace.md),
+                child: Row(
+                  children: [
+                    for (final t in VividThemes.all.skip(i).take(2)) ...[
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            ThemePreview(palette: t),
+                            const SizedBox(height: BrandSpace.xs),
+                            Text(t.name, style: BrandVividType.row),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: BrandSpace.sm),
+                    ],
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    ],
+  );
+
   static final CatalogEntry screens = CatalogEntry(
     id: 'vivid-screens',
     name: 'Settings and Recall',

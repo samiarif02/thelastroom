@@ -103,8 +103,8 @@ class _ExitToast extends StatelessWidget {
                 border: Border.all(color: BrandVivid.accent, width: 1.5),
                 boxShadow: BrandVivid.glowShadow(BrandVivid.night),
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
                   horizontal: BrandSpace.lg,
                   vertical: BrandSpace.sm + 4,
                 ),

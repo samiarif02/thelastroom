@@ -29,8 +29,8 @@ class SettingsGear extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: BrandVivid.hairline(_ringAlpha)),
       ),
-      child: const CustomPaint(
-        size: Size.square(_glyph),
+      child: CustomPaint(
+        size: const Size.square(_glyph),
         painter: _GearPainter(color: BrandVivid.onDeep),
       ),
     ),

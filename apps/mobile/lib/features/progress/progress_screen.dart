@@ -189,10 +189,7 @@ class _Header extends StatelessWidget {
           Expanded(
             child: Semantics(
               header: true,
-              child: const Text(
-                ProgressScreen.title,
-                style: BrandVividType.title,
-              ),
+              child: Text(ProgressScreen.title, style: BrandVividType.title),
             ),
           ),
         ],
@@ -234,7 +231,7 @@ class _Summary extends StatelessWidget {
                     '${report.done}/${report.total}',
                     style: BrandVividType.title,
                   ),
-                  const Text('DONE', style: BrandVividType.kicker),
+                  Text('DONE', style: BrandVividType.kicker),
                 ],
               ),
             ),
@@ -301,7 +298,7 @@ class _Skills extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = skills;
     return _Panel(
-      colors: const [BrandVivid.night, BrandVivid.skyMid],
+      colors: [BrandVivid.night, BrandVivid.skyMid],
       glow: BrandVivid.accent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -312,7 +309,7 @@ class _Skills extends StatelessWidget {
           ),
           const SizedBox(height: BrandSpace.sm),
           if (s == null)
-            const Text(ProgressScreen.skillsEmpty, style: BrandVividType.body)
+            Text(ProgressScreen.skillsEmpty, style: BrandVividType.body)
           else
             Center(
               child: SkillRadar(
@@ -364,7 +361,7 @@ class _MissionCard extends StatelessWidget {
     final best = line.best;
     return _Panel(
       colors: latest == null
-          ? const [BrandVivid.locked, BrandVivid.night]
+          ? [BrandVivid.locked, BrandVivid.night]
           : grade.cardGradient,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -388,7 +385,7 @@ class _MissionCard extends StatelessWidget {
           ),
           if (latest == null) ...[
             const SizedBox(height: BrandSpace.xs),
-            const Text(ProgressScreen.notPlayed, style: BrandVividType.body),
+            Text(ProgressScreen.notPlayed, style: BrandVividType.body),
           ] else ...[
             const SizedBox(height: BrandSpace.sm),
             _ScoreSource(ai: ai != null),
@@ -486,8 +483,8 @@ class _ReportCard extends StatelessWidget {
     final ready = s is ReportReady;
     return _Panel(
       colors: ready
-          ? const [BrandVivid.skyMid, BrandVivid.night]
-          : const [BrandVivid.locked, BrandVivid.night],
+          ? [BrandVivid.skyMid, BrandVivid.night]
+          : [BrandVivid.locked, BrandVivid.night],
       glow: ready ? BrandVivid.accent : null,
       child: Row(
         children: [
@@ -497,7 +494,7 @@ class _ReportCard extends StatelessWidget {
               children: [
                 Semantics(
                   header: true,
-                  child: const Text(title, style: BrandVividType.row),
+                  child: Text(title, style: BrandVividType.row),
                 ),
                 const SizedBox(height: BrandSpace.xs),
                 Text(switch (s) {
@@ -518,7 +515,7 @@ class _ReportCard extends StatelessWidget {
           ),
           if (!ready) ...[
             const SizedBox(width: BrandSpace.sm),
-            const LockGlyph(color: BrandVivid.onDeepSoft, size: 22),
+            LockGlyph(color: BrandVivid.onDeepSoft, size: 22),
           ],
         ],
       ),
@@ -570,15 +567,14 @@ class _Chip extends StatelessWidget {
 
 /// A rounded card on the sky, in [colors] (night by default).
 class _Panel extends StatelessWidget {
-  const _Panel({
-    required this.child,
-    this.colors = const [BrandVivid.locked, BrandVivid.night],
-    this.glow,
-  });
+  const _Panel({required this.child, this._colors, this.glow});
 
   final Widget child;
-  final List<Color> colors;
+  final List<Color>? _colors;
   final Color? glow;
+
+  /// The fill; the current theme's slate to night unless given.
+  List<Color> get colors => _colors ?? [BrandVivid.locked, BrandVivid.night];
 
   @override
   Widget build(BuildContext context) => Container(

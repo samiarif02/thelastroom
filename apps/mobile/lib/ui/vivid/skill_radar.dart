@@ -12,7 +12,7 @@ class SkillRadar extends StatelessWidget {
     required this.values,
     required this.labels,
     required this.color,
-    this.outline = BrandVivid.accent,
+    this.outline,
     this.size = 240,
   }) : assert(values.length == labels.length && values.length >= 3);
 
@@ -20,7 +20,9 @@ class SkillRadar extends StatelessWidget {
   final List<int> values;
   final List<String> labels;
   final Color color;
-  final Color outline;
+
+  /// The shape's edge and dots; null is the current theme's accent.
+  final Color? outline;
   final double size;
 
   static const double _labelRoom = 46;
@@ -52,7 +54,7 @@ class SkillRadar extends StatelessWidget {
                     grow: t,
                     radius: radius,
                     fill: color,
-                    outline: outline,
+                    outline: outline ?? BrandVivid.accent,
                   ),
                 ),
               ),

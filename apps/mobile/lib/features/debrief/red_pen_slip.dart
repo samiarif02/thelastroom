@@ -173,11 +173,11 @@ class PaperSlip extends StatelessWidget {
 /// The slips' inks on the chapter's deepest colour (each pair AA on `deeper` and on `night`).
 abstract final class SlipInk {
   /// Body text and quoted lines.
-  static const Color text = BrandVivid.onDeep;
+  static final Color text = BrandVivid.onDeep;
 
   /// Small caps headings.
-  static const Color soft = BrandVivid.onDeepSoft;
+  static final Color soft = BrandVivid.onDeepSoft;
 
   /// What went wrong: the red pen's job, in sunset orange.
-  static const Color mark = BrandVivid.horizon;
+  static final Color mark = BrandVivid.horizon;
 }
