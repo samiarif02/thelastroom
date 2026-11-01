@@ -5,6 +5,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import List, Optional, Tuple, Dict, Any
@@ -418,22 +419,44 @@ def subagent_sections(session_dir: Path, session_id: str) -> List[str]:
     return lines
 
 
+def hook_transcript() -> Optional[Path]:
+    """The transcript of the session that fired this hook, from the hook's stdin JSON.
+
+    Claude Code hands every hook `session_id` and `transcript_path`. Guessing "the newest
+    transcript in this folder" instead logs the wrong session whenever two sessions share a
+    folder, and loses a session entirely once it moves to another worktree.
+    """
+    if sys.stdin is None or sys.stdin.isatty():
+        return None
+    try:
+        payload = json.loads(sys.stdin.read() or '{}')
+    except json.JSONDecodeError:
+        return None
+    path = payload.get('transcript_path') if isinstance(payload, dict) else None
+    if path and Path(path).is_file():
+        return Path(path)
+    return None
+
+
 def main():
     cwd = Path(os.environ.get('CLAUDE_CWD', os.getcwd()))
-    session_dir = get_project_session_dir(cwd)
 
-    if not session_dir.exists():
-        return
+    # A manual run (a backfill, a test) may name the transcript explicitly.
+    explicit = os.environ.get('CLAUDE_TRANSCRIPT')
+    latest = Path(explicit) if explicit else hook_transcript()
 
-    session_files = [
-        f for f in session_dir.glob('*.jsonl')
-        if not f.name.startswith('agent-')
-    ]
+    if latest is None:
+        session_dir = get_project_session_dir(cwd)
+        if not session_dir.exists():
+            return
+        session_files = [
+            f for f in session_dir.glob('*.jsonl')
+            if not f.name.startswith('agent-')
+        ]
+        if not session_files:
+            return
+        latest = max(session_files, key=lambda p: p.stat().st_mtime)
 
-    if not session_files:
-        return
-
-    latest = max(session_files, key=lambda p: p.stat().st_mtime)
     session_id = latest.stem
 
     entries = extract_clean_log(latest)
@@ -524,7 +547,8 @@ def main():
             lines.append(f"chars: {len(content)}")
             lines.append(f"\n{content}\n")
 
-    subagents = subagent_sections(session_dir, session_id)
+    # Subagent transcripts sit beside the session's own: <dir>/<session-id>/subagents.
+    subagents = subagent_sections(latest.parent, session_id)
     if subagents:
         lines.append("\n---\n")
         lines.append("# Subagents\n")
