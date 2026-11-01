@@ -12,6 +12,7 @@ import '../../app/router.dart';
 import '../../core/analytics/analytics_event.dart';
 import '../../core/analytics/event_value.dart';
 import '../../core/audio/game_sounds.dart';
+import '../../core/notifications/reminder_primer.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
@@ -139,6 +140,7 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
       _say(TowerScreen.litNotice(lit));
       if (_lighting.value < 1) unawaited(_lighting.forward());
     }
+    if (widget.lit == 1) unawaited(offerReminders(context, ref));
   }
 
   void _tapRoom(TowerRoom room, List<TowerRoom> rooms) {
