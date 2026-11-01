@@ -100,7 +100,7 @@ Flutter 3.47.8; no keys, no network. For AI scoring on a laptop, see the README 
 - Chapters 2 and 3 (visible now as locked teasers): the panel interview and the final round.
 - A free-text answer mode (not built): say your answer in your own words and get it graded on
   content only.
-- Local notifications (the daily nudge, "recall due"), designed in FR-50s.
+- More reminder types from FR-50 (the cliffhanger, the weekly win), and reminders tested on iOS.
 - A hosted backend, so AI scoring works away from the laptop.
 - Validating the scoring weights against human-rated answers.
 - A store build: a release signing key, then Play Store and TestFlight.

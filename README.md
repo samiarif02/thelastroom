@@ -119,8 +119,8 @@ standards to Flutter (the divergences are listed there).
 - **Not in stores.** The APK is signed with the debug key, which is fine for installing
   directly, not for Google Play. The game has been played on Android (a realme 8) and in Chrome;
   iOS hasn't been tested.
-- **No notifications yet** (FR-50s): the daily nudge and "recall due" reminders are designed but
-  not built.
+- **Reminders are Android-first.** The local "traps waiting" and in-character nudges are built
+  and tested; on iOS they're wired but untested, and the web has none (FR-50–53).
 - No job is promised: story outcomes are narrative, not predictions.
 
 ## Optional: the backend and AI scoring
