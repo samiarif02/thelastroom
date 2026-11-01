@@ -3,7 +3,11 @@
 An interview-practice game that plays like a film, built in Flutter for an 8x product
 assessment. Repo: https://github.com/samiarif02/thelastroom
 
-**Demo video:** _the owner's recording, link to be added here_ (TODO: owner)
+**Demo video:** _the owner's recording, link to be added here_ (TODO: owner). The shot list
+is [`demo-script.md`](demo-script.md).
+
+**What's built and what isn't:** every requirement and plan phase, checked, in
+[`completion.md`](completion.md).
 
 **Android APK:** the draft release on [Releases](https://github.com/samiarif02/thelastroom/releases)
 (published by the owner). It installs directly, needs no keys and plays offline.
@@ -94,6 +98,49 @@ Flutter 3.47.8; no keys, no network. For AI scoring on a laptop, see the README 
   misconception, no reason repeating a line).
 - **Analytics:** events are registered in an enum before a feature ships, with no PII and no
   answer text ([EVENTS.md](EVENTS.md)).
+
+## The business model: a paywall mock (designed, not built)
+
+Chapter 1 is free and complete. What happens after it was decision D1
+([requirements](requirements.md#d1-the-argument)). The owner chose a **waitlist**, now built:
+the Chapter 1 report ends on Chapter 2's locked rooms and "Tell me when it opens", which
+records `waitlist_joined`. A real paywall (RevenueCat in sandbox) would have cost a day for a purchase
+no reviewer can make from a clone. So the paywall is designed here, as the plan asked, and the
+waitlist measures the same thing: demand for what comes next.
+
+```text
+┌──────────────────────────────────────────┐
+│  CHAPTER 2 · UNDER PRESSURE               │
+│  Marcus and Lena are waiting.             │
+│                                           │
+│  ✓ Chapters 2 and 3: 14 new missions,     │
+│    Under Pressure and The Final Round     │
+│  ✓ AI recruiter scoring, unlimited        │
+│    (Chapter 1 keeps 30 a day, free)       │
+│  ✓ Say it your way: answer in your own    │
+│    words, graded on content only          │
+│  ✓ Your interview date: a plan that       │
+│    paces the Recall Room to it            │
+│                                           │
+│  ┌─────────────────────────────────────┐  │
+│  │  Start 7 days free                  │  │   then £4.99 / month
+│  └─────────────────────────────────────┘  │   or £29.99 / year (save 50%)
+│  Not now: keep practising Chapter 1       │
+│                                           │
+│  Cancel any time. We never promise a job. │
+└──────────────────────────────────────────┘
+```
+
+- **Free forever:** Chapter 1 (seven missions), the Recall Room, the offline score, reminders,
+  themes. Learning never stops at a paywall, so a player mid-Recall is never locked out.
+- **Pro:** the content and the AI that cost money to make and to run.
+- **When it's shown:** only at the end of the Chapter 1 report, never mid-mission, and only once
+  per session after that.
+- **Prices are a hypothesis**, pitched at a student budget (below a typical language-learning
+  subscription). The waitlist's `waitlist_joined` ÷ `chapter_completed` is the first signal to
+  test them against.
+- **Honest copy:** "Cancel any time. We never promise a job." (NFR-6). No fake reviews, counts or
+  countdown timers.
 
 ## What's next
 
