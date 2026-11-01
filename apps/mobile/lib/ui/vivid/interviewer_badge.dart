@@ -18,6 +18,7 @@ class InterviewerBadge extends StatelessWidget {
     this.grade = ChapterGrade.lobby,
     this.expression = InterviewerExpression.smile,
     this.semanticLabel,
+    this.idle = true,
   });
 
   final FriendlyFigure figure;
@@ -28,6 +29,10 @@ class InterviewerBadge extends StatelessWidget {
   final ChapterGrade grade;
   final InterviewerExpression expression;
   final String? semanticLabel;
+
+  /// Breathing and blinking. Off for small faces in long lists, where the motion barely shows
+  /// but each one would repaint every frame (brief 31).
+  final bool idle;
 
   /// How much wider than the badge the figure is drawn: head and shoulders fill it.
   static const double _zoom = 1.9;
@@ -65,6 +70,7 @@ class InterviewerBadge extends StatelessWidget {
                 figure: figure,
                 expression: expression,
                 grade: grade,
+                idle: idle,
               ),
             ),
           ],
