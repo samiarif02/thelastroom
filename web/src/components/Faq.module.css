@@ -1,0 +1,45 @@
+.section {
+	padding: var(--section) 0;
+}
+.grid {
+	display: grid;
+	gap: 32px;
+}
+.kicker {
+	color: var(--ch1-deep);
+}
+.head h2 {
+	margin-top: 8px;
+}
+.list {
+	display: grid;
+	gap: 32px;
+	margin: 0;
+}
+.item {
+	padding-top: 16px;
+	border-top: 1px solid var(--sand-2);
+}
+.answer {
+	margin-top: 8px;
+	color: var(--ink-2);
+}
+
+@media (min-width: 768px) {
+	.list {
+		grid-template-columns: 1fr 1fr;
+		column-gap: 48px;
+	}
+}
+
+@media (min-width: 1200px) {
+	.grid {
+		grid-template-columns: 360px 1fr;
+		gap: 64px;
+	}
+	.head {
+		position: sticky;
+		top: 112px;
+		align-self: start;
+	}
+}

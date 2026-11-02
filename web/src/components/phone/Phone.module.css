@@ -1,0 +1,32 @@
+/* The device: a dark frame, 10 px of bezel, the screen inside at the app's size, scaled. */
+.device {
+	--phone-scale: 0.5;
+	--bezel: 10px;
+	position: relative;
+	flex: none;
+	width: calc(390px * var(--phone-scale) + var(--bezel) * 2);
+	height: calc(844px * var(--phone-scale) + var(--bezel) * 2);
+	padding: var(--bezel);
+	border-radius: calc(72px * var(--phone-scale) + var(--bezel));
+	background: var(--device);
+	box-shadow: var(--float);
+}
+
+.screen {
+	position: relative;
+	width: calc(390px * var(--phone-scale));
+	height: calc(844px * var(--phone-scale));
+	overflow: hidden;
+	border-radius: calc(72px * var(--phone-scale));
+	background: var(--paper);
+}
+
+.canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 390px;
+	height: 844px;
+	transform: scale(var(--phone-scale));
+	transform-origin: 0 0;
+}

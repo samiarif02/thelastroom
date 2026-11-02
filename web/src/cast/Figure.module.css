@@ -1,0 +1,187 @@
+/*
+ * The cast in motion (direction.md, "Characters"): expressions blend over 300 ms on the base
+ * curve (the faces cross-fade, the head tilts), and while idle a figure breathes (the torso,
+ * 1.0 → 1.01 over 4 s), sways (±1° over 9 s) and blinks every few seconds (120 ms). Only
+ * transform and opacity move. Reduced motion stops the idle and makes the blend a plain fade.
+ * The idle starts once the page has loaded (PageMotion sets `motion-ready`), so it never competes
+ * with the first paint.
+ */
+.figure {
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+.sway,
+.torso,
+.head,
+.eyes {
+	transform-box: view-box;
+}
+
+.sway,
+.torso {
+	transform-origin: 100px 200px;
+}
+
+.head {
+	transform-origin: 100px 140px;
+	transition: transform var(--move) var(--ease);
+}
+
+.eyes {
+	transform-origin: 100px 86px;
+}
+
+.face {
+	opacity: 0;
+	transition: opacity var(--fade) var(--ease);
+}
+
+/* The resting expression, or the one a script set. */
+.figure[data-expr='neutral'] [data-face='neutral'],
+.figure[data-expr='listening'] [data-face='listening'],
+.figure[data-expr='thinking'] [data-face='thinking'],
+.figure[data-expr='nod'] [data-face='nod'],
+.figure[data-expr='smile'] [data-face='smile'],
+.figure[data-expr='hmm'] [data-face='hmm'],
+.figure[data-expr='talk'] [data-face='talk'] {
+	opacity: 1;
+}
+
+.figure[data-expr='listening'] .head {
+	transform: translateY(1.5px) rotate(3.5deg);
+}
+.figure[data-expr='thinking'] .head {
+	transform: rotate(-5deg);
+}
+.figure[data-expr='nod'] .head {
+	transform: translateY(4px) rotate(1.5deg);
+}
+.figure[data-expr='smile'] .head {
+	transform: rotate(2.5deg);
+}
+.figure[data-expr='hmm'] .head {
+	transform: rotate(-2.5deg);
+}
+.figure[data-expr='talk'] .head {
+	transform: rotate(1deg);
+}
+
+/* A reaction on hover or keyboard focus of the card it sits in. */
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover] [data-face] {
+	opacity: 0;
+}
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='nod'] [data-face='nod'],
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='smile'] [data-face='smile'],
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='talk'] [data-face='talk'],
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='listening'] [data-face='listening'],
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='thinking'] [data-face='thinking'],
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='hmm'] [data-face='hmm'] {
+	opacity: 1;
+}
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='nod'] .head {
+	transform: translateY(4px) rotate(1.5deg);
+}
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='smile'] .head {
+	transform: rotate(2.5deg);
+}
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='talk'] .head {
+	transform: rotate(1deg);
+}
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='listening'] .head {
+	transform: translateY(1.5px) rotate(3.5deg);
+}
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='thinking'] .head {
+	transform: rotate(-5deg);
+}
+:global(.react-host):is(:hover, :focus-within) .figure[data-hover='hmm'] .head {
+	transform: rotate(-2.5deg);
+}
+
+/* Talking: the open mouth and the resting one take turns, a syllable each. */
+.rest {
+	opacity: 0;
+}
+:global(.motion-ready) .syllable {
+	animation: syllable 360ms steps(1, end) infinite;
+}
+:global(.motion-ready) .rest {
+	animation: syllable 360ms steps(1, end) infinite reverse;
+}
+
+@keyframes syllable {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0;
+	}
+}
+
+:global(.motion-ready) .idle .sway {
+	animation: sway 9s var(--ease) infinite alternate;
+}
+:global(.motion-ready) .idle .torso {
+	animation: breathe 4s var(--ease) infinite alternate;
+}
+:global(.motion-ready) .idle .eyes {
+	animation: blink 5.2s var(--ease) infinite;
+	animation-delay: var(--blink-delay, 0ms);
+}
+.idle[data-person='Marcus'] .eyes {
+	animation-duration: 4.6s;
+}
+.idle[data-person='Lena'] .eyes {
+	animation-duration: 5.8s;
+}
+.idle[data-person='Sam'] .eyes {
+	animation-duration: 4.2s;
+}
+
+@keyframes sway {
+	from {
+		transform: rotate(-1deg);
+	}
+	to {
+		transform: rotate(1deg);
+	}
+}
+
+@keyframes breathe {
+	from {
+		transform: scale(1);
+	}
+	to {
+		transform: scale(1.01);
+	}
+}
+
+/* 120 ms closed out of every cycle. */
+@keyframes blink {
+	0%,
+	96% {
+		transform: scaleY(1);
+	}
+	97.2% {
+		transform: scaleY(0.1);
+	}
+	98.4%,
+	100% {
+		transform: scaleY(1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:global(.motion-ready) .idle .sway,
+	:global(.motion-ready) .idle .torso,
+	:global(.motion-ready) .idle .eyes,
+	:global(.motion-ready) .syllable,
+	:global(.motion-ready) .rest {
+		animation: none;
+	}
+	.head {
+		transition: none;
+	}
+}

@@ -1,0 +1,82 @@
+.wrap {
+	display: grid;
+	justify-items: start;
+	gap: 16px;
+}
+
+/* Tactile: a hard honey edge below; it lifts on hover and sinks as the edge collapses on press. */
+.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 56px;
+	padding: 12px 24px;
+	border-radius: 16px;
+	background: var(--honey);
+	box-shadow: 0 4px 0 var(--honey-edge);
+	color: var(--on-honey);
+	text-decoration: none;
+	transition:
+		transform var(--press) var(--ease),
+		box-shadow var(--press) var(--ease);
+}
+.button svg {
+	font-size: 20px;
+}
+.button:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 0 var(--honey-edge);
+}
+.button:active {
+	transform: translateY(4px);
+	box-shadow: 0 0 0 var(--honey-edge);
+}
+.button:focus-visible {
+	outline-offset: 6px;
+	border-radius: 16px;
+}
+
+.risk {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 16px;
+	color: var(--ink-2);
+}
+.risk li {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+.risk svg {
+	color: var(--ch1);
+	font-size: 16px;
+}
+.short {
+	display: none;
+}
+
+@media (max-width: 767px) {
+	.wrap {
+		justify-items: stretch;
+	}
+	.risk {
+		gap: 8px 12px;
+	}
+	.long {
+		display: none;
+	}
+	.short {
+		display: inline;
+	}
+}
+
+.onDark .risk {
+	color: var(--white);
+}
+.onDark .risk svg {
+	color: var(--honey);
+}
+.onDark .button:focus-visible {
+	outline-color: var(--honey);
+}

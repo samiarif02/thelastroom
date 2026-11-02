@@ -1,0 +1,66 @@
+.main {
+	min-height: 100dvh;
+	padding-top: 24px;
+	padding-bottom: 64px;
+}
+.home {
+	display: inline-flex;
+	padding: 8px 0;
+	text-decoration: none;
+}
+.grid {
+	display: grid;
+	gap: 32px;
+	align-items: center;
+	margin-top: 48px;
+}
+.arch {
+	width: 240px;
+	height: 280px;
+	overflow: hidden;
+	border-radius: 9999px 9999px 24px 24px;
+	background: var(--ch1-tint);
+}
+.kicker {
+	color: var(--ch1-deep);
+}
+.body {
+	max-width: 480px;
+	margin-top: 16px;
+	color: var(--ink-2);
+}
+.button {
+	display: inline-flex;
+	align-items: center;
+	min-height: 56px;
+	margin-top: 32px;
+	padding: 12px 24px;
+	border-radius: 16px;
+	background: var(--honey);
+	box-shadow: 0 4px 0 var(--honey-edge);
+	color: var(--on-honey);
+	text-decoration: none;
+	transition:
+		transform var(--press) var(--ease),
+		box-shadow var(--press) var(--ease);
+}
+.button:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 0 var(--honey-edge);
+}
+.button:active {
+	transform: translateY(4px);
+	box-shadow: 0 0 0 var(--honey-edge);
+}
+
+@media (min-width: 768px) {
+	.grid {
+		grid-template-columns: 320px 1fr;
+		gap: 64px;
+		margin-top: 96px;
+	}
+	.arch {
+		width: 320px;
+		height: 380px;
+	}
+}

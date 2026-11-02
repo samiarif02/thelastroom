@@ -1,0 +1,204 @@
+.header {
+	position: fixed;
+	top: 16px;
+	left: 0;
+	right: 0;
+	z-index: var(--z-nav);
+	display: flex;
+	justify-content: center;
+	padding-inline: 16px;
+	pointer-events: none;
+}
+
+.bar {
+	display: flex;
+	align-items: center;
+	gap: 24px;
+	padding: 8px 8px 8px 16px;
+	border-radius: 16px;
+	background: color-mix(in srgb, var(--raised) 72%, transparent);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	box-shadow: 0 8px 24px rgb(94 72 40 / 0.1);
+	pointer-events: auto;
+}
+
+.home {
+	display: inline-flex;
+	padding: 4px 0;
+	text-decoration: none;
+}
+
+.links {
+	display: flex;
+	gap: 4px;
+}
+
+.link {
+	display: block;
+	padding: 8px 12px;
+	border-radius: 8px;
+	color: var(--ink-2);
+	text-decoration: none;
+	transition:
+		color var(--fade) var(--ease),
+		background-color var(--fade) var(--ease);
+}
+.link:hover {
+	color: var(--ink);
+	background: color-mix(in srgb, var(--sand) 60%, transparent);
+}
+.link[aria-current] {
+	color: var(--ink);
+	background: var(--sand);
+}
+
+.cta {
+	padding: 8px 12px;
+	border-radius: 8px;
+	background: var(--honey);
+	box-shadow: 0 2px 0 var(--honey-edge);
+	color: var(--on-honey);
+	text-decoration: none;
+	white-space: nowrap;
+	transition:
+		transform var(--press) var(--ease),
+		box-shadow var(--press) var(--ease);
+}
+.cta:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 3px 0 var(--honey-edge);
+}
+.cta:active {
+	transform: translateY(2px);
+	box-shadow: 0 0 0 var(--honey-edge);
+}
+
+/* The menu tile: three lines that turn into a cross. */
+.menuButton {
+	display: none;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: var(--sand);
+	color: var(--ink);
+	cursor: pointer;
+}
+.lines {
+	position: relative;
+	display: block;
+	width: 18px;
+	height: 14px;
+}
+.lines span {
+	position: absolute;
+	left: 0;
+	width: 18px;
+	height: 2px;
+	border-radius: 1px;
+	background: currentColor;
+	transition:
+		transform var(--move) var(--ease),
+		opacity var(--fade) var(--ease);
+}
+.lines span:nth-child(1) {
+	top: 0;
+}
+.lines span:nth-child(2) {
+	top: 6px;
+}
+.lines span:nth-child(3) {
+	top: 12px;
+}
+.menuButton[aria-expanded='true'] .lines span:nth-child(1) {
+	transform: translateY(6px) rotate(45deg);
+}
+.menuButton[aria-expanded='true'] .lines span:nth-child(2) {
+	opacity: 0;
+	transform: scaleX(0.2);
+}
+.menuButton[aria-expanded='true'] .lines span:nth-child(3) {
+	transform: translateY(-6px) rotate(-45deg);
+}
+
+/* The phone's menu: a full-height panel; links rise 24 px and fade in, 60 ms apart. */
+.panel {
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	padding: 96px 24px 48px;
+	background: color-mix(in srgb, var(--paper) 94%, transparent);
+	backdrop-filter: blur(24px);
+	-webkit-backdrop-filter: blur(24px);
+	pointer-events: auto;
+}
+.panel[hidden] {
+	display: none;
+}
+.panel ul {
+	display: grid;
+	gap: 8px;
+}
+.panel li {
+	animation: arrive var(--move) var(--ease) backwards;
+	animation-delay: min(calc(var(--i) * 60ms), 400ms);
+}
+.panelLink {
+	display: block;
+	padding: 8px 0;
+	color: var(--ink);
+	text-decoration: none;
+}
+.panelLink[aria-current] {
+	color: var(--ch1-deep);
+}
+
+.locked {
+	overflow: hidden;
+}
+
+@keyframes arrive {
+	from {
+		opacity: 0;
+		transform: translateY(24px);
+	}
+}
+
+@media (max-width: 899px) {
+	.bar {
+		flex: 1;
+		justify-content: space-between;
+		gap: 12px;
+	}
+	.links,
+	.cta {
+		display: none;
+	}
+	.menuButton {
+		display: grid;
+	}
+}
+
+@media (min-width: 900px) {
+	.panel {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.panel li {
+		animation-name: fade;
+	}
+	.lines span {
+		transition: opacity var(--fade) var(--ease);
+	}
+}
+
+@keyframes fade {
+	from {
+		opacity: 0;
+	}
+}
