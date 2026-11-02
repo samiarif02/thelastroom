@@ -70,7 +70,10 @@ void main() {
     await rig.until(find.byType(ProgressScreen));
     await rig.run(const Duration(milliseconds: 300));
     final report = ProgressReport.of(missions, attempts, first);
-    expect(find.bySemanticsLabel('2 of 7 missions done'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('2 of ${missions.length} missions done'),
+      findsOneWidget,
+    );
     expect(find.bySemanticsLabel('AVERAGE: ${report.average}'), findsOneWidget);
     final delta = report.sinceBaseline!.totalDelta;
     expect(
@@ -106,7 +109,10 @@ void main() {
         findsWidgets,
       );
     }
-    expect(find.text(ProgressScreen.notPlayed), findsNWidgets(5));
+    expect(
+      find.text(ProgressScreen.notPlayed),
+      findsNWidgets(missions.length - 2),
+    );
   });
 
   testWidgets('auto-advance and calm mode switch from the file', (

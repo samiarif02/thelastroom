@@ -32,15 +32,12 @@ void main() {
     expect(validateContent(opened), isEmpty);
   });
 
-  test(
-    'Chapter 3 waits for the voice player: locked, its missions not yet played',
-    () {
-      expect(chapterThree.playable, isFalse);
-      for (final m in chapterThreeMissions) {
-        expect(missions.any((p) => p.id == m.id), isFalse, reason: m.id);
-      }
-    },
-  );
+  test('Chapter 3 is open, and its missions are in the game (brief 39)', () {
+    expect(chapterThree.playable, isTrue);
+    for (final m in chapterThreeMissions) {
+      expect(missions.any((p) => p.id == m.id), isTrue, reason: m.id);
+    }
+  });
 
   test('missions 15–21, titled as the tower teases them', () {
     expect(

@@ -34,7 +34,7 @@ void main() {
         RoomState.done,
         RoomState.done,
         RoomState.current,
-        ...List.filled(4, RoomState.locked),
+        ...List.filled(missions.length - 3, RoomState.locked),
       ]);
       final best = weak.score.total > strong.score.total ? weak : strong;
       expect(rooms[0].best, best.score.total);
@@ -52,11 +52,16 @@ void main() {
 
     test('the hero offers the current room, then the weakest to beat', () {
       expect(heroRoom(towerRooms(missions, const []))!.mission, missions[0]);
-      final all = [
-        for (var i = 0; i < missions.length; i++)
-          playedAttempt(missions[i], pick: i == 3 ? 2 : 0),
+      // Every Chapter 1 mission played (the helper plays choices missions), one weaker.
+      final chapterOne = [
+        for (final m in missions)
+          if (m.chapter == 1) m,
       ];
-      final rooms = towerRooms(missions, all);
+      final all = [
+        for (var i = 0; i < chapterOne.length; i++)
+          playedAttempt(chapterOne[i], pick: i == 3 ? 2 : 0),
+      ];
+      final rooms = towerRooms(chapterOne, all);
       final weakest = rooms.reduce((a, b) => a.best! <= b.best! ? a : b);
       expect(heroRoom(rooms), weakest);
     });

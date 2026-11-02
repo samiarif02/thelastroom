@@ -41,17 +41,17 @@ void main() {
     );
   });
 
-  test(
-    'Chapters 2 and 3 are locked, with seven mission titles each (FR-31)',
-    () {
-      expect([for (final c in gameContent.chapters) c.number], [1, 2, 3]);
-      expect(gameContent.chapters.first.playable, isTrue);
-      for (final chapter in gameContent.chapters.skip(1)) {
-        expect(chapter.playable, isFalse);
-        expect(chapter.missionTitles, hasLength(7));
-      }
-    },
-  );
+  test('all three chapters are playable, with seven missions each (owner, 2026-11-02)', () {
+    expect([for (final c in gameContent.chapters) c.number], [1, 2, 3]);
+    for (final chapter in gameContent.chapters) {
+      expect(chapter.playable, isTrue);
+      expect(chapter.missionTitles, hasLength(7));
+      expect(
+        gameContent.missions.where((m) => m.chapter == chapter.number),
+        hasLength(7),
+      );
+    }
+  });
 
   test('each interviewer runs the missions brief §6 gives them', () {
     const expected = {

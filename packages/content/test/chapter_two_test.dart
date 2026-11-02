@@ -46,12 +46,13 @@ void main() {
     expect(validateContent(flipped), isEmpty);
   });
 
-  // The app plays a mission by its beats until the voice player (brief 35) merges, so the
-  // chapter stays locked here. The flip: `playable: true` in chapters.dart,
-  // `...chapterTwoMissions` in `missions`, and this test turned round.
-  test('Chapter 2 stays locked until the voice player merges (brief 35)', () {
-    expect(chapterTwo.playable, isFalse);
-    expect(gameContent.missions.where((m) => m.chapter == 2), isEmpty);
+  // The voice player (brief 35) is in, so Chapter 2 is open and played (brief 39).
+  test('Chapter 2 is open, and its missions are in the game', () {
+    expect(chapterTwo.playable, isTrue);
+    expect(
+      [for (final m in gameContent.missions.where((m) => m.chapter == 2)) m.id],
+      [for (final m in chapterTwoMissions) m.id],
+    );
   });
 
   test('every Chapter 2 mission is answered by voice: no beats, no option follow-ups', () {
