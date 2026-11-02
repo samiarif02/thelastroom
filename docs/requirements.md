@@ -138,6 +138,10 @@ new email form.**
     ring sits at the top.
   - [10] Skills come from `newlyUnlockedSkills`; a hinted attempt unlocks none (engine test).
   - [13] XP and the Recall Room screen.
+  - [32] XP: per attempt `missionXp` (20 + score ÷ 2, plus 30 on a first clear) and per recall
+    round `recallXp` (5 per card known, 1 per other answer); the debrief shows "+N XP". A skill
+    unlocks on an unhinted attempt that meets its requirement (`unlockedSkills`); the debrief
+    shows its card once, with its sound and `skill_unlocked`.
 - **FR-17** **[09]** Sound design: typing ticks, named cues and per-chapter ambience, under the
   scene and never in the way of it (D5; spec in `docs/sound-design.md`).
   - Every sound is licensed for this use, and the README credits each one.
@@ -227,7 +231,9 @@ new email form.**
 - **FR-40** **[04, 13]** Recall Room: a 2-minute warm-up of missed lessons, Leitner boxes at 1, 3 and 7 days.
 - **FR-41** **[13]** Skill radar (four dimensions, baseline vs. now) and "then vs. now" (Mission 1 draft
   beside the latest).
-- **FR-42** **[13]** No lives, no streak shaming; a soft weekly goal ("3 sessions this week").
+- **FR-42** **[13, 32]** No lives, no streak shaming; a soft weekly goal ("3 sessions this week").
+  - [32] Sessions are days with a mission or a Recall Room round, Monday to today
+    (`sessionsThisWeek`); the ring never shames ("A new week: 0 of 3 sessions so far").
 
 ### Notifications (brief §8, mobile only)
 
@@ -273,7 +279,8 @@ new email form.**
     shows each one in the log while playing Mission 1.
   - `user_activated` fires exactly once per player, on the first `mission_completed`, even
     across restarts (stored locally).
-- **FR-71** **[14, 15]** Metrics: activation, D1/D3/D7 return, median score delta (Mission 1 → 7), Mission 3
+- **FR-71** **[14, 15]** **Cut for v1 (owner, 1 Nov): events are defined and logged locally; a
+  PostHog sink is v2.** Metrics: activation, D1/D3/D7 return, median score delta (Mission 1 → 7), Mission 3
   recall pass rate, notification open rate by type and variant.
 
 ## Non-functional requirements
