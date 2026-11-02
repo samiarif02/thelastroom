@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>The Last Room · interview practice game</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="landing.css">
+<style>
+body.web.m { height: 844px; }
+.m .hero.wrap { padding-top: 96px; }
+.hero .kicker { margin-bottom: 12px; }
+.hero .sub { margin-top: 16px; }
+.hero .cta-main { margin-top: 24px; }
+.hero .risk { margin-top: 12px; gap: 12px; }
+.art { position: relative; margin: 32px 16px 0; height: 300px; }
+.art .arch-bg { position: absolute; inset: 0 48px 0 48px; background: var(--ch1); border-radius: 9999px 9999px 24px 24px; overflow: hidden; }
+.art .sky { position: absolute; left: 16px; right: 16px; top: 16px; height: 200px; border-radius: 9999px 9999px 8px 8px; background: var(--sky); }
+.art .who { position: absolute; left: 50%; bottom: 0; width: 280px; height: 280px; transform: translateX(-46%); }
+.art .chip { position: absolute; z-index: 3; background: var(--raised); border-radius: 16px; padding: 8px 12px; box-shadow: 0 8px 24px rgb(94 72 40 / 0.14); }
+.art .chip.say { left: 0; top: 56px; max-width: 168px; }
+.art .chip.say .caption-3 { color: var(--ch1-deep); }
+.art .chip.xp { right: 0; top: 168px; background: var(--honey); color: var(--on-honey); box-shadow: 0 4px 0 var(--honey-edge); transform: rotate(-4deg); font: 600 14px/20px var(--ui); display: flex; gap: 4px; align-items: center; }
+</style>
+</head>
+<body class="web m">
+<nav class="topnav" aria-label="Main">
+	<span class="brand"><span class="mark" aria-hidden="true"></span>The Last Room</span>
+	<span class="menu" aria-label="Open the menu"><i class="ph-bold ph-list"></i></span>
+</nav>
+<main>
+<section class="hero wrap">
+	<p class="kicker caption-3"><b></b>An interview practice game for graduates</p>
+	<h1 class="h1">Rehearse the interview before the real one.</h1>
+	<p class="sub body-3">Four interviewers ask you 21 real questions. Pick your lines or say them out loud, then get a scored debrief with one lesson to keep.</p>
+	<a class="cta-main" href="#get"><i class="ph-bold ph-android-logo"></i>Get the free Android preview</a>
+	<p class="risk caption-4"><span><i class="ph-bold ph-check"></i>No sign up</span><span><i class="ph-bold ph-check"></i>Plays offline</span><span><i class="ph-bold ph-check"></i>Voice never stored</span></p>
+</section>
+<div class="art" aria-label="Marcus, the hiring manager">
+	<div class="arch-bg"><div class="sky"></div><div class="cast who" data-cast="marcus" data-expr="listening"></div></div>
+	<div class="chip say"><p class="caption-3">Marcus</p><p class="body-5">“What did you actually do?”</p></div>
+	<div class="chip xp"><i class="ph-fill ph-lightning"></i>+40 XP</div>
+</div>
+</main>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

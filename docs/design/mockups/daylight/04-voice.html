@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Mission, voice answer</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mission.css">
+<style>
+.bar .title { flex: 1; }
+.bar .title .caption-4 { color: var(--ink-2); }
+.bar .mode { background: var(--raised); color: var(--ch-deep); box-shadow: 0 2px 0 var(--sand-2); height: 32px; padding: 0 12px; border-radius: 8px; }
+.room .live { position: absolute; left: 16px; top: 16px; z-index: 2; background: var(--raised); color: var(--ink); }
+.room .live b { width: 8px; height: 8px; border-radius: 4px; background: var(--trap); }
+.room .listen { position: absolute; right: 16px; top: 16px; z-index: 2; background: rgb(255 255 255 / 0.7); color: var(--ch-deep); }
+.points { margin: 16px 16px 0; padding: 16px; background: var(--raised); border-radius: 24px; box-shadow: var(--edge); }
+.points h2 { display: flex; justify-content: space-between; align-items: baseline; }
+.points h2 span { color: var(--ink-2); }
+.points ol { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.points li { display: flex; gap: 12px; align-items: center; }
+.points li .n { flex: none; width: 24px; height: 24px; border-radius: 6px; background: var(--ch-tint); color: var(--ch-deep); display: grid; place-items: center; font: 600 12px/16px var(--ui); }
+.points .private { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--sand); display: flex; gap: 8px; align-items: center; color: var(--ink-2); }
+.points .private i { font-size: 16px; }
+.recorder {
+	position: fixed; left: 16px; right: 16px; bottom: 24px;
+	background: var(--ch);
+	border-radius: 24px;
+	padding: 16px;
+	color: #fff;
+	box-shadow: 0 4px 0 var(--ch-deep);
+}
+.recorder .top { display: flex; align-items: center; gap: 16px; }
+.recorder .time { width: 72px; }
+.recorder .time .heading-5 { color: #fff; }
+.recorder .time .caption-4 { color: var(--ch-soft); }
+.recorder .wave { flex: 1; height: 48px; display: flex; align-items: center; gap: 3px; }
+.recorder .wave i { flex: 1; border-radius: 2px; background: #fff; }
+.recorder .wave i.future { background: rgb(255 255 255 / 0.28); }
+.recorder .stop { flex: none; width: 64px; height: 64px; border-radius: 16px; background: var(--honey); box-shadow: 0 4px 0 var(--honey-edge); display: grid; place-items: center; color: var(--on-honey); font-size: 28px; }
+.recorder .links { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgb(255 255 255 / 0.18); }
+.recorder .links a { color: #fff; text-decoration: none; display: flex; gap: 4px; align-items: center; }
+.recorder .links a.soft { color: var(--ch-soft); }
+</style>
+</head>
+<body class="ch2">
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<header class="bar">
+	<span class="iconbtn" aria-label="Leave the room"><i class="ph-bold ph-x"></i></span>
+	<div class="title"><p class="caption-4">Floor 2 · room 11</p><h1 class="body-1">Tight deadline</h1></div>
+	<span class="tag mode"><i class="ph-bold ph-microphone"></i>Out loud</span>
+</header>
+
+<section class="stage" aria-label="Marcus listens">
+	<div class="room">
+		<span class="tag live"><b></b>Recording</span>
+		<span class="tag listen"><i class="ph-bold ph-ear"></i>Listening</span>
+		<div class="glass"><div class="city"><i style="left:4px;width:22px;height:36px"></i><i style="left:30px;width:28px;height:58px"></i><i style="left:62px;width:18px;height:30px"></i><i style="left:84px;width:30px;height:48px"></i><i style="left:118px;width:26px;height:34px"></i><i style="left:148px;width:24px;height:62px"></i><i style="left:176px;width:30px;height:40px"></i></div></div>
+		<div class="plant"><span></span><span></span><span></span></div>
+		<div class="cast who" data-cast="marcus" data-expr="listening"></div>
+		<div class="desk"></div>
+	</div>
+	<div class="bubble">
+		<p class="caption-3 speaker">Marcus · hiring manager</p>
+		<p class="heading-6">Tell me about a time you had too much to do and not enough time.</p>
+	</div>
+</section>
+
+<section class="points">
+	<h2 class="body-1">Points to cover <span class="caption-4">your own story, or the practice CV</span></h2>
+	<ol>
+		<li><span class="n">1</span><p class="body-6">The squeeze: what was due, and by when</p></li>
+		<li><span class="n">2</span><p class="body-6">What you did first, and why it mattered most</p></li>
+		<li><span class="n">3</span><p class="body-6">What you cut, and who you told</p></li>
+		<li><span class="n">4</span><p class="body-6">What you delivered, and what you'd plan now</p></li>
+	</ol>
+	<p class="private caption-4"><i class="ph-bold ph-lock-simple"></i>Nothing is scored while you talk. The audio stays on this phone.</p>
+</section>
+
+<section class="recorder" aria-label="Recorder">
+	<div class="top">
+		<div class="time"><p class="heading-5 tnum">0:47</p><p class="caption-4 tnum">of 2:00</p></div>
+		<div class="wave" aria-hidden="true" id="wave"></div>
+		<span class="stop" aria-label="Stop and send"><i class="ph-fill ph-stop"></i></span>
+	</div>
+	<div class="links"><a class="body-4" href="#pause"><i class="ph-bold ph-pause"></i>Pause</a><a class="body-5 soft" href="#again"><i class="ph-bold ph-arrow-counter-clockwise"></i>Start again</a></div>
+</section>
+<script src="../shared/cast.js"></script>
+<script>
+Cast.mount()
+const h=[10,18,26,14,32,40,22,12,28,44,36,18,24,38,30,16,12,22,34,26,14,8,6,6,6,6,6,6,6,6]
+document.getElementById('wave').innerHTML=h.map((v,i)=>`<i class="${i>21?'future':''}" style="height:${v}px"></i>`).join('')
+</script>
+</body>
+</html>

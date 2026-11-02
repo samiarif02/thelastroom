@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Floor cleared</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<style>
+body { background: var(--ch1); color: #fff; }
+.status { color: #fff; }
+.fx { position: absolute; inset: 0; z-index: 0; }
+header { position: relative; z-index: 2; padding: 8px 24px 0; }
+header .caption-3 { color: var(--honey); display: flex; gap: 4px; align-items: center; }
+header h1 { margin-top: 8px; }
+.badge { position: relative; z-index: 2; width: 184px; margin: 16px auto 0; }
+.badge svg { display: block; }
+.badge-note { position: relative; z-index: 2; text-align: center; color: var(--ch1-soft); margin-top: 8px; }
+.panel { position: relative; z-index: 2; display: flex; justify-content: center; gap: 12px; margin-top: 16px; }
+.panel .w { width: 80px; height: 96px; background: var(--honey); position: relative; border: 4px solid #fff6dc; }
+.panel .w .cast { position: absolute; left: -8px; right: -8px; bottom: 0; height: 88px; }
+.stats { position: relative; z-index: 2; margin: 16px 16px 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.stats div { background: var(--ch1-deep); border-radius: 16px; padding: 12px; }
+.stats .caption-4 { color: var(--ch1-soft); }
+.stats .v { font: 600 20px/28px var(--display); color: #fff; }
+.stats .v small { font: 500 14px/20px var(--ui); color: var(--ch1-soft); }
+.stats .ring { display: flex; align-items: center; gap: 8px; }
+.tease { position: relative; z-index: 2; margin: 12px 16px 0; padding: 12px; border-radius: 16px; background: var(--ch2); display: flex; gap: 12px; align-items: center; box-shadow: 0 4px 0 var(--ch2-deep); }
+.tease .lock { width: 40px; height: 40px; border-radius: 8px; background: var(--ch2-soft); color: var(--ch2-deep); display: grid; place-items: center; font-size: 20px; }
+.tease .caption-4 { color: var(--ch2-soft); }
+.cta { position: relative; margin: 16px 16px 0; z-index: 2; }
+.cta a { display: flex; justify-content: center; gap: 4px; align-items: center; margin-top: 8px; color: #fff; text-decoration: none; }
+</style>
+</head>
+<body>
+<svg class="fx" width="390" height="844" viewBox="0 0 390 844" aria-hidden="true">
+	<g fill="#ffffff" opacity=".07">
+		<path d="M195 330 L120 0 H180Z"/><path d="M195 330 L240 0 H300Z"/><path d="M195 330 L390 60 V150Z"/><path d="M195 330 L0 110 V200Z"/><path d="M195 330 L390 330 V420Z"/><path d="M195 330 L0 380 V460Z"/>
+	</g>
+	<g>
+		<path d="M30 236 v-10 a6 6 0 0 1 12 0 v10z" fill="var(--honey)" transform="rotate(-18 36 231)"/>
+		<rect x="330" y="128" width="10" height="16" rx="2" fill="var(--ch3-soft)" transform="rotate(24 335 136)"/>
+		<path d="M318 230 v-10 a6 6 0 0 1 12 0 v10z" fill="#fff" transform="rotate(16 324 225)"/>
+		<rect x="58" y="268" width="8" height="14" rx="2" fill="var(--ch2-soft)" transform="rotate(-30 62 275)"/>
+		<rect x="300" y="300" width="9" height="15" rx="2" fill="var(--honey)" transform="rotate(40 304 307)"/>
+		<path d="M34 360 v-10 a6 6 0 0 1 12 0 v10z" fill="var(--ch1-soft)" transform="rotate(12 40 355)"/>
+		<rect x="350" y="380" width="8" height="12" rx="2" fill="#fff" transform="rotate(-14 354 386)"/>
+		<rect x="300" y="196" width="7" height="12" rx="2" fill="#fff" transform="rotate(30 303 202)"/>
+		<path d="M340 72 v-8 a5 5 0 0 1 10 0 v8z" fill="var(--ch2-soft)" transform="rotate(-24 345 68)"/>
+	</g>
+</svg>
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<header>
+	<p class="caption-3"><i class="ph-fill ph-buildings"></i>Floor 1 cleared · 7 of 7 rooms lit</p>
+	<h1 class="heading-3">You got through the door.</h1>
+</header>
+
+<div class="badge" role="img" aria-label="Badge: Evidence Builder">
+	<svg width="184" height="212" viewBox="0 0 184 212">
+		<path d="M14 206 V96 a78 78 0 0 1 156 0 V206Z" fill="var(--honey-edge)"/>
+		<path d="M14 200 V92 a78 78 0 0 1 156 0 V200Z" fill="var(--honey)"/>
+		<path d="M28 186 V96 a64 64 0 0 1 128 0 V186Z" fill="var(--ch1-deep)"/>
+		<path d="M36 178 V98 a56 56 0 0 1 112 0 V178Z" fill="none" stroke="#fff6dc" stroke-width="1.5" stroke-dasharray="3 5" opacity=".6"/>
+		<rect x="58" y="104" width="16" height="36" rx="3" fill="var(--ch1-soft)"/>
+		<rect x="80" y="84" width="16" height="56" rx="3" fill="#fff"/>
+		<rect x="102" y="66" width="16" height="74" rx="3" fill="var(--honey)"/>
+		<circle cx="118" cy="104" r="17" fill="none" stroke="#fff" stroke-width="6"/>
+		<path d="M130 116 L142 128" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+		<path d="M0 150 H184 L174 166 L184 182 H0 L10 166Z" fill="#fff"/>
+		<path d="M0 182 L10 166 L0 150 V182Z M184 182 L174 166 L184 150 V182Z" fill="#e3d8c6"/>
+		<text x="92" y="172" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="600" font-size="16" fill="var(--ink)">Evidence Builder</text>
+	</svg>
+</div>
+<p class="badge-note body-5">Earned in room 7, with no hints.</p>
+
+<div class="panel" aria-label="Priya, Marcus and Lena">
+	<div class="w arch"><div class="cast" data-cast="priya" data-expr="smile"></div></div>
+	<div class="w arch"><div class="cast" data-cast="marcus" data-expr="nod"></div></div>
+	<div class="w arch"><div class="cast" data-cast="lena" data-expr="smile"></div></div>
+</div>
+
+<div class="stats">
+	<div><p class="caption-4">Specificity</p><p class="v tnum">41 <small>to</small> 72</p></div>
+	<div><p class="caption-4">Total XP</p><p class="v tnum">1,247</p></div>
+	<div><p class="caption-4">This week</p><div class="ring"><svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="var(--honey)" stroke-width="5"/></svg><p class="v tnum">3/3</p></div></div>
+</div>
+
+<div class="tease"><span class="lock"><i class="ph-bold ph-lock-simple-open"></i></span><div><p class="body-4">Floor 2 is open: Under pressure</p><p class="caption-4">Seven rooms. You answer out loud.</p></div></div>
+
+<div class="cta">
+	<div class="btn"><i class="ph-bold ph-arrow-fat-lines-up"></i>Take the lift to floor 2</div>
+	<a class="body-4" href="#share"><i class="ph-bold ph-share-network"></i>Share your floor card</a>
+</div>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

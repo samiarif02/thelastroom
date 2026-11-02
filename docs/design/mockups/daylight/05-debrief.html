@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Debrief</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mission.css">
+<style>
+body { background: var(--paper); }
+.bar .title { flex: 1; }
+.bar .title .caption-4 { color: var(--ink-2); }
+.verdict { display: flex; gap: 12px; align-items: flex-end; margin: 8px 16px 0; }
+.verdict .face { flex: none; width: 88px; height: 104px; background: var(--ch-soft); position: relative; }
+.verdict .face .cast { position: absolute; left: -10px; right: -10px; bottom: 0; height: 100px; }
+.verdict .bubble { margin: 0 0 8px; flex: 1; box-shadow: var(--edge); }
+.verdict .bubble::before { top: auto; bottom: 16px; left: -6px; }
+.score { margin: 16px 16px 0; padding: 16px; background: var(--raised); border-radius: 24px; box-shadow: var(--edge); }
+.score .top { display: flex; gap: 16px; align-items: center; }
+.dial { position: relative; width: 112px; height: 112px; flex: none; }
+.dial svg { display: block; }
+.dial .n { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; }
+.dial .n .caption-4 { color: var(--ink-2); text-align: center; }
+.score .sum h2 { margin-bottom: 8px; }
+.score .sum .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.score .up { background: var(--ch-tint); color: var(--ch-deep); }
+.score .xp { background: var(--honey); color: var(--on-honey); }
+.dims { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px; }
+.dims li .row { display: flex; justify-content: space-between; align-items: baseline; }
+.dims li .bar2 { margin-top: 4px; height: 8px; border-radius: 4px; background: var(--sand); position: relative; overflow: hidden; }
+.dims li .bar2 b { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--ch); }
+.dims li .why { margin-top: 4px; color: var(--ink-2); }
+.dims li.low .bar2 b { background: var(--trap); }
+.dims li.low .row .body-4 { color: var(--trap); }
+.cost { margin: 12px 16px 0; padding: 16px; background: var(--trap-tint); border-radius: 24px; }
+.cost .caption-3 { color: var(--trap); display: flex; gap: 4px; align-items: center; }
+.cost p.body-2 { margin-top: 4px; }
+.cost p.body-6 { margin-top: 4px; color: var(--ink-2); }
+.dock { background: var(--paper); }
+</style>
+</head>
+<body class="ch1">
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<header class="bar">
+	<span class="iconbtn" aria-label="Close"><i class="ph-bold ph-x"></i></span>
+	<div class="title"><p class="caption-4">Debrief · floor 1 · room 4</p><h1 class="body-1">Show me the evidence</h1></div>
+</header>
+
+<section class="verdict">
+	<div class="face arch"><div class="cast" data-cast="marcus" data-expr="smile"></div></div>
+	<div class="bubble">
+		<p class="caption-3 speaker">Marcus</p>
+		<p class="body-2">600 tickets, one in three. That I believe. Next time, keep the reply about you.</p>
+	</div>
+</section>
+
+<section class="score" aria-label="Score 78 of 100">
+	<div class="top">
+		<div class="dial">
+			<svg width="112" height="112" viewBox="0 0 112 112">
+				<circle cx="56" cy="56" r="48" fill="none" stroke="var(--sand)" stroke-width="10"/>
+				<circle cx="56" cy="56" r="48" fill="none" stroke="var(--ch)" stroke-width="10" stroke-linecap="round" stroke-dasharray="235.2 301.6" transform="rotate(-90 56 56)"/>
+			</svg>
+			<div class="n"><p class="heading-2 tnum">78</p><p class="caption-4">of 100</p></div>
+		</div>
+		<div class="sum">
+			<h2 class="heading-6">A strong answer</h2>
+			<div class="tags"><span class="tag up"><i class="ph-bold ph-trend-up"></i><span class="tnum">+14 since room 1</span></span><span class="tag xp tnum"><i class="ph-fill ph-lightning"></i>+40 XP</span></div>
+		</div>
+	</div>
+	<ul class="dims">
+		<li><div class="row"><span class="title-4">Relevance</span><span class="body-4 tnum">84</span></div><div class="bar2"><b style="width:84%"></b></div><p class="caption-4 why">You answered what he asked: your part, with data.</p></li>
+		<li><div class="row"><span class="title-4">Specificity</span><span class="body-4 tnum">81</span></div><div class="bar2"><b style="width:81%"></b></div><p class="caption-4 why">A count (600), a share (one in three) and your own action.</p></li>
+		<li><div class="row"><span class="title-4">Structure</span><span class="body-4 tnum">76</span></div><div class="bar2"><b style="width:76%"></b></div><p class="caption-4 why">Open, evidence, land in order. The close ran a little long.</p></li>
+		<li class="low"><div class="row"><span class="title-4">Adaptability</span><span class="body-4 tnum">63</span></div><div class="bar2"><b style="width:63%"></b></div><p class="caption-4 why">Your reply to his follow up said “we” twice.</p></li>
+	</ul>
+</section>
+
+<section class="cost">
+	<p class="caption-3"><i class="ph-bold ph-push-pin"></i>The line that cost the most</p>
+	<p class="body-2">“We'd probably do it the same way again, as a team.”</p>
+	<p class="body-6">He asked what you would do. Back in your Recall Room on Friday.</p>
+</section>
+
+<div class="dock"><div class="btn"><i class="ph-fill ph-lightbulb-filament"></i>Light room 4</div></div>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

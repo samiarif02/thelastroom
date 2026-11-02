@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Home, scrolled to the tower</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<style>
+main { padding: 8px 16px 0; transform: translateY(-520px); }
+.head { display: flex; justify-content: space-between; align-items: flex-start; }
+.head .date { color: var(--ink-2); }
+.ring { width: 56px; text-align: center; }
+.ring svg { display: block; }
+.ring .caption-4 { color: var(--ink-2); margin-top: 2px; }
+.tags { display: flex; gap: 8px; margin-top: 12px; }
+.tags .xp { background: #f8ead0; color: #6b4a08; }
+.tags .date { background: var(--sand); color: var(--ink-2); }
+
+.next {
+	margin-top: 48px;
+	background: var(--ch1);
+	border-radius: 24px;
+	padding: 16px;
+	color: #fff;
+	position: relative;
+}
+.next .top { display: flex; gap: 12px; }
+.next .copy { flex: 1; min-width: 0; padding-top: 4px; }
+.next .kicker { color: var(--ch1-soft); }
+.next h2 { margin-top: 8px; }
+.next p { margin-top: 8px; color: #e7f5ee; }
+.next .meta { display: flex; gap: 8px; margin-top: 12px; }
+.next .meta .tag { background: rgb(255 255 255 / 0.14); color: #fff; }
+.next .window {
+	flex: none;
+	width: 120px;
+	height: 148px;
+	margin-top: -48px;
+	background: var(--sky);
+	border: 4px solid #fff;
+	position: relative;
+}
+.next .window .sill { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: var(--ch1-deep); }
+.next .window .cast { position: absolute; left: -4px; right: -4px; bottom: 0; height: 132px; }
+.next .btn { margin-top: 16px; border-radius: 8px; }
+.next .says { margin-top: 12px; padding: 12px; border-radius: 8px; background: var(--ch1-deep); color: #fff; }
+.next .says span { display: block; margin-top: 4px; color: var(--ch1-soft); font: 500 12px/16px var(--ui); }
+
+.recall {
+	margin-top: 16px;
+	background: var(--recall-tint);
+	border-radius: 24px;
+	padding: 12px 16px 12px 12px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.recall .face { width: 48px; height: 56px; background: var(--recall-soft); flex: none; position: relative; }
+.recall .face .cast { position: absolute; inset: 4px -6px 0; }
+.recall .copy { flex: 1; }
+.recall .copy p { color: var(--ink-2); }
+.recall .due { color: var(--recall); }
+.recall > i { font-size: 20px; color: var(--recall); }
+
+.section { display: flex; justify-content: space-between; align-items: baseline; margin-top: 24px; }
+.section .caption-4 { color: var(--ink-2); }
+.tower { margin-top: 12px; border-radius: 24px; overflow: hidden; }
+.tower svg { display: block; }
+
+.skills { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
+.skills .b { display: grid; place-items: center; width: 64px; height: 76px; margin: 0 auto 8px; background: var(--sand); color: var(--ink-3); font-size: 28px; }
+.skills .next .b { background: #f8ead0; color: var(--honey-edge); box-shadow: 0 0 0 2px var(--honey); }
+.skills .hint { color: var(--ink-2); }
+.status { background: var(--paper); }
+nav {
+	position: fixed;
+	left: 16px;
+	right: 16px;
+	bottom: 24px;
+	height: 64px;
+	padding: 8px;
+	border-radius: 24px;
+	background: rgb(255 255 255 / 0.86);
+	backdrop-filter: blur(16px);
+	box-shadow: var(--lift);
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 4px;
+	z-index: 10;
+}
+nav a { border-radius: 16px; display: grid; place-items: center; align-content: center; gap: 0; color: var(--ink-2); text-decoration: none; position: relative; }
+nav a i { font-size: 22px; }
+nav a span { font: 500 12px/16px var(--ui); }
+nav a.on { background: var(--ink); color: #fff; }
+nav a .badge { position: absolute; top: 4px; right: 18px; min-width: 16px; height: 16px; border-radius: 4px; background: var(--recall); color: #fff; font: 600 12px/16px var(--ui); padding: 0 4px; }
+</style>
+</head>
+<body>
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<main>
+	<header class="head">
+		<div>
+			<p class="caption-4 date">Tuesday, 12 November</p>
+			<h1 class="heading-4">Morning, Sami.</h1>
+		</div>
+		<div class="ring" aria-label="Two of three sessions this week">
+			<svg width="56" height="56" viewBox="0 0 56 56">
+				<circle cx="28" cy="28" r="23" fill="none" stroke="var(--sand-2)" stroke-width="7"/>
+				<circle cx="28" cy="28" r="23" fill="none" stroke="var(--ch1)" stroke-width="7" stroke-linecap="round" stroke-dasharray="96.3 144.5" transform="rotate(-90 28 28)"/>
+				<text x="28" y="33" text-anchor="middle" font-family="Geist" font-weight="600" font-size="14" fill="var(--ink)">2/3</text>
+			</svg>
+			<p class="caption-4">this week</p>
+		</div>
+	</header>
+	<div class="tags">
+		<span class="tag xp"><i class="ph-fill ph-lightning"></i><span class="tnum">1,247 XP</span></span>
+		<span class="tag date"><i class="ph-bold ph-calendar-blank"></i>Interview in 9 days</span>
+	</div>
+
+	<section class="next" aria-label="Up next">
+		<div class="top">
+			<div class="copy">
+				<p class="caption-3 kicker">Up next · room 4 of 21</p>
+				<h2 class="heading-5">Show me the evidence</h2>
+				<div class="meta"><span class="tag"><i class="ph-bold ph-timer"></i>5 min</span><span class="tag"><i class="ph-bold ph-cards"></i>3 beats</span></div>
+			</div>
+			<div class="window arch"><div class="cast" data-cast="marcus" data-expr="listening"></div><div class="sill"></div></div>
+		</div>
+		<p class="body-6 says">“Tell me about a time you used data to change something.” <span>Marcus, hiring manager</span></p>
+		<div class="btn"><i class="ph-fill ph-play"></i>Start room 4</div>
+	</section>
+
+	<section class="recall" aria-label="Recall Room">
+		<div class="face arch"><div class="cast" data-cast="priya" data-expr="talk"></div></div>
+		<div class="copy">
+			<p class="caption-3 due">Recall Room · due today</p>
+			<h3 class="body-1">Two traps from Saturday</h3>
+			<p class="body-6">Priya kept notes. Two minutes.</p>
+		</div>
+		<i class="ph-bold ph-caret-right"></i>
+	</section>
+
+	<div class="section"><h3 class="heading-6">Northstar tower</h3><span class="caption-4 tnum">3 of 21 rooms lit</span></div>
+	<div class="tower">
+		<svg width="358" height="300" viewBox="0 0 358 300" role="img" aria-label="The tower: floor 1 has three rooms lit and room 4 waiting; floor 2 opens after floor 1; floor 3, the final round, is at the top.">
+			<rect width="358" height="300" fill="var(--sky)"/>
+			<g fill="var(--sky-cloud)">
+				<path d="M8 40 h44 a10 10 0 0 0 -16 -12 a14 14 0 0 0 -26 6 a8 8 0 0 0 -2 6z"/>
+				<path d="M300 22 h50 a10 10 0 0 0 -14 -12 a16 16 0 0 0 -30 4 a8 8 0 0 0 -6 8z"/>
+			</g>
+			<g fill="#c2d6e8">
+				<rect x="0" y="210" width="22" height="90"/><rect x="336" y="190" width="22" height="110"/>
+			</g>
+			<!-- roof -->
+			<rect x="172" y="10" width="4" height="22" fill="var(--dusk)"/>
+			<circle cx="174" cy="10" r="4" fill="var(--honey)"/>
+			<path d="M40 52 L60 32 H298 L318 52Z" fill="#2c1f38"/>
+			<text x="179" y="47" text-anchor="middle" font-family="Geist" font-weight="600" font-size="9" letter-spacing="2" fill="#e8dcc2">NORTHSTAR LABS</text>
+			<!-- floor 3: the final round, dusk -->
+			<rect x="24" y="52" width="310" height="76" fill="var(--dusk)"/>
+			<g fill="#2a1e36">
+				<path d="M42 104 V74 a14 14 0 0 1 28 0 V104Z"/><path d="M80 104 V74 a14 14 0 0 1 28 0 V104Z"/><path d="M118 104 V74 a14 14 0 0 1 28 0 V104Z"/><path d="M156 104 V74 a14 14 0 0 1 28 0 V104Z"/><path d="M194 104 V74 a14 14 0 0 1 28 0 V104Z"/><path d="M232 104 V74 a14 14 0 0 1 28 0 V104Z"/>
+			</g>
+			<path d="M270 104 V74 a17 17 0 0 1 34 0 V104Z" fill="var(--honey)"/>
+			<path d="M277 104 c0 -10 4 -14 10 -14 s10 4 10 14z M287 88 a5.5 6 0 1 0 0.01 0z" fill="var(--dusk)"/>
+			<text x="42" y="120" font-family="Geist" font-weight="500" font-size="12" fill="#e8dcef">Floor 3 · The final round</text>
+			<text x="316" y="120" text-anchor="end" font-family="Geist" font-weight="600" font-size="12" fill="var(--honey)">Sam waits here</text>
+			<!-- floor 2: under pressure -->
+			<rect x="24" y="128" width="310" height="76" fill="var(--ch2-soft)"/>
+			<g fill="#e9eefb" stroke="#a9bdef" stroke-width="2">
+				<path d="M42 180 V150 a14 14 0 0 1 28 0 V180Z"/><path d="M80 180 V150 a14 14 0 0 1 28 0 V180Z"/><path d="M118 180 V150 a14 14 0 0 1 28 0 V180Z"/><path d="M156 180 V150 a14 14 0 0 1 28 0 V180Z"/><path d="M194 180 V150 a14 14 0 0 1 28 0 V180Z"/><path d="M232 180 V150 a14 14 0 0 1 28 0 V180Z"/><path d="M270 180 V150 a14 14 0 0 1 28 0 V180Z"/>
+			</g>
+			<text x="42" y="196" font-family="Geist" font-weight="500" font-size="12" fill="var(--ch2-deep)">Floor 2 · Under pressure</text>
+			<text x="316" y="196" text-anchor="end" font-family="Geist" font-weight="500" font-size="12" fill="var(--ch2-deep)">Opens after floor 1</text>
+			<!-- floor 1: get through the door -->
+			<rect x="24" y="204" width="310" height="76" fill="var(--ch1)"/>
+			<g fill="var(--honey)">
+				<path d="M42 256 V226 a14 14 0 0 1 28 0 V256Z"/><path d="M80 256 V226 a14 14 0 0 1 28 0 V256Z"/><path d="M118 256 V226 a14 14 0 0 1 28 0 V256Z"/>
+			</g>
+			<g fill="none" stroke="var(--on-honey)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M50 238 l4 4 l7 -8"/><path d="M88 238 l4 4 l7 -8"/><path d="M126 238 l4 4 l7 -8"/>
+			</g>
+			<path d="M152 260 V224 a18 18 0 0 1 36 0 V260Z" fill="none" stroke="#fff6dc" stroke-width="2" opacity=".7"/>
+			<path d="M156 256 V226 a14 14 0 0 1 28 0 V256Z" fill="#fff6dc"/>
+			<foreignObject x="156" y="212" width="28" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="width:28px;height:44px;border-radius:14px 14px 0 0;overflow:hidden"><div class="cast" data-cast="marcus" data-expr="neutral" data-viewbox="40 30 120 170" style="width:28px;height:44px"></div></div></foreignObject>
+			<g fill="var(--ch1-deep)">
+				<path d="M194 256 V226 a14 14 0 0 1 28 0 V256Z"/><path d="M232 256 V226 a14 14 0 0 1 28 0 V256Z"/><path d="M270 256 V226 a14 14 0 0 1 28 0 V256Z"/>
+			</g>
+			<text x="42" y="273" font-family="Geist" font-weight="500" font-size="12" fill="#e7f5ee">Floor 1 · Get through the door</text>
+			<text x="316" y="273" text-anchor="end" font-family="Geist" font-weight="600" font-size="12" fill="#fff">3 of 7</text>
+			<rect x="24" y="280" width="310" height="20" fill="#e3d8c6"/>
+		</svg>
+	</div>
+	<div class="section"><h3 class="heading-6">Skills</h3><span class="caption-4 tnum">Next one in room 7</span></div>
+	<ul class="skills">
+		<li class="next"><span class="b arch"><i class="ph-fill ph-chart-bar"></i></span><p class="caption-3">Evidence Builder</p><p class="caption-4 hint">Room 7</p></li>
+		<li><span class="b arch"><i class="ph-bold ph-hand-waving"></i></span><p class="caption-4">Clear Introductions</p><p class="caption-4 hint">Room 7</p></li>
+		<li><span class="b arch"><i class="ph-bold ph-handshake"></i></span><p class="caption-4">Conflict Navigator</p><p class="caption-4 hint">Floor 2</p></li>
+		<li><span class="b arch"><i class="ph-bold ph-lightning"></i></span><p class="caption-4">Think Under Pressure</p><p class="caption-4 hint">Floor 3</p></li>
+	</ul>
+</main>
+<nav aria-label="Main">
+	<a class="on" href="#tower"><i class="ph-fill ph-buildings"></i><span>Tower</span></a>
+	<a href="#recall"><i class="ph ph-cards-three"></i><span>Recall</span><b class="badge">2</b></a>
+	<a href="#skills"><i class="ph ph-medal"></i><span>Skills</span></a>
+	<a href="#you"><i class="ph ph-user-circle"></i><span>You</span></a>
+</nav>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

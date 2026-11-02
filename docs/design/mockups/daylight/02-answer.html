@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Mission, answer cards</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mission.css">
+</head>
+<body class="ch1">
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<header class="bar">
+	<span class="iconbtn" aria-label="Leave the room"><i class="ph-bold ph-x"></i></span>
+	<ol class="beats" aria-label="Beat 2 of 3">
+		<li class="done"><span></span>Open</li>
+		<li class="now"><span></span>Evidence</li>
+		<li><span></span>Land</li>
+	</ol>
+	<span class="trust" aria-label="Trust, 3 of 5"><i class="ph-fill ph-handshake"></i><b></b><b></b><b></b><b class="off"></b><b class="off"></b></span>
+</header>
+
+<section class="stage" aria-label="Marcus listens">
+	<div class="room">
+		<div class="glass"><div class="city"><i style="left:4px;width:22px;height:36px"></i><i style="left:30px;width:28px;height:58px"></i><i style="left:62px;width:18px;height:30px"></i><i style="left:84px;width:30px;height:48px"></i><i style="left:118px;width:26px;height:34px"></i><i style="left:148px;width:24px;height:62px"></i><i style="left:176px;width:30px;height:40px"></i></div></div>
+		<div class="plant"><span></span><span></span><span></span></div>
+		<div class="cast who" data-cast="marcus" data-expr="listening"></div>
+		<div class="desk"></div>
+	</div>
+	<div class="bubble">
+		<p class="caption-3 speaker">Marcus · hiring manager</p>
+		<p class="heading-6">Now the data. What did you actually do?</p>
+	</div>
+</section>
+
+<section class="so-far" aria-label="Your answer so far">
+	<i class="ph-fill ph-check-circle"></i>
+	<p class="body-6"><b>Open</b> “I wanted to know why support was swamped every Monday.”</p>
+</section>
+
+<div class="pick-head"><h2 class="title-3"><b>Pick your evidence</b></h2><span class="caption-4">Tap a line, then lock it in</span></div>
+
+<ul class="options">
+	<li class="card opt"><span class="letter">A</span><p class="body-3">We went through a month of tickets, found resets were the biggest group, and cut them by a quarter.</p></li>
+	<li class="card opt on"><span class="letter">B</span><p class="body-3">I tagged 600 tickets from one month. One in three were password resets, so I wrote a help page for them.</p></li>
+	<li class="card opt"><span class="letter">C</span><p class="body-3">I looked through lots of tickets, spotted patterns around logins, and suggested fixes.</p></li>
+</ul>
+
+<div class="dock"><div class="btn"><i class="ph-bold ph-lock-simple"></i>Lock in line B</div></div>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>
