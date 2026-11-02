@@ -118,6 +118,10 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
   @override
   void initState() {
     super.initState();
+    // Resolved now, not lazily: `dispose` stops both, and `ref` can't be read by then. A
+    // mission left before a line was spoken used to throw on the way out.
+    _voice;
+    _sounds;
     final mission = _game.mission;
     if (mission.opensChapter) _sounds.chapterCard(mission.chapter);
   }
