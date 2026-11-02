@@ -137,8 +137,15 @@ abstract final class VividEntries {
         label: 'Locked',
         build: (_) => CatalogSky(
           children: [
+            // Every chapter is open since brief 39; the locked state is shown on a copy of
+            // Chapter 2 as it looked before, so the catalog keeps the teaser design.
             ChapterCard(
-              chapter: chapters[1],
+              chapter: Chapter(
+                number: chapters[1].number,
+                title: chapters[1].title,
+                missionTitles: chapters[1].missionTitles,
+                playable: false,
+              ),
               rooms: const [],
               onTapRoom: (_) {},
             ),
