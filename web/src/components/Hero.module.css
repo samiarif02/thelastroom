@@ -1,165 +1,167 @@
-.hero {
-	position: relative;
-	overflow: hidden;
-	padding-block: var(--space-7) var(--space-8);
-	border-bottom: 1px solid var(--line-soft);
-}
-
-/* The title card's lamp: a warm pool of brass light from above. */
-.lamp {
-	position: absolute;
-	inset: -30% -20% auto;
-	height: 120%;
-	background: radial-gradient(ellipse 50% 45% at 50% 20%, rgb(200 161 90 / 0.16), transparent 70%);
-	pointer-events: none;
+.lobby {
+	padding-block: clamp(2.5rem, 7vw, 6rem) clamp(4rem, 8vw, 7rem);
 }
 
 .grid {
-	position: relative;
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	gap: var(--space-8);
-	align-items: center;
+	align-items: start;
 }
 
 .copy {
-	display: grid;
+	display: flex;
+	flex-direction: column;
 	gap: var(--space-5);
-	text-align: center;
-	justify-items: center;
+	min-width: 0;
 }
 
-.eyebrow {
-	color: var(--brass);
-	font-size: 0.75rem;
-	font-weight: 600;
-	letter-spacing: 0.32em;
-	text-transform: uppercase;
-}
-
-.title {
-	font-size: clamp(2.6rem, 1.4rem + 6vw, 5.6rem);
-	font-weight: 500;
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
-	line-height: 1;
-	animation: track-in 1.6s var(--ease) both;
-}
-
-.line {
-	font-family: var(--font-serif), Georgia, serif;
-	font-style: italic;
-	font-size: clamp(1.45rem, 1.1rem + 1.5vw, 2.1rem);
-	line-height: 1.25;
-	color: var(--text);
-	max-width: 26ch;
-	text-wrap: balance;
-}
-
-.body {
-	color: var(--text-2);
-	max-width: var(--measure);
-}
-
-.actions {
-	display: grid;
-	gap: var(--space-4);
-	justify-items: center;
-	margin-top: var(--space-3);
-}
-
-.stores {
-	color: var(--text-2);
-	font-size: 0.9375rem;
-}
-
-.storesLabel {
+.kicker {
 	color: var(--muted);
 }
 
-.store {
-	color: var(--text);
-	font-weight: 600;
+.title {
+	font-size: clamp(2.75rem, 1rem + 5.6vw, 5.75rem);
+	line-height: 0.92;
+	letter-spacing: -0.04em;
 }
 
-.stills {
-	position: relative;
+.body {
+	max-width: 36rem;
+	color: var(--fg);
+	font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+	line-height: 1.6;
+}
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-4) var(--space-6);
+	margin-top: var(--space-2);
+}
+
+/* The lobby's directory board: a framed panel, one row per floor, the last room at the top. */
+.board {
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	background: var(--surface);
+}
+
+.boardHead,
+.boardFoot {
+	display: flex;
+	justify-content: space-between;
+	gap: var(--space-4);
+	padding: var(--space-3) var(--space-4);
+	color: var(--muted);
+}
+
+.boardHead {
+	border-bottom: 1px solid var(--line);
+}
+
+.boardFoot {
+	border-top: 1px solid var(--line);
+}
+
+.rows > li + li {
+	border-top: 1px solid var(--line);
+}
+
+.row {
 	display: grid;
-	justify-items: center;
-	padding-bottom: var(--space-4);
+	grid-template-columns: 3rem minmax(0, 1fr) auto;
+	grid-template-areas:
+		'mark name arrow'
+		'mark detail arrow';
+	gap: 0.15rem var(--space-4);
+	align-items: center;
+	padding: var(--space-3) var(--space-4);
+	color: var(--fg);
+	text-decoration: none;
+	transition: background-color var(--fast) var(--ease);
 }
 
-.front {
-	position: relative;
-	z-index: 1;
-	width: min(62vw, 260px);
+a.row:hover {
+	background: var(--petrol);
 }
 
-.back {
-	display: none;
+.mark {
+	grid-area: mark;
+	display: grid;
+	place-items: center;
+	height: 3rem;
+	border-radius: var(--radius);
+	background: var(--tone);
+	color: var(--on-tone);
+	font-family: var(--font-mono), ui-monospace, monospace;
+	font-size: 1.375rem;
+	font-weight: 600;
+	line-height: 1;
 }
 
-@keyframes track-in {
-	from {
-		letter-spacing: 0.4em;
-		opacity: 0;
-	}
-	to {
-		letter-spacing: 0.14em;
-		opacity: 1;
-	}
+/* The last room: the same oxblood as its floor, drawn as an outlined door plate above it. */
+.top {
+	background: transparent;
+	color: var(--fg);
+	box-shadow: inset 0 0 0 2px var(--tone);
 }
 
-@media (min-width: 40rem) {
-	.stills {
-		min-height: 36rem;
-	}
-
-	.front {
-		width: 260px;
-		transform: translateX(-22%);
-	}
-
-	.back {
-		display: block;
-		position: absolute;
-		top: 3rem;
-		left: 50%;
-		width: 220px;
-		transform: translateX(-5%);
-		opacity: 0.88;
-	}
+.lobbyMark {
+	background: transparent;
+	color: var(--fg);
+	box-shadow: inset 0 0 0 1px var(--line-strong);
 }
 
-@media (min-width: 60rem) {
-	.hero {
-		padding-block: var(--space-9);
-	}
+.name {
+	grid-area: name;
+	font-family: var(--font-display), system-ui, sans-serif;
+	font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+	font-weight: 800;
+	line-height: 1.05;
+	letter-spacing: -0.005em;
+	text-transform: uppercase;
+}
 
+.detail {
+	grid-area: detail;
+	color: var(--muted);
+	font-size: 0.6875rem;
+}
+
+.arrow {
+	grid-area: arrow;
+	font-size: 1.125rem;
+	color: var(--muted);
+	transition:
+		color var(--fast) var(--ease),
+		transform var(--fast) var(--ease);
+}
+
+a.row:hover .arrow {
+	color: var(--fg);
+	transform: rotate(-90deg) translateX(3px);
+}
+
+.here .name {
+	color: var(--muted);
+}
+
+@media (min-width: 64rem) {
 	.grid {
-		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-	}
-
-	.copy {
-		text-align: left;
-		justify-items: start;
-	}
-
-	.copy .ornament {
-		margin-inline: 0;
-	}
-
-	.actions {
-		justify-items: start;
-		grid-auto-flow: column;
+		grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+		gap: var(--space-8);
 		align-items: center;
-		gap: var(--space-6);
 	}
 
-	.front {
-		width: 300px;
+	.row {
+		grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+		padding: var(--space-4) var(--space-5);
 	}
 
-	.back {
-		width: 260px;
+	.mark {
+		height: 3.5rem;
+		font-size: 1.625rem;
 	}
 }
