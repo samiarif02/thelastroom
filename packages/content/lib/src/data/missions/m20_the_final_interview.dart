@@ -39,22 +39,22 @@ const missionTheFinalInterview = Mission(
     listenFor: [
       ListenFor(
         id: 'm20_listen_job_needs',
-        text: "Names two or three things this job needs, and matches each to something you've done",
+        text: "Names two or three things this job needs, and matches each to something you've done.",
         dimension: Dimension.relevance,
       ),
       ListenFor(
         id: 'm20_listen_proof',
-        text: 'Backs each one with a specific example: what you did, and what changed',
+        text: 'Backs each one with a specific example: what you did, and what changed.',
         dimension: Dimension.specificity,
       ),
       ListenFor(
         id: 'm20_listen_own_words',
-        text: 'Uses your own words, with no "hard-working team player" phrases standing in for proof',
+        text: 'Uses your own words, with no "hard-working team player" phrases standing in for proof.',
         dimension: Dimension.specificity,
       ),
       ListenFor(
         id: 'm20_listen_shape',
-        text: 'Has a clear shape: the case, the proof, then why you want this job',
+        text: 'Has a clear shape: the case, the proof, then why you want this job.',
         dimension: Dimension.structure,
       ),
     ],
@@ -65,17 +65,17 @@ const missionTheFinalInterview = Mission(
     followUpListenFor: [
       ListenFor(
         id: 'm20_listen_real_gap',
-        text: 'Names a real gap, not a strength in disguise',
+        text: 'Names a real gap, not a strength in disguise.',
         dimension: Dimension.adaptability,
       ),
       ListenFor(
         id: 'm20_listen_closing_it',
-        text: "Says what you're already doing about it",
+        text: "Says what you're already doing about it.",
         dimension: Dimension.adaptability,
       ),
       ListenFor(
         id: 'm20_listen_case_stands',
-        text: "Finishes, briefly, on why you're still the right pick",
+        text: "Finishes, briefly, on why you're still the right pick.",
         dimension: Dimension.structure,
       ),
     ],
