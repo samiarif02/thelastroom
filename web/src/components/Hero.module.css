@@ -1,0 +1,165 @@
+.hero {
+	position: relative;
+	overflow: hidden;
+	padding-block: var(--space-7) var(--space-8);
+	border-bottom: 1px solid var(--line-soft);
+}
+
+/* The title card's lamp: a warm pool of brass light from above. */
+.lamp {
+	position: absolute;
+	inset: -30% -20% auto;
+	height: 120%;
+	background: radial-gradient(ellipse 50% 45% at 50% 20%, rgb(200 161 90 / 0.16), transparent 70%);
+	pointer-events: none;
+}
+
+.grid {
+	position: relative;
+	display: grid;
+	gap: var(--space-8);
+	align-items: center;
+}
+
+.copy {
+	display: grid;
+	gap: var(--space-5);
+	text-align: center;
+	justify-items: center;
+}
+
+.eyebrow {
+	color: var(--brass);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.32em;
+	text-transform: uppercase;
+}
+
+.title {
+	font-size: clamp(2.6rem, 1.4rem + 6vw, 5.6rem);
+	font-weight: 500;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	line-height: 1;
+	animation: track-in 1.6s var(--ease) both;
+}
+
+.line {
+	font-family: var(--font-serif), Georgia, serif;
+	font-style: italic;
+	font-size: clamp(1.45rem, 1.1rem + 1.5vw, 2.1rem);
+	line-height: 1.25;
+	color: var(--text);
+	max-width: 26ch;
+	text-wrap: balance;
+}
+
+.body {
+	color: var(--text-2);
+	max-width: var(--measure);
+}
+
+.actions {
+	display: grid;
+	gap: var(--space-4);
+	justify-items: center;
+	margin-top: var(--space-3);
+}
+
+.stores {
+	color: var(--text-2);
+	font-size: 0.9375rem;
+}
+
+.storesLabel {
+	color: var(--muted);
+}
+
+.store {
+	color: var(--text);
+	font-weight: 600;
+}
+
+.stills {
+	position: relative;
+	display: grid;
+	justify-items: center;
+	padding-bottom: var(--space-4);
+}
+
+.front {
+	position: relative;
+	z-index: 1;
+	width: min(62vw, 260px);
+}
+
+.back {
+	display: none;
+}
+
+@keyframes track-in {
+	from {
+		letter-spacing: 0.4em;
+		opacity: 0;
+	}
+	to {
+		letter-spacing: 0.14em;
+		opacity: 1;
+	}
+}
+
+@media (min-width: 40rem) {
+	.stills {
+		min-height: 36rem;
+	}
+
+	.front {
+		width: 260px;
+		transform: translateX(-22%);
+	}
+
+	.back {
+		display: block;
+		position: absolute;
+		top: 3rem;
+		left: 50%;
+		width: 220px;
+		transform: translateX(-5%);
+		opacity: 0.88;
+	}
+}
+
+@media (min-width: 60rem) {
+	.hero {
+		padding-block: var(--space-9);
+	}
+
+	.grid {
+		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+	}
+
+	.copy {
+		text-align: left;
+		justify-items: start;
+	}
+
+	.copy .ornament {
+		margin-inline: 0;
+	}
+
+	.actions {
+		justify-items: start;
+		grid-auto-flow: column;
+		align-items: center;
+		gap: var(--space-6);
+	}
+
+	.front {
+		width: 300px;
+	}
+
+	.back {
+		width: 260px;
+	}
+}
