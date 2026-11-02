@@ -35,22 +35,22 @@ const missionTheDecision = Mission(
     listenFor: [
       ListenFor(
         id: 'm21_listen_wants_it',
-        text: 'Thanks them, and says plainly that you want the job',
+        text: 'Thanks them, and says plainly that you want the job.',
         dimension: Dimension.relevance,
       ),
       ListenFor(
         id: 'm21_listen_in_writing',
-        text: "Asks for the offer in writing: the pay, the start date and what's in the package",
+        text: "Asks for the offer in writing: the pay, the start date and what's in the package.",
         dimension: Dimension.specificity,
       ),
       ListenFor(
         id: 'm21_listen_names_date',
-        text: "Agrees when you'll answer, and names the day",
+        text: "Agrees when you'll answer, and names the day.",
         dimension: Dimension.specificity,
       ),
       ListenFor(
         id: 'm21_listen_short',
-        text: "Keeps it short and in order: thanks, the details, when you'll reply",
+        text: "Keeps it short and in order: thanks, the details, when you'll reply.",
         dimension: Dimension.structure,
       ),
     ],
@@ -61,18 +61,17 @@ const missionTheDecision = Mission(
     followUpListenFor: [
       ListenFor(
         id: 'm21_listen_calm_ask',
-        text: "Says calmly where you'd hoped to be, and why, without a threat",
+        text: "Says calmly where you'd hoped to be, and why, without a threat.",
         dimension: Dimension.adaptability,
       ),
       ListenFor(
         id: 'm21_listen_what_moves',
-        text:
-            'Asks what could move: the start salary, a review date or training',
+        text: 'Asks what could move: the start salary, a review date or training.',
         dimension: Dimension.adaptability,
       ),
       ListenFor(
         id: 'm21_listen_still_keen',
-        text: 'Makes clear you still want the job while you talk it through',
+        text: 'Makes clear you still want the job while you talk it through.',
         dimension: Dimension.relevance,
       ),
     ],

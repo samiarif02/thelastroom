@@ -40,11 +40,16 @@ extension MissionLookup on Mission {
   bool get opensChapter =>
       missions.where((m) => m.chapter == chapter).firstOrNull?.number == number;
 
-  /// The last playable mission of its chapter: finishing it opens the chapter report.
+  /// The last playable mission of its chapter (Missions 7, 14 and 21).
   bool get closesChapter {
     final after = next;
     return after == null || after.chapter != chapter;
   }
+
+  /// Whether finishing this mission opens the chapter report: only Chapter 1's review has one
+  /// (brief 24, the first try against the review). Missions 14 and 21 close their chapters on
+  /// the tower, their room lit (brief 44: they used to open Chapter 1's report).
+  bool get leadsToReport => closesChapter && chapter == reportedChapter;
 
   /// The mission after this one in campaign order, or null after the last playable one.
   Mission? get next {
@@ -72,6 +77,9 @@ extension AddressedLine on SceneLine {
     text: text.replaceAll(_candidateName, name),
   );
 }
+
+/// The one chapter with a report: Chapter 1, whose review (Mission 7) is set against Mission 1.
+const int reportedChapter = 1;
 
 /// The practice candidate's first name as the interviewers say it, as a whole word.
 final RegExp _candidateName = RegExp(

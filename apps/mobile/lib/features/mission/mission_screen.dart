@@ -44,7 +44,7 @@ class MissionScreen extends ConsumerWidget {
           key: ValueKey(number),
           number: number,
           onExit: () => context.go(
-            mission!.closesChapter ? Routes.report : Routes.tower(lit: number),
+            mission!.leadsToReport ? Routes.report : Routes.tower(lit: number),
           ),
           onLeave: () => context.go(Routes.tower()),
         ),
@@ -83,10 +83,10 @@ class MissionScreen extends ConsumerWidget {
       AsyncData(:final value) => MissionPlayer(
         key: ValueKey(number),
         number: number,
-        // The Tower lights this room and shows the next one glowing (brief 13); the chapter's
-        // last mission opens its report instead (brief 24).
+        // The Tower lights this room and shows the next one glowing (brief 13); Chapter 1's
+        // review opens its report instead (brief 24).
         onExit: () => context.go(
-          value.mission.closesChapter
+          value.mission.leadsToReport
               ? Routes.report
               : Routes.tower(lit: number),
         ),

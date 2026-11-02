@@ -6,25 +6,42 @@ import 'package:go_router/go_router.dart';
 import '../../app/router.dart';
 import '../../ui/film_kit.dart';
 import '../recall/recall_controller.dart';
+import 'tower_hero.dart';
+import 'tower_rooms.dart';
 
-/// The top of the building (brief §9): the last room, always in sight, out of reach for now.
+/// The top of the building (brief §9): the last room, always in sight. Locked until the
+/// campaign's last mission is played; then it says the player made it, with that room's stars
+/// (brief 44: it stayed locked after Mission 21).
 class LastRoomCard extends StatelessWidget {
-  const LastRoomCard({super.key});
+  const LastRoomCard({super.key, this.room});
+
+  /// The campaign's last room (Mission 21); null or not done keeps the card locked.
+  final TowerRoom? room;
 
   static const String title = 'The Last Room';
   static const String line = 'The offer is decided here.';
+  static const String doneLine =
+      'You made it to the top. The offer was yours to decide.';
   static const String kicker = 'THE TOP FLOOR';
 
   @override
   Widget build(BuildContext context) {
     const grade = ChapterGrade.finalRound;
+    final reached = room?.state == RoomState.done;
     return _FeatureCard(
       colors: [grade.deeper, BrandVivid.night],
       glow: grade.glow,
       kicker: kicker,
       title: title,
-      line: line,
-      trailing: LockGlyph(color: BrandVivid.onDeepSoft, size: 22),
+      line: reached ? doneLine : line,
+      trailing: switch (room) {
+        final r? when reached => StarRow(
+          stars: r.stars,
+          best: r.best ?? 0,
+          size: 14,
+        ),
+        _ => LockGlyph(color: BrandVivid.onDeepSoft, size: 22),
+      },
     );
   }
 }

@@ -74,9 +74,8 @@ final chapterReportProvider = FutureProvider.autoDispose<ChapterReportState>((
 ) async {
   final store = ref.read(progressRepositoryProvider);
   final catalog = ref.read(missionCatalogProvider);
-  const chapterNumber = 1;
-  final chapter = chapters.firstWhere((c) => c.number == chapterNumber);
-  final review = catalog.lastWhere((m) => m.chapter == chapterNumber);
+  final chapter = chapters.firstWhere((c) => c.number == reportedChapter);
+  final review = catalog.lastWhere((m) => m.chapter == reportedChapter);
   final reviews = await store.attempts(missionId: review.id);
   final baseline = await store.baseline();
   if (reviews.isEmpty || baseline == null) return ReportNotYet(review);

@@ -18,10 +18,21 @@ import 'skill_badges.dart';
 /// is demonstrated, a "Skill unlocked" card with its sound and `skill_unlocked`. Each skill is
 /// celebrated once, ever; the card stays for this debrief.
 class DebriefRewards extends ConsumerStatefulWidget {
-  const DebriefRewards({super.key, required this.mission, required this.grade});
+  const DebriefRewards({
+    super.key,
+    required this.mission,
+    required this.grade,
+    this.ready = true,
+  });
 
   final Mission mission;
   final ChapterGrade grade;
+
+  /// The debrief has settled, so the attempt is stored and progression has been read again:
+  /// only then is what to celebrate decided. Until then the tower's progress card can still
+  /// hold the reading from before this mission (brief 44: every debrief showed the first
+  /// mission's XP, and later skills were never celebrated).
+  final bool ready;
 
   static String xpGained(int xp) => '+$xp XP';
   static const String unlockedKicker = 'SKILL UNLOCKED';
@@ -49,9 +60,11 @@ class _DebriefRewardsState extends ConsumerState<DebriefRewards> {
 
   @override
   Widget build(BuildContext context) {
-    final p = ref.watch(progressionProvider).value;
-    if (p == null) return const SizedBox.shrink();
-    if (_celebrating == null) {
+    final reading = ref.watch(progressionProvider);
+    final p = reading.value;
+    // Never a number from before this attempt: nothing while it's being read again.
+    if (p == null || reading.isLoading) return const SizedBox.shrink();
+    if (_celebrating == null && widget.ready) {
       final fresh = p.uncelebrated;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _celebrating == null) setState(() => _celebrate(fresh));

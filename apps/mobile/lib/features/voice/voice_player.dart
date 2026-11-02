@@ -327,7 +327,9 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
         ],
         grade: grade,
         sounds: _sounds,
-        doneLabel: DebriefView.reportLabel,
+        doneLabel: mission.leadsToReport
+            ? DebriefView.reportLabel
+            : DebriefView.continueLabel,
         onDone: widget.onExit,
       );
     }

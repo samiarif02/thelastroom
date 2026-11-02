@@ -127,9 +127,11 @@ class _DraftPanelState extends State<DraftPanel> {
                     // One node for screen readers: the label merges into EditableText's own
                     // text field. A second `textField: true` here made the web's textarea
                     // read as disabled until focused (brief 30, as 1e found on the name field).
+                    // `enabled`: without it the web still marks the textarea `disabled` (brief 44).
                     MergeSemantics(
                       child: Semantics(
                         label: DraftPanel.heading,
+                        enabled: true,
                         child: EditableText(
                           controller: _text,
                           focusNode: _focus,

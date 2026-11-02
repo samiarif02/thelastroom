@@ -3,6 +3,7 @@ import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:the_last_room/app/app.dart';
@@ -12,6 +13,7 @@ import 'package:the_last_room/core/analytics/analytics.dart';
 import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/core/audio/game_sounds.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
+import 'package:the_last_room/core/progress/attempt_score.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
 import 'package:the_last_room/features/debrief/ai_score.dart';
 import 'package:the_last_room/features/debrief/ai_score_store.dart';
@@ -182,6 +184,9 @@ class MissionRig {
   /// The debrief's AI scorer; null keeps the app's (no backend in tests: "Offline score").
   AiScorer? scorer;
 
+  /// More overrides for [boot]: a voice mission's microphone, voice and scorer (brief 44).
+  final List<Override> overrides = [];
+
   static const Size phone = Size(375, 667);
 
   Future<void> boot(
@@ -207,6 +212,7 @@ class MissionRig {
         recallStoreProvider.overrideWithValue(recall),
         routerProvider.overrideWithValue(router),
         if (scorer case final s?) aiScorerProvider.overrideWithValue(s),
+        ...overrides,
       ],
     );
     addTearDown(container.dispose);
@@ -261,10 +267,31 @@ class MissionRig {
   MissionState state(int number) =>
       container.read(missionControllerProvider(number)).requireValue;
 
-  /// Records a played attempt (first options, read slowly) at every mission before [number], so
-  /// the tower's rule (rooms open in order) lets a test start at [number]. Call before [boot].
+  /// Records a played attempt (first options, read slowly; every point made on a voice
+  /// mission) at every mission before [number], so the tower's rule (rooms open in order) lets a
+  /// test start at [number]. Call before [boot].
   Future<void> unlockThrough(int number, {String? baselineDraft}) async {
     for (final m in missions.where((m) => m.number < number)) {
+      if (m.voice case final voice?) {
+        final made = [
+          for (final p in [...voice.listenFor, ...voice.followUpListenFor])
+            p.id,
+        ];
+        await progress.recordAttempt(
+          AttemptRecord.voice(
+            missionId: m.id,
+            attemptNumber: 1,
+            score: voiceScoreFor(m, made)!.score,
+            hinted: m.hinted,
+            voice: VoiceAnswerRecord(
+              madePointIds: made,
+              source: VoiceScoreSource.selfCheck,
+              seconds: 60,
+            ),
+          ),
+        );
+        continue;
+      }
       final beats = [
         for (final b in m.beats)
           BeatPick(beat: b.kind, choice: b.options.first.scored),

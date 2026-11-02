@@ -64,7 +64,7 @@ class DebriefView extends ConsumerStatefulWidget {
   static const String title = 'Candidate assessment';
   static const String continueLabel = 'Back to the tower';
 
-  /// The chapter's last mission leads to its report instead (brief 24).
+  /// Chapter 1's review leads to its report instead (brief 24).
   static const String reportLabel = 'See your Chapter 1 report';
 
   /// The dossier sheet's largest text scale (the slip and buttons below take the full 2x).
@@ -256,7 +256,11 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                   children: [
                     TrustMeter(trust: widget.trust, grade: grade),
                     const SizedBox(height: BrandSpace.md),
-                    DebriefRewards(mission: widget.mission, grade: grade),
+                    DebriefRewards(
+                      mission: widget.mission,
+                      grade: grade,
+                      ready: _settled,
+                    ),
                     const SizedBox(height: BrandSpace.md),
                     if (ai != null) ...[
                       AiBasisSlip(score: ai, grade: grade),
@@ -298,7 +302,7 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                     ],
                     const SizedBox(height: BrandSpace.lg),
                     VividButton(
-                      label: widget.mission.closesChapter
+                      label: widget.mission.leadsToReport
                           ? DebriefView.reportLabel
                           : DebriefView.continueLabel,
                       expand: true,

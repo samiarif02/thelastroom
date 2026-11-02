@@ -131,6 +131,15 @@ void main() {
           );
         });
 
+        // Brief 37's pattern, which brief 38 follows: the self-check and the debrief list
+        // Chapter 2's and Chapter 3's points side by side (brief 44: these had no full stop).
+        test('every point reads as a checklist item: what the answer does', () {
+          for (final p in [...voice.listenFor, ...voice.followUpListenFor]) {
+            expect(p.text, matches(RegExp(r'^[A-Z][a-z]+s\b')), reason: p.id);
+            expect(p.text, endsWith('.'), reason: p.id);
+          }
+        });
+
         test('point ids carry the mission prefix', () {
           final prefix = '${mission.id.substring(0, 3)}_';
           for (final p in [...voice.listenFor, ...voice.followUpListenFor]) {
