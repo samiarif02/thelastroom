@@ -27,7 +27,7 @@ more editorial, a little less calm. See [the alternative](#the-alternative-paper
 
 | Screen | Daylight Tower (recommended) | Paper Pop (alternative) |
 | --- | --- | --- |
-| Home, the tower | `mockups/daylight/png/01-home.jpg`, scrolled: `01b-home-tower.jpg` | `mockups/paper/png/01-home.jpg` |
+| Home, the tower (a day 3 return, with the welcome-back card) | `mockups/daylight/png/01-home.jpg`, scrolled: `01b-home-tower.jpg` | `mockups/paper/png/01-home.jpg` |
 | Answer cards with the interviewer | `02-answer.jpg` | `02-answer.jpg` |
 | The "why that line?" step | `03-why.jpg` | `03-why.jpg` |
 | Voice recording (chapter 2) | `04-voice.jpg` | `04-voice.jpg` |
@@ -135,10 +135,54 @@ All values live in `packages/brand` and nowhere else (non-negotiable 1). Every t
 | `ch3` / `ch3-deep` / `ch3-tint` / `ch3-soft` | `#C23A62` / `#8A2343` / `#FBE6EC` / `#F3C0CF` | Floor 3, "The final round" | white on ch3 5.2 |
 | `honey` / `honey-edge` / `on-honey` | `#EBBE52` / `#C3962F` / `#2A1E05` | **The one action accent**: primary buttons, XP, lit windows | on-honey 9.3 |
 | `trap` / `trap-tint` | `#A8432B` / `#F8E4DC` | The weakest dimension, "the line that cost the most" (clay, never alarm red) | 4.9 on tint, 5.6 on paper |
-| `recall` / `recall-tint` / `recall-soft` | `#5E4BB4` / `#ECE8F8` / `#CFC6EF` | The Recall Room | 5.6 on tint |
+| `recall` / `recall-deep` / `recall-tint` / `recall-soft` | `#5E4BB4` / `#43348A` / `#ECE8F8` / `#CFC6EF` | The Recall Room, the welcome-back button | 5.6 on tint, white on recall 6.7 |
 | `sky` / `sky-cloud` / `dusk` | `#D4E6F4` / `#EAF3FA` / `#3B2A4A` | Illustration only: the sky, the final floor at dusk | honey on dusk 7.4 |
 
-Rules: text on a chapter colour is white or that chapter's `-on`, never `-soft` (3.6:1, fails).
+```dart
+// packages/brand/lib/src/daylight.dart (names are the contract; values from the table above)
+abstract final class DaylightColors {
+  static const paper = Color(0xFFFBF6EE), sand = Color(0xFFF3EBDF), sand2 = Color(0xFFE7DCCB);
+  static const raised = Color(0xFFFFFFFF), ink = Color(0xFF24201C), ink2 = Color(0xFF5E554B);
+  static const honey = Color(0xFFEBBE52), honeyEdge = Color(0xFFC3962F), onHoney = Color(0xFF2A1E05);
+  static const trap = Color(0xFFA8432B), trapTint = Color(0xFFF8E4DC);
+  static const recall = Color(0xFF5E4BB4), recallDeep = Color(0xFF43348A);
+  static const recallTint = Color(0xFFECE8F8), recallSoft = Color(0xFFCFC6EF);
+  static const sky = Color(0xFFD4E6F4), skyCloud = Color(0xFFEAF3FA), dusk = Color(0xFF3B2A4A);
+  static const cityFar = Color(0xFFC2D6E8), desk = Color(0xFFE9DCC6), deskTop = Color(0xFFF5ECDD);
+}
+
+/// One floor's colours; `ChapterGrade` gets a getter that returns them.
+@immutable
+class FloorColours {
+  const FloorColours({required this.base, required this.deep, required this.tint, required this.soft, required this.on});
+  final Color base, deep, tint, soft, on;
+}
+const floor1 = FloorColours(base: Color(0xFF147356), deep: Color(0xFF0E5C44), tint: Color(0xFFE3F3EA), soft: Color(0xFFBFE6D2), on: Color(0xFFD6F0E2));
+const floor2 = FloorColours(base: Color(0xFF3152BD), deep: Color(0xFF22398A), tint: Color(0xFFE6ECFB), soft: Color(0xFFC3D2F5), on: Color(0xFFD3DEFA));
+const floor3 = FloorColours(base: Color(0xFFC23A62), deep: Color(0xFF8A2343), tint: Color(0xFFFBE6EC), soft: Color(0xFFF3C0CF), on: Color(0xFFFFF0F4));
+
+abstract final class DaylightSpace {
+  static const s2 = 2.0, s4 = 4.0, s8 = 8.0, s12 = 12.0, s16 = 16.0, s24 = 24.0;
+  static const s32 = 32.0, s40 = 40.0, s48 = 48.0, s64 = 64.0, s80 = 80.0, s96 = 96.0;
+}
+abstract final class DaylightRadius {
+  static const tag = 6.0, inner = 8.0, tile = 12.0, card = 16.0, panel = 24.0, arch = 999.0;
+}
+abstract final class DaylightMotion {
+  static const ease = Cubic(0.22, 1, 0.36, 1);
+  static const press = Duration(milliseconds: 200), colour = Duration(milliseconds: 300);
+  static const move = Duration(milliseconds: 500), stagger = Duration(milliseconds: 60);
+  static const staggerCap = Duration(milliseconds: 400);
+}
+abstract final class DaylightElevation {
+  static const edge = [BoxShadow(color: DaylightColors.sand2, offset: Offset(0, 4))];
+  static const lift = [BoxShadow(color: Color(0x1F5E4828), blurRadius: 24, offset: Offset(0, 8))];
+}
+```
+
+`floor3.on` (`#FFF0F4`, 4.7:1 on `#C23A62`) completes the set; the mockups never set soft text on
+floor 3. Rules: text on a chapter colour is white or that chapter's `-on`, never `-soft` (3.6:1,
+fails).
 Honey is never text on green. Every HSL saturation is under 80% (the skill's limit; main's
 sunflower was 100%). Shadows: the edge is `0 4px 0 sand-2` (or the element's `-deep`), and the
 lift is `0 8px 24px rgb(94 72 40 / 0.12)`.
@@ -163,8 +207,42 @@ lift is `0 8px 24px rgb(94 72 40 / 0.12)`.
 slightly irregular ink traps. At display sizes it has personality, a bit of hand-made warmth,
 without being rounded or childish. It reads as "made by a studio", not "default app". Geist (OFL,
 an approved font in the skill) is a neutral, very legible UI sans with a large x-height, good for
-non-native readers at 14–16. Both get bundled in `packages/brand/fonts/` (offline, no runtime
-fetch), replacing Manrope and Cormorant Garamond.
+non-native readers at 14–16.
+
+**The font files** (bundled, offline, no runtime fetch; they replace Manrope and Cormorant
+Garamond in `packages/brand/pubspec.yaml`). Google Fonts ships both as variable fonts only:
+
+| File (from `github.com/google/fonts`, main) | Into | Axes used | Licence |
+| --- | --- | --- | --- |
+| `ofl/bricolagegrotesque/BricolageGrotesque[opsz,wdth,wght].ttf` | `packages/brand/fonts/bricolage_grotesque/BricolageGrotesque-Variable.ttf` | `wght` 600, `opsz` = the font size (12–96), `wdth` 100 | `ofl/bricolagegrotesque/OFL.txt`, copied beside it |
+| `ofl/geist/Geist[wght].ttf` | `packages/brand/fonts/geist/Geist-Variable.ttf` | `wght` 400, 500, 600 | `ofl/geist/OFL.txt` |
+| (alternative only) `ofl/fraunces/Fraunces[SOFT,WONK,opsz,wght].ttf` | not bundled unless Paper Pop is chosen | `wght` 600, `SOFT` 100, `WONK` 0 | `ofl/fraunces/OFL.txt` |
+
+```yaml
+# packages/brand/pubspec.yaml
+flutter:
+  fonts:
+    - family: BricolageGrotesque
+      fonts:
+        - asset: fonts/bricolage_grotesque/BricolageGrotesque-Variable.ttf
+    - family: Geist
+      fonts:
+        - asset: fonts/geist/Geist-Variable.ttf
+```
+
+Every named style sets its axes explicitly, so the app matches the browser-rendered mockups
+(which used automatic optical sizing):
+
+```dart
+TextStyle(
+  fontFamily: 'BricolageGrotesque', package: 'brand',
+  fontSize: 24, height: 32 / 24, letterSpacing: -0.24, fontWeight: FontWeight.w600,
+  fontVariations: [FontVariation.weight(600), FontVariation.opticalSize(24)],
+)
+```
+
+`fonts_test.dart` asserts every style resolves to a bundled family. The web loads the same two
+families through `next/font/google` (self-hosted at build).
 
 ### Space, radius, elevation
 
@@ -269,6 +347,8 @@ Streak won an award for kindness, so the habit gauge is weekly and forgiving.
 | When | What brings them back | Where it shows |
 | --- | --- | --- |
 | End of every room | XP, the room lights up, and a **dated promise**: "Back in your Recall Room on Friday" | Debrief, the "line that cost the most" card |
+| Reminders (main #51) | Local reminders on **days 1, 3 and 5, then day 8**, then silence. At most one a day, at the player's usual hour, Recall first. "Send a test reminder" in Settings | Notification, then a deep link. WS2 restyles the Settings row only |
+| Any return after a day away | The **welcome-back card**, in the next interviewer's voice, with one button to what's waiting | Home, the first card (`01-home`) |
 | Day 1 | A Recall note due, in the voice of the interviewer who caught the trap ("Marcus remembers what you said about the deadline. Do you?") | Notification → Recall Room. A home card with "due today", a tab badge |
 | **Day 3** | The second Leitner box: "Welcome back, Sami. Marcus caught you on this one. Want another go?" No hints this time. The weekly ring says "This closes 3 of 3 for the week." | `07-recall`: the note with tape and a day counter |
 | **Day 5** | The ring nudge ("One more session closes your week"), plus the story thread left open: "Lena has one more question for you…" If an interview date is set: "Interview in 5 days: a six minute warm-up." | Home: the ring, a Lena note card, the date tag |
@@ -293,16 +373,26 @@ letter tile; idle, pressed, selected, dimmed, locked), `FeedbackSheet`, `ScoreDi
 `ChapterTint` (sets ch/ch-deep/ch-tint/ch-on for a subtree), `Grain` (5% noise; replaces film
 grain). Each one gets a `/dev/catalog` entry and goldens for every state.
 
-### 1 · Home, the tower (`features/tower/`, `01-home`, `01b-home-tower`)
+### 1 · Home, the tower (`features/tower/`; `01-home` is a day 3 return, `01b-home-tower` is scrolled)
 
 On paper. From the top: the date (Caption 4), "Morning, Sami." (Heading 4) and the **weekly
 ring** (56, ch1 on sand-2, "2/3"); tags for XP and the interview countdown. The **up-next card**
 is ch1, r24, with the interviewer's arch window breaking 48 above its top edge. Inside: the
 kicker "Up next · room 4 of 21", the mission title (Heading 5), tags (5 min, 3 beats), the
-interviewer's question on ch1-deep (r8), and `TactileButton` "Start room 4" (r8, by the nested
-rule). Next comes the **Recall card** (recall-tint, r24) with the hosting interviewer in an arch,
-"Recall Room · due today", the count and the minutes. It moves above the up-next card when two
-or more notes are due. Then **Northstar tower**, the illustration as the progress bar: three
+interviewer's question on ch1-deep (r8; left out while the welcome-back card is up, to keep the
+button above the fold), and `TactileButton` "Start room 4" (r8, by the nested rule).
+
+On a return after a day or more away, the **welcome-back card** (main's
+`features/tower/welcome_back_card.dart`, PR #51; restyle only, keep its logic and copy rules)
+comes first, above the up-next card: white, r24, edge. It holds the next room's interviewer in a
+56 × 64 arch (`smile`), the kicker "Welcome back · Priya" (Caption 3, recall colour, **sentence
+case**, replacing `WELCOME BACK · PRIYA`), the greeting (Heading 6), the "waiting" lines as icon
+rows (Phosphor fill, recall colour, Body 5), a dismiss tile (32, sand), and its one button in the
+**recall colour** (white text 6.7:1, `recallDeep` edge), so it never competes with the honey
+up-next button. While it is up, the Recall card is not repeated, because the welcome card
+already names the cards due. Otherwise the **Recall card** (recall-tint, r24) shows the hosting
+interviewer in an arch, "Recall Room · due today", the count and the minutes; it moves above the
+up-next card when two or more notes are due. Then **Northstar tower**, the illustration as the progress bar: three
 floors (dusk / ch2-soft / ch1), seven arched windows each (lit honey with a check, current with
 the interviewer inside and a glow ring, unlit). The labels sit on the facade. Then the **skills
 shelf**: four arch badges, the next one ringed in honey with "Room 7". The `FloatingTabBar`
@@ -437,29 +527,14 @@ Icons via `@phosphor-icons/react`. Tokens in `web/src/app/globals.css` mirror
 
 ## The alternative: Paper Pop
 
-*Cut paper, stickers and room tickets: an editorial magazine that turned into a game.*
-
-- **Motif:** each room is a **ticket** whose stub you tear to start. The interviewers are
-  **stickers** with a white die-cut edge (CapWords' sticker moment). Scores are **stamped**
-  (inherited from the original dossier). The weekly goal is a **stamp card**, Recall arrives as
-  an **envelope**, and the building is a stack of torn paper slabs.
-- **Colour:** paper `#F7F3EC`, ink `#221E1A`; fern `#19744D`, ultramarine `#3D5BD9`, raspberry
-  `#D9476B`; sun `#E9B949` for skill stickers and tear stubs; ink-black primary buttons. The
-  top of each mission screen is the chapter's sheet, torn along the bottom.
-- **Type:** **Fraunces** (soft axis at 100, 600, never italic) for display: a warm, wonky,
-  editorial serif with a magazine's confidence. **Geist** for reading.
-- **Feels like:** Imprint and Babbel's cut-outs meet CapWords. It's more playful and more
-  "designed" than Daylight, with less calm and more texture. The rotations, tears and stickers
-  need care to stay grown-up at scale.
-- **Choose it if** the owner wants the product to feel like a magazine you play, or if Daylight
-  reads too close to other learning apps on the phone.
-
-Why Daylight is the recommendation: it's the shorter step from the vivid look the owner liked
-(the same chapter colours, rings and honey, the same tower). It has a stronger home (the tower as
-the progress bar), and it's calmer for an anxious user. Paper Pop's ticket and stamp ideas can
-still be borrowed into it later (the stamp card for the week is a good one).
-
----
+*Cut paper, stickers and room tickets.* Each room is a ticket whose stub you tear to start; the
+interviewers are die-cut stickers; scores are stamped; the week is a stamp card; Recall arrives as
+an envelope. Paper `#F7F3EC`, ink `#221E1A`, fern `#19744D`, ultramarine `#3D5BD9`, raspberry
+`#D9476B`, sun `#E9B949`. **Fraunces** (soft 100, 600) for display, Geist for reading. It's more
+editorial and more playful, less calm, and it needs care to stay grown-up. It isn't the
+recommendation because Daylight is the shorter step from the vivid look the owner liked, has the
+stronger home (the tower is the progress bar) and is calmer for an anxious player. Borrowable
+later: the weekly stamp card.
 
 ## Implementation plan: three parallel workstreams
 
@@ -472,6 +547,14 @@ own PR with before/after stills and goldens.
 | **Delivers** | Tokens and AA tests, `ThemeData`, named text styles, motion tokens, the 15 kit widgets with every state, the cast with seven expressions and idle, catalog pages and goldens | The seven screens above, the eight micro-interactions, the home Recall card and skills shelf, the reward screen, the day 3 and day 5 surfaces, the weekly ring logic, reduced-motion paths, offline/empty/error states | The page per the landing spec, the tagline reveal, panel, FAQ, 404, meta, the React cast; Lighthouse mobile budget kept |
 | **Depends on** | Nothing; lands first, small (tokens, fonts, kit skeletons, cast) | WS1's tokens and kit API (can start on screens against stubs on day 1) | WS1's cast data (`cast.json`) for portraits; everything else independent |
 | **Done when** | `check:standards` passes (no raw colours outside brand), contrast tests are green, goldens are reviewed | Every screen matches its mockup at 390 × 844 on the owner's phone, with 1×, 2× text and reduced motion checked | All of Part B's checklist ticked, checked at 390, 768 and 1440 |
+
+**Notes for the workers.** Start from current `main`. It has PR #50's design skills in
+`.claude/skills/` and PR #51's welcome-back card and reminders: restyle those, don't rewrite their
+logic. Brief 33 (a tower restyle in the w7 worktree) touches the same `features/tower/` files as
+WS2, so land or close it first, or fold it into WS2. WS3 starts from `main`'s `web/`, not from the
+paused w8 branch, but should lift that branch's `HeroPhone` loop idea (restyled) and drop its
+portraits for the shared cast. Read the mockup HTML for exact layout values: every size, gap and
+colour in `docs/design/mockups/daylight/*.html` and `tokens.css` is a token from this document.
 
 Order: WS1 opens first and merges within a day (it's mostly tokens and leaf widgets). WS2 and
 WS3 start the same day against its API, and rebase when it lands. Events: the new moments need

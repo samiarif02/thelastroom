@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
 <link rel="stylesheet" href="tokens.css">
 <style>
-main { padding: 8px 16px 0; transform: translateY(-520px); }
+main { padding: 8px 16px 0; transform: translateY(-640px); }
 .head { display: flex; justify-content: space-between; align-items: flex-start; }
 .head .date { color: var(--ink-2); }
 .ring { width: 56px; text-align: center; }
@@ -19,8 +19,19 @@ main { padding: 8px 16px 0; transform: translateY(-520px); }
 .tags .xp { background: #f8ead0; color: #6b4a08; }
 .tags .date { background: var(--sand); color: var(--ink-2); }
 
+.welcome { margin-top: 16px; background: var(--raised); border-radius: 24px; padding: 16px; box-shadow: var(--edge); }
+.welcome .who { display: flex; gap: 12px; align-items: flex-start; }
+.welcome .face { flex: none; width: 56px; height: 64px; background: var(--recall-soft); position: relative; }
+.welcome .face .cast { position: absolute; inset: 4px -8px 0; }
+.welcome .hi { flex: 1; }
+.welcome .hi .caption-3 { color: var(--recall); }
+.welcome .x { width: 32px; height: 32px; border-radius: 8px; background: var(--sand); display: grid; place-items: center; color: var(--ink-2); font-size: 16px; }
+.welcome .waiting { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; }
+.welcome .waiting li { display: flex; gap: 8px; align-items: center; color: var(--ink); }
+.welcome .waiting i { color: var(--recall); font-size: 18px; }
+.welcome .go { margin-top: 12px; height: 48px; border-radius: 8px; background: var(--recall); color: #fff; display: flex; gap: 8px; align-items: center; justify-content: center; font: 600 16px/24px var(--ui); box-shadow: 0 4px 0 #43348a; }
 .next {
-	margin-top: 48px;
+	margin-top: 64px;
 	background: var(--ch1);
 	border-radius: 24px;
 	padding: 16px;
@@ -72,7 +83,7 @@ main { padding: 8px 16px 0; transform: translateY(-520px); }
 
 .skills { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
 .skills .b { display: grid; place-items: center; width: 64px; height: 76px; margin: 0 auto 8px; background: var(--sand); color: var(--ink-3); font-size: 28px; }
-.skills .next .b { background: #f8ead0; color: #6b4a08; box-shadow: 0 0 0 2px var(--honey); }
+.skills .soon .b { background: #f8ead0; color: #6b4a08; box-shadow: 0 0 0 2px var(--honey); }
 .skills .hint { color: var(--ink-2); }
 .status { background: var(--paper); }
 nav {
@@ -120,6 +131,23 @@ nav a .badge { position: absolute; top: 4px; right: 18px; min-width: 16px; heigh
 		<span class="tag date"><i class="ph-bold ph-calendar-blank"></i>Interview in 9 days</span>
 	</div>
 
+	<section class="welcome" aria-label="Welcome back">
+		<div class="who">
+			<div class="face arch"><div class="cast" data-cast="priya" data-expr="smile"></div></div>
+			<div class="hi">
+				<p class="caption-3">Welcome back · Priya</p>
+				<h2 class="heading-6">Good to see you again. Here's what's waiting.</h2>
+			</div>
+			<span class="x" aria-label="Dismiss"><i class="ph-bold ph-x"></i></span>
+		</div>
+		<ul class="waiting">
+			<li><i class="ph-fill ph-cards-three"></i><span class="body-5">2 traps are waiting in the Recall Room</span></li>
+			<li><i class="ph-fill ph-door-open"></i><span class="body-5">Room 4 is ready for you</span></li>
+			<li><i class="ph-fill ph-circle-half"></i><span class="body-5">This week: 2 of 3 sessions</span></li>
+		</ul>
+		<div class="go"><i class="ph-bold ph-cards-three"></i>Open the Recall Room</div>
+	</section>
+
 	<section class="next" aria-label="Up next">
 		<div class="top">
 			<div class="copy">
@@ -129,19 +157,9 @@ nav a .badge { position: absolute; top: 4px; right: 18px; min-width: 16px; heigh
 			</div>
 			<div class="window arch"><div class="cast" data-cast="marcus" data-expr="listening"></div><div class="sill"></div></div>
 		</div>
-		<p class="body-6 says">“Tell me about a time you used data to change something.” <span>Marcus, hiring manager</span></p>
 		<div class="btn"><i class="ph-fill ph-play"></i>Start room 4</div>
 	</section>
 
-	<section class="recall" aria-label="Recall Room">
-		<div class="face arch"><div class="cast" data-cast="priya" data-expr="talk"></div></div>
-		<div class="copy">
-			<p class="caption-3 due">Recall Room · due today</p>
-			<h3 class="body-1">Two traps from Saturday</h3>
-			<p class="body-6">Priya kept notes. Two minutes.</p>
-		</div>
-		<i class="ph-bold ph-caret-right"></i>
-	</section>
 
 	<div class="section"><h3 class="heading-6">Northstar tower</h3><span class="caption-4 tnum">3 of 21 rooms lit</span></div>
 	<div class="tower">
@@ -196,7 +214,7 @@ nav a .badge { position: absolute; top: 4px; right: 18px; min-width: 16px; heigh
 	</div>
 	<div class="section"><h3 class="heading-6">Skills</h3><span class="caption-4 tnum">Next one in room 7</span></div>
 	<ul class="skills">
-		<li class="next"><span class="b arch"><i class="ph-fill ph-chart-bar"></i></span><p class="caption-3">Evidence Builder</p><p class="caption-4 hint">Room 7</p></li>
+		<li class="soon"><span class="b arch"><i class="ph-fill ph-chart-bar"></i></span><p class="caption-3">Evidence Builder</p><p class="caption-4 hint">Room 7</p></li>
 		<li><span class="b arch"><i class="ph-bold ph-hand-waving"></i></span><p class="caption-4">Clear Introductions</p><p class="caption-4 hint">Room 7</p></li>
 		<li><span class="b arch"><i class="ph-bold ph-handshake"></i></span><p class="caption-4">Conflict Navigator</p><p class="caption-4 hint">Floor 2</p></li>
 		<li><span class="b arch"><i class="ph-bold ph-lightning"></i></span><p class="caption-4">Think Under Pressure</p><p class="caption-4 hint">Floor 3</p></li>
