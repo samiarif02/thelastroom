@@ -8,6 +8,7 @@ import '../logging/log.dart';
 import '../profile/drift_profile_repository.dart';
 import '../profile/profile_repository.dart';
 import '../progress/drift_progress_repository.dart';
+import '../progress/progress_repository.dart';
 import 'outbox.dart';
 
 /// Sends the outbox to the backend, and restores a fresh install once (FR-60, FR-61).
@@ -210,6 +211,9 @@ RemoteAttempt remoteAttempt(StoredAttempt a, MissionScore score) =>
       beatOptionIds: a.beatOptionIds,
       followUpId: a.followUpId,
       replyOptionId: a.replyOptionId,
+      beatPlays: a.beatPlays.isEmpty
+          ? null
+          : [for (final p in a.beatPlays) p.toJson()],
     );
 
 /// A restored attempt as the device stores it (no draft: it never left the old device).
@@ -224,6 +228,7 @@ StoredAttempt storedAttempt(RemoteAttempt a) => StoredAttempt(
   hinted: a.hinted,
   completedAt: a.completedAt,
   contentSchemaVersion: a.contentSchemaVersion,
+  beatPlays: BeatPlayRecord.listFrom(a.beatPlays),
 );
 
 RemoteProfile remoteProfile(PlayerProfile p) => RemoteProfile(

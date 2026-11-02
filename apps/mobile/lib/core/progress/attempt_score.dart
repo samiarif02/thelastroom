@@ -1,16 +1,21 @@
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 
+import 'progress_repository.dart';
+
 /// Recomputes an attempt's score from its picks with the engine. A stored or restored attempt
-/// keeps only what the player chose; its score is always the engine's (explainable,
-/// reproducible offline). Null when the picks no longer match the content (an option removed by
-/// a later content version), so a stale row is skipped, never mis-scored.
+/// keeps only what the player chose and how ([beatPlays]: the reasons and the time taken, which
+/// wave 5's credits depend on); its score is always the engine's (explainable, reproducible
+/// offline), and the same as the one the debrief showed. Null when the picks no longer match
+/// the content (an option removed by a later content version), so a stale row is skipped,
+/// never mis-scored.
 MissionScore? scoreFromPicks({
   required String missionId,
   required List<String> beatOptionIds,
   required String followUpId,
   required String replyOptionId,
   required bool hinted,
+  List<BeatPlayRecord> beatPlays = const [],
 }) {
   final mission = _mission(missionId);
   if (mission == null || beatOptionIds.length != mission.beats.length) {
@@ -21,7 +26,18 @@ MissionScore? scoreFromPicks({
     final beat = mission.beats[i];
     final option = beat.optionById(beatOptionIds[i]);
     if (option == null) return null;
-    picks.add(BeatPick(beat: beat.kind, choice: option.scored));
+    final play = i < beatPlays.length ? beatPlays[i] : const BeatPlayRecord();
+    final reason = beat.why?.reasons
+        .where((r) => r.id == play.reasonId)
+        .firstOrNull;
+    picks.add(
+      BeatPick(
+        beat: beat.kind,
+        choice: option.scored,
+        decidedIn: play.decidedIn,
+        reason: reason == null ? null : beat.reasonPick(reason, option.id),
+      ),
+    );
   }
   FollowUp? followUp;
   for (final f in mission.followUps) {

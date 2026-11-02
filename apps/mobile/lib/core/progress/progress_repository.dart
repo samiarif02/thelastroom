@@ -17,6 +17,7 @@ class AttemptRecord {
     this.draft,
     this.attemptId,
     this.completedAt,
+    this.beatPlays = const [],
   });
 
   final String missionId;
@@ -34,6 +35,11 @@ class AttemptRecord {
   final MissionScore score;
   final bool hinted;
 
+  /// How each beat was played, in beat order: the reason given and the time taken. The score
+  /// depends on both (wave 5), so a stored attempt keeps them to be scored again the same way.
+  /// Empty for an attempt stored before brief 30: it rescores at full credit, as it did then.
+  final List<BeatPlayRecord> beatPlays;
+
   /// The player's own words from the draft-first step (FR-11), or null if skipped. It stays on
   /// the device: never logged, never sent as an event.
   final String? draft;
@@ -48,6 +54,37 @@ class AttemptRecord {
   @override
   String toString() =>
       'AttemptRecord($missionId #$attemptNumber, total ${score.total})';
+}
+
+/// One beat as it was played: the reason given ("why that line?"; null where none was asked)
+/// and how long the player took to pick (null where it wasn't measured).
+class BeatPlayRecord {
+  const BeatPlayRecord({this.reasonId, this.decidedIn});
+
+  final String? reasonId;
+  final Duration? decidedIn;
+
+  /// The stored and synced shape (`beat_plays`), microseconds so a rescore crosses the guess
+  /// threshold exactly where the live score did.
+  Map<String, Object?> toJson() => {
+    'reason_id': reasonId,
+    'decided_us': decidedIn?.inMicroseconds,
+  };
+
+  /// Reads [toJson]'s shape; anything malformed reads as "not recorded".
+  static BeatPlayRecord fromJson(Object? json) {
+    if (json is! Map) return const BeatPlayRecord();
+    final reason = json['reason_id'];
+    final us = json['decided_us'];
+    return BeatPlayRecord(
+      reasonId: reason is String ? reason : null,
+      decidedIn: us is int ? Duration(microseconds: us) : null,
+    );
+  }
+
+  /// A list of [fromJson]s from a decoded `beat_plays` value; empty for anything else.
+  static List<BeatPlayRecord> listFrom(Object? json) =>
+      json is List ? [for (final p in json) fromJson(p)] : const [];
 }
 
 /// Where the player's progress is kept. [InMemoryProgressRepository] for tests and the catalog;
