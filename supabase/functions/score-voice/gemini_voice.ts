@@ -3,17 +3,24 @@
 // `score` function's (../score/gemini.ts), so both functions grade with the same judge.
 // https://ai.google.dev/gemini-api/docs/audio and https://ai.google.dev/gemini-api/docs/structured-output
 
-import { GEMINI_MODEL, UpstreamError, type Usage } from '../score/gemini.ts';
+import { GEMINI_CHAIN, type GeminiModel, UpstreamError, type Usage } from '../score/gemini.ts';
 import { OutputError, parseVerdict, promptParts, responseSchema, systemInstruction, type VoiceInput } from './voice.ts';
 import type { VoiceResult } from './voice.ts';
 
 const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 /**
- * How long the function waits for Gemini. Listening to up to two 90 s takes and transcribing them
- * takes longer than grading text, so this is longer than `score`'s 7 s; the app waits 30 s.
+ * The voice chain: `score`'s models, in its order and with minimal thinking (the first live run
+ * showed a thinking model timing out on the owner's key, brief 36), each given longer because it
+ * listens to up to two 90 s takes. The total stays under the app's 30 s wait.
  */
-export const VOICE_GEMINI_TIMEOUT_MS = 25_000;
+export const VOICE_CHAIN: readonly GeminiModel[] = GEMINI_CHAIN.map((m, i) => ({
+  ...m,
+  timeoutMs: [11_000, 9_000, 7_000][i] ?? 7_000,
+}));
+
+/** How long one call waits when no model is given. */
+export const VOICE_GEMINI_TIMEOUT_MS = VOICE_CHAIN[0].timeoutMs;
 
 /** Two transcripts of up to ~1,500 characters, the point ids, five scores and five sentences. */
 const MAX_OUTPUT_TOKENS = 4096;
@@ -26,7 +33,10 @@ export interface VoiceVerdict {
 type Fetch = typeof fetch;
 
 /** The `generateContent` body: instructions, the questions and points around the two clips. */
-export function requestBody(input: VoiceInput): Record<string, unknown> {
+export function requestBody(
+  input: VoiceInput,
+  thinkingLevel: GeminiModel['thinkingLevel'] = VOICE_CHAIN[0].thinkingLevel,
+): Record<string, unknown> {
   const parts = promptParts(input);
   return {
     systemInstruction: { parts: [{ text: systemInstruction(input) }] },
@@ -45,6 +55,7 @@ export function requestBody(input: VoiceInput): Record<string, unknown> {
       responseMimeType: 'application/json',
       responseSchema: responseSchema(input),
       maxOutputTokens: MAX_OUTPUT_TOKENS,
+      thinkingConfig: { thinkingLevel },
     },
   };
 }
@@ -59,15 +70,16 @@ export async function scoreVoiceWithGemini(
   apiKey: string,
   fetchImpl: Fetch = fetch,
   timeoutMs = VOICE_GEMINI_TIMEOUT_MS,
+  model: GeminiModel = VOICE_CHAIN[0],
 ): Promise<VoiceVerdict> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   let response: Response;
   try {
-    response = await fetchImpl(`${ENDPOINT}/${GEMINI_MODEL}:generateContent`, {
+    response = await fetchImpl(`${ENDPOINT}/${model.model}:generateContent`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
-      body: JSON.stringify(requestBody(input)),
+      body: JSON.stringify(requestBody(input, model.thinkingLevel)),
       signal: controller.signal,
     });
   } catch (error) {
@@ -94,7 +106,26 @@ export async function scoreVoiceWithGemini(
   if (raw === '') throw new OutputError('gemini returned no text');
   const usage = data.usageMetadata as Record<string, unknown> | undefined;
   return {
-    result: parseVerdict(raw, GEMINI_MODEL, input),
+    result: parseVerdict(raw, model.model, input),
     usage: { promptTokens: count(usage?.promptTokenCount), outputTokens: count(usage?.candidatesTokenCount) },
   };
+}
+
+/** Grades with the first model in [chain] that answers; the last failure is the one thrown. */
+export async function scoreVoiceWithFallback(
+  input: VoiceInput,
+  apiKey: string,
+  fetchImpl: Fetch = fetch,
+  chain: readonly GeminiModel[] = VOICE_CHAIN,
+): Promise<VoiceVerdict> {
+  let last: unknown = new UpstreamError('no model to grade with');
+  for (const model of chain) {
+    try {
+      return await scoreVoiceWithGemini(input, apiKey, fetchImpl, model.timeoutMs, model);
+    } catch (error) {
+      if (!(error instanceof UpstreamError) && !(error instanceof OutputError)) throw error;
+      last = error;
+    }
+  }
+  throw last;
 }

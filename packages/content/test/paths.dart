@@ -1,6 +1,13 @@
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 
+/// The missions answered by picking lines (all of Chapter 1): the ones the path, option and
+/// reasoning checks apply to. A voice mission has no beats or options (brief 37).
+final List<Mission> choiceMissions = [
+  for (final m in gameContent.missions)
+    if (m.answerMode == AnswerMode.choices) m,
+];
+
 /// One way through a mission: the beat picks, the follow-up the engine asks for them, the
 /// reply, and the score.
 typedef MissionPath = ({
@@ -61,3 +68,19 @@ List<AnswerOption> allOptions(Mission mission) => [
 /// An option's points on all four dimensions.
 int pointsOf(AnswerOption option) =>
     Dimension.values.fold(0, (sum, d) => sum + option.scores[d]);
+
+/// Every mission written so far, in campaign order: the playable ones, then Chapters 2 and 3
+/// while they wait for the voice player (briefs 37, 38). Once a chapter joins [missions] its
+/// missions aren't listed twice.
+final List<Mission> writtenMissions = [
+  ...missions,
+  for (final m in [...chapterTwoMissions, ...chapterThreeMissions])
+    if (!missions.any((p) => p.id == m.id)) m,
+];
+
+/// The written missions answered by picking lines: the ones the writing notes and the why step
+/// apply to. A voice mission has no lines to pick.
+final List<Mission> choicesMissions = [
+  for (final m in writtenMissions)
+    if (m.answerMode == AnswerMode.choices) m,
+];

@@ -321,6 +321,90 @@ void main() {
     },
   );
 
+  group('a later chapter numbers on from every title teased before it', () {
+    const point = ListenFor(
+      id: 'm_later_point',
+      text: 'Says what they did.',
+      dimension: Dimension.specificity,
+    );
+    ContentBundle withChapterThreeAt(int number) => ContentBundle(
+      chapters: const [
+        Chapter(
+          number: 1,
+          title: 'One',
+          missionTitles: ['Fixture'],
+          playable: true,
+        ),
+        Chapter(
+          number: 2,
+          title: 'Two',
+          missionTitles: ['Not yet', 'Nor this'],
+          playable: false,
+        ),
+        Chapter(
+          number: 3,
+          title: 'Three',
+          missionTitles: ['Later'],
+          playable: true,
+        ),
+      ],
+      interviewers: fixture.interviewers,
+      lessons: fixture.lessons,
+      missions: [
+        base,
+        Mission(
+          id: 'm_later',
+          chapter: 3,
+          number: number,
+          title: 'Later',
+          scene: base.scene,
+          question: base.question,
+          beats: const [],
+          followUps: const [],
+          hinted: false,
+          answerMode: AnswerMode.voice,
+          voice: VoicePrompt(
+            listenFor: const [
+              point,
+              ListenFor(
+                id: 'm_later_relevant',
+                text: 'Answers the question.',
+                dimension: Dimension.relevance,
+              ),
+              ListenFor(
+                id: 'm_later_ordered',
+                text: 'Ends on purpose.',
+                dimension: Dimension.structure,
+              ),
+            ],
+            followUp: base.question,
+            followUpListenFor: const [
+              ListenFor(
+                id: 'm_later_adapts',
+                text: 'Answers the push-back.',
+                dimension: Dimension.adaptability,
+              ),
+            ],
+            lessonId: fixture.lessons.single.id,
+          ),
+        ),
+      ],
+    );
+
+    test(
+      'with Chapter 2 unwritten, Chapter 3 still starts after its titles',
+      () {
+        expect(problems(withChapterThreeAt(4)), isEmpty);
+      },
+    );
+
+    test('not straight after the last written mission', () {
+      expect(problems(withChapterThreeAt(2)), [
+        'm_later: missions must be numbered 1, 2, 3… in order',
+      ]);
+    });
+  });
+
   test('a mission must sit in a playable chapter', () {
     expect(
       problems(

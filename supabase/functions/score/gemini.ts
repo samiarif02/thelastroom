@@ -11,16 +11,38 @@ import {
   systemInstruction,
 } from './scoring.ts';
 
+/** One model the function may grade with, and how long it gets. */
+export interface GeminiModel {
+  model: string;
+  /** Gemini 3's thinking level: `minimal` keeps a verdict to a second or two. */
+  thinkingLevel: 'minimal' | 'low';
+  timeoutMs: number;
+}
+
 /**
- * The model that grades. Gemini 3.8 Flash: Google's strongest Flash model, and fast enough for
- * the app's 8 s wait (`gemini-4-argon` reasons longer than the player should wait). ADR 0006.
+ * The models that grade, tried in order: the next one only when the one before is overloaded
+ * (503), over its rate limit (429), fails or runs out of time. Measured live with the owner's key
+ * on 2026-11-02 (brief 36): `gemini-3.8-flash` answered 503 "high demand" or took 30 s+ and doesn't
+ * allow minimal thinking; with minimal thinking `gemini-3.6-flash` answered a verdict in ~2–7 s,
+ * `gemini-3.5-flash-lite` in ~1.2 s and `gemini-3.1-flash-lite` in 1.3–13 s. Rate limits are per
+ * model, so the chain also spreads the load. The timeouts add up to under the app's 30 s
+ * `AiScorer.lateLimit` (the app shows the offline score at 8 s meanwhile). ADR 0006 (amended).
  */
-export const GEMINI_MODEL = 'gemini-3.8-flash';
+export const GEMINI_CHAIN: readonly GeminiModel[] = [
+  // First because it's the configuration the evaluation measured (docs/scoring-eval.md: 63 of
+  // 63 verdicts, median 2.1 s) and the fastest on the key's free tier.
+  { model: 'gemini-3.5-flash-lite', thinkingLevel: 'minimal', timeoutMs: 7000 },
+  { model: 'gemini-3.6-flash', thinkingLevel: 'minimal', timeoutMs: 10000 },
+  { model: 'gemini-3.1-flash-lite', thinkingLevel: 'minimal', timeoutMs: 7000 },
+];
+
+/** The first model in [GEMINI_CHAIN]: what a verdict normally records as its grader. */
+export const GEMINI_MODEL = GEMINI_CHAIN[0].model;
 
 const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-/** How long the function waits for Gemini; the app gives up at 8 s, so this leaves headroom. */
-export const GEMINI_TIMEOUT_MS = 7000;
+/** How long one call waits when no model is given; the chain sets its own (above). */
+export const GEMINI_TIMEOUT_MS = GEMINI_CHAIN[0].timeoutMs;
 
 /** Room for five scores and five one-sentence bases, and nothing else. */
 const MAX_OUTPUT_TOKENS = 1024;
@@ -46,7 +68,10 @@ export class UpstreamError extends Error {
 type Fetch = typeof fetch;
 
 /** The `generateContent` body: the panel's instructions, the transcript, deterministic JSON. */
-export function requestBody(input: ScoreInput): Record<string, unknown> {
+export function requestBody(
+  input: ScoreInput,
+  thinkingLevel: GeminiModel['thinkingLevel'] = GEMINI_CHAIN[0].thinkingLevel,
+): Record<string, unknown> {
   return {
     systemInstruction: { parts: [{ text: systemInstruction(input) }] },
     contents: [{ role: 'user', parts: [{ text: answerTranscript(input) }] }],
@@ -55,6 +80,7 @@ export function requestBody(input: ScoreInput): Record<string, unknown> {
       responseMimeType: 'application/json',
       responseSchema: RESPONSE_SCHEMA,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
+      thinkingConfig: { thinkingLevel },
     },
   };
 }
@@ -72,15 +98,16 @@ export async function scoreWithGemini(
   apiKey: string,
   fetchImpl: Fetch = fetch,
   timeoutMs = GEMINI_TIMEOUT_MS,
+  model: GeminiModel = GEMINI_CHAIN[0],
 ): Promise<Verdict> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   let response: Response;
   try {
-    response = await fetchImpl(`${ENDPOINT}/${GEMINI_MODEL}:generateContent`, {
+    response = await fetchImpl(`${ENDPOINT}/${model.model}:generateContent`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
-      body: JSON.stringify(requestBody(input)),
+      body: JSON.stringify(requestBody(input, model.thinkingLevel)),
       signal: controller.signal,
     });
   } catch (error) {
@@ -107,7 +134,29 @@ export async function scoreWithGemini(
   if (raw === '') throw new OutputError('gemini returned no text');
   const usage = data.usageMetadata as Record<string, unknown> | undefined;
   return {
-    result: parseVerdict(raw, GEMINI_MODEL),
+    result: parseVerdict(raw, model.model),
     usage: { promptTokens: count(usage?.promptTokenCount), outputTokens: count(usage?.candidatesTokenCount) },
   };
+}
+
+/**
+ * Grades with the first model in [chain] that answers: an overloaded, failing or slow model
+ * hands over to the next. The last model's failure is the one thrown.
+ */
+export async function scoreWithFallback(
+  input: ScoreInput,
+  apiKey: string,
+  fetchImpl: Fetch = fetch,
+  chain: readonly GeminiModel[] = GEMINI_CHAIN,
+): Promise<Verdict> {
+  let last: unknown = new UpstreamError('no model to grade with');
+  for (const model of chain) {
+    try {
+      return await scoreWithGemini(input, apiKey, fetchImpl, model.timeoutMs, model);
+    } catch (error) {
+      if (!(error instanceof UpstreamError) && !(error instanceof OutputError)) throw error;
+      last = error;
+    }
+  }
+  throw last;
 }

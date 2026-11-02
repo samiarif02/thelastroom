@@ -1,0 +1,135 @@
+.section {
+	padding-block: var(--space-9);
+}
+
+.grid {
+	display: grid;
+	gap: var(--space-7);
+}
+
+.dimensions {
+	display: grid;
+	gap: var(--space-5);
+	align-content: start;
+}
+
+.dimension {
+	display: grid;
+	gap: var(--space-2);
+	padding-bottom: var(--space-5);
+	border-bottom: 1px solid var(--line);
+}
+
+.dimensionHead {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--space-4);
+}
+
+.dimensionName {
+	font-size: 1.6rem;
+}
+
+.weight {
+	font-family: var(--font-serif), Georgia, serif;
+	font-size: 2rem;
+	font-weight: 500;
+	color: var(--brass);
+	font-variant-numeric: lining-nums tabular-nums;
+}
+
+.bar {
+	display: block;
+	height: 2px;
+	background: var(--line);
+}
+
+.fill {
+	display: block;
+	height: 100%;
+	background: var(--brass);
+}
+
+.question {
+	color: var(--text-2);
+}
+
+.side {
+	display: grid;
+	gap: var(--space-4);
+	align-content: start;
+}
+
+.scorer {
+	display: grid;
+	gap: var(--space-2);
+	padding: var(--space-6);
+	background: var(--ink-800);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+}
+
+.scorerEyebrow {
+	color: var(--brass);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.28em;
+	text-transform: uppercase;
+}
+
+.scorerTitle {
+	font-size: 1.7rem;
+}
+
+.body {
+	color: var(--text-2);
+}
+
+.limits {
+	display: grid;
+	gap: var(--space-4);
+	justify-items: start;
+	margin-top: var(--space-8);
+	padding: var(--space-6);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	background:
+		linear-gradient(var(--ink-900), var(--ink-900)) padding-box,
+		linear-gradient(135deg, var(--brass-deep), var(--line) 40%) border-box;
+	border-color: transparent;
+}
+
+.limitsTitle {
+	font-size: 1.7rem;
+}
+
+.limitList {
+	display: grid;
+	gap: var(--space-3);
+}
+
+.limit {
+	position: relative;
+	padding-left: var(--space-5);
+	color: var(--text-2);
+	max-width: var(--measure);
+}
+
+.limit::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0.7em;
+	width: 6px;
+	height: 6px;
+	background: var(--brass);
+	transform: rotate(45deg);
+}
+
+@media (min-width: 60rem) {
+	.grid {
+		grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+		gap: var(--space-8);
+	}
+}

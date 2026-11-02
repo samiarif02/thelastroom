@@ -71,3 +71,28 @@ recruiter reading what the player built, with each number explained.
   author's fixed judgement, which is what reviewers questioned.
 - **Scoring on the device:** would ship the key in the app (forbidden) or need an on-device
   model too large for the game.
+
+## Amendment, 2026-11-02 (brief 36): what the live key showed
+
+The first run with the owner's real key (until then only a mocked Gemini had answered) failed
+every time: `gemini-3.8-flash` answered 503 "high demand" or took 30 s and more (it thinks by
+default, and doesn't allow minimal thinking), so every verdict hit the 7 s timeout and the player
+always saw the offline score. Measured on the key's model list:
+
+- `gemini-3.6-flash` with `thinkingLevel: minimal` answered in about 1.7 s on a small prompt and
+  3 s on a real verdict; `gemini-3.1-flash-lite` with minimal thinking in 1.3–5.6 s.
+- Under load either can still stall, so a hard 8 s cut-off threw good verdicts away.
+
+**So:** the function tries a chain (`GEMINI_CHAIN` in `gemini.ts`): `gemini-3.6-flash`, then
+`gemini-3.1-flash-lite` when the first is overloaded, fails or runs past 14 s; minimal thinking
+on both, temperature 0, the verdict records which model graded. The app still shows something
+to read at 8 s (the offline score), but keeps listening for 30 s, and a late verdict replaces the
+offline score ("Scored by AI" appears; `ai_score_shown` carries `late: true`). With the chain
+and the longer window, 8 of 8 live verdicts came back, in 2–6 s. The evaluation of the scores
+themselves is `docs/scoring-eval.md`.
+
+**Later the same day:** a third model, `gemini-3.5-flash-lite` (about 1.2 s), went to the front
+of the chain once the evaluation ran on it: 63 of 63 verdicts, 92 % in the intended band, every
+mission ranked right, r = 0.91 with the engine, median 2.1 s (`docs/scoring-eval.md`). The
+prompt also gained two rules from the evaluation: an all-guessed answer is capped (40 overall,
+20 specificity), and a good-sounding reason never rescues a weak line.

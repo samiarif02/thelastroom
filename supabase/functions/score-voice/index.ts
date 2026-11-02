@@ -6,7 +6,7 @@
 // Local:  supabase start && supabase functions serve score-voice --env-file .env
 // Remote: supabase secrets set --env-file .env && supabase functions deploy score-voice
 
-import { scoreVoiceWithGemini } from './gemini_voice.ts';
+import { scoreVoiceWithFallback } from './gemini_voice.ts';
 import { type Deps, handle, NotConfigured, Unauthorized } from './handler.ts';
 import { storedTranscript, type VoiceInput, type VoiceResult } from './voice.ts';
 
@@ -31,7 +31,7 @@ const deps: Deps = {
   score(input: VoiceInput) {
     const key = Deno.env.get('GEMINI_API_KEY');
     if (!key) return Promise.reject(new NotConfigured());
-    return scoreVoiceWithGemini(input, key);
+    return scoreVoiceWithFallback(input, key);
   },
 
   async claimQuota(jwt: string) {

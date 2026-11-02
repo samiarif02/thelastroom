@@ -66,7 +66,9 @@ Scope is optional and curated in `scripts/check-commit-message.mjs`'s
 `claude`. A change spanning areas takes no scope. Add a scope there (and
 here) when a genuinely new area appears, not to fit one commit.
 
-Session logs are committed on their own, last, right before the push:
+Session logs are committed on their own, last, right before the push, **in every PR, every
+time** (the pre-push hook refuses a branch without them; background agents copy their parent
+session's log in):
 `chore(claude): add session logs` (the `ship` skill).
 
 ## The changelog line

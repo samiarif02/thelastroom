@@ -2,6 +2,7 @@
 // network. Run: deno test supabase/functions/score-voice (or the Docker line in local-review).
 
 import { GEMINI_MODEL, UpstreamError } from '../score/gemini.ts';
+import { scoreVoiceWithFallback, VOICE_CHAIN } from './gemini_voice.ts';
 import { requestBody, scoreVoiceWithGemini, type VoiceVerdict } from './gemini_voice.ts';
 import { type Deps, handle, NotConfigured, Unauthorized } from './handler.ts';
 import {
@@ -402,4 +403,20 @@ Deno.test('handle: a failed save still returns the verdict', async () => {
 Deno.test('handle: CORS preflight and other methods', async () => {
   assertEquals((await handle(new Request('http://localhost/x', { method: 'OPTIONS' }), fakeDeps())).status, 204);
   assertEquals((await handle(new Request('http://localhost/x', { method: 'GET' }), fakeDeps())).status, 405);
+});
+
+Deno.test("scoreVoiceWithFallback: a busy model hands over; the chain fits the app's 30 s wait", async () => {
+  const seen: string[] = [];
+  const fake = ((url: string, init: RequestInit) => {
+    seen.push(url.split('/models/')[1].split(':')[0]);
+    const body = JSON.parse(String(init.body));
+    assertEquals(body.generationConfig.thinkingConfig, { thinkingLevel: 'minimal' });
+    return Promise.resolve(
+      seen.length === 1 ? new Response('{}', { status: 429 }) : geminiResponse(JSON.stringify(verdictJson)),
+    );
+  }) as unknown as typeof fetch;
+  const { result } = await scoreVoiceWithFallback(parseInput(body), 'k', fake);
+  assertEquals(seen, VOICE_CHAIN.slice(0, 2).map((m) => m.model));
+  assertEquals(result.model, VOICE_CHAIN[1].model);
+  assert(VOICE_CHAIN.reduce((sum, m) => sum + m.timeoutMs, 0) < 30_000);
 });

@@ -349,6 +349,438 @@ const lessonKeepYourStory = Lesson(
   ),
 );
 
+// Chapter 2, "Under Pressure" (brief 37): the lessons the voice missions teach where no
+// Chapter 1 lesson fits. Missions 9 and 14 reuse Chapter 1's.
+
+const lessonBothSides = Lesson(
+  id: 'lesson_both_sides',
+  title: 'Give the other side its due',
+  flag: Flag.blame,
+  flaw: 'It makes the other person the problem, so the listener wonders what they would say.',
+  takeaway: 'Say what the other person wanted and why it made sense, then what you did to settle it. How you settled it matters more than who was right.',
+  recall: RecallCheck(
+    prompt: 'You disagreed with a teammate. Which line tells it best?',
+    options: [
+      RecallOption(
+        id: 'recall_both_sides_difficult',
+        text: 'He was honestly quite difficult to work with, so I had to push back.',
+      ),
+      RecallOption(
+        id: 'recall_both_sides_fair',
+        text:
+            'She wanted to ship fast; I wanted to test first. Both made sense.',
+      ),
+      RecallOption(
+        id: 'recall_both_sides_avoid',
+        text: "I don't really get into conflicts, I just get along with everyone.",
+      ),
+    ],
+    correctOptionId: 'recall_both_sides_fair',
+  ),
+);
+
+const lessonAskThenAct = Lesson(
+  id: 'lesson_ask_then_act',
+  title: 'Show what you asked and assumed',
+  flag: Flag.vague,
+  flaw: 'It says you took the initiative, but not what you asked or what you decided.',
+  takeaway: 'Say who you asked, what you assumed where nobody knew, and how you checked that assumption early.',
+  recall: RecallCheck(
+    prompt:
+        'Your brief is one line long. Which answer shows how you handled it?',
+    options: [
+      RecallOption(
+        id: 'recall_ask_then_act_initiative',
+        text: "I'm a natural self-starter, so I just used my initiative and figured it out.",
+      ),
+      RecallOption(
+        id: 'recall_ask_then_act_asked',
+        text: 'I asked the lead two questions and shared my guesses before starting.',
+      ),
+      RecallOption(
+        id: 'recall_ask_then_act_waited',
+        text: 'I waited until my manager had time to give me a proper, full brief.',
+      ),
+    ],
+    correctOptionId: 'recall_ask_then_act_asked',
+  ),
+);
+
+const lessonCutDontCram = Lesson(
+  id: 'lesson_cut_dont_cram',
+  title: 'Say what you cut, not how late you stayed',
+  flag: Flag.generic,
+  flaw: 'Working late shows effort, but not how you decided what mattered.',
+  takeaway: 'Say what you did first, what you dropped or delayed, and who you told. Choosing is the skill; extra hours are not.',
+  recall: RecallCheck(
+    prompt: 'Which answer shows how you handled a tight deadline?',
+    options: [
+      RecallOption(
+        id: 'recall_cut_dont_cram_late',
+        text: 'I stayed late every night that week, and I got everything finished.',
+      ),
+      RecallOption(
+        id: 'recall_cut_dont_cram_cut',
+        text: "I did the client's part first and told my lead the report would slip.",
+      ),
+      RecallOption(
+        id: 'recall_cut_dont_cram_pressure',
+        text: 'I honestly work best under pressure, so deadlines never worry me much.',
+      ),
+    ],
+    correctOptionId: 'recall_cut_dont_cram_cut',
+  ),
+);
+
+const lessonNoWithAWay = Lesson(
+  id: 'lesson_no_with_a_way',
+  title: 'Say no, then offer another way',
+  flag: Flag.generic,
+  flaw: 'It talks about your values but never shows what you said in the room.',
+  takeaway: 'Say what you were asked, what you said back, and what you offered instead. Firm and helpful beats a speech about principles.',
+  recall: RecallCheck(
+    prompt: 'A lead asks you to leave a bad number out. What do you say?',
+    options: [
+      RecallOption(
+        id: 'recall_no_with_a_way_values',
+        text: "I'd tell them I have strong values and I never compromise on integrity.",
+      ),
+      RecallOption(
+        id: 'recall_no_with_a_way_offer',
+        text:
+            "I'd keep the number in and offer to add a note that explains it.",
+      ),
+      RecallOption(
+        id: 'recall_no_with_a_way_comply',
+        text: "It's their call in the end, so I'd do it and raise it some other time.",
+      ),
+    ],
+    correctOptionId: 'recall_no_with_a_way_offer',
+  ),
+);
+
+const lessonPauseThenAnswer = Lesson(
+  id: 'lesson_pause_then_answer',
+  title: 'Pause, then answer',
+  flag: Flag.rambling,
+  flaw: 'Thinking out loud to fill the silence buries the answer when it finally comes.',
+  takeaway: "It's fine to say \"Give me a second.\" Then answer in one sentence, add one example, and stop.",
+  recall: RecallCheck(
+    prompt: 'A follow-up catches you off guard. What is the best first move?',
+    options: [
+      RecallOption(
+        id: 'recall_pause_then_answer_fill',
+        text: "Start talking straight away so there's no awkward silence in the room.",
+      ),
+      RecallOption(
+        id: 'recall_pause_then_answer_pause',
+        text:
+            "Say 'Give me a second', think, then answer in one clear sentence.",
+      ),
+      RecallOption(
+        id: 'recall_pause_then_answer_dodge',
+        text: 'Steer back to the story you prepared, since you know that one well.',
+      ),
+    ],
+    correctOptionId: 'recall_pause_then_answer_pause',
+  ),
+);
+
+// Chapter 3, "The Final Round" (brief 38).
+
+const lessonCauseBeforeFix = Lesson(
+  id: 'lesson_cause_before_fix',
+  title: 'Find the cause before the fix',
+  flag: Flag.offQuestion,
+  flaw: 'It jumps to a fix before finding out what is actually broken.',
+  takeaway: 'Say what you would check first, and why. A fix that worked somewhere else is still a guess until you know the cause here.',
+  recall: RecallCheck(
+    prompt: 'Sign-ups fell last month. Which first step is strongest?',
+    options: [
+      RecallOption(
+        id: 'recall_cause_before_fix_redesign',
+        text: 'Redesign the sign-up screens, since shorter forms nearly always win.',
+      ),
+      RecallOption(
+        id: 'recall_cause_before_fix_funnel',
+        text:
+            'Find the step where people stop, and compare it with last month.',
+      ),
+      RecallOption(
+        id: 'recall_cause_before_fix_ads',
+        text: 'Spend more on ads for a month, so the numbers can recover.',
+      ),
+    ],
+    correctOptionId: 'recall_cause_before_fix_funnel',
+  ),
+);
+
+const lessonFirstStep = Lesson(
+  id: 'lesson_first_step',
+  title: 'Commit to a first step',
+  flag: Flag.vague,
+  flaw: 'It lists every possible cause but commits to checking none of them.',
+  takeaway: 'Pick the one thing you would check first and say why it comes first. A clear first step beats a long list of maybes.',
+  recall: RecallCheck(
+    prompt: 'Asked where you would start, which answer commits?',
+    options: [
+      RecallOption(
+        id: 'recall_first_step_everything',
+        text: "It could be lots of things, so I'd look at all of them to be safe.",
+      ),
+      RecallOption(
+        id: 'recall_first_step_steps',
+        text: 'The sign-up steps first: a big drop usually shows in one place.',
+      ),
+      RecallOption(
+        id: 'recall_first_step_wait',
+        text: "I'd wait a month first, in case it's only a seasonal dip.",
+      ),
+    ],
+    correctOptionId: 'recall_first_step_steps',
+  ),
+);
+
+const lessonUseTheMethod = Lesson(
+  id: 'lesson_use_the_method',
+  title: "Use the method, don't name it",
+  flag: Flag.memorized,
+  flaw: 'It names a framework but never applies it to the problem in front of you.',
+  takeaway: "Skip the framework's name. Say the first thing you'd check in this problem, and why it comes first.",
+  recall: RecallCheck(
+    prompt: 'Which opening sounds like real problem-solving?',
+    options: [
+      RecallOption(
+        id: 'recall_use_the_method_framework',
+        text:
+            "I'd define the problem, gather data, form hypotheses, then test.",
+      ),
+      RecallOption(
+        id: 'recall_use_the_method_check',
+        text: "I'd check the drop is real before I touch anything at all.",
+      ),
+      RecallOption(
+        id: 'recall_use_the_method_gut',
+        text: "I've solved lots of problems like this, so I'd trust my gut.",
+      ),
+    ],
+    correctOptionId: 'recall_use_the_method_check',
+  ),
+);
+
+const lessonAnswerFirst = Lesson(
+  id: 'lesson_answer_first',
+  title: 'Lead with the answer',
+  flag: Flag.rambling,
+  flaw: 'It saves the point for the end, so an interruption cuts it off.',
+  takeaway: 'Put the result in your first two sentences, then tell the story. If they stop you, they have already heard what matters.',
+  recall: RecallCheck(
+    prompt: 'They might cut in after thirty seconds. Which opening is best?',
+    options: [
+      RecallOption(
+        id: 'recall_answer_first_background',
+        text: 'So, to give you some background, it all started in my second year…',
+      ),
+      RecallOption(
+        id: 'recall_answer_first_result',
+        text: 'I redesigned our sign-up, and finished sign-ups nearly doubled.',
+      ),
+      RecallOption(
+        id: 'recall_answer_first_team',
+        text: 'It was a group project, so first let me explain who did what.',
+      ),
+    ],
+    correctOptionId: 'recall_answer_first_result',
+  ),
+);
+
+const lessonHonestGap = Lesson(
+  id: 'lesson_honest_gap',
+  title: "Say what you don't know, then reason",
+  flag: Flag.vague,
+  flaw: 'A confident guess sounds fine until the next question shows it was a guess.',
+  takeaway: "Say which part you don't know, reason from what you do, and say how you'd find out. Honest and useful beats sure and wrong.",
+  recall: RecallCheck(
+    prompt: "Asked something you don't know, which reply works best?",
+    options: [
+      RecallOption(
+        id: 'recall_honest_gap_bluff',
+        text: "Two weeks. That's the standard length for any test like that.",
+      ),
+      RecallOption(
+        id: 'recall_honest_gap_reason',
+        text: "I don't know the length, but it needs enough visitors to trust.",
+      ),
+      RecallOption(
+        id: 'recall_honest_gap_freeze',
+        text:
+            "Sorry, I really don't know. We never covered that at university.",
+      ),
+    ],
+    correctOptionId: 'recall_honest_gap_reason',
+  ),
+);
+
+const lessonResearchedRange = Lesson(
+  id: 'lesson_researched_range',
+  title: 'Give a range you can explain',
+  flag: Flag.vague,
+  flaw: 'A number with no reason behind it is easy to push down, or to wave away.',
+  takeaway: 'Look up what similar roles pay, give a range, and say where you sit in it and why. Then the number has something behind it.',
+  recall: RecallCheck(
+    prompt: 'Asked about salary, which answer is strongest?',
+    options: [
+      RecallOption(
+        id: 'recall_researched_range_low',
+        text: "Twenty-eight thousand is fine. I'm just glad to get a start.",
+      ),
+      RecallOption(
+        id: 'recall_researched_range_range',
+        text:
+            'Similar roles pay thirty to thirty-four; I aim for the top half.',
+      ),
+      RecallOption(
+        id: 'recall_researched_range_high',
+        text: "I'd start at forty-five, then see where we end up from there.",
+      ),
+    ],
+    correctOptionId: 'recall_researched_range_range',
+  ),
+);
+
+const lessonPriceTheRole = Lesson(
+  id: 'lesson_price_the_role',
+  title: 'Talk about the role, not your needs',
+  flag: Flag.offQuestion,
+  flaw: 'It talks about what you need or would accept, not what the role is worth.',
+  takeaway: "Base pay on the role: what similar jobs pay, and what you bring. Your rent, or 'whatever's fair', leaves them to set it.",
+  recall: RecallCheck(
+    prompt: 'Which salary answer stays on the role?',
+    options: [
+      RecallOption(
+        id: 'recall_price_the_role_rent',
+        text:
+            'My rent is high, so I would need at least thirty-five to manage.',
+      ),
+      RecallOption(
+        id: 'recall_price_the_role_market',
+        text:
+            'Roles like this pay thirty to thirty-four, so I would aim there.',
+      ),
+      RecallOption(
+        id: 'recall_price_the_role_fair',
+        text: "Whatever you think is fair is fine. I'm not fussy about money.",
+      ),
+    ],
+    correctOptionId: 'recall_price_the_role_market',
+  ),
+);
+
+const lessonAskWhatOnlyTheyKnow = Lesson(
+  id: 'lesson_ask_what_only_they_know',
+  title: 'Ask what only they can answer',
+  flag: Flag.generic,
+  flaw: 'The website already answers it, so the question shows no thought.',
+  takeaway: 'Ask about something you heard today, or something only this team knows: a problem, a project, what a good start looks like.',
+  recall: RecallCheck(
+    prompt: 'Which question shows you were listening?',
+    options: [
+      RecallOption(
+        id: 'recall_ask_what_only_they_know_values',
+        text: 'What are the company values, and how would you describe the culture?',
+      ),
+      RecallOption(
+        id: 'recall_ask_what_only_they_know_drop',
+        text: 'You said sign-ups fell. What did the team find in the end?',
+      ),
+      RecallOption(
+        id: 'recall_ask_what_only_they_know_future',
+        text: 'Where do you see the company in five years, and why there?',
+      ),
+    ],
+    correctOptionId: 'recall_ask_what_only_they_know_drop',
+  ),
+);
+
+const lessonAskAboutTheWork = Lesson(
+  id: 'lesson_ask_about_the_work',
+  title: 'Ask about the work first',
+  flag: Flag.offQuestion,
+  flaw: 'It asks what the job gives you, so it says little about how you would do it.',
+  takeaway: 'Spend your questions on the work: the problems, the team, what a good start looks like. Holidays, bonuses and promotion come with the offer.',
+  recall: RecallCheck(
+    prompt: 'Your turn to ask. Which question goes first?',
+    options: [
+      RecallOption(
+        id: 'recall_ask_about_the_work_holiday',
+        text: 'How many holiday days come with the role, and is there a bonus?',
+      ),
+      RecallOption(
+        id: 'recall_ask_about_the_work_start',
+        text: 'What would a good first three months look like in this role?',
+      ),
+      RecallOption(
+        id: 'recall_ask_about_the_work_promotion',
+        text: 'How soon could I move up to a more senior role if I do well?',
+      ),
+    ],
+    correctOptionId: 'recall_ask_about_the_work_start',
+  ),
+);
+
+const lessonMakeTheCase = Lesson(
+  id: 'lesson_make_the_case',
+  title: 'Make the case in three parts',
+  flag: Flag.rambling,
+  flaw: 'It lists every strength, so none of them sticks.',
+  takeaway: 'Name the two things this job needs most, give one proof for each, and end on why you want it. Then stop.',
+  recall: RecallCheck(
+    prompt: '"Why you?" Which answer is built best?',
+    options: [
+      RecallOption(
+        id: 'recall_make_the_case_list',
+        text: "I'm curious, organised, hard-working, a good listener and a fast learner.",
+      ),
+      RecallOption(
+        id: 'recall_make_the_case_two',
+        text: 'It needs users and numbers: I ran twelve interviews and tagged 600 tickets.',
+      ),
+      RecallOption(
+        id: 'recall_make_the_case_school',
+        text: 'Well, it really started at school, when I first got into computers…',
+      ),
+    ],
+    correctOptionId: 'recall_make_the_case_two',
+  ),
+);
+
+const lessonCloseTheOffer = Lesson(
+  id: 'lesson_close_the_offer',
+  title: 'Get it in writing, then decide',
+  flag: Flag.vague,
+  flaw: 'Saying yes on the spot means agreeing to terms you have not seen.',
+  takeaway: "Thank them, say you want the job, and ask for the offer in writing. Agree a day you'll answer by, and keep to it.",
+  recall: RecallCheck(
+    prompt: 'They offer you the job. What do you say first?',
+    options: [
+      RecallOption(
+        id: 'recall_close_the_offer_yes',
+        text: 'Yes! I accept, whatever the details are. When can I start?',
+      ),
+      RecallOption(
+        id: 'recall_close_the_offer_writing',
+        text: 'Thank you, I want this. Can I see it in writing and reply by Friday?',
+      ),
+      RecallOption(
+        id: 'recall_close_the_offer_salary',
+        text:
+            'Thanks. Before anything else, can we talk about the salary first?',
+      ),
+    ],
+    correctOptionId: 'recall_close_the_offer_writing',
+  ),
+);
+
 /// Every lesson the campaign teaches. Each belongs to one flag; a flag can have several, so
 /// a mission can teach the version of a mistake its own lines make.
 const List<Lesson> lessons = [
@@ -365,4 +797,20 @@ const List<Lesson> lessons = [
   lessonTellItDontRecite,
   lessonOwnYourPart,
   lessonKeepYourStory,
+  lessonBothSides,
+  lessonAskThenAct,
+  lessonCutDontCram,
+  lessonNoWithAWay,
+  lessonPauseThenAnswer,
+  lessonCauseBeforeFix,
+  lessonFirstStep,
+  lessonUseTheMethod,
+  lessonAnswerFirst,
+  lessonHonestGap,
+  lessonResearchedRange,
+  lessonPriceTheRole,
+  lessonAskWhatOnlyTheyKnow,
+  lessonAskAboutTheWork,
+  lessonMakeTheCase,
+  lessonCloseTheOffer,
 ];
