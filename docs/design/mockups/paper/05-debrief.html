@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mission.css">
+<title>Debrief, the report</title>
+<style>
+body { background: var(--paper); }
+.status { color: var(--ink); }
+.top { display: flex; align-items: center; gap: 12px; padding: 4px 16px 0; height: 48px; }
+.top .t { flex: 1; }
+.top .t .caption-4 { color: var(--ink-2); }
+.report { position: relative; margin: 12px 16px 0; padding: 16px; background: #fff; border-radius: 4px; box-shadow: var(--paper-shadow); }
+.report .who { position: absolute; right: 8px; top: -8px; width: 104px; height: 112px; }
+.report .bigstamp { width: 120px; height: 120px; border-radius: 60px; border: 4px solid var(--ch1); color: var(--ch1-deep); display: grid; place-items: center; align-content: center; transform: rotate(-8deg); position: relative; }
+.report .bigstamp::before { content: ''; position: absolute; inset: 5px; border: 1.5px solid var(--ch1); border-radius: 55px; }
+.report .bigstamp .heading-2 { color: var(--ch1-deep); }
+.report .bigstamp .caption-3 { margin-top: 2px; }
+.report .line1 { display: flex; gap: 16px; align-items: center; }
+.report .line1 .q { flex: 1; padding-right: 72px; }
+.report .line1 .q p.body-5 { color: var(--ink-2); margin-top: 4px; }
+.report .tags { display: flex; gap: 8px; margin-top: 12px; }
+.report .tags .up { background: var(--ch1-tint); color: var(--ch1-deep); }
+.report .tags .xp { background: var(--sun); color: var(--on-sun); }
+table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+td { padding: 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+td.n { width: 48px; text-align: right; font: 600 20px/28px var(--display); font-variation-settings: 'SOFT' 100; }
+td.n.low { color: var(--stamp); }
+td .caption-4 { color: var(--ink-2); display: block; margin-top: 2px; }
+.lesson { margin: 12px 16px 0; padding: 16px; background: var(--sun); border-radius: 4px; transform: rotate(-0.6deg); box-shadow: var(--paper-shadow); }
+.lesson .caption-3 { display: flex; gap: 4px; align-items: center; }
+.lesson p.heading-6 { margin-top: 4px; }
+.dock { background: var(--paper); }
+.cost { margin: 16px 16px 0; padding: 12px 16px; border: 2px dashed var(--stamp); border-radius: 8px; }
+.cost .caption-3 { color: var(--stamp); display: flex; gap: 4px; align-items: center; }
+.cost .caption-4 { color: var(--ink-2); margin-top: 4px; }
+</style>
+</head>
+<body class="ch1">
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<header class="top"><span class="iconbtn"><i class="ph-bold ph-x"></i></span><div class="t"><p class="caption-4">Report · floor 1 · room 4</p><h1 class="body-1">Show me the evidence</h1></div></header>
+<section class="report">
+	<div class="cast who sticker" data-cast="marcus" data-expr="smile" data-style="paper"></div>
+	<div class="line1">
+		<div class="bigstamp"><p class="heading-2 tnum">78</p><p class="caption-3">of 100</p></div>
+		<div class="q"><p class="heading-6">“That I believe.”</p><p class="body-5">Marcus, after your evidence</p></div>
+	</div>
+	<div class="tags"><span class="tag up"><i class="ph-bold ph-trend-up"></i>+14 since room 1</span><span class="tag xp"><i class="ph-fill ph-lightning"></i>+40 XP</span></div>
+	<table>
+		<tr><td><span class="title-4">Relevance</span><span class="caption-4">Answered what he asked: your part, with data.</span></td><td class="n tnum">84</td></tr>
+		<tr><td><span class="title-4">Specificity</span><span class="caption-4">A count, a share and your own action.</span></td><td class="n tnum">81</td></tr>
+		<tr><td><span class="title-4">Structure</span><span class="caption-4">Open, evidence, land in order. The close ran long.</span></td><td class="n tnum">76</td></tr>
+		<tr><td><span class="title-4">Adaptability</span><span class="caption-4">Your follow up reply said “we” twice.</span></td><td class="n low tnum">63</td></tr>
+	</table>
+</section>
+<section class="lesson"><p class="caption-3"><i class="ph-fill ph-push-pin"></i>One lesson to keep</p><p class="heading-6">Claim your part, not the team's.</p></section>
+<section class="cost"><p class="caption-3"><i class="ph-bold ph-scissors"></i>The line that cost the most</p><p class="body-2">“We'd probably do it the same way again, as a team.”</p><p class="caption-4">Back in your notes on Friday.</p></section>
+<div class="dock"><div class="btn sun"><i class="ph-fill ph-lightbulb-filament"></i>Light room 4</div></div>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

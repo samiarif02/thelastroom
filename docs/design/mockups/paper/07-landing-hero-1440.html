@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="mockup-height" content="900">
+<title>The Last Room · interview practice game</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="landing.css">
+<style>
+.hero { height: 900px; }
+.hero .wrap { display: grid; grid-template-columns: 1fr 520px; gap: 32px; align-items: center; height: 100%; padding-top: 48px; }
+.copy .kicker { color: var(--ch1-deep); margin-bottom: 24px; }
+.copy .sub { margin-top: 24px; }
+.copy .cta-main { margin-top: 32px; }
+.copy .risk { margin-top: 16px; }
+.copy .proof { margin-top: 48px; display: flex; gap: 12px; }
+.copy .proof span { padding: 8px 12px; border-radius: 4px; background: var(--raised); box-shadow: var(--paper-shadow); color: var(--ink-2); }
+.copy .proof b { color: var(--ink); font: 600 18px/28px var(--display); font-variation-settings: 'SOFT' 100; margin-right: 4px; }
+.collage { position: relative; height: 640px; }
+.block { position: absolute; border-radius: 16px; }
+.b1 { left: 40px; top: 24px; width: 300px; height: 360px; background: var(--ch1); transform: rotate(-3deg); }
+.b2 { right: 0; top: 140px; width: 260px; height: 300px; background: var(--ch2); transform: rotate(4deg); }
+.b3 { left: 0; bottom: 24px; width: 240px; height: 200px; background: var(--ch3); transform: rotate(2deg); }
+.st { position: absolute; filter: var(--sticker); }
+.st.m { left: 56px; top: 40px; width: 290px; height: 330px; }
+.st.l { right: 8px; top: 170px; width: 250px; height: 270px; }
+.st.p { left: 8px; bottom: 30px; width: 220px; height: 190px; }
+.tk { position: absolute; right: 24px; bottom: 32px; width: 300px; display: flex; background: var(--raised); border-radius: 12px; box-shadow: var(--paper-shadow); transform: rotate(-2deg); }
+.tk .m2 { flex: 1; padding: 12px 16px; }
+.tk .m2 .caption-4 { color: var(--ink-2); }
+.tk .s2 { width: 72px; background: var(--sun); border-radius: 0 12px 12px 0; border-left: 2px dashed var(--line); display: grid; place-items: center; font: 600 30px/36px var(--display); font-variation-settings: 'SOFT' 100; }
+.say { position: absolute; left: 240px; top: 0; background: #fff; border-radius: 16px 16px 16px 4px; padding: 12px 16px; box-shadow: var(--paper-shadow); max-width: 220px; transform: rotate(2deg); z-index: 3; }
+.say .caption-3 { color: var(--ch1-deep); }
+</style>
+</head>
+<body class="web">
+<nav class="topnav" aria-label="Main">
+	<span class="brand"><span class="mark" aria-hidden="true"></span>The Last Room</span>
+	<span class="links"><a class="on" href="#how">How it works</a><a href="#panel">The panel</a><a href="#scoring">Scoring</a><a href="#faq">Questions</a></span>
+	<a class="navcta" href="#get">Get the app</a>
+</nav>
+<main>
+<section class="hero"><div class="wrap">
+	<div class="copy">
+		<p class="kicker caption-3">An interview practice game for graduates</p>
+		<h1 class="h1">Rehearse the interview<br>before the real one.</h1>
+		<p class="sub title-1">Four interviewers ask you 21 real questions. Pick your lines or say them out loud, explain why they work, and get a scored debrief with one lesson to keep.</p>
+		<a class="cta-main" href="#get"><i class="ph-bold ph-android-logo"></i>Get the free Android preview</a>
+		<p class="risk body-5"><span><i class="ph-bold ph-check"></i>No sign up</span><span><i class="ph-bold ph-check"></i>Plays offline</span><span><i class="ph-bold ph-check"></i>Your voice is never stored</span></p>
+		<p class="proof body-5"><span><b>21</b>real questions</span><span><b>4</b>interviewers</span><span><b>4</b>scores, each explained</span></p>
+	</div>
+	<div class="collage" aria-label="The panel as stickers">
+		<div class="block b1"></div><div class="block b2"></div><div class="block b3"></div>
+		<div class="st m cast" data-cast="marcus" data-expr="listening" data-style="paper"></div>
+		<div class="st l cast" data-cast="lena" data-expr="hmm" data-style="paper"></div>
+		<div class="st p cast" data-cast="priya" data-expr="smile" data-style="paper"></div>
+		<div class="say"><p class="caption-3">Marcus</p><p class="body-2">“Now the data. What did you actually do?”</p></div>
+		<div class="tk"><div class="m2"><p class="caption-4">Floor 1 · up next</p><p class="heading-6">Show me the evidence</p></div><div class="s2">04</div></div>
+	</div>
+</div></section>
+</main>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

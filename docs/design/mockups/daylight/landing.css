@@ -1,0 +1,48 @@
+/* The landing page in Daylight Tower: the landing skill's Part B values, light theme. */
+body.web { width: 1440px; height: auto; min-height: 900px; overflow: hidden; }
+body.web.m { width: 390px; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 64px; }
+.m .wrap { padding: 0 16px; }
+.topnav {
+	position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+	display: flex; align-items: center; gap: 24px;
+	padding: 8px 8px 8px 16px;
+	border-radius: 16px;
+	background: rgb(255 255 255 / 0.72);
+	backdrop-filter: blur(16px);
+	box-shadow: 0 8px 24px rgb(94 72 40 / 0.10);
+	z-index: 20;
+	white-space: nowrap;
+}
+.m .topnav { left: 16px; right: 16px; transform: none; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 8px; font: 600 18px/28px var(--display); color: var(--ink); }
+.brand .mark { width: 24px; height: 28px; border-radius: 9999px 9999px 4px 4px; background: var(--ch1); position: relative; }
+.brand .mark::after { content: ''; position: absolute; left: 7px; right: 7px; bottom: 0; height: 14px; border-radius: 9999px 9999px 0 0; background: var(--honey); }
+.links { display: flex; gap: 4px; }
+.links a { padding: 8px 12px; border-radius: 8px; color: var(--ink-2); text-decoration: none; font: 500 14px/20px var(--ui); }
+.links a.on { color: var(--ink); background: var(--sand); }
+.navcta { padding: 8px 12px; border-radius: 8px; background: var(--honey); color: var(--on-honey); font: 600 14px/20px var(--ui); box-shadow: 0 2px 0 var(--honey-edge); text-decoration: none; }
+.menu { width: 40px; height: 40px; border-radius: 8px; background: var(--sand); display: grid; place-items: center; font-size: 20px; }
+
+.h1 {
+	font: 600 60px/60px var(--display);
+	letter-spacing: -0.03em;
+	max-width: 680px;
+	background: linear-gradient(90deg, #000000, #666666);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+.m .h1 { font-size: 36px; line-height: 40px; letter-spacing: -0.02em; }
+.sub { max-width: 680px; color: var(--ink-2); }
+.kicker { display: inline-flex; align-items: center; gap: 8px; color: var(--ch1-deep); }
+.kicker b { width: 8px; height: 8px; border-radius: 2px; background: var(--ch1); }
+.cta-row { display: flex; align-items: center; gap: 16px; }
+.cta-main { display: inline-flex; align-items: center; gap: 8px; height: 56px; padding: 0 24px; border-radius: 16px; background: var(--honey); color: var(--on-honey); box-shadow: 0 4px 0 var(--honey-edge); font: 600 18px/28px var(--ui); text-decoration: none; }
+.m .cta-main { width: 100%; justify-content: center; }
+.risk { color: var(--ink-2); display: flex; gap: 16px; flex-wrap: wrap; }
+.risk span { display: inline-flex; gap: 4px; align-items: center; }
+.risk i { color: var(--ch1); font-size: 16px; }
+.proof { display: flex; gap: 32px; }
+.proof div .n { font: 600 30px/36px var(--display); }
+.proof div .caption-4 { color: var(--ink-2); }
