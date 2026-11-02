@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Mission, answer slips</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mission.css">
+</head>
+<body class="ch1">
+<div class="field" style="height:316px"><svg class="tear" viewBox="0 0 390 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0 H390 V4 L376 10 L362 3 L350 9 L334 4 L320 11 L306 5 L292 10 L276 3 L262 9 L246 4 L232 11 L218 4 L204 9 L188 3 L174 10 L160 4 L146 11 L130 5 L116 9 L100 3 L86 10 L72 4 L58 11 L42 4 L28 9 L14 3 L0 8Z" fill="var(--ch)"/></svg></div>
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<header class="bar">
+	<span class="iconbtn" aria-label="Leave the room"><i class="ph-bold ph-x"></i></span>
+	<ol class="beats" aria-label="Beat 2 of 3"><li class="done"><b><i class="ph-bold ph-check"></i></b></li><li class="now"><b>2</b>Evidence</li><li><b>3</b></li></ol>
+	<span class="trust" aria-label="Trust, 3 of 5"><span></span><span></span><span></span><span class="off"></span><span class="off"></span></span>
+</header>
+<section class="scene">
+	<div class="cast who sticker" data-cast="marcus" data-expr="listening" data-style="paper"></div>
+	<div class="say"><p class="caption-3">Marcus</p><p class="heading-6">Now the data. What did you actually do?</p></div>
+</section>
+<section class="sofar"><span class="st">Open</span><p class="body-6">“I wanted to know why support was swamped every Monday.”</p></section>
+<div class="head2"><h2 class="heading-6">Pick your evidence</h2><span class="caption-4">2 of 3</span></div>
+<ul class="opts">
+	<li class="slip opt"><span class="letter">a</span><p class="body-3">We went through a month of tickets, found resets were the biggest group, and cut them by a quarter.</p></li>
+	<li class="slip opt on"><span class="letter">b</span><p class="body-3">I tagged 600 tickets from one month. One in three were password resets, so I wrote a help page for them.</p></li>
+	<li class="slip opt"><span class="letter">c</span><p class="body-3">I looked through lots of tickets, spotted patterns around logins, and suggested fixes.</p></li>
+</ul>
+<div class="dock"><div class="btn">Lock in line b<i class="ph-bold ph-arrow-right"></i></div></div>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

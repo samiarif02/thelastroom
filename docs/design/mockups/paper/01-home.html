@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Home, the ticket</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<style>
+main { padding: 8px 16px 0; }
+.head { display: flex; justify-content: space-between; align-items: flex-end; }
+.head .caption-4 { color: var(--ink-2); }
+.stamps { text-align: right; }
+.stamps .row { display: flex; gap: 4px; justify-content: flex-end; }
+.stamps .s { width: 32px; height: 32px; border-radius: 16px; display: grid; place-items: center; font-size: 16px; }
+.stamps .s.on { border: 2px solid var(--stamp); color: var(--stamp); transform: rotate(-12deg); background: rgb(181 67 42 / 0.06); }
+.stamps .s.off { border: 2px dashed var(--line); }
+.stamps .caption-4 { margin-top: 4px; }
+.meta { display: flex; gap: 8px; margin-top: 16px; }
+.meta .tag { background: var(--raised); box-shadow: var(--paper-shadow); }
+.meta .tag i { color: var(--sun-edge); }
+
+.ticket { margin-top: 48px; display: flex; background: var(--ch1); color: #fff; min-height: 184px; }
+.ticket .main { flex: 1; padding: 16px; position: relative; padding-left: 136px; }
+.ticket .main .who { position: absolute; left: 0; bottom: 0; width: 140px; height: 212px; }
+.ticket .main .caption-3 { color: var(--ch1-tint); }
+.ticket .main h2 { margin-top: 8px; }
+.ticket .main .by { margin-top: 12px; color: var(--ch1-tint); }
+.ticket .stub { width: 80px; flex: none; background: var(--sun); color: var(--on-sun); border-radius: 0 16px 16px 0; border-left: 2px dashed var(--ch1-deep); display: grid; place-items: center; align-content: center; gap: 4px; text-align: center; }
+.ticket .stub .no { font: 600 36px/40px var(--display); font-variation-settings: 'SOFT' 100; }
+.ticket .stub .go { width: 40px; height: 40px; border-radius: 20px; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 18px; margin: 4px auto 0; }
+.tear { margin-top: 8px; text-align: right; color: var(--ink-2); display: flex; justify-content: flex-end; gap: 4px; align-items: center; }
+
+.envelope { margin-top: 24px; display: flex; gap: 12px; align-items: center; padding: 16px; background: var(--raised); border-radius: 16px; box-shadow: var(--paper-shadow); position: relative; }
+.envelope .env { flex: none; width: 56px; height: 40px; background: var(--ch3-tint); border-radius: 4px; position: relative; overflow: hidden; }
+.envelope .env::before { content: ''; position: absolute; left: -4px; right: -4px; top: -24px; height: 48px; background: var(--ch3); transform: scaleX(0.82) rotate(45deg); transform-origin: center; border-radius: 4px; }
+.envelope .env b { position: absolute; right: -4px; top: -4px; width: 20px; height: 20px; border-radius: 10px; background: var(--stamp); color: #fff; font: 600 12px/20px var(--ui); text-align: center; z-index: 2; }
+.envelope .copy { flex: 1; padding-right: 72px; }
+.envelope .copy p { color: var(--ink-2); }
+.envelope .face { position: absolute; right: 12px; bottom: 0; width: 72px; height: 80px; }
+
+.section { display: flex; justify-content: space-between; align-items: baseline; margin-top: 24px; }
+.section .caption-4 { color: var(--ink-2); }
+.slabs { position: relative; margin-top: 12px; height: 220px; }
+.slab { position: absolute; left: 24px; right: 24px; height: 64px; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 16px; color: #fff; box-shadow: var(--paper-shadow); }
+.slab .win { width: 16px; height: 22px; border-radius: 8px 8px 2px 2px; background: rgb(255 255 255 / 0.25); }
+.slab .win.lit { background: var(--sun); }
+.slab .label { margin-left: auto; text-align: right; }
+.slab.f3 { top: 0; background: #3a2b47; transform: rotate(-1.5deg); }
+.slab.f2 { top: 68px; background: var(--ch2); transform: rotate(1deg); }
+.slab.f1 { top: 136px; background: var(--ch1); transform: rotate(-0.5deg); }
+
+nav { position: fixed; left: 16px; right: 16px; bottom: 24px; height: 64px; border-radius: 16px; background: var(--ink); display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px; gap: 4px; z-index: 10; }
+nav a { color: #b9b0a4; text-decoration: none; display: grid; place-items: center; align-content: center; border-radius: 8px; }
+nav a i { font-size: 22px; }
+nav a span { font: 500 12px/16px var(--ui); }
+nav a.on { background: var(--sun); color: var(--on-sun); }
+</style>
+</head>
+<body>
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<main>
+	<header class="head">
+		<div><p class="caption-4">Tuesday, 12 November</p><h1 class="heading-4">Morning, Sami.</h1></div>
+		<div class="stamps" aria-label="Two of three sessions this week">
+			<div class="row"><span class="s on"><i class="ph-bold ph-check"></i></span><span class="s on" style="transform:rotate(8deg)"><i class="ph-bold ph-check"></i></span><span class="s off"></span></div>
+			<p class="caption-4">2 of 3 this week</p>
+		</div>
+	</header>
+	<div class="meta"><span class="tag"><i class="ph-fill ph-lightning"></i><span class="tnum">1,247 XP</span></span><span class="tag"><i class="ph-fill ph-calendar-blank"></i>Interview on Thursday 21</span></div>
+
+	<section class="ticket" aria-label="Your next room">
+		<div class="main">
+			<div class="cast who sticker" data-cast="marcus" data-expr="listening" data-style="paper"></div>
+			<p class="caption-3">Floor 1 · up next</p>
+			<h2 class="heading-5">Show me the evidence</h2>
+			<p class="by caption-4">Marcus · 5 min · 3 beats</p>
+		</div>
+		<div class="stub"><span class="caption-3">Room</span><span class="no tnum">04</span><span class="go"><i class="ph-fill ph-play"></i></span></div>
+	</section>
+	<p class="tear caption-4"><i class="ph-bold ph-hand-tap"></i>Tear the stub to start</p>
+
+	<section class="envelope" aria-label="Recall Room">
+		<span class="env"><b>2</b></span>
+		<div class="copy"><h3 class="body-1">Two notes from Priya</h3><p class="body-6">Traps from Saturday. Two minutes.</p></div>
+		<div class="face cast sticker" data-cast="priya" data-expr="smile" data-style="paper"></div>
+	</section>
+
+	<div class="section"><h3 class="heading-6">The building</h3><span class="caption-4">3 of 21 rooms lit</span></div>
+	<div class="slabs">
+		<div class="slab f3"><span class="win"></span><span class="win"></span><span class="win"></span><span class="win"></span><span class="win"></span><span class="win"></span><span class="win lit"></span><span class="label caption-3">Floor 3<br><span class="caption-4">Sam waits here</span></span></div>
+		<div class="slab f2"><span class="win"></span><span class="win"></span><span class="win"></span><span class="win"></span><span class="win"></span><span class="win"></span><span class="win"></span><span class="label caption-3">Floor 2<br><span class="caption-4">After floor 1</span></span></div>
+		<div class="slab f1"><span class="win lit"></span><span class="win lit"></span><span class="win lit"></span><span class="win" style="background:#fff"></span><span class="win"></span><span class="win"></span><span class="win"></span><span class="label caption-3">Floor 1<br><span class="caption-4">3 of 7</span></span></div>
+	</div>
+</main>
+<nav aria-label="Main">
+	<a class="on" href="#home"><i class="ph-fill ph-ticket"></i><span>Rooms</span></a>
+	<a href="#recall"><i class="ph ph-envelope-simple"></i><span>Notes</span></a>
+	<a href="#skills"><i class="ph ph-sticker"></i><span>Stickers</span></a>
+	<a href="#you"><i class="ph ph-user-circle"></i><span>You</span></a>
+</nav>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

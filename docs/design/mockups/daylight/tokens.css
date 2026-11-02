@@ -14,14 +14,16 @@
 	--ink-3: #8a7f73;
 
 	/* chapters: the building's floors */
-	--ch1: #17805e;
+	--ch1: #147356;
 	--ch1-deep: #0e5c44;
 	--ch1-tint: #e3f3ea;
 	--ch1-soft: #bfe6d2;
-	--ch2: #3559c7;
+	--ch1-on: #d6f0e2;
+	--ch2: #3152bd;
 	--ch2-deep: #22398a;
 	--ch2-tint: #e6ecfb;
 	--ch2-soft: #c3d2f5;
+	--ch2-on: #d3defa;
 	--ch3: #c23a62;
 	--ch3-deep: #8a2343;
 	--ch3-tint: #fbe6ec;
@@ -33,7 +35,7 @@
 	--on-honey: #2a1e05;
 
 	/* meaning */
-	--trap: #b84a30;
+	--trap: #a8432b;
 	--trap-tint: #f8e4dc;
 	--recall: #5e4bb4;
 	--recall-tint: #ece8f8;
