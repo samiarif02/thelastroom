@@ -51,3 +51,6 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `score_basis_viewed` | The player opens "How we scored this" on the debrief (brief 36) | `mission_id`, `source` (`ai`, `offline`) |
 | `voice_answer_recorded` | A spoken answer is submitted on a voice mission (brief 35), once per take: the answer, then the reply. Never audio or words | `mission_id`, `seconds`, `paused_count`, `retakes` |
 | `voice_answer_scored` | A voice mission's answer is scored and its debrief shown | `mission_id`, `score_bucket`, `source` (`ai`, `selfCheck`) |
+| `test_reminder_sent` | The player taps "Send a test reminder" in Settings and tomorrow's planned reminder is shown now (brief 42). Never its text | `type` (`recallDue`, `nudge`) |
+| `welcome_back_shown` | The tower greets a player back after one or more calendar days away (brief 42), once per return | `days_away`, `target` (`recall`, `mission`, `progress`) |
+| `welcome_back_closed` | The welcome-back card goes: its button was followed, or it was dismissed | `action` (`followed`, `dismissed`), `target` (`recall`, `mission`, `progress`) |
