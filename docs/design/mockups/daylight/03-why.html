@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Mission, why that line</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mission.css">
+<style>
+.ask { display: flex; gap: 12px; align-items: flex-end; margin: 12px 16px 0; }
+.ask .face { flex: none; width: 104px; height: 128px; background: var(--ch-soft); position: relative; }
+.ask .face .cast { position: absolute; left: -12px; right: -12px; bottom: 0; height: 124px; }
+.ask .bubble { flex: 1; margin: 0 0 8px; }
+.ask .bubble::before { top: auto; bottom: 16px; left: -6px; transform: rotate(45deg); }
+.mine { margin: 16px 16px 0; padding: 12px 16px; border-radius: 16px; background: rgb(255 255 255 / 0.6); }
+.mine .caption-3 { color: var(--ch-deep); display: flex; align-items: center; gap: 4px; }
+.mine p.body-2 { margin-top: 4px; }
+.why-head { margin: 24px 16px 8px; }
+.why-head p { color: var(--ink-2); margin-top: 4px; }
+.reason { display: flex; gap: 12px; padding: 12px; align-items: flex-start; }
+.reason .ico { flex: none; width: 32px; height: 32px; border-radius: 8px; background: var(--sand); display: grid; place-items: center; font-size: 18px; color: var(--ink-2); }
+.reason.on .ico { background: var(--ch); color: #fff; }
+.reason.on { background: #f6fcf9; box-shadow: 0 0 0 2px var(--ch), 0 4px 0 var(--ch-deep); }
+.scrim { position: fixed; inset: 0; background: rgb(36 32 28 / 0.18); z-index: 3; }
+.sheet {
+	position: fixed; left: 0; right: 0; bottom: 0; z-index: 4;
+	background: var(--raised);
+	border-radius: 24px 24px 0 0;
+	padding: 24px 16px 32px;
+	box-shadow: 0 -8px 24px rgb(94 72 40 / 0.14);
+}
+.sheet .row { display: flex; gap: 12px; align-items: center; }
+.sheet .face { flex: none; width: 56px; height: 64px; background: var(--ch-soft); position: relative; }
+.sheet .face .cast { position: absolute; inset: 4px -8px 0; }
+.sheet .copy { flex: 1; }
+.sheet .copy h3 { color: var(--ch-deep); }
+.sheet .copy p { color: var(--ink-2); }
+.sheet .xp { background: var(--honey); color: var(--on-honey); height: 32px; padding: 0 12px; font-size: 14px; border-radius: 8px; transform: rotate(-4deg); box-shadow: 0 2px 0 var(--honey-edge); }
+.sheet .btn { margin-top: 16px; border-radius: 16px; }
+.lesson { margin-top: 16px; padding: 12px; border-radius: 12px; background: var(--ch-tint); display: flex; gap: 8px; }
+.lesson i { color: var(--ch-deep); font-size: 20px; }
+.lesson p { color: var(--ink); }
+</style>
+</head>
+<body class="ch1">
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<header class="bar">
+	<span class="iconbtn" aria-label="Leave the room"><i class="ph-bold ph-x"></i></span>
+	<ol class="beats" aria-label="Beat 2 of 3">
+		<li class="done"><span></span>Open</li>
+		<li class="now"><span></span>Evidence</li>
+		<li><span></span>Land</li>
+	</ol>
+	<span class="trust" aria-label="Trust, 4 of 5"><i class="ph-fill ph-handshake"></i><b></b><b></b><b></b><b></b><b class="off"></b></span>
+</header>
+
+<section class="ask">
+	<div class="face arch"><div class="cast" data-cast="marcus" data-expr="thinking"></div></div>
+	<div class="bubble">
+		<p class="caption-3 speaker">Marcus</p>
+		<p class="heading-5">Why those details?</p>
+	</div>
+</section>
+
+<section class="mine">
+	<p class="caption-3"><i class="ph-fill ph-check-circle"></i>Your line</p>
+	<p class="body-2">“I tagged 600 tickets from one month. One in three were password resets, so I wrote a help page for them.”</p>
+</section>
+
+<div class="why-head">
+	<h2 class="heading-6">What makes it work?</h2>
+	<p class="body-6">Pick the principle. It is the part you keep.</p>
+</div>
+<ul class="options">
+	<li class="card reason on"><span class="ico"><i class="ph-bold ph-hash"></i></span><p class="body-3">He asked about data, so give the actual numbers and what I did with them.</p></li>
+	<li class="card reason"><span class="ico"><i class="ph-bold ph-users-three"></i></span><p class="body-3">Sharing credit with the team is the professional thing to do.</p></li>
+	<li class="card reason"><span class="ico"><i class="ph-bold ph-list-dashes"></i></span><p class="body-3">Summarising the findings is clearer than burying him in figures.</p></li>
+</ul>
+
+
+<section class="sheet" aria-live="polite">
+	<div class="row">
+		<div class="face arch"><div class="cast" data-cast="marcus" data-expr="nod"></div></div>
+		<div class="copy">
+			<h3 class="heading-6">That's the principle.</h3>
+			<p class="body-6">Marcus nods. Trust goes up one.</p>
+		</div>
+		<span class="tag xp tnum">+10 XP</span>
+	</div>
+	<div class="lesson"><i class="ph-fill ph-lightbulb"></i><p class="body-5">An actual number and your own action prove more than a summary of what the team found.</p></div>
+	<div class="btn">Next: land the answer<i class="ph-bold ph-arrow-right"></i></div>
+</section>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

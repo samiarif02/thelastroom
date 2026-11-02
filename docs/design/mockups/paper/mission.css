@@ -1,0 +1,31 @@
+/* Paper Pop missions: the top of the screen is the chapter's sheet of paper, torn along the bottom. */
+body.ch1 { --ch: var(--ch1); --ch-deep: var(--ch1-deep); --ch-tint: var(--ch1-tint); }
+body.ch2 { --ch: var(--ch2); --ch-deep: var(--ch2-deep); --ch-tint: var(--ch2-tint); }
+.field { position: absolute; left: 0; right: 0; top: 0; background: var(--ch); }
+.field .tear { position: absolute; left: 0; right: 0; bottom: -11px; height: 12px; display: block; }
+.status { color: #fff; }
+.bar { position: relative; z-index: 3; display: flex; align-items: center; gap: 12px; padding: 4px 16px 0; height: 48px; }
+.bar .iconbtn { background: rgb(255 255 255 / 0.16); color: #fff; box-shadow: none; }
+.beats { flex: 1; display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.beats li { display: flex; align-items: center; gap: 4px; color: rgb(255 255 255 / 0.7); font: 500 12px/16px var(--ui); }
+.beats li b { width: 24px; height: 24px; border-radius: 12px; border: 2px solid rgb(255 255 255 / 0.5); display: grid; place-items: center; font: 600 12px/16px var(--ui); }
+.beats li.done b { background: #fff; color: var(--ch-deep); border-color: #fff; }
+.beats li.now { color: #fff; font-weight: 600; }
+.beats li.now b { border-color: var(--sun); background: var(--sun); color: var(--on-sun); }
+.trust { display: flex; gap: 4px; align-items: center; color: #fff; }
+.trust span { width: 12px; height: 12px; border-radius: 6px; background: #fff; }
+.trust span.off { background: rgb(255 255 255 / 0.28); }
+.scene { position: relative; z-index: 2; height: 212px; margin: 8px 16px 0; }
+.scene .who { position: absolute; left: -8px; bottom: -16px; width: 196px; height: 220px; }
+.scene .say { position: absolute; right: 0; top: 16px; width: 196px; background: #fff; border-radius: 16px 16px 16px 4px; padding: 12px 16px; box-shadow: var(--paper-shadow); transform: rotate(1.5deg); }
+.scene .say .caption-3 { color: var(--ch-deep); margin-bottom: 4px; }
+.sofar { position: relative; z-index: 2; margin: 40px 16px 0; padding: 8px 12px; border-radius: 8px; background: var(--paper-2); display: flex; gap: 8px; align-items: center; color: var(--ink-2); }
+.sofar p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sofar .st { flex: none; padding: 0 6px; border: 2px solid var(--ch); color: var(--ch-deep); border-radius: 4px; font: 600 12px/16px var(--ui); transform: rotate(-4deg); }
+.head2 { margin: 16px 16px 8px; display: flex; justify-content: space-between; align-items: baseline; }
+.head2 .caption-4 { color: var(--ink-2); }
+.opts { list-style: none; margin: 0 16px; padding: 0; display: grid; gap: 8px; }
+.opt { display: flex; gap: 12px; padding: 12px; }
+.opt.on { box-shadow: 0 0 0 2px var(--ink), var(--paper-shadow); transform: rotate(-0.6deg); }
+.opt.on .letter { background: var(--sun); border-color: var(--sun); color: var(--on-sun); }
+.dock { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px 24px; background: var(--paper); z-index: 4; }

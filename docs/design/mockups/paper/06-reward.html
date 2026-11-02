@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Floor cleared, the sticker</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<style>
+body { background: var(--ch1); color: #fff; }
+.status { color: #fff; }
+header { padding: 8px 24px 0; }
+header .caption-3 { color: var(--ch1-tint); }
+header h1 { margin-top: 8px; color: #fff; }
+.sheet { position: relative; margin: 24px 16px 0; height: 392px; background: var(--paper); border-radius: 16px; color: var(--ink); overflow: hidden; }
+.sheet .grid { position: absolute; inset: 0; opacity: 0.5; }
+.big { position: absolute; left: 50%; top: 40px; width: 200px; height: 220px; margin-left: -100px; transform: rotate(-6deg); filter: var(--sticker); }
+.big .shape { position: absolute; inset: 0; background: var(--sun); border-radius: 100px 100px 24px 24px; display: grid; place-items: center; align-content: center; gap: 8px; text-align: center; padding: 16px; }
+.big .shape i { font-size: 64px; color: var(--ch1-deep); }
+.big .shape p { font: 600 24px/28px var(--display); font-variation-settings: 'SOFT' 100; color: var(--on-sun); }
+.big .peel { position: absolute; right: 0; bottom: 0; width: 40px; height: 40px; background: #f0d9a0; border-radius: 0 0 24px 0; clip-path: polygon(100% 0, 0 100%, 100% 100%); }
+.s { position: absolute; filter: var(--sticker); }
+.s1 { left: 8px; bottom: 8px; width: 120px; height: 120px; transform: rotate(-8deg); }
+.s2 { left: 135px; bottom: -4px; width: 120px; height: 120px; transform: rotate(4deg); }
+.s3 { right: 4px; bottom: 12px; width: 120px; height: 120px; transform: rotate(10deg); }
+.note { position: absolute; left: 16px; top: 16px; color: var(--ink-2); }
+.row { display: flex; gap: 8px; margin: 16px 16px 0; }
+.row div { flex: 1; background: var(--ch1-deep); border-radius: 12px; padding: 12px; }
+.row .caption-4 { color: var(--ch1-tint); }
+.row .v { font: 600 20px/28px var(--display); font-variation-settings: 'SOFT' 100; }
+.row .stamps { display: flex; gap: 4px; margin-top: 4px; }
+.row .stamps b { width: 20px; height: 20px; border-radius: 10px; border: 2px solid var(--sun); display: grid; place-items: center; font-size: 12px; color: var(--sun); }
+.cta { margin: 16px 16px 0; }
+.cta .btn { background: var(--sun); color: var(--on-sun); }
+.cta a { display: flex; justify-content: center; gap: 4px; margin-top: 8px; color: #fff; text-decoration: none; align-items: center; }
+</style>
+</head>
+<body>
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<header><p class="caption-3">Floor 1 cleared · 7 of 7 rooms</p><h1 class="heading-3">A sticker for the evidence.</h1></header>
+<section class="sheet" aria-label="Sticker: Evidence Builder">
+	<p class="note caption-4">Earned in room 7, with no hints</p>
+	<div class="big"><div class="shape"><i class="ph-fill ph-chart-bar"></i><p>Evidence Builder</p></div><span class="peel"></span></div>
+	<div class="s s1 cast" data-cast="priya" data-expr="smile" data-style="paper" data-bg="#ddf0e5"></div>
+	<div class="s s2 cast" data-cast="marcus" data-expr="nod" data-style="paper" data-bg="#efe8dc"></div>
+	<div class="s s3 cast" data-cast="lena" data-expr="smile" data-style="paper" data-bg="#e2e8fb"></div>
+</section>
+<div class="row">
+	<div><p class="caption-4">Specificity</p><p class="v tnum">41 → 72</p></div>
+	<div><p class="caption-4">Total XP</p><p class="v tnum">1,247</p></div>
+	<div><p class="caption-4">This week</p><div class="stamps"><b><i class="ph-bold ph-check"></i></b><b><i class="ph-bold ph-check"></i></b><b><i class="ph-bold ph-check"></i></b></div></div>
+</div>
+<div class="cta"><div class="btn"><i class="ph-bold ph-ticket"></i>Get your floor 2 ticket</div><a class="body-4" href="#share"><i class="ph-bold ph-share-network"></i>Share the sticker</a></div>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

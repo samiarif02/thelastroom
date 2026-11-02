@@ -1,0 +1,86 @@
+/* Paper Pop (direction B, the alternative): cut paper, stickers and tickets. Same skill scales
+   as Daylight Tower; a different motif, display face and colour temperature. */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,500..700,100&family=Geist:wght@400..700&display=swap');
+
+:root {
+	--paper: #f7f3ec;
+	--paper-2: #efe8dc;
+	--line: #e2d8c8;
+	--raised: #ffffff;
+	--ink: #221e1a;
+	--ink-2: #5a5248;
+
+	--ch1: #19744d;
+	--ch1-deep: #146142;
+	--ch1-tint: #ddf0e5;
+	--ch2: #3d5bd9;
+	--ch2-deep: #263f9e;
+	--ch2-tint: #e2e8fb;
+	--ch3: #d9476b;
+	--ch3-deep: #9c2a48;
+	--ch3-tint: #fbe3e9;
+
+	--sun: #e9b949;
+	--sun-edge: #c0922a;
+	--on-sun: #2a1e05;
+	--stamp: #b5432a;
+	--sky: #cfe1f0;
+
+	--display: 'Fraunces', serif;
+	--ui: 'Geist', sans-serif;
+	--paper-shadow: 0 2px 0 rgb(120 96 60 / 0.10), 0 12px 24px rgb(120 96 60 / 0.12);
+	--sticker: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 6px 8px rgb(60 40 20 / 0.22));
+	--ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+	width: 390px; height: 844px; overflow: hidden; position: relative;
+	background: var(--paper); color: var(--ink);
+	font-family: var(--ui); font-size: 16px; line-height: 24px;
+	-webkit-font-smoothing: antialiased;
+}
+body::after {
+	content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.08; z-index: 50;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+h1, h2, h3, h4, p { margin: 0; }
+h1, h2, h3, h4 { text-wrap: balance; }
+p { text-wrap: pretty; }
+.tnum { font-variant-numeric: tabular-nums; }
+.d { font-family: var(--display); font-variation-settings: 'SOFT' 100; }
+.heading-2 { font: 600 48px/48px var(--display); font-variation-settings: 'SOFT' 100; letter-spacing: -0.02em; }
+.heading-3 { font: 600 36px/40px var(--display); font-variation-settings: 'SOFT' 100; letter-spacing: -0.02em; }
+.heading-4 { font: 600 30px/36px var(--display); font-variation-settings: 'SOFT' 100; letter-spacing: -0.015em; }
+.heading-5 { font: 600 24px/32px var(--display); font-variation-settings: 'SOFT' 100; letter-spacing: -0.01em; }
+.heading-6 { font: 600 20px/28px var(--display); font-variation-settings: 'SOFT' 100; }
+.title-1 { font: 500 20px/28px var(--ui); }
+.title-3 { font: 500 16px/24px var(--ui); }
+.title-4 { font: 500 14px/20px var(--ui); }
+.body-1 { font: 600 16px/24px var(--ui); }
+.body-2 { font: 500 16px/24px var(--ui); }
+.body-3 { font: 400 16px/24px var(--ui); }
+.body-4 { font: 600 14px/20px var(--ui); }
+.body-5 { font: 500 14px/20px var(--ui); }
+.body-6 { font: 400 14px/20px var(--ui); }
+.caption-3 { font: 600 12px/16px var(--ui); }
+.caption-4 { font: 500 12px/16px var(--ui); }
+
+.status { height: 48px; padding: 16px 24px 0; display: flex; justify-content: space-between; font: 600 14px/20px var(--ui); position: relative; z-index: 5; }
+.status i { font-size: 16px; margin-left: 4px; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; height: 56px; border-radius: 12px; background: var(--ink); color: #fff; font: 600 18px/28px var(--ui); }
+.btn.sun { background: var(--sun); color: var(--on-sun); }
+.btn i { font-size: 20px; }
+.tag { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border-radius: 4px; font: 600 12px/16px var(--ui); white-space: nowrap; }
+.iconbtn { width: 40px; height: 40px; border-radius: 12px; background: var(--raised); display: grid; place-items: center; font-size: 20px; box-shadow: var(--paper-shadow); }
+.sticker { filter: var(--sticker); }
+.cast { display: block; }
+.cast svg { width: 100%; height: 100%; display: block; }
+.slip { background: var(--raised); border-radius: 12px; box-shadow: var(--paper-shadow); }
+.letter { flex: none; width: 32px; height: 32px; border-radius: 9999px; border: 2px solid var(--line); display: grid; place-items: center; font: 600 16px/24px var(--display); font-variation-settings: 'SOFT' 100; color: var(--ink-2); }
+/* the ticket: a room is a ticket with a perforated stub */
+.ticket { position: relative; border-radius: 16px; }
+.ticket .stub { border-left: 2px dashed rgb(255 255 255 / 0.5); }
+.ticket::before, .ticket::after { content: ''; position: absolute; width: 24px; height: 24px; border-radius: 12px; background: var(--paper); right: 80px; }
+.ticket::before { top: -12px; }
+.ticket::after { bottom: -12px; }
