@@ -450,7 +450,8 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
 }
 
 /// Chapters are numbered 1, 2, 3…; every mission sits in a playable one; a playable chapter's
-/// tower titles are its missions' titles, in order, and its missions are numbered without gaps.
+/// tower titles are its missions' titles, in order, and its missions are numbered without gaps,
+/// after every title of the chapters before it.
 void _checkChapters(
   ContentBundle bundle,
   void Function(String id, String problem) issue,
@@ -470,14 +471,25 @@ void _checkChapters(
       issue(mission.id, 'chapter ${mission.chapter} is not a playable chapter');
     }
   }
-  final numbers = [for (final m in bundle.missions) m.number];
-  for (var i = 0; i < numbers.length; i++) {
-    if (numbers[i] != i + 1) {
-      issue(
-        bundle.missions[i].id,
-        'missions must be numbered 1, 2, 3… in order',
-      );
+  // A mission's number is its place in the campaign: every title the earlier chapters tease
+  // comes first. With every chapter written that's 1, 2, 3… with no gaps; it also lets a later
+  // chapter be written before an earlier one (Chapter 3 starts at 15 either way).
+  final firstNumber = <int, int>{};
+  var teased = 0;
+  for (final chapter in bundle.chapters) {
+    firstNumber[chapter.number] = teased + 1;
+    teased += chapter.missionTitles.length;
+  }
+  final placeInChapter = <int, int>{};
+  var previous = 0;
+  for (final mission in bundle.missions) {
+    final place = placeInChapter[mission.chapter] ?? 0;
+    placeInChapter[mission.chapter] = place + 1;
+    final expected = (firstNumber[mission.chapter] ?? 1) + place;
+    if (mission.number != expected || mission.number <= previous) {
+      issue(mission.id, 'missions must be numbered 1, 2, 3… in order');
     }
+    previous = mission.number;
   }
   for (final chapter in bundle.chapters) {
     if (chapter.missionTitles.isEmpty) {
