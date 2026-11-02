@@ -1,7 +1,15 @@
 // Unit tests for the `score` function, with Gemini and the database faked: no key, no network.
 // Run: deno test supabase/functions/score (or via Docker: see docs/status/22.md).
 
-import { GEMINI_MODEL, requestBody, scoreWithGemini, UpstreamError, type Verdict } from './gemini.ts';
+import {
+  GEMINI_CHAIN,
+  GEMINI_MODEL,
+  requestBody,
+  scoreWithFallback,
+  scoreWithGemini,
+  UpstreamError,
+  type Verdict,
+} from './gemini.ts';
 import { type Deps, handle, NotConfigured, Unauthorized } from './handler.ts';
 import {
   answerTranscript,
@@ -210,6 +218,37 @@ Deno.test('scoreWithGemini: an error status, a block, a cut-off and a timeout ar
     })) as unknown as typeof fetch;
   const error = await assertRejects(() => scoreWithGemini(parseInput(body), 'k', hang, 20), UpstreamError);
   assert((error as UpstreamError).timedOut, 'a timeout is marked as one');
+});
+
+Deno.test('requestBody asks for minimal thinking, so a verdict takes seconds, not tens of seconds', () => {
+  const config = requestBody(parseInput(body)).generationConfig as Record<string, unknown>;
+  assertEquals(config.thinkingConfig, { thinkingLevel: 'minimal' });
+  assertEquals(config.temperature, 0);
+});
+
+Deno.test('scoreWithFallback: an overloaded first model hands over to the next', async () => {
+  const seen: string[] = [];
+  const fake = ((url: string) => {
+    seen.push(url.split('/models/')[1].split(':')[0]);
+    return Promise.resolve(
+      seen.length === 1
+        ? new Response('{"error":{"status":"UNAVAILABLE"}}', { status: 503 })
+        : geminiResponse(JSON.stringify(verdictJson)),
+    );
+  }) as unknown as typeof fetch;
+  const { result } = await scoreWithFallback(parseInput(body), 'k', fake);
+  assertEquals(seen, GEMINI_CHAIN.map((m) => m.model));
+  assertEquals(result.model, GEMINI_CHAIN[1].model, 'the verdict records the model that graded');
+});
+
+Deno.test('scoreWithFallback: when every model fails, the last failure is thrown', async () => {
+  const down = (() => Promise.resolve(new Response('{}', { status: 503 }))) as unknown as typeof fetch;
+  await assertRejects(() => scoreWithFallback(parseInput(body), 'k', down), UpstreamError);
+});
+
+Deno.test("scoreWithFallback: the chain fits inside the app's 8 s wait", () => {
+  const total = GEMINI_CHAIN.reduce((sum, m) => sum + m.timeoutMs, 0);
+  assert(total < 8000, `${total} ms`);
 });
 
 // ---------------------------------------------------------------- handler

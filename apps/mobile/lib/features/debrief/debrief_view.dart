@@ -84,6 +84,9 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
   /// The AI's verdict or the offline fallback; null while the panel deliberates.
   AiVerdict? _verdict;
 
+  /// The scorer's verdicts: the offline score may be followed by a late verdict.
+  StreamSubscription<AiVerdict>? _verdicts;
+
   GameSounds get _sounds => ref.read(gameSoundsProvider);
   Analytics get _analytics => ref.read(analyticsProvider);
 
@@ -103,14 +106,19 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
     _analytics.track(AnalyticsEvent.aiScoreRequested, {
       'mission_id': EventValue.id(widget.mission),
     });
-    unawaited(
-      scorer.score(request!).then((verdict) {
-        if (mounted) setState(() => _show(verdict));
-      }),
-    );
+    _verdicts = scorer.verdicts(request!).listen((verdict) {
+      if (mounted) setState(() => _show(verdict));
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_verdicts?.cancel());
+    super.dispose();
   }
 
   void _show(AiVerdict verdict) {
+    final late = verdict is AiScored && _verdict is AiOffline;
     _verdict = verdict;
     switch (verdict) {
       case AiScored(:final score):
@@ -130,6 +138,7 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
         _analytics.track(AnalyticsEvent.aiScoreShown, {
           'mission_id': EventValue.id(widget.mission),
           'score_bucket': EventValue.name(ScoreBucket.of(score.overall.score)),
+          'late': EventValue.flag(late),
         });
       case AiOffline(:final reason):
         _analytics.track(AnalyticsEvent.aiScoreFallback, {

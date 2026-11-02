@@ -180,6 +180,51 @@ void main() {
     });
 
     test(
+      'a slow verdict: the offline score at 8 s, then the verdict replaces it',
+      () {
+        fakeAsync((async) {
+          final backend = FakeBackend()
+            ..scorer = (_) => Future<Object?>.delayed(
+              AiScorer.timeout + const Duration(seconds: 6),
+              () => _verdict,
+            );
+          final seen = <AiVerdict>[];
+          _scorer(backend).verdicts(_request()).listen(seen.add);
+          async.elapse(AiScorer.timeout + const Duration(milliseconds: 1));
+          expect(seen.single, isA<AiOffline>());
+          async.elapse(const Duration(seconds: 6));
+          expect(seen, hasLength(2));
+          expect((seen.last as AiScored).score.overall.score, 74);
+        });
+      },
+    );
+
+    test('a verdict within 8 s is the only thing shown', () {
+      fakeAsync((async) {
+        final backend = FakeBackend()
+          ..scorer = (_) => Future<Object?>.delayed(
+            const Duration(seconds: 2),
+            () => _verdict,
+          );
+        final seen = <AiVerdict>[];
+        _scorer(backend).verdicts(_request()).listen(seen.add);
+        async.elapse(AiScorer.lateLimit);
+        expect(seen.single, isA<AiScored>());
+      });
+    });
+
+    test('nothing by the late limit: the offline score stays', () {
+      fakeAsync((async) {
+        final backend = FakeBackend()
+          ..scorer = (_) => Completer<Object?>().future;
+        final seen = <AiVerdict>[];
+        _scorer(backend).verdicts(_request()).listen(seen.add);
+        async.elapse(AiScorer.lateLimit + const Duration(seconds: 1));
+        expect(seen.single, isA<AiOffline>());
+      });
+    });
+
+    test(
       'a spent quota, a refusal, junk and no network are offline scores',
       () async {
         final cases =
@@ -280,6 +325,32 @@ void main() {
         expect(
           rig.analytics.only(AnalyticsEvent.aiScoreFallback).wire['reason'],
           'timeout',
+        );
+        await rig.settleDossier();
+      },
+    );
+
+    testWidgets(
+      'a late verdict: "Offline score" at 8 s, then the recruiter\'s score replaces it',
+      (tester) async {
+        final backend = FakeBackend()
+          ..scorer = (_) => Future<Object?>.delayed(
+            AiScorer.timeout + const Duration(seconds: 5),
+            () => _verdict,
+          );
+        final rig = await playToDebrief(tester, _scorer(backend));
+        await rig.until(
+          find.text(ScoreSourceLabel.offlineLabel.toUpperCase()),
+          timeout: AiScorer.timeout + const Duration(seconds: 3),
+        );
+        await rig.until(
+          find.text(ScoreSourceLabel.aiLabel.toUpperCase()),
+          timeout: const Duration(seconds: 10),
+        );
+        expect(tester.widget<Dossier>(find.byType(Dossier)).total, 74);
+        expect(
+          rig.analytics.only(AnalyticsEvent.aiScoreShown).wire['late'],
+          isTrue,
         );
         await rig.settleDossier();
       },
