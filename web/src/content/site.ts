@@ -51,13 +51,21 @@ const repo = 'https://github.com/samiarif02/thelastroom'
 
 const phone = { width: 540, height: 1140 } as const
 
+/** Where the site is served in production; read only at build time (every use is static). */
+function productionUrl(): string {
+	const host = process.env.VERCEL_PROJECT_PRODUCTION_URL
+	return host ? `https://${host}` : 'https://thelastroom.vercel.app'
+}
+
 export const site = {
 	name: 'The Last Room',
 	/**
-	 * The production URL, for canonical links, Open Graph and the sitemap. Change it here once
-	 * the Vercel project has its domain (web/README.md).
+	 * The production URL, for canonical links, Open Graph and the sitemap. On Vercel it's the
+	 * project's own production address, which Vercel sets at build time
+	 * (`VERCEL_PROJECT_PRODUCTION_URL`, a system variable: nothing to configure), so a free
+	 * `*.vercel.app` address or a custom domain both work without an edit. Locally, the fallback.
 	 */
-	url: 'https://thelastroom.vercel.app',
+	url: productionUrl(),
 	title: 'The Last Room: practise the interview before the one that counts',
 	description:
 		'An interview-practice game that plays like a film. Answer a recruiter, say why, and get a scored debrief with one lesson. Coming soon on Google Play and the App Store.',

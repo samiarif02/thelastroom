@@ -48,7 +48,7 @@ public/screens/     stills from the app (from docs/screenshots/, status bar crop
 - **Honesty**: no invented users, ratings, testimonials or numbers (`docs/rules/analytics.md`).
   Every figure on the page (weights, intervals, thresholds) is one the game's code states.
 - **The site's URL** is `site.url` in `src/content/site.ts` (canonical link, Open Graph,
-  sitemap). Change it once the Vercel project has its domain.
+  sitemap): Vercel's production address at build time, `https://thelastroom.vercel.app` locally.
 
 ## Deploy on Vercel
 
@@ -63,8 +63,9 @@ repository holds a Vercel token, and CI has no deploy job.
    `output: 'export'`, Vercel serves the static export.
 4. **Environment variables:** none.
 5. **Deploy.** The production branch is `main`; every other branch and PR gets a preview URL.
-6. Once the domain is known, set `site.url` in `src/content/site.ts` to it (in a PR) so the
-   canonical link, Open Graph image and sitemap point at it.
+6. Nothing to change afterwards: the site reads its own production address from Vercel at build
+   time (`VERCEL_PROJECT_PRODUCTION_URL`), so the canonical link, Open Graph image and sitemap
+   point at whatever address Vercel gives the project, free `*.vercel.app` or a custom domain.
 
 Optional: under **Settings → Git → Ignored Build Step**, use
 `git diff --quiet HEAD^ HEAD -- .` so Vercel only rebuilds when `web/` changes.
