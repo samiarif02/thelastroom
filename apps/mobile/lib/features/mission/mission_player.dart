@@ -15,6 +15,7 @@ import '../debrief/debrief_facts.dart';
 import '../debrief/debrief_view.dart';
 import 'mission_controller.dart';
 import 'mission_lookup.dart';
+import 'scene/epilogue_scene.dart';
 import 'scene/lower_third.dart';
 import 'scene/mission_card.dart';
 import 'scene/mission_set.dart';
@@ -55,6 +56,9 @@ enum SceneStage {
 
   /// The dossier.
   debrief,
+
+  /// Mission 7's cliffhanger (FR-30), after the debrief and before the chapter report.
+  epilogue,
 }
 
 /// Where a beat is: the cards are up, the interviewer asks why, the player gives a reason, or
@@ -91,6 +95,7 @@ class MissionPlayer extends ConsumerStatefulWidget {
   final VoidCallback onLeave;
 
   static const String continueLabel = 'Continue the scene';
+  static const String cardContinueLabel = 'Continue';
 
   /// After a tap picks a card, another tap can still change it for this long; then it's said.
   /// A tap on the picked card says it at once.
@@ -483,7 +488,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   /// The interviewer says how [quality] landed, then [then]. A beat with no reaction content
   /// moves straight on.
   void _react(PickQuality quality, {required VoidCallback then}) {
-    final line = _game.mission.beats[_beatShown].reaction?.forQuality(quality);
+    final line = _game.reactionFor(_beatShown, quality);
     if (line == null) {
       then();
       return;
@@ -549,6 +554,16 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     _go(SceneStage.replies);
   }
 
+  /// On from the dossier: the chapter's cliffhanger first when the mission has one (Mission 7),
+  /// then out.
+  void _afterDebrief() {
+    if (_game.mission.epilogue.isEmpty) {
+      widget.onExit();
+      return;
+    }
+    _go(SceneStage.epilogue);
+  }
+
   @override
   Widget build(BuildContext context) {
     final game = ref
@@ -568,6 +583,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
         trust: game.trust,
         firstTry: game.firstTry,
         reasoning: reasoningOf(mission, game.plays),
+        baselineDraft: game.baselineDraft,
         // The answer for the AI recruiter (brief 22); the dossier falls back by itself.
         scoreRequest: game.followUp != null && game.reply != null
             ? ScoreRequest(
@@ -577,7 +593,19 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                 reply: game.reply!,
               )
             : null,
-        onContinue: widget.onExit,
+        onContinue: _afterDebrief,
+      );
+    }
+    if (_stage == SceneStage.epilogue) {
+      return EpilogueScene(
+        lines: [
+          for (final line in mission.epilogue)
+            line.addressedTo(game.playerName),
+        ],
+        grade: grade,
+        sounds: _sounds,
+        doneLabel: DebriefView.reportLabel,
+        onDone: widget.onExit,
       );
     }
 
@@ -630,6 +658,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
             button: true,
             label: MissionPlayer.continueLabel,
             onTap: _tap,
+            // One labelled node: the detector adds no second, unlabelled tap (1e's audit).
+            excludeSemantics: true,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: _tap,
@@ -656,10 +686,17 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
             children: _lowerThird(game, lead, grade),
           ),
           if (_stage == SceneStage.card)
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
+            // The card's title stays readable; the tap on it is one labelled button.
+            Semantics(
+              button: true,
+              label: MissionPlayer.cardContinueLabel,
               onTap: _cardDone,
-              child: MissionCard(mission: mission, onFinished: _cardDone),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                excludeFromSemantics: true,
+                onTap: _cardDone,
+                child: MissionCard(mission: mission, onFinished: _cardDone),
+              ),
             ),
           if (_stage != SceneStage.card && !_leaving)
             Positioned(
@@ -707,7 +744,10 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
         );
 
     switch (_stage) {
-      case SceneStage.card || SceneStage.opening || SceneStage.debrief:
+      case SceneStage.card ||
+          SceneStage.opening ||
+          SceneStage.debrief ||
+          SceneStage.epilogue:
         return const [];
       case SceneStage.lines || SceneStage.push:
         return [
@@ -827,7 +867,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     SceneStage.opening ||
     SceneStage.lines ||
     SceneStage.push ||
-    SceneStage.debrief => InterviewerExpression.smile,
+    SceneStage.debrief ||
+    SceneStage.epilogue => InterviewerExpression.smile,
     SceneStage.draft => InterviewerExpression.neutral,
     // Her reaction: warm on a strong line, cooler on a weak one, sceptical of a guess.
     SceneStage.beats when _phase == BeatPhase.reaction => switch (_quality) {
@@ -853,7 +894,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     SceneStage.draft || SceneStage.beats => const [SceneShot.close],
     SceneStage.followUp ||
     SceneStage.replies ||
-    SceneStage.debrief => const [SceneShot.tight],
+    SceneStage.debrief ||
+    SceneStage.epilogue => const [SceneShot.tight],
   };
 }
 
@@ -913,6 +955,8 @@ class _Overlay extends StatelessWidget {
               ? LowerThird(children: children)
               : GestureDetector(
                   behavior: HitTestBehavior.opaque,
+                  // A touch shortcut: the scene's labelled "Continue" serves screen readers.
+                  excludeFromSemantics: true,
                   onTap: onTapLowerThird,
                   child: LowerThird(children: children),
                 ),

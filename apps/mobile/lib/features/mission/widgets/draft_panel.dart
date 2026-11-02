@@ -124,12 +124,12 @@ class _DraftPanelState extends State<DraftPanel> {
                           ),
                         ),
                       ),
-                    // One node for screen readers: the label and the field (EditableText's own
-                    // node would otherwise be a second, unlabelled text field).
+                    // One node for screen readers: the label merges into EditableText's own
+                    // text field. A second `textField: true` here made the web's textarea
+                    // read as disabled until focused (brief 30, as 1e found on the name field).
                     MergeSemantics(
                       child: Semantics(
                         label: DraftPanel.heading,
-                        textField: true,
                         child: EditableText(
                           controller: _text,
                           focusNode: _focus,

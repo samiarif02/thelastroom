@@ -14,6 +14,8 @@ class ChapterReport {
     required this.review,
     required this.firstTry,
     required this.latest,
+    this.firstDraft,
+    this.latestAnswer = '',
   });
 
   final Chapter chapter;
@@ -22,6 +24,12 @@ class ChapterReport {
   final Mission review;
   final MissionScore firstTry;
   final MissionScore latest;
+
+  /// The player's own words from Mission 1's draft, for "Then / Now" (FR-41); null if skipped.
+  final String? firstDraft;
+
+  /// The review's answer as the player gave it: its beat lines, joined.
+  final String latestAnswer;
 
   BaselineComparison get change =>
       compareToBaseline(baseline: firstTry, latest: latest);
@@ -72,12 +80,19 @@ final chapterReportProvider = FutureProvider.autoDispose<ChapterReportState>((
   final reviews = await store.attempts(missionId: review.id);
   final baseline = await store.baseline();
   if (reviews.isEmpty || baseline == null) return ReportNotYet(review);
+  final last = reviews.last;
   return ReportReady(
     ChapterReport(
       chapter: chapter,
       review: review,
       firstTry: baseline.score,
-      latest: reviews.last.score,
+      latest: last.score,
+      firstDraft: baseline.draft,
+      latestAnswer: [
+        for (var i = 0; i < review.beats.length; i++)
+          if (i < last.beatOptionIds.length)
+            ?review.beats[i].optionById(last.beatOptionIds[i])?.text,
+      ].join(' '),
     ),
   );
 });

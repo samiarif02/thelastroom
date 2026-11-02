@@ -92,7 +92,11 @@ class ChoiceCard extends StatelessWidget {
                           child: Text(
                             numeral,
                             style: BrandVividType.row.copyWith(
-                              color: lit ? BrandVivid.accent : grade.glow,
+                              // onDeepSoft holds AA on the card in every theme; the
+                              // chapter's glow is 4.18:1 in Sunset City (1e's audit).
+                              color: lit
+                                  ? BrandVivid.accent
+                                  : BrandVivid.onDeepSoft,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
