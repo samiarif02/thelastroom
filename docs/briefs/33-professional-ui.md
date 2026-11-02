@@ -43,6 +43,10 @@ app. Think an executive-search firm's app, or Linear / LinkedIn Premium, not a q
 
 ## In scope
 
+**Chapters 2 and 3 become playable this wave** (briefs 37, 38): the tower shows every playable
+chapter's rooms from the content data, with the same done / up next / locked states, and marks a
+voice mission with a small microphone mark.
+
 Every screen a player sees, in this order of importance: the tower (home), the mission scene and
 answer cards, the debrief (visual side only, see wave-6 for the shared file), onboarding, the
 title/intro, Your file (progress, radar, badges), the Recall Room, settings, the splash and the

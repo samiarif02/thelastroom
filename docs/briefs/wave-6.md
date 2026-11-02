@@ -25,8 +25,9 @@ the owner's feedback session. **Submission is Thu 5 Nov. Every PR open, green an
 
 ## Owner's decisions (2026-11-02)
 
-- One voice mission: **the last mission in the game (Mission 8, a Chapter 2 preview), mixing
-  both** spoken answers and the multiple-choice beats. The rest of Chapter 2 stays "coming soon".
+- **Chapter 2 is all voice (7 missions); Chapter 3 mixes voice and multiple-choice missions
+  (4 voice, 3 choices).** Chapters 2 and 3 become playable. The voice player and its scoring are
+  brief 35; the missions are briefs 37 and 38, written in parallel against the contract.
 - The landing page is Next.js, deployed on Vercel. ADR 0005's "no hosted demo" is about the
   game; a static marketing page is a separate decision (ADR 0007, brief 34).
 - The demo video is done. Nothing in this wave touches it.
@@ -36,22 +37,31 @@ the owner's feedback session. **Submission is Thu 5 Nov. Every PR open, green an
 | Brief | Worktree | Session | Owns |
 | --- | --- | --- | --- |
 | 33 professional UI, one look everywhere | `../thelastroom-w1` | thelastroom-de | `packages/brand`, `apps/mobile/lib/ui`, `features/{tower,onboarding,progress,progression,title,intro,settings,recall}`, the *visual* side of `features/{mission,debrief}`, goldens |
-| 34 landing page (Next.js, `web/`) | `../thelastroom-w3` | background agent of thelastroom-w4-fe | `web/**` (new), the CI `web` job + its `local-review` mirror, ADR 0007 |
-| 35 one voice mission | `../thelastroom-w2` | thelastroom-75 | `features/voice/**` (new), the voice mission in `packages/content`, `supabase/functions/score-voice/**` (new), mic/TTS permission lines in `android/` and `ios/`, its pubspec lines |
+| 34 landing page (Next.js, `web/`) | `../thelastroom-w3` | agent of thelastroom-w4-fe | `web/**` (new), the CI `web` job + its `local-review` mirror, ADR 0007 |
+| 35 voice missions: the player and scoring | `../thelastroom-w2` | thelastroom-75 | `features/voice/**` (new), the engine's self-check scorer, `supabase/functions/score-voice/**` (new), the voice attempt store + migration, mic/TTS lines in `android/` and `ios/`, its pubspec lines |
 | 36 scoring you can trust | `../thelastroom-w4` | thelastroom-w4-fe | `supabase/functions/score/**`, `features/debrief/scoring_basis*.dart` (new) + one insertion in `debrief_view.dart`, the eval set and report, README "How the score works" |
+| 37 Chapter 2, all voice | `../thelastroom-w5` | agent of thelastroom-w4-fe | missions 8–14 in `packages/content`, Chapter 2 lessons and cast additions |
+| 38 Chapter 3, mixed | `../thelastroom-w6` | agent of thelastroom-w4-fe | missions 15–21 in `packages/content`, Chapter 3 lessons and cast additions |
 
-**The contract** (committed on `lead/wave-6`, every branch starts there): `Mission.practises`,
-one line per mission saying what it teaches, filled for Missions 1–7. 33 shows it before the
-mission; 36 shows it on the debrief; 35 writes one for the voice mission.
+**The contract** (committed on `lead/wave-6`, every branch starts there):
+
+- `Mission.practises`, one line per mission saying what it teaches, filled for Missions 1–7. 33
+  shows it before the mission, 36 on the debrief; 37 and 38 write one for every new mission.
+- `Mission.answerMode` (`choices` | `voice`) and `Mission.voice` (`VoicePrompt` with
+  `ListenFor` points, a spoken follow-up, a lesson), validated by `validateContent`. 35 plays
+  them; 37 and 38 write them.
 
 **Shared files, append-only:** `AnalyticsEvent` + `docs/EVENTS.md` (append at the end),
-`apps/mobile/pubspec.yaml` + `pubspec.lock` (35 only), `router.dart` (35 adds one route).
+`apps/mobile/pubspec.yaml` + `pubspec.lock` (35 only), `router.dart` (35 adds one route),
+`packages/content` `missions` list, `lessons.dart`, `interviewers.dart` (37 and 38 append).
 `debrief_view.dart`: 36 inserts one widget call, 33 owns the rest; tell each other before
 touching it.
 
-**Merge order:** 36 → 33 → 35 → 34 (34 is independent). The later branch rebases on `main` and
-reruns the gates. 35 builds on today's tokens and components only (no new colours), then adopts
-33's look after 33 merges.
+**Merge order:** 36 → 33 → 35 → 37 → 38 (34 any time). The voice player (35) must land before
+the content that turns Chapters 2–3 playable, or the tower would offer missions nothing can
+play. The later branch rebases on `main` and reruns the gates. 35 builds on today's tokens and
+components only (no new colours), then adopts 33's look after 33 merges. 33 makes the tower
+show every playable chapter's rooms from the data (Chapters 2–3 open when 37/38 flip them).
 
 ## Rules for every brief
 

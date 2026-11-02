@@ -41,6 +41,8 @@ class Mission implements Identified {
     this.skillRequirements = const [],
     this.continuity,
     this.epilogue = const [],
+    this.answerMode = AnswerMode.choices,
+    this.voice,
   });
 
   @override
@@ -61,10 +63,11 @@ class Mission implements Identified {
   final List<SceneLine> scene;
   final SceneLine question;
 
-  /// Exactly three, in [BeatKind] order.
+  /// Exactly three, in [BeatKind] order. Empty on a voice mission.
   final List<Beat> beats;
 
-  /// Exactly one default (no trigger), plus at most one per flag.
+  /// Exactly one default (no trigger), plus at most one per flag. Empty on a voice mission (its
+  /// follow-up is [VoicePrompt.followUp]).
   final List<FollowUp> followUps;
 
   /// Whether hint cards are offered. Mission 1 (baseline), Mission 3 (recall checkpoint) and
@@ -90,6 +93,72 @@ class Mission implements Identified {
   /// Lines played after the debrief: Mission 7's cliffhanger before the Chapter 2 teaser.
   /// Empty on most missions.
   final List<SceneLine> epilogue;
+
+  /// How the player answers: by building it from options (Chapter 1, some of Chapter 3) or by
+  /// speaking it (all of Chapter 2, some of Chapter 3; owner, 2026-11-02).
+  final AnswerMode answerMode;
+
+  /// What a spoken answer is listened for. Set exactly when [answerMode] is
+  /// [AnswerMode.voice].
+  final VoicePrompt? voice;
+}
+
+/// How a mission is answered.
+enum AnswerMode {
+  /// Three beats built from 3–4 options each, a reason, a follow-up reply.
+  choices,
+
+  /// Spoken out loud: the question, then the follow-up, each answered in the player's own
+  /// voice. Scored on what was said, never on accent or how it sounds.
+  voice,
+}
+
+/// A voice mission's answer key: what a strong spoken answer does, the interviewer's push-back,
+/// and the lesson it teaches. The AI recruiter checks the points; offline, the player ticks the
+/// ones they covered (a self-check), so the mission still scores and still teaches.
+class VoicePrompt {
+  const VoicePrompt({
+    required this.listenFor,
+    required this.followUp,
+    required this.followUpListenFor,
+    required this.lessonId,
+    this.maxSeconds = defaultMaxSeconds,
+  });
+
+  /// 3–4 points a strong answer to the question makes, each tied to the dimension it earns.
+  final List<ListenFor> listenFor;
+
+  /// The interviewer's challenge, spoken after the first answer.
+  final SceneLine followUp;
+
+  /// 1–3 points a strong reply to [followUp] makes (adaptability lives here).
+  final List<ListenFor> followUpListenFor;
+
+  /// The lesson taught when the answer misses its points.
+  final String lessonId;
+
+  /// The longest an answer may run, in seconds.
+  final int maxSeconds;
+
+  static const int defaultMaxSeconds = 90;
+}
+
+/// One thing a strong spoken answer does: "Names the conflict and your part in it".
+class ListenFor implements Identified {
+  const ListenFor({
+    required this.id,
+    required this.text,
+    required this.dimension,
+  });
+
+  @override
+  final String id;
+
+  /// Written as what the answer does, so it reads as a checklist item for the self-check.
+  final String text;
+
+  /// The dimension covering this point earns.
+  final Dimension dimension;
 }
 
 /// An earlier mission's answer, carried into this one: the interviewer quotes the line that
