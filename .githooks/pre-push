@@ -12,6 +12,34 @@
 # and the gate scripts' temp-dir tests think they're inside a repo. The gates need none of them.
 unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX
 
+# Claude Code logs (the owner is scored on them; missing logs were flagged three times,
+# 2026-11-02). Every branch pushed for a PR carries its session's log: at least one commit in
+# the range that touches .claude-logs/, and no newer log changes left uncommitted (the hook
+# rewrites the session's file after every prompt, so commit it right before the push).
+# Background agents copy their parent session's log in. Never skip this with --no-verify.
+logs_fail=0
+while read -r local_ref local_sha remote_ref _remote_sha; do
+  case "$local_sha" in 0000000000000000000000000000000000000000) continue ;; esac
+  case "$remote_ref" in refs/heads/main) continue ;; esac
+  base=$(git merge-base "$local_sha" origin/main 2>/dev/null) || base=""
+  [ -z "$base" ] && continue
+  if [ -z "$(git diff --name-only "$base" "$local_sha" -- .claude-logs/)" ]; then
+    echo "pre-push: ✗ ${local_ref#refs/heads/} has no Claude session log commit."
+    echo "  Commit the session's .claude-logs file (chore(claude): add session logs) and push again."
+    logs_fail=1
+  fi
+done
+if [ -n "$(git status --porcelain -- .claude-logs/)" ]; then
+  echo "pre-push: ✗ .claude-logs/ has changes that aren't committed: the newest prompts would be missing."
+  git status --short -- .claude-logs/
+  echo "  git add .claude-logs && git commit -m 'chore(claude): add session logs', then push again."
+  logs_fail=1
+fi
+if [ "$logs_fail" -ne 0 ]; then
+  echo "Push blocked: Claude logs are part of every PR (docs/memory/feedback-claude-logs-every-pr.md)."
+  exit 1
+fi
+
 if ! node -e 'require("./package.json")' 2>/dev/null; then
   echo "pre-push: package.json can't be read, so no gate can run. Push blocked."
   exit 1
