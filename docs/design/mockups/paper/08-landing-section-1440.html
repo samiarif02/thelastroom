@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="mockup-height" content="790">
+<title>The Last Room · how it works</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="landing.css">
+<style>
+.reveal { padding: 96px 0 64px; }
+.reveal h2 { font: 600 60px/60px var(--display); font-variation-settings: 'SOFT' 100; letter-spacing: -0.03em; max-width: 680px; }
+.reveal h2 span { color: rgb(34 30 26 / 0.3); }
+.reveal h2 span.lit { color: var(--ink); }
+.how { padding-bottom: 96px; }
+.how h3 { margin-bottom: 32px; }
+.steps { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 24px; align-items: start; }
+.step { display: flex; background: var(--raised); border-radius: 16px; box-shadow: var(--paper-shadow); }
+.step:nth-child(2) { margin-top: 48px; transform: rotate(1deg); }
+.step:nth-child(3) { margin-top: 16px; transform: rotate(-1deg); }
+.step .m { flex: 1; padding: 24px; }
+.step .m p.body-3 { margin-top: 8px; color: var(--ink-2); }
+.step .m .art { height: 160px; margin-top: 16px; border-radius: 8px; position: relative; overflow: hidden; }
+.step .s { width: 64px; border-left: 2px dashed var(--line); display: grid; place-items: center; font: 600 30px/36px var(--display); font-variation-settings: 'SOFT' 100; border-radius: 0 16px 16px 0; }
+.step:nth-child(1) .s { background: var(--ch1-tint); color: var(--ch1-deep); }
+.step:nth-child(2) .s { background: var(--ch2-tint); color: var(--ch2-deep); }
+.step:nth-child(3) .s { background: var(--ch3-tint); color: var(--ch3-deep); }
+.art .slipx { position: absolute; left: 16px; right: 16px; padding: 8px 12px; border-radius: 8px; background: #fff; box-shadow: var(--paper-shadow); font: 400 14px/20px var(--ui); }
+.art .cast { position: absolute; bottom: 0; filter: var(--sticker); }
+.big78 { position: absolute; left: 24px; top: 20px; width: 112px; height: 112px; border-radius: 56px; border: 4px solid var(--ch3); color: var(--ch3-deep); display: grid; place-items: center; font: 600 48px/48px var(--display); font-variation-settings: 'SOFT' 100; transform: rotate(-8deg); }
+</style>
+</head>
+<body class="web">
+<section class="reveal"><div class="wrap"><h2 id="tag">Nerves fade when the questions stop being new.</h2></div></section>
+<section class="how" id="how"><div class="wrap">
+	<h3 class="heading-3">One room, three moves</h3>
+	<div class="steps">
+		<article class="step"><div class="m"><h4 class="heading-6">Build the answer</h4><p class="body-3">Pick a line for each beat: open, evidence, land. From floor 2, say it out loud.</p><div class="art" style="background:var(--ch1-tint)"><div class="slipx" style="top:16px">I tagged 600 tickets from one month.</div><div class="slipx" style="top:64px;transform:rotate(-2deg);box-shadow:0 0 0 2px var(--ink)">One in three were password resets.</div><div class="cast" data-cast="marcus" data-expr="listening" data-style="paper" style="right:-12px;width:110px;height:110px;bottom:-8px"></div></div></div><div class="s">1</div></article>
+		<article class="step"><div class="m"><h4 class="heading-6">Say why it works</h4><p class="body-3">Choose the principle behind your line. That is the part that sticks.</p><div class="art" style="background:var(--ch2-tint)"><div class="slipx" style="top:24px">Numbers and my own action, not the team's summary.</div><div class="cast" data-cast="lena" data-expr="nod" data-style="paper" style="right:8px;width:110px;height:110px"></div></div></div><div class="s">2</div></article>
+		<article class="step"><div class="m"><h4 class="heading-6">Read the debrief</h4><p class="body-3">Four scores with the reason for each, and one lesson to keep.</p><div class="art" style="background:var(--ch3-tint)"><div class="big78">78</div><div class="cast" data-cast="sam" data-expr="smile" data-style="paper" style="right:8px;width:120px;height:120px"></div></div></div><div class="s">3</div></article>
+	</div>
+</div></section>
+<script src="../shared/cast.js"></script>
+<script>
+Cast.mount()
+const h = document.getElementById('tag')
+h.innerHTML = h.textContent.split(' ').map((w, i) => `<span class="${i < 6 ? 'lit' : ''}">${w}</span>`).join(' ')
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+body.web { width: 1440px; height: auto; overflow: hidden; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 48px; }
+.topnav { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 24px; padding: 8px 8px 8px 16px; border-radius: 12px; background: rgb(255 255 255 / 0.72); backdrop-filter: blur(16px); box-shadow: var(--paper-shadow); z-index: 20; white-space: nowrap; }
+.brand { display: flex; gap: 8px; align-items: center; font: 600 20px/28px var(--display); font-variation-settings: 'SOFT' 100; }
+.brand .mark { width: 28px; height: 20px; border-radius: 4px; background: var(--ch1); position: relative; }
+.brand .mark::after { content: ''; position: absolute; right: 6px; top: 0; bottom: 0; border-left: 2px dashed var(--paper); }
+.links { display: flex; gap: 4px; }
+.links a { padding: 8px 12px; border-radius: 8px; color: var(--ink-2); text-decoration: none; font: 500 14px/20px var(--ui); }
+.links a.on { color: var(--ink); background: var(--paper-2); }
+.navcta { padding: 8px 12px; border-radius: 8px; background: var(--ink); color: #fff; font: 600 14px/20px var(--ui); text-decoration: none; }
+.h1 { font: 600 60px/60px var(--display); font-variation-settings: 'SOFT' 100; letter-spacing: -0.03em; max-width: 680px; background: linear-gradient(90deg, #000000, #666666); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sub { max-width: 680px; color: var(--ink-2); }
+.cta-main { display: inline-flex; align-items: center; gap: 8px; height: 56px; padding: 0 24px; border-radius: 12px; background: var(--ink); color: #fff; font: 600 18px/28px var(--ui); text-decoration: none; }
+.risk { color: var(--ink-2); display: flex; gap: 16px; }
+.risk span { display: inline-flex; gap: 4px; align-items: center; }
+.risk i { color: var(--ch1); }

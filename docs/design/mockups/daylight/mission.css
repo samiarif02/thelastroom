@@ -1,0 +1,77 @@
+/* The mission screens: a flat chapter tint for the ground, the room as an illustration,
+   the interviewer in it, the choices below. */
+body.ch1 { --ch: var(--ch1); --ch-deep: var(--ch1-deep); --ch-tint: var(--ch1-tint); --ch-soft: var(--ch1-soft); }
+body.ch2 { --ch: var(--ch2); --ch-deep: var(--ch2-deep); --ch-tint: var(--ch2-tint); --ch-soft: var(--ch2-soft); }
+body.ch3 { --ch: var(--ch3); --ch-deep: var(--ch3-deep); --ch-tint: var(--ch3-tint); --ch-soft: var(--ch3-soft); }
+body { background: var(--ch-tint); }
+
+.bar { display: flex; align-items: center; gap: 12px; padding: 4px 16px 0; height: 48px; }
+.beats { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; list-style: none; margin: 0; padding: 0; }
+.beats li { font: 500 12px/16px var(--ui); color: var(--ink-2); }
+.beats li span { display: block; height: 8px; border-radius: 4px; background: var(--raised); margin-bottom: 4px; }
+.beats li.done span { background: var(--ch); }
+.beats li.now span { position: relative; overflow: hidden; }
+.beats li.now span::after { content: ''; position: absolute; inset: 0 55% 0 0; background: var(--ch); }
+.beats li.now { color: var(--ink); font-weight: 600; }
+.trust { display: flex; align-items: center; gap: 4px; height: 40px; padding: 0 12px; border-radius: 12px; background: var(--raised); box-shadow: 0 2px 0 var(--sand-2); color: var(--ch-deep); font-size: 20px; }
+.trust b { width: 6px; height: 12px; border-radius: 2px; background: var(--ch); }
+.trust b.off { background: var(--sand-2); }
+.trust i { margin-right: 4px; }
+
+.stage { margin: 12px 16px 0; position: relative; }
+.room {
+	height: 168px;
+	border-radius: 24px;
+	overflow: hidden;
+	position: relative;
+	background: var(--ch-soft);
+}
+.room .glass { position: absolute; left: 24px; right: 120px; top: 16px; height: 104px; border-radius: 9999px 9999px 8px 8px; background: var(--sky); overflow: hidden; border: 6px solid var(--raised); }
+.room .city { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; }
+.room .city i { position: absolute; bottom: 0; background: #c2d6e8; border-radius: 2px 2px 0 0; }
+.room .city i:nth-child(even) { background: var(--sky-cloud); }
+.room .plant { position: absolute; right: 24px; bottom: 24px; width: 56px; height: 96px; }
+.room .plant::after { content: ''; position: absolute; left: 12px; bottom: 0; width: 32px; height: 32px; border-radius: 4px 4px 12px 12px; background: var(--honey); }
+.room .plant span { position: absolute; bottom: 28px; width: 20px; height: 56px; border-radius: 9999px 0; background: var(--ch-deep); transform-origin: bottom center; }
+.room .plant span:nth-child(1) { left: 10px; transform: rotate(-24deg); }
+.room .plant span:nth-child(2) { left: 18px; height: 68px; transform: rotate(4deg); background: var(--ch); }
+.room .plant span:nth-child(3) { left: 26px; transform: rotate(30deg); }
+.room .who { position: absolute; left: 50%; bottom: 16px; width: 188px; height: 168px; transform: translateX(-46%); }
+.room .desk { position: absolute; left: 0; right: 0; bottom: 0; height: 24px; background: #e9dcc6; }
+.room .desk::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 8px; background: #f5ecdd; }
+
+.bubble {
+	position: relative;
+	margin: -32px 8px 0;
+	background: var(--raised);
+	border-radius: 16px;
+	padding: 12px 16px 16px;
+	box-shadow: var(--lift);
+	z-index: 2;
+}
+.bubble::before { content: ''; position: absolute; top: -8px; left: 50%; width: 16px; height: 16px; background: var(--raised); transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
+.bubble .speaker { color: var(--ch-deep); margin-bottom: 4px; }
+
+.so-far {
+	margin: 12px 16px 0;
+	padding: 8px 12px;
+	border-radius: 12px;
+	background: rgb(255 255 255 / 0.6);
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	color: var(--ink-2);
+}
+.so-far p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.so-far i { color: var(--ch); font-size: 20px; margin-top: 0; }
+.so-far b { color: var(--ink); font-weight: 600; margin-right: 4px; }
+
+.pick-head { display: flex; justify-content: space-between; align-items: baseline; margin: 12px 16px 8px; }
+.pick-head .caption-4 { color: var(--ink-2); }
+.options { list-style: none; margin: 0 16px; padding: 0; display: grid; gap: 8px; }
+.opt { display: flex; gap: 12px; padding: 12px; align-items: flex-start; }
+.opt.on { background: #f6fcf9; box-shadow: 0 0 0 2px var(--ch), 0 4px 0 var(--ch-deep); transform: translateY(-2px); }
+.opt.on .letter { background: var(--ch); color: #fff; }
+.opt.dim { opacity: 0.55; }
+
+.dock { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px 24px; background: var(--ch-tint); }
