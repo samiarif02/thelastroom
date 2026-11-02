@@ -14,6 +14,7 @@ const missionTheExperienceGap = Mission(
   chapter: 1,
   number: 3,
   title: 'The Experience Gap',
+  practises: "Owning a gap in your experience and showing how you'd close it.",
   hinted: false,
   skillRequirements: [
     SkillRequirement(

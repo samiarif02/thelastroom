@@ -30,6 +30,7 @@ class Mission implements Identified {
     required this.chapter,
     required this.number,
     required this.title,
+    this.practises,
     required this.scene,
     required this.question,
     required this.beats,
@@ -49,6 +50,12 @@ class Mission implements Identified {
   /// The mission's place in the campaign, 1–21.
   final int number;
   final String title;
+
+  /// What the player practises here, in one line a job-seeker would recognise ("Answering
+  /// 'why this role?' with a reason that's about the job"). Shown before the mission and on
+  /// the debrief, so every mission says what it teaches (owner feedback, 2026-11-02). Null
+  /// only on content written before it.
+  final String? practises;
 
   /// 1–3 setup lines before the question (FR-10).
   final List<SceneLine> scene;

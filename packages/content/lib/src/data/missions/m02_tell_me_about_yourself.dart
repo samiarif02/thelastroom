@@ -13,6 +13,7 @@ const missionTellMeAboutYourself = Mission(
   chapter: 1,
   number: 2,
   title: 'Tell Me About Yourself',
+  practises: "Introducing yourself in under a minute: present, past, and why you're here.",
   hinted: true,
   scene: [
     SceneLine(

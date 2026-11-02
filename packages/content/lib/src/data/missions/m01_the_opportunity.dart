@@ -18,6 +18,7 @@ const missionTheOpportunity = Mission(
   chapter: 1,
   number: 1,
   title: 'The Opportunity',
+  practises: "Answering 'why this role?' with a reason that's about the job, not about you.",
   hinted: false,
   timed: false,
   isBaseline: true,

@@ -14,6 +14,7 @@ const missionSomethingWentWrong = Mission(
   chapter: 1,
   number: 5,
   title: 'Something Went Wrong',
+  practises: 'Telling a mistake story honestly: what happened, what you did, what you learned.',
   hinted: true,
   scene: [
     SceneLine(

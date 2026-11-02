@@ -16,6 +16,7 @@ const missionFirstRoundReview = Mission(
   chapter: 1,
   number: 7,
   title: 'First Round Review',
+  practises: 'Putting it all together under pressure, with two interviewers in the room.',
   hinted: false,
   skillRequirements: [
     SkillRequirement(
