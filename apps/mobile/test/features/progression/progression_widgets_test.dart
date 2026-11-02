@@ -149,4 +149,46 @@ void main() {
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     expect(store.record.interviewDate, isNull);
   });
+
+  group(
+    'accessibility (the audit #37 runs on screens, here on each new piece)',
+    () {
+      Future<void> audit(WidgetTester tester) async {
+        await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+        await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+        await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+      }
+
+      testWidgets('the interview step: 48 dp, labelled, legible', (
+        tester,
+      ) async {
+        final handle = tester.ensureSemantics();
+        await pump(tester, const InterviewDateChoices());
+        await audit(tester);
+        handle.dispose();
+      });
+
+      testWidgets('the unlock card and the XP pill are legible', (
+        tester,
+      ) async {
+        final handle = tester.ensureSemantics();
+        await progress.recordAttempt(attempt(m7, 100, at: now));
+        await pump(
+          tester,
+          DebriefRewards(mission: m7, grade: ChapterGrade.lobby),
+        );
+        await audit(tester);
+        handle.dispose();
+      });
+
+      testWidgets('the progress card is legible', (tester) async {
+        final handle = tester.ensureSemantics();
+        await progress.recordAttempt(attempt(m7, 100, at: now));
+        await pump(tester, const ProgressionCard());
+        await audit(tester);
+        handle.dispose();
+      });
+    },
+  );
 }
