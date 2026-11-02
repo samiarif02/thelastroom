@@ -39,6 +39,22 @@ class ChapterReportScreen extends ConsumerStatefulWidget {
       'Chapter 2 isn\'t in this version yet. Ask to hear when it opens: nothing is sent '
       'anywhere but your own file.';
   static const String join = 'Tell me when it opens';
+  static const String upNextKicker = 'UP NEXT';
+
+  /// What an open next chapter says: how it's played (brief 39).
+  static String openLine(Chapter next, List<Mission> itsMissions) {
+    final voice = itsMissions
+        .where((m) => m.answerMode == AnswerMode.voice)
+        .length;
+    final how = voice == itsMissions.length
+        ? 'all answered out loud'
+        : voice == 0
+        ? 'answered by choosing your lines'
+        : '$voice answered out loud, ${itsMissions.length - voice} by choosing your lines';
+    return '${itsMissions.length} missions, $how.';
+  }
+
+  static String start(Chapter next) => 'Start Chapter ${next.number}';
   static const String joined = 'You\'re on the list';
   static const String backToTower = 'Back to the tower';
   static const String notYetTitle = 'Your report isn\'t ready yet';
@@ -311,6 +327,13 @@ class _Report extends ConsumerWidget {
               chapter: next.first,
               joined: profile.waitlistJoinedAt != null,
               onJoin: () => ref.read(profileProvider.notifier).joinWaitlist(),
+              onStart: () => context.go(
+                Routes.mission(
+                  missions
+                      .firstWhere((m) => m.chapter == next.first.number)
+                      .number,
+                ),
+              ),
             ),
           ),
         enter(
@@ -462,16 +485,20 @@ class _SkillRow extends StatelessWidget {
 }
 
 /// The next chapter: what it holds, that it isn't here yet, and the waitlist (D1, FR-5).
+/// The next chapter after the report: open (brief 39), it starts there; still locked, it
+/// offers the waitlist (D1).
 class _NextChapter extends StatelessWidget {
   const _NextChapter({
     required this.chapter,
     required this.joined,
     required this.onJoin,
+    required this.onStart,
   });
 
   final Chapter chapter;
   final bool joined;
   final VoidCallback onJoin;
+  final VoidCallback onStart;
 
   @override
   Widget build(BuildContext context) {
@@ -482,7 +509,7 @@ class _NextChapter extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${ChapterReportScreen.nextKicker} · CHAPTER ${chapter.number}',
+            '${chapter.playable ? ChapterReportScreen.upNextKicker : ChapterReportScreen.nextKicker} · CHAPTER ${chapter.number}',
             style: BrandVividType.kicker,
           ),
           const SizedBox(height: BrandSpace.xs),
@@ -509,16 +536,31 @@ class _NextChapter extends StatelessWidget {
             ],
           ),
           const SizedBox(height: BrandSpace.md),
-          Text(ChapterReportScreen.nextLine, style: BrandVividType.body),
-          const SizedBox(height: BrandSpace.md),
-          VividButton(
-            label: joined
-                ? ChapterReportScreen.joined
-                : ChapterReportScreen.join,
-            primary: !joined,
-            expand: true,
-            onPressed: joined ? null : onJoin,
+          Text(
+            chapter.playable
+                ? ChapterReportScreen.openLine(chapter, [
+                    for (final m in missions)
+                      if (m.chapter == chapter.number) m,
+                  ])
+                : ChapterReportScreen.nextLine,
+            style: BrandVividType.body,
           ),
+          const SizedBox(height: BrandSpace.md),
+          if (chapter.playable)
+            VividButton(
+              label: ChapterReportScreen.start(chapter),
+              expand: true,
+              onPressed: onStart,
+            )
+          else
+            VividButton(
+              label: joined
+                  ? ChapterReportScreen.joined
+                  : ChapterReportScreen.join,
+              primary: !joined,
+              expand: true,
+              onPressed: joined ? null : onJoin,
+            ),
         ],
       ),
     );

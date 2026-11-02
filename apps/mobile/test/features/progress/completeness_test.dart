@@ -18,6 +18,7 @@ import 'package:the_last_room/features/progress/chapter_report.dart';
 import 'package:the_last_room/features/progress/chapter_report_screen.dart';
 import 'package:the_last_room/features/progress/file_trouble.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
+import 'package:the_last_room/features/voice/voice_player.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
 import '../mission/mission_harness.dart';
@@ -187,9 +188,12 @@ void main() {
           contains('chapterReport'),
         );
 
-        await _tapText(rig, ChapterReportScreen.join);
-        await rig.until(find.text(ChapterReportScreen.joined));
-        expect(rig.analytics.count(AnalyticsEvent.waitlistJoined), 1);
+        // Chapter 2 is open (brief 39): the report starts it, no waitlist.
+        final two = chapters.singleWhere((c) => c.number == 2);
+        expect(find.text(ChapterReportScreen.join), findsNothing);
+        await _tapText(rig, ChapterReportScreen.start(two));
+        await rig.until(find.byType(VoicePlayer));
+        expect(rig.analytics.count(AnalyticsEvent.waitlistJoined), 0);
       },
     );
 
