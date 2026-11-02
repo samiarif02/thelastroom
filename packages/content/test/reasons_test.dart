@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 
 import 'paths.dart';
 
-/// Wave 5 across every mission answered by picking lines: the score rewards thinking (brief 19).
+/// Wave 5 across every choices mission: the score rewards thinking (brief 19).
 void main() {
   const thinking = Duration(seconds: 6);
   const rushed = Duration(milliseconds: 500);
@@ -43,7 +43,7 @@ void main() {
     );
   }
 
-  for (final mission in choiceMissions) {
+  for (final mission in choicesMissions) {
     group(mission.id, () {
       test('thinking scores more than rushing the same lines', () {
         final thought = play(mission, decidedIn: thinking);
