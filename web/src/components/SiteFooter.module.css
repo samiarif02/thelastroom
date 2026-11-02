@@ -1,92 +1,41 @@
 .footer {
-	padding-top: clamp(4rem, 8vw, 7rem);
-	padding-bottom: var(--space-6);
-	border-top: 1px solid var(--line);
-	background: var(--petrol);
+	padding: 48px 0 64px;
+	border-top: 1px solid var(--sand-2);
 }
-
-.exit {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-5);
-}
-
-.label {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--space-2);
-	color: var(--muted);
-}
-
-.exitArrow {
-	transform: scaleX(-1);
-}
-
-.line {
-	max-width: 16ch;
-	font-family: var(--font-display), system-ui, sans-serif;
-	font-size: clamp(2.5rem, 1rem + 5vw, 5rem);
-	font-weight: 800;
-	line-height: 0.92;
-	letter-spacing: -0.04em;
-}
-
-.actions {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--space-4) var(--space-6);
-	margin-top: var(--space-2);
-}
-
-.base {
+.grid {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr);
-	gap: var(--space-5);
-	margin-top: clamp(4rem, 8vw, 6rem);
-	padding-top: var(--space-5);
-	border-top: 1px solid var(--line);
+	gap: 24px;
 }
-
-.name {
-	font-family: var(--font-display), system-ui, sans-serif;
-	font-size: 1.125rem;
-	font-weight: 800;
-	text-transform: uppercase;
+.muted {
+	margin-top: 8px;
+	color: var(--ink-2);
 }
-
 .links {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0 var(--space-5);
+	gap: 8px 24px;
 }
-
 .link {
-	display: inline-flex;
-	align-items: center;
-	min-height: 44px;
-	color: var(--fg);
-	text-decoration: underline;
-	text-underline-offset: 0.35em;
+	display: inline-block;
+	padding: 12px 0;
+	color: var(--ink);
+	text-underline-offset: 4px;
+	text-decoration-color: var(--sand-2);
+	transition: text-decoration-color var(--fade) var(--ease);
+}
+.link:hover {
+	text-decoration-color: currentColor;
+}
+.note {
+	color: var(--ink-2);
 }
 
-.fine {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-1);
-	color: var(--muted);
-	font-size: 0.875rem;
-	line-height: 1.5;
-}
-
-@media (min-width: 64rem) {
-	.base {
-		grid-template-columns: 14rem auto minmax(0, 1fr);
-		gap: var(--space-7);
-		align-items: start;
+@media (min-width: 900px) {
+	.grid {
+		grid-template-columns: 1fr auto;
+		align-items: center;
 	}
-
-	.fine {
-		text-align: right;
+	.note {
+		grid-column: 1 / -1;
 	}
 }

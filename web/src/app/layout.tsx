@@ -1,36 +1,28 @@
 import type { Metadata, Viewport } from 'next'
-import { Atkinson_Hyperlegible, Overpass, Overpass_Mono } from 'next/font/google'
+import { Bricolage_Grotesque, Geist } from 'next/font/google'
 import type { ReactNode } from 'react'
 
-import { site } from '@/content/site'
+import { faq, site } from '@/content/site'
 
 import './globals.css'
 
-// "Wayfinding" type, shared with the app: Overpass (drawn from highway signage) for display, set
-// heavy and tight like floor signs; Atkinson Hyperlegible for text; Overpass Mono for labels, floor
-// and room numbers, and scores. All SIL OFL. next/font downloads them at build time and serves them
-// from this site, so a visitor's browser never calls Google.
+// Daylight Tower's pair (docs/design/direction.md, "Type" and "The landing page"): Bricolage
+// Grotesque 600 for display, Geist 400/500/600 for reading. Both SIL OFL. next/font downloads them
+// at build time and serves them from this site, so a visitor's browser never calls Google.
 //
-// One weight each, three small files: the page stays inside Lighthouse's mobile budget (every
-// extra weight is another font in the way of the first paint on a throttled phone).
-const display = Overpass({
+// One display weight and no optical-size axis: the full opsz × wght variable file is 77 KB, the
+// 600 instance 22 KB, and on a throttled phone that difference is Lighthouse's whole margin.
+const display = Bricolage_Grotesque({
 	subsets: ['latin'],
-	weight: '800',
+	weight: '600',
 	variable: '--font-display',
 	display: 'swap'
 })
 
-const body = Atkinson_Hyperlegible({
+const ui = Geist({
 	subsets: ['latin'],
-	weight: '400',
-	variable: '--font-body',
-	display: 'swap'
-})
-
-const mono = Overpass_Mono({
-	subsets: ['latin'],
-	weight: '600',
-	variable: '--font-mono',
+	weight: ['400', '500', '600'],
+	variable: '--font-ui',
 	display: 'swap'
 })
 
@@ -57,18 +49,30 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-	themeColor: '#0b1d22',
-	colorScheme: 'dark'
+	themeColor: '#fbf6ee',
+	colorScheme: 'light'
+}
+
+/** The FAQ as structured data, for search and answer engines (landing-page-design A7). */
+const faqSchema = {
+	'@context': 'https://schema.org',
+	'@type': 'FAQPage',
+	mainEntity: faq.items.map((item) => ({
+		'@type': 'Question',
+		name: item.q,
+		acceptedAnswer: { '@type': 'Answer', text: item.a }
+	}))
 }
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
 	return (
-		<html lang="en-GB" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+		<html lang="en-GB" className={`${display.variable} ${ui.variable}`}>
 			<body>
 				<a className="skip-link" href="#main">
 					Skip to content
 				</a>
 				{children}
+				<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 			</body>
 		</html>
 	)

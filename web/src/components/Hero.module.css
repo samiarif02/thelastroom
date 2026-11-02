@@ -1,167 +1,260 @@
-.lobby {
-	padding-block: clamp(2.5rem, 7vw, 6rem) clamp(4rem, 8vw, 7rem);
+/*
+ * The hero (mockups 08 at 1440 and 09 at 390): the promise on the left; on the right, Marcus in
+ * the floor 1 arch and the game on a phone in front of him, with three chips (his question, a
+ * score, the XP). Sizes, gaps and offsets are the mockup's.
+ */
+.hero {
+	position: relative;
+	padding: 96px 0 var(--section);
 }
 
 .grid {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr);
-	gap: var(--space-8);
-	align-items: start;
+	gap: 48px;
 }
 
 .copy {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-5);
-	min-width: 0;
+	display: grid;
+	justify-items: start;
 }
 
 .kicker {
-	color: var(--muted);
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--ch1-deep);
+}
+.kicker span {
+	width: 8px;
+	height: 8px;
+	border-radius: 2px;
+	background: var(--ch1);
 }
 
 .title {
-	font-size: clamp(2.75rem, 1rem + 5.6vw, 5.75rem);
-	line-height: 0.92;
-	letter-spacing: -0.04em;
+	margin-top: 12px;
 }
 
-.body {
-	max-width: 36rem;
-	color: var(--fg);
-	font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
-	line-height: 1.6;
+.sub {
+	max-width: 680px;
+	margin-top: 16px;
+	color: var(--ink-2);
 }
 
-.actions {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--space-4) var(--space-6);
-	margin-top: var(--space-2);
+.cta {
+	margin-top: 24px;
 }
 
-/* The lobby's directory board: a framed panel, one row per floor, the last room at the top. */
-.board {
-	border: 1px solid var(--line);
-	border-radius: var(--radius);
-	background: var(--surface);
-}
-
-.boardHead,
-.boardFoot {
-	display: flex;
-	justify-content: space-between;
-	gap: var(--space-4);
-	padding: var(--space-3) var(--space-4);
-	color: var(--muted);
-}
-
-.boardHead {
-	border-bottom: 1px solid var(--line);
-}
-
-.boardFoot {
-	border-top: 1px solid var(--line);
-}
-
-.rows > li + li {
-	border-top: 1px solid var(--line);
-}
-
-.row {
+.proof {
 	display: grid;
-	grid-template-columns: 3rem minmax(0, 1fr) auto;
-	grid-template-areas:
-		'mark name arrow'
-		'mark detail arrow';
-	gap: 0.15rem var(--space-4);
+	grid-template-columns: repeat(3, auto);
+	justify-content: start;
+	gap: 16px 24px;
+	margin: 32px 0 0;
+	padding-top: 24px;
+	border-top: 1px solid var(--sand-2);
+	align-self: stretch;
+}
+.proof > div {
+	display: flex;
+	flex-direction: column-reverse;
+}
+.proofValue {
+	margin: 0;
+}
+@media (max-width: 767px) {
+	.proofValue {
+		font-size: 24px;
+		line-height: 32px;
+	}
+}
+.proofLabel {
+	color: var(--ink-2);
+}
+
+/* --- The picture ------------------------------------------------------------------------ */
+.visual {
+	position: relative;
+	height: 456px;
+	margin-bottom: 64px;
+}
+
+.arch {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 236px;
+	height: 360px;
+	overflow: hidden;
+	border-radius: 9999px 9999px 24px 24px;
+	background: var(--ch1);
+}
+.sky {
+	position: absolute;
+	left: 16px;
+	right: 16px;
+	top: 16px;
+	height: 216px;
+	overflow: hidden;
+	border-radius: 9999px 9999px 8px 8px;
+	background: var(--sky);
+}
+.sky i {
+	position: absolute;
+	bottom: 0;
+	border-radius: 2px 2px 0 0;
+	background: var(--city-far);
+}
+.sky i:nth-child(even) {
+	background: var(--sky-cloud);
+}
+.who {
+	position: absolute;
+	left: 50%;
+	bottom: 0;
+	width: 280px;
+	height: 280px;
+	transform: translateX(-42%);
+}
+
+.chip {
+	position: absolute;
+	z-index: var(--z-chip);
+	border-radius: 16px;
+	background: var(--raised);
+	box-shadow: 0 8px 24px rgb(94 72 40 / 0.14);
+}
+.say {
+	display: none;
+}
+.chipSpeaker {
+	color: var(--ch1-deep);
+}
+.score {
+	right: 0;
+	top: 256px;
+	display: flex;
 	align-items: center;
-	padding: var(--space-3) var(--space-4);
-	color: var(--fg);
-	text-decoration: none;
-	transition: background-color var(--fast) var(--ease);
+	gap: 8px;
+	padding: 8px 12px 8px 8px;
 }
-
-a.row:hover {
-	background: var(--petrol);
-}
-
-.mark {
-	grid-area: mark;
+.score > span {
 	display: grid;
-	place-items: center;
-	height: 3rem;
-	border-radius: var(--radius);
-	background: var(--tone);
-	color: var(--on-tone);
-	font-family: var(--font-mono), ui-monospace, monospace;
-	font-size: 1.375rem;
-	font-weight: 600;
-	line-height: 1;
+}
+.chipRing {
+	width: 40px;
+	height: 40px;
+	transform: rotate(-90deg);
+}
+.chipTrack,
+.chipFill {
+	fill: none;
+	stroke-width: 6;
+}
+.chipTrack {
+	stroke: var(--sand);
+}
+.chipFill {
+	stroke: var(--ch1);
+	stroke-linecap: round;
+	stroke-dasharray: var(--ring);
+	stroke-dashoffset: var(--ring-left);
+}
+.chipLabel {
+	color: var(--ink-2);
+}
+.xp {
+	right: 24px;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 8px 12px;
+	background: var(--honey);
+	box-shadow: 0 4px 0 var(--honey-edge);
+	color: var(--on-honey);
+	transform: rotate(-4deg);
 }
 
-/* The last room: the same oxblood as its floor, drawn as an outlined door plate above it. */
-.top {
-	background: transparent;
-	color: var(--fg);
-	box-shadow: inset 0 0 0 2px var(--tone);
+.phoneSpot {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+}
+.phoneSpot .phone {
+	--phone-scale: 0.48;
 }
 
-.lobbyMark {
-	background: transparent;
-	color: var(--fg);
-	box-shadow: inset 0 0 0 1px var(--line-strong);
+/* A tablet: the picture sits under the copy, centred, at the desktop's proportions. */
+@media (min-width: 768px) {
+	.title > span {
+		display: block;
+	}
+	.proof {
+		gap: 16px 32px;
+	}
+	.visual {
+		width: 448px;
+		height: 640px;
+		margin: 0 auto 64px;
+	}
+	.arch {
+		top: 24px;
+		width: 408px;
+		height: 600px;
+	}
+	.sky {
+		left: 32px;
+		right: 32px;
+		top: 32px;
+		height: 360px;
+	}
+	.who {
+		width: 440px;
+		height: 440px;
+		transform: translateX(-46%);
+	}
+	.say {
+		display: block;
+		right: 232px;
+		top: 64px;
+		max-width: 240px;
+		padding: 12px 16px;
+	}
+	.score {
+		right: -16px;
+		top: 392px;
+		gap: 12px;
+		padding: 12px 16px;
+	}
+	.chipRing {
+		width: 48px;
+		height: 48px;
+	}
+	.xp {
+		right: 72px;
+		bottom: 32px;
+		padding: 12px 16px;
+	}
+	.phoneSpot {
+		left: -40px;
+	}
+	.phoneSpot .phone {
+		--phone-scale: 0.5744;
+	}
 }
 
-.name {
-	grid-area: name;
-	font-family: var(--font-display), system-ui, sans-serif;
-	font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
-	font-weight: 800;
-	line-height: 1.05;
-	letter-spacing: -0.005em;
-	text-transform: uppercase;
-}
-
-.detail {
-	grid-area: detail;
-	color: var(--muted);
-	font-size: 0.6875rem;
-}
-
-.arrow {
-	grid-area: arrow;
-	font-size: 1.125rem;
-	color: var(--muted);
-	transition:
-		color var(--fast) var(--ease),
-		transform var(--fast) var(--ease);
-}
-
-a.row:hover .arrow {
-	color: var(--fg);
-	transform: rotate(-90deg) translateX(3px);
-}
-
-.here .name {
-	color: var(--muted);
-}
-
-@media (min-width: 64rem) {
+/* Desktop: copy and picture side by side (1fr and 448 px), the picture's height sets the row. */
+@media (min-width: 1200px) {
+	.hero {
+		padding: 96px 0 var(--section);
+	}
 	.grid {
-		grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-		gap: var(--space-8);
+		grid-template-columns: 1fr 448px;
 		align-items: center;
+		gap: 32px;
 	}
-
-	.row {
-		grid-template-columns: 3.5rem minmax(0, 1fr) auto;
-		padding: var(--space-4) var(--space-5);
-	}
-
-	.mark {
-		height: 3.5rem;
-		font-size: 1.625rem;
+	.visual {
+		margin: 0 0 64px;
 	}
 }

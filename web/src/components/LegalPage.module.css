@@ -1,0 +1,43 @@
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding-top: 24px;
+	padding-bottom: 24px;
+}
+.home {
+	text-decoration: none;
+}
+.back {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	color: var(--ink-2);
+	text-underline-offset: 4px;
+	transition: color var(--fade) var(--ease);
+}
+.back:hover {
+	color: var(--ink);
+}
+.main {
+	max-width: 760px;
+	padding-top: 48px;
+	padding-bottom: var(--section);
+}
+.intro {
+	margin-top: 16px;
+	color: var(--ink-2);
+}
+.section {
+	margin-top: 40px;
+}
+.p {
+	margin-top: 8px;
+	color: var(--ink-2);
+}
+.updated {
+	margin-top: 48px;
+	color: var(--ink-2);
+}

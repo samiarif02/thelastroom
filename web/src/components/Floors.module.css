@@ -1,0 +1,113 @@
+.section {
+	padding: var(--section) 0;
+}
+
+.head {
+	max-width: 680px;
+}
+.kicker {
+	color: var(--ch1-deep);
+}
+.head h2 {
+	margin-top: 8px;
+}
+.body {
+	margin-top: 16px;
+	color: var(--ink-2);
+}
+
+.list {
+	display: grid;
+	gap: 64px;
+	margin-top: 48px;
+}
+
+.row {
+	display: grid;
+	gap: 32px;
+	align-items: center;
+}
+
+.level {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	color: var(--ch-deep);
+}
+.levelTag {
+	display: inline-flex;
+	align-items: center;
+	height: 24px;
+	padding: 0 8px;
+	border-radius: 6px;
+	background: var(--ch);
+	color: var(--white);
+}
+.floorBody {
+	max-width: 560px;
+	margin-top: 12px;
+	color: var(--ink-2);
+}
+.points {
+	display: grid;
+	gap: 8px;
+	margin-top: 24px;
+}
+.points li {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	color: var(--ink);
+}
+.points svg {
+	margin-top: 2px;
+	color: var(--ch);
+	font-size: 16px;
+}
+
+/* The screen sits on the floor's colour, in the arch, cropped where it meets the desk. */
+.visual {
+	position: relative;
+	justify-self: center;
+	width: 100%;
+	max-width: 480px;
+	height: 440px;
+	overflow: hidden;
+	border-radius: 9999px 9999px 24px 24px;
+	background: var(--ch-tint);
+}
+.visual::before {
+	content: '';
+	position: absolute;
+	left: 16px;
+	right: 16px;
+	bottom: 0;
+	height: 40%;
+	border-radius: 16px 16px 0 0;
+	background: var(--ch-soft);
+}
+.visual .phone {
+	--phone-scale: 0.6;
+	position: absolute;
+	top: 48px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+@media (min-width: 900px) {
+	.row {
+		grid-template-columns: 1fr 1fr;
+		gap: 64px;
+	}
+	.row:nth-child(even) .text {
+		order: 2;
+	}
+	.visual {
+		height: 560px;
+	}
+	.visual .phone {
+		--phone-scale: 0.8;
+		top: 64px;
+	}
+}

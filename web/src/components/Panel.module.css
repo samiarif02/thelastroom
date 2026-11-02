@@ -1,0 +1,137 @@
+.section {
+	padding: 0 0 var(--section);
+}
+
+.grid {
+	display: grid;
+	gap: 48px;
+}
+
+.intro {
+	align-self: start;
+}
+.body {
+	margin-top: 16px;
+	color: var(--ink-2);
+}
+.steps {
+	display: grid;
+	gap: 16px;
+	margin-top: 32px;
+}
+.steps li {
+	display: flex;
+	gap: 12px;
+	color: var(--ink-2);
+}
+.number {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background: var(--ink);
+	color: var(--paper);
+}
+.stepTitle {
+	color: var(--ink);
+	font-weight: 600;
+}
+
+.people {
+	display: grid;
+	gap: 24px;
+}
+
+/* A white card on paper with a hard edge below, never border plus shadow. */
+.person {
+	padding: 16px;
+	border-radius: 24px;
+	background: var(--raised);
+	box-shadow: var(--edge);
+	outline-offset: 4px;
+	transition:
+		transform var(--move) var(--ease),
+		box-shadow var(--move) var(--ease);
+}
+.person:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 0 var(--sand-2);
+}
+.person:global(.is-armed) {
+	transform: translateY(32px);
+}
+
+.pic {
+	position: relative;
+	height: 208px;
+	overflow: hidden;
+	border-radius: 9999px 9999px 8px 8px;
+}
+.pic svg {
+	position: absolute;
+	left: 24px;
+	bottom: 0;
+	width: calc(100% - 48px);
+	height: 208px;
+}
+.name {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+	margin-top: 16px;
+}
+.role {
+	color: var(--ink-2);
+}
+.line {
+	margin-top: 12px;
+	padding: 12px;
+	border-radius: 8px;
+}
+.listens {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 12px;
+	color: var(--ink-2);
+}
+.listens svg {
+	font-size: 16px;
+}
+
+.ch1 .pic,
+.ch1 .line {
+	background: var(--ch1-tint);
+}
+.honey .pic,
+.honey .line {
+	background: var(--honey-tint);
+}
+.ch2 .pic,
+.ch2 .line {
+	background: var(--ch2-tint);
+}
+.ch3 .pic,
+.ch3 .line {
+	background: var(--ch3-tint);
+}
+
+@media (min-width: 640px) {
+	.people {
+		grid-template-columns: 1fr 1fr;
+		align-items: start;
+	}
+	.people > :nth-child(even) {
+		margin-top: 64px;
+	}
+}
+
+@media (min-width: 1200px) {
+	.grid {
+		grid-template-columns: 360px 1fr;
+		gap: 64px;
+	}
+}

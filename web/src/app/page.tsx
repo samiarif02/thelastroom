@@ -1,40 +1,33 @@
-import { FloorSection } from '@/components/FloorSection'
+import { Faq } from '@/components/Faq'
+import { Finale } from '@/components/Finale'
+import { Floors } from '@/components/Floors'
 import { Hero } from '@/components/Hero'
-import { HowItWorks, TowerStill } from '@/components/HowItWorks'
-import { LastRoom } from '@/components/LastRoom'
-import { Privacy } from '@/components/Privacy'
+import { PageMotion } from '@/components/PageMotion'
+import { Panel } from '@/components/Panel'
 import { Scoring } from '@/components/Scoring'
 import { SiteFooter } from '@/components/SiteFooter'
-import { SiteHeader } from '@/components/SiteHeader'
-import { VoiceNote } from '@/components/VoiceNote'
-import { WhyItWorks } from '@/components/WhyItWorks'
-import { floors } from '@/content/site'
-
-const [floorOne, floorTwo, floorThree] = floors
+import { SiteNav } from '@/components/SiteNav'
+import { Tagline } from '@/components/Tagline'
 
 // The page is only composition: copy lives in src/content/site.ts, layout in the components.
-// It reads as the building: the lobby's directory, the three floors, then the Recall Room, the
-// notice board (scoring) and the house rules (privacy).
+// Layout type A (landing-page-design A3): a classic hero, then the argument (the tagline, the
+// panel, the floors, the score and its proof), then the objections (FAQ) and the same call to
+// action again.
 export default function Home() {
 	return (
 		<div id="top">
-			<SiteHeader />
+			<SiteNav />
 			<main id="main">
 				<Hero />
-				<FloorSection floor={floorOne} side={<TowerStill />}>
-					<HowItWorks />
-				</FloorSection>
-				<FloorSection floor={floorTwo}>
-					<VoiceNote />
-				</FloorSection>
-				<FloorSection floor={floorThree}>
-					<LastRoom />
-				</FloorSection>
-				<WhyItWorks />
+				<Tagline />
+				<Panel />
+				<Floors />
 				<Scoring />
-				<Privacy />
+				<Faq />
+				<Finale />
 			</main>
 			<SiteFooter />
+			<PageMotion />
 		</div>
 	)
 }

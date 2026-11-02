@@ -1,160 +1,200 @@
-.layout {
-	display: flex;
-	flex-direction: column;
-	gap: clamp(2.5rem, 5vw, 4rem);
+.section {
+	padding: var(--section) 0;
 }
 
-/* The board: notices pinned in a grid, each a framed panel with a typed head. */
-.board {
+.grid {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr);
-	gap: var(--space-5);
+	gap: 48px;
+	align-items: start;
 }
 
-.notice {
-	border: 1px solid var(--line-strong);
-	border-radius: var(--radius);
+.kicker {
+	color: var(--ch1-deep);
 }
-
-.noticeHead {
-	display: flex;
-	justify-content: space-between;
-	gap: var(--space-4);
-	margin: 0;
-	padding: var(--space-3) var(--space-4);
-	background: var(--ink);
-	color: var(--concrete);
-	border-radius: 3px 3px 0 0;
+.intro h2 {
+	margin-top: 8px;
 }
-
-.noticeBody {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-2);
-	padding: var(--space-5);
+.body {
+	max-width: 560px;
+	margin-top: 16px;
+	color: var(--ink-2);
 }
-
-/* The four weights as one bar of 100, split like the floors on a lift panel. */
-.split {
-	display: flex;
-	gap: 2px;
-	margin: var(--space-5) var(--space-5) 0;
-	border-radius: var(--radius);
-	overflow: hidden;
-}
-
-.segment {
-	flex-basis: 0;
-	min-width: 0;
-	overflow: hidden;
-	padding: var(--space-2);
-	background: var(--ink);
-	color: var(--concrete);
-	font-family: var(--font-mono), ui-monospace, monospace;
-	font-size: 0.75rem;
-	font-weight: 600;
-	line-height: 1;
-	text-align: center;
-}
-
-.dimensions {
-	padding: var(--space-3) var(--space-5) var(--space-4);
-}
-
-.dimension {
-	display: grid;
-	grid-template-columns: 5.5rem minmax(0, 1fr);
-	gap: var(--space-4);
-	align-items: baseline;
-	padding-block: var(--space-4);
-}
-
-.dimension + .dimension {
-	border-top: 1px solid var(--line);
-}
-
-.weight {
-	font-family: var(--font-mono), ui-monospace, monospace;
-	font-size: clamp(2.25rem, 1.8rem + 1.6vw, 3.25rem);
-	font-weight: 600;
-	line-height: 0.9;
-	letter-spacing: -0.04em;
-}
-
-.unit {
-	font-size: 0.45em;
-	letter-spacing: 0;
-}
-
-.name {
-	font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
-	line-height: 1.1;
-	text-transform: uppercase;
-	letter-spacing: -0.005em;
-}
-
-.question {
-	margin-top: var(--space-1);
-	color: var(--muted);
-	font-size: 0.9375rem;
-	line-height: 1.45;
+.muted {
+	color: var(--ink-2);
 }
 
 .scorers {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr);
-	gap: var(--space-5);
-	align-content: start;
+	gap: 16px;
+	margin-top: 32px;
 }
-
-.scorerTitle {
-	font-size: clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem);
-	line-height: 1.1;
+.scorers li {
+	display: flex;
+	gap: 12px;
+	max-width: 560px;
 }
-
-.copy {
-	color: var(--muted);
-	font-size: 1rem;
-	line-height: 1.6;
-}
-
-.limitList {
+.scorerIcon {
+	flex: none;
 	display: grid;
-	grid-template-columns: minmax(0, 1fr);
-	gap: var(--space-4) var(--space-7);
-	padding: var(--space-5);
+	place-items: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 12px;
+	background: var(--sand);
+	color: var(--ink);
+	font-size: 20px;
+}
+.scorerKicker {
+	color: var(--ch1-deep);
 }
 
-.limit {
+.link {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin-top: 24px;
+	color: var(--ch1-deep);
+	text-underline-offset: 4px;
+	transition: color var(--fade) var(--ease);
+}
+.link:hover {
+	color: var(--ink);
+}
+
+.card {
+	padding: 24px;
+	border-radius: 24px;
+	background: var(--raised);
+	box-shadow: var(--edge);
+}
+.stack {
+	display: flex;
+	gap: 4px;
+	height: 16px;
+}
+.stack span {
+	flex: var(--w) 0 0;
+	border-radius: 4px;
+}
+.ch1 {
+	background: var(--ch1);
+}
+.ch2 {
+	background: var(--ch2);
+}
+.honey {
+	background: var(--honey);
+}
+.ch3 {
+	background: var(--ch3);
+}
+.dimensions {
 	display: grid;
-	grid-template-columns: 2rem minmax(0, 1fr);
-	color: var(--fg);
-	font-size: 0.9375rem;
-	line-height: 1.55;
+	margin-top: 8px;
+}
+.dimensions li {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: start;
+	gap: 12px;
+	padding: 16px 0;
+	border-bottom: 1px solid var(--sand);
+}
+.dimensions li:last-child {
+	border-bottom: 0;
+	padding-bottom: 0;
+}
+.dot {
+	width: 12px;
+	height: 12px;
+	margin-top: 8px;
+	border-radius: 4px;
+}
+.weight {
+	display: grid;
+	justify-items: end;
 }
 
-.limitIndex {
-	padding-top: 0.2rem;
-	color: var(--muted);
+/* Proof: the published evaluation's numbers. */
+.proof {
+	display: grid;
+	gap: 32px;
+	margin-top: var(--section);
+}
+.proofHead h2 {
+	margin-top: 8px;
+}
+.stats {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px;
+	margin: 0;
+}
+.stats > div {
+	display: flex;
+	flex-direction: column-reverse;
+	justify-content: flex-end;
+	gap: 8px;
+	padding-top: 16px;
+	border-top: 2px solid var(--ink);
+}
+.stats dd {
+	margin: 0;
+}
+.limits {
+	display: grid;
+	gap: 12px;
+	padding: 24px;
+	border-radius: 24px;
+	background: var(--sand);
+}
+.limits ul {
+	display: grid;
+	gap: 8px;
+	color: var(--ink-2);
+}
+.limits li {
+	display: flex;
+	gap: 8px;
+}
+.limits li::before {
+	content: '';
+	flex: none;
+	width: 6px;
+	height: 6px;
+	margin-top: 8px;
+	border-radius: 2px;
+	background: var(--ink-2);
+}
+.inlineLink {
+	color: var(--ink);
+	text-underline-offset: 3px;
 }
 
-.readMore {
-	padding: 0 var(--space-5) var(--space-4);
-}
-
-@media (min-width: 48rem) {
-	.limitList {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (min-width: 900px) {
+	.stats {
+		grid-template-columns: repeat(4, 1fr);
 	}
 }
 
-@media (min-width: 64rem) {
-	.board {
-		grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-		align-items: start;
+@media (min-width: 1200px) {
+	.grid {
+		grid-template-columns: 1fr 560px;
+		gap: 64px;
 	}
-
+	.proof {
+		grid-template-columns: 1fr 1fr;
+		column-gap: 64px;
+	}
+	.proofHead {
+		grid-column: 1;
+	}
 	.limits {
+		grid-column: 2;
+		grid-row: 1;
+		align-self: end;
+	}
+	.stats {
 		grid-column: 1 / -1;
 	}
 }

@@ -1,0 +1,29 @@
+.brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--ink);
+}
+.mark {
+	position: relative;
+	flex: none;
+	width: 24px;
+	height: 28px;
+	border-radius: 9999px 9999px 4px 4px;
+	background: var(--ch1);
+}
+.mark::after {
+	content: '';
+	position: absolute;
+	left: 7px;
+	right: 7px;
+	bottom: 0;
+	height: 14px;
+	border-radius: 9999px 9999px 0 0;
+	background: var(--honey);
+}
+.name {
+	font: 600 18px/28px var(--display);
+	letter-spacing: -0.01em;
+	white-space: nowrap;
+}

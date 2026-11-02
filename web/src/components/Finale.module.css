@@ -1,0 +1,79 @@
+.section {
+	padding: var(--section) 0;
+}
+
+/* The top floor at dusk: the one dark block on the page, and the reason it's dark. */
+.floor {
+	display: grid;
+	gap: 40px;
+	padding: 40px 24px 0;
+	overflow: hidden;
+	border-radius: 24px;
+	background: var(--dusk);
+	color: var(--white);
+}
+.kicker {
+	color: var(--honey);
+}
+.title {
+	margin-top: 12px;
+	max-width: 680px;
+}
+.body {
+	max-width: 560px;
+	margin-top: 16px;
+	color: var(--ch3-on);
+}
+.cta {
+	margin-top: 32px;
+}
+
+.windows {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 8px;
+	align-self: end;
+}
+.window {
+	position: relative;
+	height: 132px;
+	overflow: hidden;
+	border-radius: 9999px 9999px 4px 4px;
+	background: var(--honey);
+}
+/* The person fills the window, cropped at the shoulders like the tower's lit rooms. */
+.window svg {
+	position: absolute;
+	left: 50%;
+	bottom: 0;
+	width: 150%;
+	height: auto;
+	transform: translateX(-50%);
+}
+
+@media (min-width: 768px) {
+	.floor {
+		padding: 64px 48px 0;
+	}
+	.windows {
+		gap: 16px;
+	}
+	.window {
+		height: 200px;
+	}
+}
+
+@media (min-width: 1200px) {
+	.floor {
+		grid-template-columns: 1fr 520px;
+		align-items: end;
+		gap: 48px;
+		padding: 80px 64px 0;
+	}
+	.copy {
+		padding-bottom: 80px;
+	}
+	.window {
+		height: 220px;
+	}
+}
