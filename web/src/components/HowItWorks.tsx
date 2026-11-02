@@ -1,39 +1,38 @@
 import { howItWorks } from '@/content/site'
 
 import { PhoneFrame } from './PhoneFrame'
-import { SectionHeading } from './SectionHeading'
+import { SignArrow } from './SignArrow'
 import styles from './HowItWorks.module.css'
 
-/** A mission in three steps, each with the app's roman numeral and a still. */
+/** Floor 1's main column: how a room works, in three steps, each with its still. */
 export function HowItWorks() {
 	return (
-		<section id="how-it-works" className={styles.section} aria-labelledby="how-it-works-title">
-			<div className="container">
-				<SectionHeading
-					id="how-it-works-title"
-					eyebrow={howItWorks.eyebrow}
-					title={howItWorks.title}
-					intro={howItWorks.intro}
-				/>
-				<ol className={styles.steps}>
-					{howItWorks.steps.map((step) => (
-						<li key={step.numeral} className={styles.step}>
-							<PhoneFrame
-								still={step.still}
-								sizes="(min-width: 60rem) 240px, (min-width: 40rem) 220px, 66vw"
-								className={styles.still}
-							/>
-							<div className={styles.text}>
-								<span className={styles.numeral} aria-hidden="true">
-									{step.numeral}.
-								</span>
-								<h3 className={styles.title}>{step.title}</h3>
-								<p className={styles.body}>{step.body}</p>
-							</div>
-						</li>
-					))}
-				</ol>
-			</div>
-		</section>
+		<div className={styles.block}>
+			<h3 className={`label ${styles.label}`}>{howItWorks.label}</h3>
+			<ol className={styles.steps}>
+				{howItWorks.steps.map((step, i) => (
+					<li key={step.numeral} className={styles.step}>
+						<PhoneFrame
+							still={step.still}
+							sizes="(min-width: 64rem) 220px, (min-width: 48rem) 200px, 40vw"
+							className={styles.still}
+						/>
+						<div className={styles.text}>
+							<p className={styles.numeral} aria-hidden="true">
+								<span>{step.numeral}</span>
+								{i < howItWorks.steps.length - 1 ? <SignArrow className={styles.next} /> : null}
+							</p>
+							<h4 className={styles.title}>{step.title}</h4>
+							<p className={styles.copy}>{step.body}</p>
+						</div>
+					</li>
+				))}
+			</ol>
+		</div>
 	)
+}
+
+/** Floor 1's side column: the tower, the app's home screen, which lists the floor's rooms. */
+export function TowerStill() {
+	return <PhoneFrame still={howItWorks.tower} sizes="(min-width: 64rem) 220px, 56vw" className={styles.sideStill} />
 }

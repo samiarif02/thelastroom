@@ -1,59 +1,47 @@
 .button {
 	display: inline-flex;
 	align-items: center;
-	justify-content: center;
-	gap: var(--space-2);
+	gap: var(--space-3);
 	min-height: 48px;
-	padding: var(--space-3) var(--space-5);
-	border-radius: var(--radius-sm);
-	font-size: 0.8125rem;
-	font-weight: 700;
-	letter-spacing: 0.16em;
+	font-family: var(--font-display), system-ui, sans-serif;
+	font-size: 1rem;
+	font-weight: 800;
+	line-height: 1.1;
+	letter-spacing: 0.01em;
 	text-transform: uppercase;
 	text-decoration: none;
 	transition:
 		background-color var(--fast) var(--ease),
-		border-color var(--fast) var(--ease),
-		color var(--fast) var(--ease),
-		transform var(--fast) var(--ease);
+		color var(--fast) var(--ease);
 }
 
-.button:active {
-	transform: translateY(1px);
+.arrow {
+	transition: transform var(--fast) var(--ease);
+}
+
+.button:hover .arrow {
+	transform: translateX(3px);
 }
 
 .primary {
-	background: var(--brass);
-	color: var(--on-brass);
-	border: 1px solid var(--brass-bright);
-	box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25);
+	padding: var(--space-3) var(--space-5);
+	border-radius: var(--radius);
+	background: var(--amber);
+	color: var(--ink);
 }
 
 .primary:hover {
-	background: var(--brass-bright);
+	background: var(--amber-hover);
 }
 
-.secondary {
-	border: 1px solid var(--brass-deep);
-	color: var(--text);
-}
-
-.secondary:hover {
-	border-color: var(--brass);
-	color: var(--brass-bright);
+.primary:active {
+	transform: translateY(1px);
 }
 
 .text {
 	min-height: 44px;
-	padding-inline: 0;
-	color: var(--brass);
-	letter-spacing: 0.12em;
+	color: var(--fg);
 	text-decoration: underline;
-	text-decoration-color: var(--brass-deep);
-	text-underline-offset: 0.4em;
-}
-
-.text:hover {
-	color: var(--brass-bright);
-	text-decoration-color: var(--brass-bright);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.3em;
 }

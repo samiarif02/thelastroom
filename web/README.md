@@ -36,15 +36,25 @@ src/app/            layout (fonts, metadata), page (composition only), robots, s
                     icon.svg, opengraph-image.jpg (+ its alt text), globals.css (the tokens)
 src/components/     one component per section or piece, each with its CSS module
 src/content/site.ts every word on the page, typed; change copy here, not in components
-public/screens/     stills from the app (from docs/screenshots/, status bar cropped, compressed)
+public/screens/     stills from the app (docs/screenshots/ and .pr-screenshots/35/), status bar
+                    cropped, 480 px wide, compressed
 ```
 
-- **Colours** are the custom properties at the top of `src/app/globals.css`: the chapter title
-  card's ink, brass and cream. Components use the tokens, never a raw colour. Every text pair
-  is AA (4.5:1) or better; the figures are in the comment there.
-- **Fonts**: Cormorant Garamond and Manrope (SIL OFL), through `next/font/google`. They're
-  downloaded at build time and served from the site, so a visitor's browser never calls Google.
-  The build needs network access for that.
+- **Identity**: "wayfinding", shared with the app. The page is Northstar Labs' building: the
+  lobby's directory board (21 rooms on three floors, the last room at the top, each row a link),
+  then a section per floor with its colour band and sign, the Recall Room, the notice board
+  (scoring) and the house rules (privacy). The lift's floor indicator in the header rolls to
+  the floor you've scrolled to (`LiftIndicator`, the page's only client component;
+  with reduced motion it changes without rolling).
+- **Colours** are the custom properties at the top of `src/app/globals.css`: petrol ground,
+  concrete text, slate, one action colour (lift-button amber, the primary call to action only)
+  and a colour per floor (teal, signal blue, oxblood). Components use the roles (`--fg`,
+  `--muted`, `--tone`…), never a raw colour; `.light` flips them for the notice board. Every
+  text pair is AA (4.5:1) or better; the figures are in the comment there.
+- **Fonts**: Overpass (display), Atkinson Hyperlegible (text) and Overpass Mono (labels and
+  numbers), all SIL OFL, through `next/font/google`, one weight each to stay inside the mobile
+  performance budget. They're downloaded at build time and served from the site, so a visitor's
+  browser never calls Google. The build needs network access for that.
 - **Honesty**: no invented users, ratings, testimonials or numbers (`docs/rules/analytics.md`).
   Every figure on the page (weights, intervals, thresholds) is one the game's code states.
 - **The site's URL** is `site.url` in `src/content/site.ts` (canonical link, Open Graph,

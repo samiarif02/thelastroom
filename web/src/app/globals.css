@@ -1,21 +1,44 @@
 /*
- * The landing page's tokens: the chapter title card's ink, brass and serif (DESIGN.md, brief 33's
- * direction). Every colour on the page is one of these. AA (4.5:1) checked for every text pair:
- * text 13.7+, text-2 7.3+, muted 5.2+, brass 6.7+ on any ground; ink on brass 7.8.
+ * The landing page's tokens: "wayfinding", the identity the app shares. The page is the
+ * building's directory and lift: Northstar Labs' tower, three floors, the last room at the top.
+ * A deep petrol ground, surfaces one step up, cool concrete text, a slate for secondary text,
+ * one action colour (lift-button amber, the primary call to action only) and a colour per floor.
+ * Every colour on the page is one of these.
+ *
+ * AA (4.5:1) for every text pair, measured:
+ *   on petrol:       concrete 14.3, slate 7.3, teal 6.7, blue 5.3
+ *   on petrol-up:    concrete 11.5, slate 5.9, teal 5.4
+ *   on concrete:     ink 14.3, slate-dark 5.9, teal-deep 4.5, blue-deep 4.7, oxblood-deep 5.8
+ *   ink on amber 8.6, ink on teal 6.7, ink on blue 5.3, concrete on oxblood 4.6
+ * Oxblood is a fill only on petrol (3.1 as text), and blue is never small text on petrol-up (4.3).
+ * Rules and bands are decoration, not text.
  */
 :root {
-	--ink-900: #0a0e16;
-	--ink-800: #111723;
-	--ink-700: #182031;
-	--line: #263044;
-	--line-soft: #1c2434;
-	--text: #f2ebdd;
-	--text-2: #a7aebc;
-	--muted: #8a93a3;
-	--brass: #c8a15a;
-	--brass-bright: #ddb872;
-	--brass-deep: #8f7036;
-	--on-brass: #14100a;
+	--petrol: #0b1d22;
+	--petrol-up: #12303a;
+	--petrol-line: #24444e;
+	--concrete: #e6eaea;
+	--slate: #9aabb0;
+	--slate-dark: #4a5a60;
+	--ink: #0b1d22;
+	--amber: #f2a900;
+	--amber-hover: #ffbf2e;
+	--teal: #2bb3a3;
+	--blue: #4c8df6;
+	--oxblood: #b5423b;
+	--teal-deep: #14766b;
+	--blue-deep: #2a62c9;
+	--oxblood-deep: #9e3530;
+	--concrete-line: #b9c3c5;
+	--shadow: rgb(0 0 0 / 0.45);
+
+	/* Roles. Components use these; a light section (`.light`) flips them. */
+	--ground: var(--petrol);
+	--surface: var(--petrol-up);
+	--fg: var(--concrete);
+	--muted: var(--slate);
+	--line: var(--petrol-line);
+	--line-strong: var(--slate);
 
 	--space-1: 0.25rem;
 	--space-2: 0.5rem;
@@ -27,18 +50,53 @@
 	--space-8: 4.5rem;
 	--space-9: 7rem;
 
-	--radius-sm: 4px;
-	--radius-md: 10px;
-	--radius-phone: 34px;
-
-	--measure: 62ch;
-	--page: 72rem;
-	--gutter: clamp(1rem, 4vw, 2.5rem);
+	--radius: 4px;
+	--page: 80rem;
+	--gutter: clamp(1rem, 4vw, 3rem);
+	--header: 3.75rem;
 
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 	--fast: 160ms;
+	--lift: 520ms;
 
 	color-scheme: dark;
+}
+
+/* The concrete variant, for the notice board. */
+.light {
+	--ground: var(--concrete);
+	--surface: var(--concrete);
+	--fg: var(--ink);
+	--muted: var(--slate-dark);
+	--line: var(--concrete-line);
+	--line-strong: var(--ink);
+	--teal: var(--teal-deep);
+	--blue: var(--blue-deep);
+	--oxblood: var(--oxblood-deep);
+
+	color-scheme: light;
+}
+
+/* Each floor's colour, set on its section so its sign, band and tags pick it up. */
+[data-tone='teal'] {
+	--tone: var(--teal);
+	--on-tone: var(--ink);
+}
+
+[data-tone='blue'] {
+	--tone: var(--blue);
+	--on-tone: var(--ink);
+}
+
+[data-tone='oxblood'] {
+	--tone: var(--oxblood);
+	--on-tone: var(--concrete);
+}
+
+/* The building's services (Recall Room, notice board, house rules): signed in slate, not a floor colour. */
+[data-tone='neutral'] {
+	--tone: var(--muted);
+	--on-tone: var(--ground);
 }
 
 *,
@@ -51,17 +109,17 @@ html {
 	-webkit-text-size-adjust: 100%;
 	text-size-adjust: 100%;
 	scroll-behavior: smooth;
-	scroll-padding-top: 5rem;
+	scroll-padding-top: calc(var(--header) + 1rem);
+	background: var(--petrol);
 }
 
 body {
 	margin: 0;
-	background: var(--ink-900);
-	color: var(--text);
-	font-family: var(--font-sans), system-ui, sans-serif;
+	background: var(--ground);
+	color: var(--fg);
+	font-family: var(--font-body), system-ui, sans-serif;
 	font-size: 1.0625rem;
-	line-height: 1.65;
-	font-feature-settings: 'lnum', 'tnum';
+	line-height: 1.6;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	overflow-x: hidden;
@@ -69,11 +127,13 @@ body {
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
 	margin: 0;
-	font-family: var(--font-serif), Georgia, serif;
-	font-weight: 500;
-	line-height: 1.1;
+	font-family: var(--font-display), system-ui, sans-serif;
+	font-weight: 800;
+	line-height: 1.02;
+	letter-spacing: -0.02em;
 	text-wrap: balance;
 }
 
@@ -83,7 +143,10 @@ p {
 }
 
 ul,
-ol {
+ol,
+dl,
+dd,
+figure {
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -100,14 +163,14 @@ img {
 }
 
 :focus-visible {
-	outline: 2px solid var(--brass-bright);
+	outline: 2px solid var(--fg);
 	outline-offset: 3px;
-	border-radius: var(--radius-sm);
+	border-radius: 2px;
 }
 
 ::selection {
-	background: var(--brass);
-	color: var(--on-brass);
+	background: var(--concrete);
+	color: var(--ink);
 }
 
 .container {
@@ -117,17 +180,36 @@ img {
 	padding-inline: var(--gutter);
 }
 
+/* A label set like the numbers on a lift panel or a room plate. */
+.label {
+	font-family: var(--font-mono), ui-monospace, monospace;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.4;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.section {
+	padding-block: clamp(4rem, 8vw, 7rem);
+	background: var(--ground);
+	color: var(--fg);
+}
+
+/* A floor's band: the full-width colour stripe at the top of each floor, as on the wall by a lift. */
+.section[data-tone] {
+	border-top: 8px solid var(--tone);
+}
+
 .skip-link {
 	position: absolute;
 	left: var(--space-4);
 	top: -4rem;
 	z-index: 100;
 	padding: var(--space-3) var(--space-4);
-	background: var(--brass);
-	color: var(--on-brass);
-	font-weight: 700;
+	background: var(--concrete);
+	color: var(--ink);
 	text-decoration: none;
-	border-radius: var(--radius-sm);
 }
 
 .skip-link:focus {
@@ -154,6 +236,7 @@ img {
 	*::before,
 	*::after {
 		animation-duration: 1ms !important;
+		animation-delay: 0ms !important;
 		animation-iteration-count: 1 !important;
 		transition-duration: 1ms !important;
 	}

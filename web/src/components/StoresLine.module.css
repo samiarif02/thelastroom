@@ -1,0 +1,11 @@
+.stores {
+	color: var(--fg);
+}
+
+.status {
+	color: var(--muted);
+}
+
+.store {
+	white-space: nowrap;
+}
