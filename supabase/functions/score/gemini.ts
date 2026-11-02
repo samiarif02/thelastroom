@@ -29,8 +29,10 @@ export interface GeminiModel {
  * `AiScorer.lateLimit` (the app shows the offline score at 8 s meanwhile). ADR 0006 (amended).
  */
 export const GEMINI_CHAIN: readonly GeminiModel[] = [
-  { model: 'gemini-3.6-flash', thinkingLevel: 'minimal', timeoutMs: 10000 },
+  // First because it's the configuration the evaluation measured (docs/scoring-eval.md: 63 of
+  // 63 verdicts, median 2.1 s) and the fastest on the key's free tier.
   { model: 'gemini-3.5-flash-lite', thinkingLevel: 'minimal', timeoutMs: 7000 },
+  { model: 'gemini-3.6-flash', thinkingLevel: 'minimal', timeoutMs: 10000 },
   { model: 'gemini-3.1-flash-lite', thinkingLevel: 'minimal', timeoutMs: 7000 },
 ];
 

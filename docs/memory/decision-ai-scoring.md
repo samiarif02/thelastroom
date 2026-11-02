@@ -5,7 +5,7 @@ type: project
 ---
 
 Since brief 22 (2026-10-31, owner's request after reviewers asked "on what basis are you
-scoring?"), the debrief asks the `score` Edge Function for a verdict: Gemini (a chain: `gemini-3.6-flash`, then `gemini-3.1-flash-lite`, minimal thinking; brief 36),
+scoring?"), the debrief asks the `score` Edge Function for a verdict: Gemini (a chain: `gemini-3.5-flash-lite`, then `gemini-3.6-flash`, then `gemini-3.1-flash-lite`, minimal thinking; brief 36),
 temperature 0, four dimensions and an overall 0–100, one sentence of basis each, never advice.
 The engine (`packages/engine`) still scores every attempt and is what the dossier shows when
 there's no verdict within 8 s ("Offline score"); progress, the baseline and skills stay on the

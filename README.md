@@ -62,7 +62,7 @@ There are two scorers, and the dossier always says which one it shows.
      judgement answers that better than numbers the author fixed in advance.
    - **Safeguards:** temperature 0 and a JSON schema, validated on the server, 30 scores per
      player per day. The key never leaves the server.
-   - **Models:** a chain, `gemini-3.6-flash` then `gemini-3.5-flash-lite` then
+   - **Models:** a chain, `gemini-3.5-flash-lite` then `gemini-3.6-flash` then
      `gemini-3.1-flash-lite`, all with minimal thinking: when one is overloaded or slow, the next
      grades, and the verdict records which one did. The player sees the offline score at 8 s if
      the verdict isn't back yet, and the verdict replaces it when it lands (up to 30 s).

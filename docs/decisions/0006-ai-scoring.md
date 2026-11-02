@@ -90,3 +90,9 @@ to read at 8 s (the offline score), but keeps listening for 30 s, and a late ver
 offline score ("Scored by AI" appears; `ai_score_shown` carries `late: true`). With the chain
 and the longer window, 8 of 8 live verdicts came back, in 2–6 s. The evaluation of the scores
 themselves is `docs/scoring-eval.md`.
+
+**Later the same day:** a third model, `gemini-3.5-flash-lite` (about 1.2 s), went to the front
+of the chain once the evaluation ran on it: 63 of 63 verdicts, 92 % in the intended band, every
+mission ranked right, r = 0.91 with the engine, median 2.1 s (`docs/scoring-eval.md`). The
+prompt also gained two rules from the evaluation: an all-guessed answer is capped (40 overall,
+20 specificity), and a good-sounding reason never rescues a weak line.

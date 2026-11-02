@@ -1,0 +1,1073 @@
+[
+  {
+    "id": "m01_the_opportunity_strong",
+    "kind": "strong",
+    "mission": "m01_the_opportunity",
+    "run": 1,
+    "status": 200,
+    "ms": 2280,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 88,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 85,
+      "adaptability": 90
+    },
+    "basis": "Strong performance across all dimensions with relevant experience, specific metrics, and genuine self-awareness in the follow-up."
+  },
+  {
+    "id": "m01_the_opportunity_strong",
+    "kind": "strong",
+    "mission": "m01_the_opportunity",
+    "run": 2,
+    "status": 200,
+    "ms": 1900,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 88,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 85
+    },
+    "basis": "The candidate demonstrates strong communication, relevant metrics, and good self-awareness regarding skills gaps."
+  },
+  {
+    "id": "m01_the_opportunity_strong",
+    "kind": "strong",
+    "mission": "m01_the_opportunity",
+    "run": 3,
+    "status": 200,
+    "ms": 2090,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 88,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 80
+    },
+    "basis": "Strong metrics, correct reasoning for the chosen lines, and an honest, constructive response to the follow-up make this an impressive entry-level interview performance."
+  },
+  {
+    "id": "m01_the_opportunity_weak",
+    "kind": "weak",
+    "mission": "m01_the_opportunity",
+    "run": 1,
+    "status": 200,
+    "ms": 2155,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 60,
+    "dimensions": {
+      "relevance": 75,
+      "specificity": 40,
+      "structure": 60,
+      "adaptability": 70
+    },
+    "basis": "The candidate showed a reasonable understanding of the prompt and handled the follow-up decently, but suffered from vague evidence."
+  },
+  {
+    "id": "m01_the_opportunity_weak",
+    "kind": "weak",
+    "mission": "m01_the_opportunity",
+    "run": 2,
+    "status": 200,
+    "ms": 2048,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 55,
+    "dimensions": {
+      "relevance": 75,
+      "specificity": 40,
+      "structure": 60,
+      "adaptability": 50
+    },
+    "basis": "The candidate showed basic alignment with the role but delivered weak specifics and an underdeveloped closing and reply."
+  },
+  {
+    "id": "m01_the_opportunity_weak",
+    "kind": "weak",
+    "mission": "m01_the_opportunity",
+    "run": 3,
+    "status": 200,
+    "ms": 2068,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 60,
+    "dimensions": {
+      "relevance": 75,
+      "specificity": 40,
+      "structure": 60,
+      "adaptability": 70
+    },
+    "basis": "The candidate shows basic interview competence, but vague evidence and weak structure hold the overall impression down."
+  },
+  {
+    "id": "m01_the_opportunity_guessed",
+    "kind": "guessed",
+    "mission": "m01_the_opportunity",
+    "run": 1,
+    "status": 200,
+    "ms": 2189,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 25,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 0,
+      "structure": 0,
+      "adaptability": 70
+    },
+    "basis": "Relying entirely on guessed answer lines crippled the main response, despite a reasonably honest follow-up reply."
+  },
+  {
+    "id": "m01_the_opportunity_guessed",
+    "kind": "guessed",
+    "mission": "m01_the_opportunity",
+    "run": 2,
+    "status": 200,
+    "ms": 3840,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 10,
+      "structure": 0,
+      "adaptability": 85
+    },
+    "basis": "Since all initial answer lines were guessed, the overall score is strictly capped below 40 despite a strong follow-up reply."
+  },
+  {
+    "id": "m01_the_opportunity_guessed",
+    "kind": "guessed",
+    "mission": "m01_the_opportunity",
+    "run": 3,
+    "status": 200,
+    "ms": 1945,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 40,
+    "dimensions": {
+      "relevance": 85,
+      "specificity": 10,
+      "structure": 20,
+      "adaptability": 80
+    },
+    "basis": "The guessed core response drags down the overall evaluation despite a strong closing reply."
+  },
+  {
+    "id": "m02_tell_me_about_yourself_strong",
+    "kind": "strong",
+    "mission": "m02_tell_me_about_yourself",
+    "run": 1,
+    "status": 200,
+    "ms": 1950,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 92,
+    "dimensions": {
+      "relevance": 95,
+      "specificity": 90,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "This is a very strong entry-level response featuring concrete metrics, logical progression, and a seamless follow-up reply."
+  },
+  {
+    "id": "m02_tell_me_about_yourself_strong",
+    "kind": "strong",
+    "mission": "m02_tell_me_about_yourself",
+    "run": 2,
+    "status": 200,
+    "ms": 2093,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 88,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 90
+    },
+    "basis": "The candidate delivered a strong, metric-driven response that demonstrated both relevant experience and a clear understanding of the position."
+  },
+  {
+    "id": "m02_tell_me_about_yourself_strong",
+    "kind": "strong",
+    "mission": "m02_tell_me_about_yourself",
+    "run": 3,
+    "status": 200,
+    "ms": 4171,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 92,
+    "dimensions": {
+      "relevance": 95,
+      "specificity": 90,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "Strong performance with clear evidence, relevant reasoning, and a solid follow-up reply demonstrating product thinking."
+  },
+  {
+    "id": "m02_tell_me_about_yourself_weak",
+    "kind": "weak",
+    "mission": "m02_tell_me_about_yourself",
+    "run": 1,
+    "status": 200,
+    "ms": 2336,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 45,
+    "dimensions": {
+      "relevance": 60,
+      "specificity": 40,
+      "structure": 50,
+      "adaptability": 50
+    },
+    "basis": "The candidate offered a superficial overview of their background without impactful metrics or a compelling personal hook for the role."
+  },
+  {
+    "id": "m02_tell_me_about_yourself_weak",
+    "kind": "weak",
+    "mission": "m02_tell_me_about_yourself",
+    "run": 2,
+    "status": 200,
+    "ms": 1998,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 45,
+    "dimensions": {
+      "relevance": 65,
+      "specificity": 35,
+      "structure": 50,
+      "adaptability": 40
+    },
+    "basis": "The response lacked rigorous detail, concrete metrics, and a focused reply to the follow-up challenge."
+  },
+  {
+    "id": "m02_tell_me_about_yourself_weak",
+    "kind": "weak",
+    "mission": "m02_tell_me_about_yourself",
+    "run": 3,
+    "status": 200,
+    "ms": 2090,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 50,
+      "specificity": 30,
+      "structure": 40,
+      "adaptability": 40
+    },
+    "basis": "The response relies on generic buzzwords and lists without depth, failing to demonstrate the specific competencies needed for an entry-level product role."
+  },
+  {
+    "id": "m02_tell_me_about_yourself_guessed",
+    "kind": "guessed",
+    "mission": "m02_tell_me_about_yourself",
+    "run": 1,
+    "status": 200,
+    "ms": 2130,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 30,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 0,
+      "structure": 0,
+      "adaptability": 85
+    },
+    "basis": "The candidate relied entirely on guesses for the main answer, leaving only a competent reply to save a failing score."
+  },
+  {
+    "id": "m02_tell_me_about_yourself_guessed",
+    "kind": "guessed",
+    "mission": "m02_tell_me_about_yourself",
+    "run": 2,
+    "status": 200,
+    "ms": 2013,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 25,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 0,
+      "structure": 0,
+      "adaptability": 40
+    },
+    "basis": "Since all answer lines were GUESSED, the overall score is limited despite a direct reply to the follow-up."
+  },
+  {
+    "id": "m02_tell_me_about_yourself_guessed",
+    "kind": "guessed",
+    "mission": "m02_tell_me_about_yourself",
+    "run": 3,
+    "status": 200,
+    "ms": 1861,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 25,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 0,
+      "structure": 0,
+      "adaptability": 45
+    },
+    "basis": "Because every answer line was guessed, the response relies entirely on a single moderate reply."
+  },
+  {
+    "id": "m03_the_experience_gap_strong",
+    "kind": "strong",
+    "mission": "m03_the_experience_gap",
+    "run": 1,
+    "status": 200,
+    "ms": 2179,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 90,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "This is a strong entry-level interview response backed by relevant evidence, clear metrics, and genuine self-awareness regarding skills gaps."
+  },
+  {
+    "id": "m03_the_experience_gap_strong",
+    "kind": "strong",
+    "mission": "m03_the_experience_gap",
+    "run": 2,
+    "status": 200,
+    "ms": 2581,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 90,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "This is a strong graduate response with high specificity, clear structure, and an honest reply to the follow-up."
+  },
+  {
+    "id": "m03_the_experience_gap_strong",
+    "kind": "strong",
+    "mission": "m03_the_experience_gap",
+    "run": 3,
+    "status": 200,
+    "ms": 1927,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 92,
+    "dimensions": {
+      "relevance": 95,
+      "specificity": 90,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "The candidate delivered a strong, evidence-backed case with high self-awareness and handled the follow-up exceptionally well."
+  },
+  {
+    "id": "m03_the_experience_gap_weak",
+    "kind": "weak",
+    "mission": "m03_the_experience_gap",
+    "run": 1,
+    "status": 200,
+    "ms": 2036,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 25,
+    "dimensions": {
+      "relevance": 40,
+      "specificity": 15,
+      "structure": 30,
+      "adaptability": 20
+    },
+    "basis": "An apologetic tone combined with vague generalities and a cliché fallback makes this a weak pitch for an entry-level role."
+  },
+  {
+    "id": "m03_the_experience_gap_weak",
+    "kind": "weak",
+    "mission": "m03_the_experience_gap",
+    "run": 2,
+    "status": 200,
+    "ms": 2194,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 30,
+    "dimensions": {
+      "relevance": 40,
+      "specificity": 20,
+      "structure": 30,
+      "adaptability": 30
+    },
+    "basis": "Defensive opening remarks, lack of concrete evidence, and a weak clichéd reply make this a below-average candidate response for an entry-level role."
+  },
+  {
+    "id": "m03_the_experience_gap_weak",
+    "kind": "weak",
+    "mission": "m03_the_experience_gap",
+    "run": 3,
+    "status": 200,
+    "ms": 2240,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 40,
+      "specificity": 25,
+      "structure": 45,
+      "adaptability": 30
+    },
+    "basis": "The interview performance undermines itself with apologies and cliché reasoning instead of demonstrating clear entry-level readiness."
+  },
+  {
+    "id": "m03_the_experience_gap_guessed",
+    "kind": "guessed",
+    "mission": "m03_the_experience_gap",
+    "run": 1,
+    "status": 200,
+    "ms": 2278,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 10,
+      "structure": 0,
+      "adaptability": 75
+    },
+    "basis": "Since every answer line was guessed, the overall score is strictly capped below forty."
+  },
+  {
+    "id": "m03_the_experience_gap_guessed",
+    "kind": "guessed",
+    "mission": "m03_the_experience_gap",
+    "run": 2,
+    "status": 200,
+    "ms": 2812,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 75,
+      "specificity": 10,
+      "structure": 25,
+      "adaptability": 80
+    },
+    "basis": "Since every answer line was guessed, the overall score was capped at a maximum of 40 despite a solid follow-up reply."
+  },
+  {
+    "id": "m03_the_experience_gap_guessed",
+    "kind": "guessed",
+    "mission": "m03_the_experience_gap",
+    "run": 3,
+    "status": 200,
+    "ms": 1938,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 20,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 0,
+      "structure": 0,
+      "adaptability": 75
+    },
+    "basis": "Because every initial answer line was guessed, the response relies entirely on a decent reply that cannot rescue the zeroed content."
+  },
+  {
+    "id": "m04_show_me_the_evidence_strong",
+    "kind": "strong",
+    "mission": "m04_show_me_the_evidence",
+    "run": 1,
+    "status": 200,
+    "ms": 2568,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 85,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 80,
+      "adaptability": 90
+    },
+    "basis": "Strong use of metrics and a thoughtful reply to the follow-up make this a solid entry-level product response."
+  },
+  {
+    "id": "m04_show_me_the_evidence_strong",
+    "kind": "strong",
+    "mission": "m04_show_me_the_evidence",
+    "run": 2,
+    "status": 200,
+    "ms": 1993,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 90,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "Strong performance with clear evidence, relevant metrics, and a thoughtful, direct answer to the follow-up question."
+  },
+  {
+    "id": "m04_show_me_the_evidence_strong",
+    "kind": "strong",
+    "mission": "m04_show_me_the_evidence",
+    "run": 3,
+    "status": 200,
+    "ms": 1733,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 88,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 85,
+      "adaptability": 90
+    },
+    "basis": "This is a strong, well-evidenced entry-level product response backed by solid reasoning and thoughtful reflection on methodology."
+  },
+  {
+    "id": "m04_show_me_the_evidence_weak",
+    "kind": "weak",
+    "mission": "m04_show_me_the_evidence",
+    "run": 1,
+    "status": 200,
+    "ms": 1919,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 60,
+      "specificity": 40,
+      "structure": 50,
+      "adaptability": 10
+    },
+    "basis": "While some raw data was present, the inability to claim personal ownership in the follow-up makes this an unsuccessful interview response."
+  },
+  {
+    "id": "m04_show_me_the_evidence_weak",
+    "kind": "weak",
+    "mission": "m04_show_me_the_evidence",
+    "run": 2,
+    "status": 200,
+    "ms": 2587,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 60,
+      "specificity": 45,
+      "structure": 50,
+      "adaptability": 10
+    },
+    "basis": "Inability to claim individual responsibility during the follow-up undermined the credibility of the entire product associate interview."
+  },
+  {
+    "id": "m04_show_me_the_evidence_weak",
+    "kind": "weak",
+    "mission": "m04_show_me_the_evidence",
+    "run": 3,
+    "status": 200,
+    "ms": 2130,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 45,
+    "dimensions": {
+      "relevance": 85,
+      "specificity": 60,
+      "structure": 70,
+      "adaptability": 10
+    },
+    "basis": "Despite a decent initial data example, the failure to claim personal responsibility on the follow-up makes it impossible to verify the candidate's actual skills for the role."
+  },
+  {
+    "id": "m04_show_me_the_evidence_guessed",
+    "kind": "guessed",
+    "mission": "m04_show_me_the_evidence",
+    "run": 1,
+    "status": 200,
+    "ms": 1915,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 30,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 0,
+      "structure": 0,
+      "adaptability": 60
+    },
+    "basis": "The heavy penalty for guessed primary answer lines restricts the total score despite a sensible follow-up reply."
+  },
+  {
+    "id": "m04_show_me_the_evidence_guessed",
+    "kind": "guessed",
+    "mission": "m04_show_me_the_evidence",
+    "run": 2,
+    "status": 200,
+    "ms": 1868,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 25,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 0,
+      "structure": 0,
+      "adaptability": 60
+    },
+    "basis": "The total reliance on guessed lines ruined the core answer, making the interview performance a failure."
+  },
+  {
+    "id": "m04_show_me_the_evidence_guessed",
+    "kind": "guessed",
+    "mission": "m04_show_me_the_evidence",
+    "run": 3,
+    "status": 200,
+    "ms": 2061,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 20,
+      "structure": 0,
+      "adaptability": 75
+    },
+    "basis": "Since all main lines were guessed, the overall score is capped below forty despite a reasonable follow-up reply."
+  },
+  {
+    "id": "m05_something_went_wrong_strong",
+    "kind": "strong",
+    "mission": "m05_something_went_wrong",
+    "run": 1,
+    "status": 200,
+    "ms": 2041,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 90,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "Strong ownership of a concrete mistake, clear lessons learned, and a professional handling of the follow-up make this an exceptional entry-level response."
+  },
+  {
+    "id": "m05_something_went_wrong_strong",
+    "kind": "strong",
+    "mission": "m05_something_went_wrong",
+    "run": 2,
+    "status": 200,
+    "ms": 1949,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 88,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 85
+    },
+    "basis": "The candidate handles a sensitive question with accountability, clear metrics, and a demonstrable learning loop."
+  },
+  {
+    "id": "m05_something_went_wrong_strong",
+    "kind": "strong",
+    "mission": "m05_something_went_wrong",
+    "run": 3,
+    "status": 200,
+    "ms": 2161,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 90,
+    "dimensions": {
+      "relevance": 95,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 90
+    },
+    "basis": "This is a strong, credible entry-level interview response that demonstrates accountability, problem-solving, and a clear lesson learned."
+  },
+  {
+    "id": "m05_something_went_wrong_weak",
+    "kind": "weak",
+    "mission": "m05_something_went_wrong",
+    "run": 1,
+    "status": 200,
+    "ms": 2012,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 30,
+    "dimensions": {
+      "relevance": 45,
+      "specificity": 25,
+      "structure": 40,
+      "adaptability": 10
+    },
+    "basis": "The interview performance is weak due to evasiveness in the follow-up and a lack of specific personal accountability in the main answer."
+  },
+  {
+    "id": "m05_something_went_wrong_weak",
+    "kind": "weak",
+    "mission": "m05_something_went_wrong",
+    "run": 2,
+    "status": 200,
+    "ms": 2159,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 30,
+    "dimensions": {
+      "relevance": 45,
+      "specificity": 20,
+      "structure": 40,
+      "adaptability": 10
+    },
+    "basis": "The response avoids taking personal accountability and fails to provide a concrete past mistake."
+  },
+  {
+    "id": "m05_something_went_wrong_weak",
+    "kind": "weak",
+    "mission": "m05_something_went_wrong",
+    "run": 3,
+    "status": 200,
+    "ms": 2017,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 30,
+    "dimensions": {
+      "relevance": 45,
+      "specificity": 25,
+      "structure": 40,
+      "adaptability": 15
+    },
+    "basis": "The interview performance falls short due to a weak framing of a mistake and a complete evasion of individual accountability."
+  },
+  {
+    "id": "m05_something_went_wrong_guessed",
+    "kind": "guessed",
+    "mission": "m05_something_went_wrong",
+    "run": 1,
+    "status": 200,
+    "ms": 1790,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 15,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 0,
+      "structure": 0,
+      "adaptability": 35
+    },
+    "basis": "Because every answer line was guessed, the response fails the evaluation despite a passable reply."
+  },
+  {
+    "id": "m05_something_went_wrong_guessed",
+    "kind": "guessed",
+    "mission": "m05_something_went_wrong",
+    "run": 2,
+    "status": 200,
+    "ms": 1970,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 25,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 0,
+      "structure": 0,
+      "adaptability": 40
+    },
+    "basis": "The reliance on guesses for the main answer heavily penalizes the score, leaving only a passable reply to save it from zero."
+  },
+  {
+    "id": "m05_something_went_wrong_guessed",
+    "kind": "guessed",
+    "mission": "m05_something_went_wrong",
+    "run": 3,
+    "status": 200,
+    "ms": 3567,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 30,
+    "dimensions": {
+      "relevance": 0,
+      "specificity": 10,
+      "structure": 0,
+      "adaptability": 75
+    },
+    "basis": "Because every answer line was guessed, the score is severely penalized despite a reasonable reply to the follow-up."
+  },
+  {
+    "id": "m06_the_follow_up_trap_strong",
+    "kind": "strong",
+    "mission": "m06_the_follow_up_trap",
+    "run": 1,
+    "status": 200,
+    "ms": 4319,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 85,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 80,
+      "adaptability": 90
+    },
+    "basis": "The candidate clearly owns the mistake, provides precise data, and demonstrates how they prevent it going forward."
+  },
+  {
+    "id": "m06_the_follow_up_trap_strong",
+    "kind": "strong",
+    "mission": "m06_the_follow_up_trap",
+    "run": 2,
+    "status": 200,
+    "ms": 4483,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 90,
+    "dimensions": {
+      "relevance": 95,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "The candidate owns the mistake transparently, supports it with specific data, and demonstrates a reliable corrective process in the follow-up."
+  },
+  {
+    "id": "m06_the_follow_up_trap_strong",
+    "kind": "strong",
+    "mission": "m06_the_follow_up_trap",
+    "run": 3,
+    "status": 200,
+    "ms": 1995,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 92,
+    "dimensions": {
+      "relevance": 95,
+      "specificity": 90,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "The candidate owns the mistake clearly, uses precise numbers, and demonstrates immediate learning and process adjustment."
+  },
+  {
+    "id": "m06_the_follow_up_trap_weak",
+    "kind": "weak",
+    "mission": "m06_the_follow_up_trap",
+    "run": 1,
+    "status": 200,
+    "ms": 5261,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 60,
+    "dimensions": {
+      "relevance": 85,
+      "specificity": 75,
+      "structure": 70,
+      "adaptability": 20
+    },
+    "basis": "While the initial walkthrough was reasonably structured and specific, the defensive evasion on the follow-up significantly weakens the overall impression."
+  },
+  {
+    "id": "m06_the_follow_up_trap_weak",
+    "kind": "weak",
+    "mission": "m06_the_follow_up_trap",
+    "run": 2,
+    "status": 200,
+    "ms": 2125,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 45,
+    "dimensions": {
+      "relevance": 60,
+      "specificity": 50,
+      "structure": 55,
+      "adaptability": 15
+    },
+    "basis": "While the initial recounting was orderly, the failure to adapt to the follow-up question and the defensive reply severely lowered the value of the answer."
+  },
+  {
+    "id": "m06_the_follow_up_trap_weak",
+    "kind": "weak",
+    "mission": "m06_the_follow_up_trap",
+    "run": 3,
+    "status": 200,
+    "ms": 4030,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 60,
+    "dimensions": {
+      "relevance": 85,
+      "specificity": 75,
+      "structure": 70,
+      "adaptability": 30
+    },
+    "basis": "While the initial recounting was structured and specific, the defensive reply to the follow-up undermines the candidate's accountability."
+  },
+  {
+    "id": "m06_the_follow_up_trap_guessed",
+    "kind": "guessed",
+    "mission": "m06_the_follow_up_trap",
+    "run": 1,
+    "status": 200,
+    "ms": 5452,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 40,
+      "specificity": 15,
+      "structure": 30,
+      "adaptability": 75
+    },
+    "basis": "The heavy reliance on guessed lines severely harms the overall quality despite a decent follow-up reply."
+  },
+  {
+    "id": "m06_the_follow_up_trap_guessed",
+    "kind": "guessed",
+    "mission": "m06_the_follow_up_trap",
+    "run": 2,
+    "status": 200,
+    "ms": 4079,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 40,
+      "specificity": 10,
+      "structure": 30,
+      "adaptability": 85
+    },
+    "basis": "Guessing the core answer lines severely penalized the evaluation despite a solid follow-up reply."
+  },
+  {
+    "id": "m06_the_follow_up_trap_guessed",
+    "kind": "guessed",
+    "mission": "m06_the_follow_up_trap",
+    "run": 3,
+    "status": 200,
+    "ms": 3455,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 85,
+      "specificity": 15,
+      "structure": 30,
+      "adaptability": 90
+    },
+    "basis": "Since all answer lines were guessed, the overall score is strictly capped at 40 despite a solid reply."
+  },
+  {
+    "id": "m07_first_round_review_strong",
+    "kind": "strong",
+    "mission": "m07_first_round_review",
+    "run": 1,
+    "status": 200,
+    "ms": 2918,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 90,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "This was a strong entry-level interview performance featuring a well-chosen example, solid metrics, and a logical narrative structure."
+  },
+  {
+    "id": "m07_first_round_review_strong",
+    "kind": "strong",
+    "mission": "m07_first_round_review",
+    "run": 2,
+    "status": 200,
+    "ms": 2109,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 88,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 85,
+      "adaptability": 90
+    },
+    "basis": "The candidate demonstrated strong initiative, clear problem-solving methodology, and solid communication throughout the exchange."
+  },
+  {
+    "id": "m07_first_round_review_strong",
+    "kind": "strong",
+    "mission": "m07_first_round_review",
+    "run": 3,
+    "status": 200,
+    "ms": 1776,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 90,
+    "dimensions": {
+      "relevance": 90,
+      "specificity": 85,
+      "structure": 90,
+      "adaptability": 95
+    },
+    "basis": "The candidate delivers a compelling, well-structured narrative with strong evidence and a thoughtful response to the follow-up."
+  },
+  {
+    "id": "m07_first_round_review_weak",
+    "kind": "weak",
+    "mission": "m07_first_round_review",
+    "run": 1,
+    "status": 200,
+    "ms": 2071,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 48,
+    "dimensions": {
+      "relevance": 60,
+      "specificity": 45,
+      "structure": 50,
+      "adaptability": 40
+    },
+    "basis": "The candidate demonstrates some initiative in a casual setting but damages their credibility through a defensive closing statement and muddy ownership in the follow-up."
+  },
+  {
+    "id": "m07_first_round_review_weak",
+    "kind": "weak",
+    "mission": "m07_first_round_review",
+    "run": 2,
+    "status": 200,
+    "ms": 1958,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 45,
+    "dimensions": {
+      "relevance": 60,
+      "specificity": 40,
+      "structure": 50,
+      "adaptability": 50
+    },
+    "basis": "The answer showed a proactive mindset, but was held back by a weak closing and muddy ownership of the task."
+  },
+  {
+    "id": "m07_first_round_review_weak",
+    "kind": "weak",
+    "mission": "m07_first_round_review",
+    "run": 3,
+    "status": 200,
+    "ms": 1941,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 45,
+    "dimensions": {
+      "relevance": 60,
+      "specificity": 40,
+      "structure": 50,
+      "adaptability": 30
+    },
+    "basis": "While the candidate identified a tangible initiative, weak execution in the ending and follow-up diminished their impact."
+  },
+  {
+    "id": "m07_first_round_review_guessed",
+    "kind": "guessed",
+    "mission": "m07_first_round_review",
+    "run": 1,
+    "status": 200,
+    "ms": 1783,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 80,
+      "specificity": 15,
+      "structure": 25,
+      "adaptability": 75
+    },
+    "basis": "Because every answer line was guessed, the score was capped according to the strict grading rules."
+  },
+  {
+    "id": "m07_first_round_review_guessed",
+    "kind": "guessed",
+    "mission": "m07_first_round_review",
+    "run": 2,
+    "status": 200,
+    "ms": 1860,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 85,
+      "specificity": 15,
+      "structure": 25,
+      "adaptability": 80
+    },
+    "basis": "Because every answer line was guessed, the score was capped at 40 despite an acceptable follow-up reply."
+  },
+  {
+    "id": "m07_first_round_review_guessed",
+    "kind": "guessed",
+    "mission": "m07_first_round_review",
+    "run": 3,
+    "status": 200,
+    "ms": 3358,
+    "model": "gemini-3.5-flash-lite",
+    "overall": 35,
+    "dimensions": {
+      "relevance": 85,
+      "specificity": 15,
+      "structure": 20,
+      "adaptability": 90
+    },
+    "basis": "Since every answer line was guessed, the overall score is capped at forty despite a strong direct reply."
+  }
+]
