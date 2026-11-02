@@ -61,7 +61,11 @@ There are two scorers, and the dossier always says which one it shows.
    - **Why:** reviewers asked "on what basis are you scoring?", and a recruiter's reasoned
      judgement answers that better than numbers the author fixed in advance.
    - **Safeguards:** temperature 0 and a JSON schema, validated on the server, 30 scores per
-     player per day, and an 8-second timeout. The key never leaves the server.
+     player per day. The key never leaves the server.
+   - **Models:** a chain, `gemini-3.5-flash-lite` then `gemini-3.6-flash` then
+     `gemini-3.1-flash-lite`, all with minimal thinking: when one is overloaded or slow, the next
+     grades, and the verdict records which one did. The player sees the offline score at 8 s if
+     the verdict isn't back yet, and the verdict replaces it when it lands (up to 30 s).
    - [ADR 0006](docs/decisions/0006-ai-scoring.md) has the details.
 2. **Offline: the rule-based engine** (`packages/engine`, pure Dart), labelled "Offline score".
    It's shown whenever there's no backend, no network, a timeout or a spent quota.
@@ -76,6 +80,17 @@ There are two scorers, and the dossier always says which one it shows.
 
 Progress over time (the Mission 1 baseline, the skills radar) uses the engine's scores, because
 they can be recomputed exactly from the stored picks.
+
+**On the debrief, "How we scored this"** tells the player, for their own answer: what the mission
+practised, who scored it, the four dimensions and their weights, the recruiter's score beside the
+game's, and what the recruiter is and isn't told.
+
+**How we know the AI scores well:** [`docs/scoring-eval.md`](docs/scoring-eval.md). A test set of
+strong, weak and guessed answers for every Chapter 1 mission (built by the app's own request
+builder, `supabase/eval/score/`) is scored several times each against the live function; the
+report gives how often the AI lands in the band the author intended, whether it ranks strong above
+weak and guessed, how much a score moves between repeat runs, and how closely it agrees with the
+engine. Re-run it after any change to the prompt or the models (`node supabase/eval/score/run.mjs`).
 
 ## Architecture at a glance
 

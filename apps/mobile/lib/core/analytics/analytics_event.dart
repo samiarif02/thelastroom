@@ -54,7 +54,10 @@ enum AnalyticsEvent {
 
   /// The player locks in an answer built from fragments (brief 27): how many they placed, and
   /// what cost points (parts missing, parts out of order, the decoy). Counts only, no text.
-  answerBuilt('answer_built');
+  answerBuilt('answer_built'),
+
+  /// The player opens "How we scored this" on the debrief (brief 36): who scored it and how.
+  scoreBasisViewed('score_basis_viewed');
 
   const AnalyticsEvent(this.wireName);
 

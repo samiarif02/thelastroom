@@ -1,0 +1,821 @@
+[
+  {
+    "id": "m01_the_opportunity_strong",
+    "mission_id": "m01_the_opportunity",
+    "kind": "strong",
+    "expected_overall": [
+      70,
+      100
+    ],
+    "engine_total": 95,
+    "request": {
+      "mission_id": "m01_the_opportunity",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Recruiter",
+      "question": "So, what made you apply for this role?",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "I like finding out why people get stuck in a product, and this role is built around exactly that: real users and real numbers.",
+          "reason": "It answers what she actually asked: why this role, not why this company.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "In my final-year project I interviewed twelve students, cut our study app's sign-up from five screens to two, and finished sign-ups went from 40% to 75%.",
+          "reason": "One story with my own part and a number beats a list of strengths.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "That's the work I want to do every day: talk to users first, then check the numbers to see if the change actually worked.",
+          "reason": "A good close ties my story back to the job she's hiring for.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "Thanks, that's clear. What will be the hardest part of this job for you?",
+      "reply": "Big company data. I've only used small spreadsheets, so I'm halfway through an SQL course, and I'd ask the data team to check my first queries.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m01_the_opportunity_weak",
+    "mission_id": "m01_the_opportunity",
+    "kind": "weak",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 24,
+    "request": {
+      "mission_id": "m01_the_opportunity",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Recruiter",
+      "question": "So, what made you apply for this role?",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "I read the job description closely, and I match almost every point on it: user research, data analysis, teamwork and communication.",
+          "reason": "It answers what she actually asked: why this role, not why this company.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "It started in second year, when a friend needed help with an app, and then I took a data module, and later my project went that way…",
+          "reason": "One story with my own part and a number beats a list of strengths.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "So yes, that's basically it, I think, unless you'd like to hear about my other projects too, because there are a few more of those…",
+          "reason": "A good close ties my story back to the job she's hiring for.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "Thanks, that's clear. What will be the hardest part of this job for you?",
+      "reply": "Maybe some of the technical side at first, but I learn quickly, and I'm sure I'll pick it all up within my first few months.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m01_the_opportunity_guessed",
+    "mission_id": "m01_the_opportunity",
+    "kind": "guessed",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 34,
+    "request": {
+      "mission_id": "m01_the_opportunity",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Recruiter",
+      "question": "So, what made you apply for this role?",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "I like finding out why people get stuck in a product, and this role is built around exactly that: real users and real numbers.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "evidence",
+          "line": "In my final-year project I interviewed twelve students, cut our study app's sign-up from five screens to two, and finished sign-ups went from 40% to 75%.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "land",
+          "line": "That's the work I want to do every day: talk to users first, then check the numbers to see if the change actually worked.",
+          "reason": null,
+          "guessed": true
+        }
+      ],
+      "follow_up_question": "Thanks, that's clear. What will be the hardest part of this job for you?",
+      "reply": "Big company data. I've only used small spreadsheets, so I'm halfway through an SQL course, and I'd ask the data team to check my first queries.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m02_tell_me_about_yourself_strong",
+    "mission_id": "m02_tell_me_about_yourself",
+    "kind": "strong",
+    "expected_overall": [
+      70,
+      100
+    ],
+    "engine_total": 95,
+    "request": {
+      "mission_id": "m02_tell_me_about_yourself",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Recruiter",
+      "question": "So, tell me about yourself.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "I've finished a degree in Information Systems, and the part I enjoyed most was user research: finding out why people get stuck.",
+          "reason": "Start with what makes me fit this job, not with my whole life.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "At my Larkfield internship I tagged 600 support tickets, found a third were password resets, and wrote a help page that cut them by a quarter.",
+          "reason": "One result I caused, with a number, proves more than a long list.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "Now I want a job where I talk to users and read the numbers every day, which is exactly what this Product Associate role is.",
+          "reason": "End by connecting who I am to what the role does day to day.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "Nice and clear. Why product, after an internship in support?",
+      "reply": "Support showed me the same problems every day, and I kept wanting to fix the cause, not just answer the ticket. That's product work.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m02_tell_me_about_yourself_weak",
+    "mission_id": "m02_tell_me_about_yourself",
+    "kind": "weak",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 30,
+    "request": {
+      "mission_id": "m02_tell_me_about_yourself",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Recruiter",
+      "question": "So, tell me about yourself.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "I'd describe myself as curious, hard-working and a good communicator, and I think those three words sum me up pretty well, honestly.",
+          "reason": "Start with what makes me fit this job, not with my whole life.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "I've also worked at the campus café for two years, interned at Larkfield, built a study app and helped at open days, so I've done a real range.",
+          "reason": "One result I caused, with a number, proves more than a long list.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "And that's me, really. I'm not sure what else you'd like to know, so please feel free to ask me anything about my CV.",
+          "reason": "End by connecting who I am to what the role does day to day.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "Let me stop you there. If you had to pick one thing, what would it be?",
+      "reply": "I'd say my people skills in general. They've helped me in every job and project I've done, so that's the main thing for me.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m02_tell_me_about_yourself_guessed",
+    "mission_id": "m02_tell_me_about_yourself",
+    "kind": "guessed",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 34,
+    "request": {
+      "mission_id": "m02_tell_me_about_yourself",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Recruiter",
+      "question": "So, tell me about yourself.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "I've finished a degree in Information Systems, and the part I enjoyed most was user research: finding out why people get stuck.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "evidence",
+          "line": "At my Larkfield internship I tagged 600 support tickets, found a third were password resets, and wrote a help page that cut them by a quarter.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "land",
+          "line": "Now I want a job where I talk to users and read the numbers every day, which is exactly what this Product Associate role is.",
+          "reason": null,
+          "guessed": true
+        }
+      ],
+      "follow_up_question": "Nice and clear. Why product, after an internship in support?",
+      "reply": "Support showed me the same problems every day, and I kept wanting to fix the cause, not just answer the ticket. That's product work.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m03_the_experience_gap_strong",
+    "mission_id": "m03_the_experience_gap",
+    "kind": "strong",
+    "expected_overall": [
+      70,
+      100
+    ],
+    "engine_total": 98,
+    "request": {
+      "mission_id": "m03_the_experience_gap",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Recruiter",
+      "question": "Why should we take a chance on a graduate?",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "That's a fair concern. I don't have years of experience, but I've already done both halves of this job: users and numbers.",
+          "reason": "Admit the real concern, then answer it with what I've actually done.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "At Larkfield I tagged 600 support tickets myself, found one in three were password resets, and my help page cut those by a quarter.",
+          "reason": "Proof of my own impact answers doubts better than any claim.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "Where I'm still new, like big datasets, I'm closing the gap: I'm halfway through an SQL course, and I'd ask for reviews early.",
+          "reason": "Naming my gap and my plan for it shows self-awareness she can trust.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "Fine. What would you need from us in your first three months?",
+      "reply": "A clear first project and someone to review my SQL early. I'd rather hear what's wrong in week two than in month three.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m03_the_experience_gap_weak",
+    "mission_id": "m03_the_experience_gap",
+    "kind": "weak",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 22,
+    "request": {
+      "mission_id": "m03_the_experience_gap",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Recruiter",
+      "question": "Why should we take a chance on a graduate?",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "I know I'm probably not the strongest candidate on paper, and I'd completely understand if you went with someone more experienced.",
+          "reason": "Admit the real concern, then answer it with what I've actually done.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "I pick things up quickly. In every job and project I've had so far, I was trusted with real responsibility within a couple of weeks.",
+          "reason": "Proof of my own impact answers doubts better than any claim.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "So I think that's why, mostly. Although I suppose it depends on what the team needs right now, which I don't fully know yet…",
+          "reason": "Naming my gap and my plan for it shows self-awareness she can trust.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "You're arguing my side for me. Why are you worth the chance?",
+      "reply": "Because experience can be taught, but attitude can't, and I think my attitude is the thing that really sets me apart from the rest.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m03_the_experience_gap_guessed",
+    "mission_id": "m03_the_experience_gap",
+    "kind": "guessed",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 34,
+    "request": {
+      "mission_id": "m03_the_experience_gap",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Recruiter",
+      "question": "Why should we take a chance on a graduate?",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "That's a fair concern. I don't have years of experience, but I've already done both halves of this job: users and numbers.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "evidence",
+          "line": "At Larkfield I tagged 600 support tickets myself, found one in three were password resets, and my help page cut those by a quarter.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "land",
+          "line": "Where I'm still new, like big datasets, I'm closing the gap: I'm halfway through an SQL course, and I'd ask for reviews early.",
+          "reason": null,
+          "guessed": true
+        }
+      ],
+      "follow_up_question": "Fine. What would you need from us in your first three months?",
+      "reply": "A clear first project and someone to review my SQL early. I'd rather hear what's wrong in week two than in month three.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m04_show_me_the_evidence_strong",
+    "mission_id": "m04_show_me_the_evidence",
+    "kind": "strong",
+    "expected_overall": [
+      70,
+      100
+    ],
+    "engine_total": 82,
+    "request": {
+      "mission_id": "m04_show_me_the_evidence",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Hiring Manager",
+      "question": "Tell me about a time you used data to change something.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "At my Larkfield internship, I noticed the support team kept answering the same question, so I decided to count how often it came up.",
+          "reason": "Open with the specific problem I noticed, so the story is clearly mine.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "I wanted to know why support was swamped. I tagged 600 tickets in a spreadsheet. One in three were password resets. So I wrote a step-by-step help page for them.",
+          "reason": "He asked about data, so give the actual numbers and what I did with them.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "The next month, password tickets fell by a quarter. It taught me to count before I suggest anything, and I'd do the same here.",
+          "reason": "Close with the measured result and what I'd carry into this job.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "Fine. What would you do differently with that data now?",
+      "reply": "I'd tag a second month too. One month might have been unusual, so I'd check the pattern holds before anyone builds a fix.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m04_show_me_the_evidence_weak",
+    "mission_id": "m04_show_me_the_evidence",
+    "kind": "weak",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 23,
+    "request": {
+      "mission_id": "m04_show_me_the_evidence",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Hiring Manager",
+      "question": "Tell me about a time you used data to change something.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "I'm someone who always lets the data lead, and my Larkfield internship was a great example of putting that approach into practice.",
+          "reason": "Open with the specific problem I noticed, so the story is clearly mine.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "We went through the tickets together as a team. One in three were password resets. I tagged 600 tickets in a spreadsheet. I wanted to know why support was swamped.",
+          "reason": "He asked about data, so give the actual numbers and what I did with them.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "Everyone in the team was really happy with how it turned out, and I think we all learned a lot from working on it together.",
+          "reason": "Close with the measured result and what I'd carry into this job.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "You keep saying 'we'. What did you do?",
+      "reply": "It was a real team effort. Everyone played their part, and I'd feel uncomfortable taking the credit for what we did together.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m04_show_me_the_evidence_guessed",
+    "mission_id": "m04_show_me_the_evidence",
+    "kind": "guessed",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 34,
+    "request": {
+      "mission_id": "m04_show_me_the_evidence",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Hiring Manager",
+      "question": "Tell me about a time you used data to change something.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "At my Larkfield internship, I noticed the support team kept answering the same question, so I decided to count how often it came up.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "evidence",
+          "line": "I wanted to know why support was swamped. I tagged 600 tickets in a spreadsheet. One in three were password resets. So I wrote a step-by-step help page for them.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "land",
+          "line": "The next month, password tickets fell by a quarter. It taught me to count before I suggest anything, and I'd do the same here.",
+          "reason": null,
+          "guessed": true
+        }
+      ],
+      "follow_up_question": "Fine. What would you do differently with that data now?",
+      "reply": "I'd tag a second month too. One month might have been unusual, so I'd check the pattern holds before anyone builds a fix.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m05_something_went_wrong_strong",
+    "mission_id": "m05_something_went_wrong",
+    "kind": "strong",
+    "expected_overall": [
+      70,
+      100
+    ],
+    "engine_total": 100,
+    "request": {
+      "mission_id": "m05_something_went_wrong",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Hiring Manager",
+      "question": "Tell me about a time you made a mistake at work.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "At Larkfield I sent my lead a ticket report saying half our tickets were password resets. The real number was one in three.",
+          "reason": "A real mistake, named plainly with its numbers, is what builds trust.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "The export had duplicate rows I hadn't checked for. I told my lead that same afternoon, before the team meeting, and sent a corrected report.",
+          "reason": "Owning the cause and how fast I spoke up matters more than the error.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "Now I check for duplicates before any number leaves my desk, and on my project I asked a teammate to recheck our figures before the demo.",
+          "reason": "Show the habit I changed and still use, so the lesson is believable.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "And how did your lead take it?",
+      "reply": "Calmly. My lead thanked me for flagging it before the meeting, and then asked me to check the next month's report as well.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m05_something_went_wrong_weak",
+    "mission_id": "m05_something_went_wrong",
+    "kind": "weak",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 39,
+    "request": {
+      "mission_id": "m05_something_went_wrong",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Hiring Manager",
+      "question": "Tell me about a time you made a mistake at work.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "Honestly, my biggest mistake is probably taking on too much, because I find it really hard to say no when someone needs my help.",
+          "reason": "A real mistake, named plainly with its numbers, is what builds trust.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "We caught the error as a team during the review, and we sent out a corrected version, so in the end there was no real harm done.",
+          "reason": "Owning the cause and how fast I spoke up matters more than the error.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "In the end it wasn't a big deal, because my lead hadn't shared it widely yet, so luckily it didn't cause any real damage at all.",
+          "reason": "Show the habit I changed and still use, so the lesson is believable.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "Leave the tool out of it. What was your part?",
+      "reply": "We all used that export, so the mistake was really in the process. We changed the process afterwards, which was the main thing.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m05_something_went_wrong_guessed",
+    "mission_id": "m05_something_went_wrong",
+    "kind": "guessed",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 34,
+    "request": {
+      "mission_id": "m05_something_went_wrong",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Hiring Manager",
+      "question": "Tell me about a time you made a mistake at work.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "At Larkfield I sent my lead a ticket report saying half our tickets were password resets. The real number was one in three.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "evidence",
+          "line": "The export had duplicate rows I hadn't checked for. I told my lead that same afternoon, before the team meeting, and sent a corrected report.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "land",
+          "line": "Now I check for duplicates before any number leaves my desk, and on my project I asked a teammate to recheck our figures before the demo.",
+          "reason": null,
+          "guessed": true
+        }
+      ],
+      "follow_up_question": "And how did your lead take it?",
+      "reply": "Calmly. My lead thanked me for flagging it before the meeting, and then asked me to check the next month's report as well.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m06_the_follow_up_trap_strong",
+    "mission_id": "m06_the_follow_up_trap",
+    "kind": "strong",
+    "expected_overall": [
+      70,
+      100
+    ],
+    "engine_total": 82,
+    "request": {
+      "mission_id": "m06_the_follow_up_trap",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Senior Engineer",
+      "question": "So walk me through it again. What actually happened?",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "The short version: I counted duplicate rows, my report said half instead of one in three, and I told my lead that afternoon.",
+          "reason": "Asked again, give the same facts plainly, so the story holds.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "The export had 900 rows. 300 of them were duplicates. I counted every row, duplicates included. So resets looked like half of the tickets, not a third.",
+          "reason": "Exact numbers that add up are what make a retold story believable.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "So it's the same story I told Marcus: my mistake, caught the same day, and I've checked for duplicates before every report since.",
+          "reason": "Confirm it's the same story, and show what has changed since.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "If I gave you that export tomorrow, what would you do first?",
+      "reply": "Count the rows, then count the unique ticket IDs. If the two don't match, I'd find the duplicates before I calculate anything.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m06_the_follow_up_trap_weak",
+    "mission_id": "m06_the_follow_up_trap",
+    "kind": "weak",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 33,
+    "request": {
+      "mission_id": "m06_the_follow_up_trap",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Senior Engineer",
+      "question": "So walk me through it again. What actually happened?",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "Sure. As I told Marcus, the situation was my internship, and the task was to write a report on our support tickets.",
+          "reason": "Asked again, give the same facts plainly, so the story holds.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "I'd only been there three weeks, and nobody showed me the export. I counted every row, duplicates included. 300 of them were duplicates. The export had 900 rows.",
+          "reason": "Exact numbers that add up are what make a retold story believable.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "Anyway, I hope that's clearer. I'm happy to go through any other part of it again if that helps, or anything else at all.",
+          "reason": "Confirm it's the same story, and show what has changed since.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "You keep mentioning the export. What did you miss?",
+      "reply": "We all missed it, really. The whole team used that export every week, and nobody else had spotted it either.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m06_the_follow_up_trap_guessed",
+    "mission_id": "m06_the_follow_up_trap",
+    "kind": "guessed",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 34,
+    "request": {
+      "mission_id": "m06_the_follow_up_trap",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Senior Engineer",
+      "question": "So walk me through it again. What actually happened?",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "The short version: I counted duplicate rows, my report said half instead of one in three, and I told my lead that afternoon.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "evidence",
+          "line": "The export had 900 rows. 300 of them were duplicates. I counted every row, duplicates included. So resets looked like half of the tickets, not a third.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "land",
+          "line": "So it's the same story I told Marcus: my mistake, caught the same day, and I've checked for duplicates before every report since.",
+          "reason": null,
+          "guessed": true
+        }
+      ],
+      "follow_up_question": "If I gave you that export tomorrow, what would you do first?",
+      "reply": "Count the rows, then count the unique ticket IDs. If the two don't match, I'd find the duplicates before I calculate anything.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m07_first_round_review_strong",
+    "mission_id": "m07_first_round_review",
+    "kind": "strong",
+    "expected_overall": [
+      70,
+      100
+    ],
+    "engine_total": 82,
+    "request": {
+      "mission_id": "m07_first_round_review",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Hiring Manager",
+      "question": "Tell me about something you improved that nobody asked you to.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "At the campus café, where I worked part-time for two years, we opened late about twice a week, and nobody had a fix for it.",
+          "reason": "Pick an example that fits the question exactly: nobody asked me.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "I timed a few morning openings. The time went on hunting for keys and stock. So I wrote a one-page opening checklist. I tested it on my own shifts first.",
+          "reason": "Show what I measured, what I built and how I tested it.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "After that, the café opened on time every day for the rest of term, and I used the checklist to train three new staff.",
+          "reason": "End with the result that lasted, so the improvement is proven.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "Why did that one bother you enough to fix it?",
+      "reply": "Late openings meant a queue of annoyed students before their early lectures, and I was the one apologising to them every time.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m07_first_round_review_weak",
+    "mission_id": "m07_first_round_review",
+    "kind": "weak",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 35,
+    "request": {
+      "mission_id": "m07_first_round_review",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Hiring Manager",
+      "question": "Tell me about something you improved that nobody asked you to.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "I'm naturally proactive, so I'm always looking for things to improve. One example is from my part-time job at the campus café.",
+          "reason": "Pick an example that fits the question exactly: nobody asked me.",
+          "guessed": false
+        },
+        {
+          "kind": "evidence",
+          "line": "We agreed a new morning routine as a team. So I wrote a one-page opening checklist. The time went on hunting for keys and stock. I timed a few morning openings.",
+          "reason": "Show what I measured, what I built and how I tested it.",
+          "guessed": false
+        },
+        {
+          "kind": "land",
+          "line": "It was only a small thing in a café, to be honest, so I'm not sure it really counts as the kind of example you wanted from me.",
+          "reason": "End with the result that lasted, so the improvement is proven.",
+          "guessed": false
+        }
+      ],
+      "follow_up_question": "Who wrote the routine? You or the team?",
+      "reply": "It was a shared effort, honestly. I had the idea, but the whole team shaped it, so I wouldn't want to call it mine.",
+      "attempt_id": null
+    }
+  },
+  {
+    "id": "m07_first_round_review_guessed",
+    "mission_id": "m07_first_round_review",
+    "kind": "guessed",
+    "expected_overall": [
+      0,
+      50
+    ],
+    "engine_total": 34,
+    "request": {
+      "mission_id": "m07_first_round_review",
+      "hiring_for": "Product Associate at Northstar Labs (entry level)",
+      "interviewer_role": "Hiring Manager",
+      "question": "Tell me about something you improved that nobody asked you to.",
+      "beats": [
+        {
+          "kind": "open",
+          "line": "At the campus café, where I worked part-time for two years, we opened late about twice a week, and nobody had a fix for it.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "evidence",
+          "line": "I timed a few morning openings. The time went on hunting for keys and stock. So I wrote a one-page opening checklist. I tested it on my own shifts first.",
+          "reason": null,
+          "guessed": true
+        },
+        {
+          "kind": "land",
+          "line": "After that, the café opened on time every day for the rest of term, and I used the checklist to train three new staff.",
+          "reason": null,
+          "guessed": true
+        }
+      ],
+      "follow_up_question": "Why did that one bother you enough to fix it?",
+      "reply": "Late openings meant a queue of annoyed students before their early lectures, and I was the one apologising to them every time.",
+      "attempt_id": null
+    }
+  }
+]
