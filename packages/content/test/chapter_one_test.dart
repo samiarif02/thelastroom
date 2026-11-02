@@ -7,6 +7,11 @@ import 'paths.dart';
 /// Brief 07's checks over the whole of Chapter 1: every mission scores, branches and teaches
 /// as specified, and Mission 6 can challenge any Mission 5 answer.
 void main() {
+  final chapterOne = [
+    for (final m in gameContent.missions)
+      if (m.chapter == 1) m,
+  ];
+
   /// Every mission's best path reaches this, so a strong answer can feel strong.
   const minBestTotal = 85;
 
@@ -17,21 +22,19 @@ void main() {
     expect(validateContent(gameContent), isEmpty);
   });
 
-  test('Chapter 1 is the seven missions of brief §6, in order', () {
-    expect(
-      [for (final m in gameContent.missions) m.number],
-      [1, 2, 3, 4, 5, 6, 7],
-    );
-    expect(gameContent.missions.every((m) => m.chapter == 1), isTrue);
+  test('Chapter 1 is the seven missions of brief §6, in order, all picked', () {
+    expect([for (final m in chapterOne) m.number], [1, 2, 3, 4, 5, 6, 7]);
+    expect(gameContent.missions.take(7), chapterOne);
     expect([
-      for (final m in gameContent.missions) m.title,
+      for (final m in chapterOne) m.title,
     ], gameContent.chapters.first.missionTitles);
+    expect(chapterOne.every((m) => m.answerMode == AnswerMode.choices), isTrue);
   });
 
   test('Missions 1, 3 and 7 are unhinted; the rest may hint (FR-30)', () {
     expect(
       [
-        for (final m in gameContent.missions)
+        for (final m in chapterOne)
           if (!m.hinted) m.number,
       ],
       [1, 3, 7],
@@ -60,7 +63,7 @@ void main() {
       6: {lenaId},
       7: {priyaId, marcusId},
     };
-    for (final mission in gameContent.missions) {
+    for (final mission in chapterOne) {
       final speakers = {
         for (final line in mission.scene) line.speakerId,
         mission.question.speakerId,
@@ -81,14 +84,14 @@ void main() {
   test('only Mission 7 has an epilogue: the cliffhanger', () {
     expect(
       [
-        for (final m in gameContent.missions)
+        for (final m in chapterOne)
           if (m.epilogue.isNotEmpty) m.id,
       ],
       [missionFirstRoundReview.id],
     );
   });
 
-  for (final mission in gameContent.missions) {
+  for (final mission in chapterOne) {
     group(mission.id, () {
       final paths = allPaths(mission);
       final totals = [for (final p in paths) p.score.total];

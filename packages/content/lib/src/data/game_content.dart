@@ -10,6 +10,13 @@ import 'missions/m04_show_me_the_evidence.dart';
 import 'missions/m05_something_went_wrong.dart';
 import 'missions/m06_the_follow_up_trap.dart';
 import 'missions/m07_first_round_review.dart';
+import 'missions/m08_team_conflict.dart';
+import 'missions/m09_the_failure.dart';
+import 'missions/m10_no_clear_instructions.dart';
+import 'missions/m11_tight_deadline.dart';
+import 'missions/m12_the_uncomfortable_request.dart';
+import 'missions/m13_the_unexpected_follow_up.dart';
+import 'missions/m14_panel_review.dart';
 
 /// Everything the game ships, as one bundle: the app plays it, `validateContent` checks it.
 /// Bundled in the app as Dart, so it works offline with nothing fetched (ADR 0005).
@@ -29,4 +36,19 @@ const List<Mission> missions = [
   missionSomethingWentWrong,
   missionTheFollowUpTrap,
   missionFirstRoundReview,
+];
+
+/// Chapter 2, "Under Pressure" (brief 37): seven missions, all answered by voice. They
+/// validate (the content tests check them as a playable chapter), but they aren't in
+/// [missions] yet: the app can only play them once the voice player (brief 35) merges. The
+/// flip is `...chapterTwoMissions` at the end of [missions] and `playable: true` on Chapter 2
+/// in `chapters.dart`.
+const List<Mission> chapterTwoMissions = [
+  missionTeamConflict,
+  missionTheFailure,
+  missionNoClearInstructions,
+  missionTightDeadline,
+  missionTheUncomfortableRequest,
+  missionTheUnexpectedFollowUp,
+  missionPanelReview,
 ];

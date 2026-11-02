@@ -14,7 +14,7 @@ void main() {
   const maxBestIsLongestShare = 1 / 3;
 
   final textOf = {
-    for (final o in gameContent.missions.expand(allOptions)) o.id: o.text,
+    for (final o in choiceMissions.expand(allOptions)) o.id: o.text,
   };
 
   bool closeInLength(List<String> texts) {
@@ -26,7 +26,7 @@ void main() {
   bool isLongest(String text, List<String> texts) =>
       texts.every((t) => t.length <= text.length);
 
-  for (final mission in gameContent.missions) {
+  for (final mission in choiceMissions) {
     group(mission.id, () {
       final sets = optionSets(mission);
 
@@ -134,9 +134,12 @@ void main() {
     }
   });
 
-  test('every lesson is taught by some line', () {
+  test('every lesson is taught by some line or voice mission', () {
     final taught = {
-      for (final o in gameContent.missions.expand(allOptions)) o.lessonId,
+      for (final o in choiceMissions.expand(allOptions)) o.lessonId,
+      // Chapter 2 is written but locked until the voice player merges (brief 37).
+      for (final m in [...gameContent.missions, ...chapterTwoMissions])
+        ?m.voice?.lessonId,
     };
     for (final lesson in gameContent.lessons) {
       expect(taught, contains(lesson.id), reason: lesson.id);
