@@ -12,6 +12,7 @@ import '../../core/analytics/event_value.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../debrief/debrief_facts.dart';
+import '../debrief/then_now_slip.dart';
 import 'chapter_report.dart';
 import 'file_trouble.dart';
 import 'progress_screen.dart';
@@ -277,6 +278,17 @@ class _Report extends ConsumerWidget {
             ),
           ),
         ),
+        if (report.firstDraft case final then?)
+          enter(
+            Padding(
+              padding: const EdgeInsets.only(bottom: BrandSpace.md),
+              child: ThenNowSlip(
+                then: then,
+                now: report.latestAnswer,
+                nowMission: report.review.number,
+              ),
+            ),
+          ),
         enter(
           _Card(
             colors: [BrandVivid.night, BrandVivid.locked],

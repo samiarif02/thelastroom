@@ -16,6 +16,7 @@ import '../../core/notifications/reminder_primer.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
+import '../recall/recall_controller.dart';
 import 'elevator.dart';
 import 'settings_gear.dart';
 import 'tower_chapter_card.dart';
@@ -87,10 +88,26 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     ref.invalidate(towerRoomsProvider);
   }
 
+  /// Whether the tower was the route on top at the last dependency change.
+  bool _wasCurrent = true;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (MediaQuery.disableAnimationsOf(context)) _lighting.value = 1;
+    // Back on top by any way at all (a mission's end, the report, the Recall Room, the file,
+    // back): the rooms and the due cards are read again, so "up next", the chapter count and
+    // the Recall Room never show what was true before (brief 30's playthrough).
+    final current = _isCurrent;
+    if (current && !_wasCurrent) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref
+          ..invalidate(towerRoomsProvider)
+          ..invalidate(recallDueCountProvider);
+      });
+    }
+    _wasCurrent = current;
     // Depends on the route's status: runs again when a child (a mission, the file) is popped
     // and the tower is on top once more.
     if (_isCurrent && _loaded != null && !_opened) {
@@ -172,7 +189,9 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
 
   @override
   Widget build(BuildContext context) {
-    final rooms = ref.watch(towerRoomsProvider);
+    // The last rooms stay on screen while fresh ones load: a refresh never blanks the tower.
+    final rooms = ref.watch(towerRoomsProvider).value;
+    final recallDue = ref.watch(recallDueCountProvider).value ?? 0;
     final name =
         ref.watch(profileProvider).value?.displayName ??
         PlayerProfile.fallbackName;
@@ -181,21 +200,22 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
         fit: StackFit.expand,
         children: [
           const VividBackdrop(),
-          switch (rooms) {
-            AsyncData(:final value) => _Tower(
+          if (rooms case final value?)
+            _Tower(
               // A new `lit` replays the arrival: scroll to the room, then open.
               key: ValueKey(widget.lit),
               rooms: value,
               name: name,
               lighting: _lighting,
               lit: widget.lit,
+              recallFirst: recallDue > 0,
               onReady: () => _open(value),
               onTapRoom: (r) => _tapRoom(r, value),
               onProgress: () => context.go(Routes.progress),
               onSettings: () => context.go(Routes.settings),
-            ),
-            _ => const SizedBox.shrink(),
-          },
+            )
+          else
+            const SizedBox.shrink(),
           if (_notice case final notice?)
             _Notice(key: ValueKey(notice), text: notice),
           if (_riding case final room?)
@@ -221,12 +241,17 @@ class _Tower extends StatefulWidget {
     required this.onTapRoom,
     required this.onProgress,
     required this.onSettings,
+    this.recallFirst = false,
   });
 
   final List<TowerRoom> rooms;
   final String name;
   final Animation<double> lighting;
   final int? lit;
+
+  /// Cards are due: the Recall Room sits right under the hero, where it's seen, instead of
+  /// below the locked chapters.
+  final bool recallFirst;
   final VoidCallback onReady;
   final ValueChanged<TowerRoom> onTapRoom;
   final VoidCallback onProgress;
@@ -294,6 +319,7 @@ class _TowerState extends State<_Tower> {
                               onPlay: () => widget.onTapRoom(hero),
                             ),
                           ),
+                        if (widget.recallFirst) enter(const RecallRoomCard()),
                         for (final chapter in chapters)
                           enter(
                             AnimatedBuilder(
@@ -312,7 +338,7 @@ class _TowerState extends State<_Tower> {
                             ),
                           ),
                         enter(const LastRoomCard()),
-                        enter(const RecallRoomCard()),
+                        if (!widget.recallFirst) enter(const RecallRoomCard()),
                       ],
                     ),
                   ),

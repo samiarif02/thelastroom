@@ -2,6 +2,7 @@ import 'package:content/content.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/progress/progress_repository.dart';
+import '../mission/mission_resume.dart';
 
 /// How a room on the Tower looks (FR-31; Duolingo's path: done, START, locked).
 enum RoomState {
@@ -17,10 +18,18 @@ enum RoomState {
 
 /// One playable mission as a room.
 class TowerRoom {
-  const TowerRoom({required this.mission, required this.state, this.best});
+  const TowerRoom({
+    required this.mission,
+    required this.state,
+    this.best,
+    this.inProgress = false,
+  });
 
   final Mission mission;
   final RoomState state;
+
+  /// The player left an attempt here part-way: the tower says "Continue", not "Play".
+  final bool inProgress;
 
   /// The best total across the player's attempts; null until played.
   final int? best;
@@ -61,8 +70,9 @@ TowerRoom? heroRoom(List<TowerRoom> rooms) {
 /// current; the rest are locked. Pure, so the Tower's states are tested without a screen.
 List<TowerRoom> towerRooms(
   List<Mission> missions,
-  List<AttemptRecord> attempts,
-) {
+  List<AttemptRecord> attempts, {
+  Set<String> inProgress = const {},
+}) {
   final best = <String, int>{};
   for (final a in attempts) {
     final previous = best[a.missionId];
@@ -82,7 +92,14 @@ List<TowerRoom> towerRooms(
     } else {
       state = RoomState.locked;
     }
-    rooms.add(TowerRoom(mission: m, state: state, best: best[m.id]));
+    rooms.add(
+      TowerRoom(
+        mission: m,
+        state: state,
+        best: best[m.id],
+        inProgress: state != RoomState.locked && inProgress.contains(m.id),
+      ),
+    );
   }
   return rooms;
 }
@@ -93,5 +110,15 @@ final towerRoomsProvider = FutureProvider.autoDispose<List<TowerRoom>>((
   ref,
 ) async {
   final attempts = await ref.read(progressRepositoryProvider).attempts();
-  return towerRooms(missions, attempts);
+  final resume = ref.read(resumeStoreProvider);
+  final inProgress = <String>{};
+  for (final m in missions) {
+    // A store that can't be read only means no "Continue": the mission still offers it.
+    try {
+      if (await resume.load(m.id) != null) inProgress.add(m.id);
+    } on Object {
+      continue;
+    }
+  }
+  return towerRooms(missions, attempts, inProgress: inProgress);
 });

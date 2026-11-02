@@ -24,8 +24,8 @@ class AppDatabase extends GeneratedDatabase {
 
   static const String fileName = 'the_last_room';
 
-  /// Version 1. A later version adds an `onUpgrade` step; never edit these statements once
-  /// shipped (the same rule as the server's migrations).
+  /// Version 1. A later version adds an `onUpgrade` step ([upgrades]); never edit these
+  /// statements once shipped (the same rule as the server's migrations).
   static const List<String> schema = [
     // One row per finished attempt. Append-only, like `mission_attempts`; the draft never
     // leaves the device. The score isn't stored: the engine recomputes it from the picks.
@@ -77,17 +77,33 @@ class AppDatabase extends GeneratedDatabase {
     )''',
   ];
 
+  /// The steps from each version to the next: `upgrades[0]` takes version 1 to 2. A new
+  /// install runs [schema] and then every step, so both paths end at the same tables.
+  static const List<List<String>> upgrades = [
+    // 2 (brief 30): how each beat was played (the reason given, the time taken), so a stored
+    // attempt rescores exactly as the debrief scored it. JSON, like beat_option_ids; null on
+    // rows from version 1, which rescore at full credit as they always did.
+    ['alter table attempts add column beat_plays text'],
+  ];
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 1 + upgrades.length;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
-      for (final statement in schema) {
+      for (final statement in [...schema, ...upgrades.expand((u) => u)]) {
         await customStatement(statement);
+      }
+    },
+    onUpgrade: (m, from, to) async {
+      for (var version = from; version < to; version++) {
+        for (final statement in upgrades[version - 1]) {
+          await customStatement(statement);
+        }
       }
     },
   );

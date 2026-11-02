@@ -51,6 +51,7 @@ class DriftProgressRepository implements ProgressRepository {
           hinted: attempt.hinted,
           draft: attempt.draft,
           completedAt: completedAt,
+          beatPlays: attempt.beatPlays,
         ),
       );
       await Outbox(_db).add(OutboxKind.attempt, id);
@@ -127,6 +128,7 @@ class StoredAttempt {
     required this.completedAt,
     this.draft,
     this.contentSchemaVersion = currentContentVersion,
+    this.beatPlays = const [],
   });
 
   factory StoredAttempt.fromRow(QueryRow row) => StoredAttempt(
@@ -148,6 +150,10 @@ class StoredAttempt {
       isUtc: true,
     ),
     contentSchemaVersion: row.read<int>('content_schema_version'),
+    beatPlays: switch (row.readNullable<String>('beat_plays')) {
+      final json? => BeatPlayRecord.listFrom(jsonDecode(json)),
+      null => const [],
+    },
   );
 
   final String attemptId;
@@ -164,6 +170,9 @@ class StoredAttempt {
   final DateTime completedAt;
   final int contentSchemaVersion;
 
+  /// How each beat was played ([AttemptRecord.beatPlays]); empty on a version-1 row.
+  final List<BeatPlayRecord> beatPlays;
+
   /// The record the game reads, scored by the engine; null when the picks no longer match the
   /// content.
   AttemptRecord? toRecord() {
@@ -173,6 +182,7 @@ class StoredAttempt {
       followUpId: followUpId,
       replyOptionId: replyOptionId,
       hinted: hinted,
+      beatPlays: beatPlays,
     );
     if (score == null) return null;
     return AttemptRecord(
@@ -187,6 +197,7 @@ class StoredAttempt {
       draft: draft,
       attemptId: attemptId,
       completedAt: completedAt,
+      beatPlays: beatPlays,
     );
   }
 }
@@ -195,8 +206,9 @@ class StoredAttempt {
 Future<void> insertAttemptRow(AppDatabase db, StoredAttempt a) =>
     db.customStatement(
       'insert into attempts (attempt_id, mission_id, attempt_number, seed, beat_option_ids, '
-      'follow_up_id, reply_option_id, hinted, draft, completed_at, content_schema_version) '
-      'values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (attempt_id) do nothing',
+      'follow_up_id, reply_option_id, hinted, draft, completed_at, content_schema_version, '
+      'beat_plays) '
+      'values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (attempt_id) do nothing',
       [
         a.attemptId,
         a.missionId,
@@ -209,5 +221,9 @@ Future<void> insertAttemptRow(AppDatabase db, StoredAttempt a) =>
         a.draft,
         a.completedAt.millisecondsSinceEpoch,
         a.contentSchemaVersion,
+        if (a.beatPlays.isEmpty)
+          null
+        else
+          jsonEncode([for (final p in a.beatPlays) p.toJson()]),
       ],
     );

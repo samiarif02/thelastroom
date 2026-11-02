@@ -22,6 +22,7 @@ class RemoteAttempt {
     required this.beatOptionIds,
     required this.followUpId,
     required this.replyOptionId,
+    this.beatPlays,
   });
 
   /// Null when [row] lacks the picks (a row from before they were synced): it can't be
@@ -51,6 +52,10 @@ class RemoteAttempt {
       beatOptionIds: [for (final id in picks) '$id'],
       followUpId: followUp,
       replyOptionId: reply,
+      beatPlays: switch (row['beat_plays']) {
+        final List<Object?> plays => plays,
+        _ => null,
+      },
     );
   }
 
@@ -73,6 +78,10 @@ class RemoteAttempt {
   final String followUpId;
   final String replyOptionId;
 
+  /// How each beat was played (`beat_plays`, brief 30): `{reason_id, decided_us}` per beat. Null
+  /// on rows synced before it existed; a restore then scores them at full credit.
+  final List<Object?>? beatPlays;
+
   Map<String, Object?> toRow() => {
     'attempt_id': attemptId,
     'mission_id': missionId,
@@ -90,6 +99,7 @@ class RemoteAttempt {
     'beat_option_ids': beatOptionIds,
     'follow_up_id': followUpId,
     'reply_option_id': replyOptionId,
+    'beat_plays': ?beatPlays,
   };
 }
 

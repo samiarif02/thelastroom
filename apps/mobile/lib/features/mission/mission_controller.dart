@@ -72,6 +72,7 @@ class MissionState {
     this.saved,
     this.draft,
     this.earlierDraft,
+    this.baselineDraft,
     this.draftDone = false,
     this.followUp,
     this.reply,
@@ -98,6 +99,10 @@ class MissionState {
 
   /// The words from the player's first attempt at this mission that has any, for a replay.
   final String? earlierDraft;
+
+  /// On the mission that closes the chapter: the player's Mission 1 draft, for "Then / Now"
+  /// (FR-41). Null elsewhere, or when it was skipped.
+  final String? baselineDraft;
 
   /// What the dossier shows as "Your first try": this attempt's words, else an earlier one's.
   String? get firstTry => draft ?? earlierDraft;
@@ -179,6 +184,21 @@ class MissionState {
     );
   }
 
+  /// What the interviewer says to beat [index]'s play, landing as [quality]. A built answer
+  /// that's weak with no decoy in it (the right pieces, out of order or one short) gets its
+  /// build's own line: the beat's weak reaction answers the picked lines' mistakes instead.
+  SceneLine? reactionFor(int index, PickQuality quality) {
+    final beat = mission.beats[index];
+    final build = beat.build;
+    if (build != null && quality == PickQuality.weak && index < plays.length) {
+      final placed = parseBuildOptionId(plays[index].option.id)?.placed;
+      if (placed != null && scoreBuild(build.spec, placed).decoysUsed.isEmpty) {
+        return build.weakReaction;
+      }
+    }
+    return beat.reaction?.forQuality(quality);
+  }
+
   /// The follow-up's replies in this attempt's order.
   List<AnswerOption> get replyOptions {
     final followUp = this.followUp;
@@ -209,6 +229,7 @@ class MissionState {
     playerName: playerName,
     draft: draft ?? this.draft,
     earlierDraft: earlierDraft,
+    baselineDraft: baselineDraft,
     plays: plays ?? this.plays,
     resumed: resumed,
     saved: saved,
@@ -281,6 +302,9 @@ class MissionController extends AsyncNotifier<MissionState> {
       question: mission.question.addressedTo(name),
       playerName: name,
       earlierDraft: previous.map((a) => a.draft).nonNulls.firstOrNull,
+      baselineDraft: mission.closesChapter
+          ? (await _progress.baseline())?.draft
+          : null,
       saved: saved == null ? null : _validated(mission, saved),
     );
   }
@@ -352,6 +376,7 @@ class MissionController extends AsyncNotifier<MissionState> {
         question: now.question,
         playerName: now.playerName,
         earlierDraft: now.earlierDraft,
+        baselineDraft: now.baselineDraft,
         draft: saved.draft,
         draftDone: saved.draftDone,
         plays: plays,
@@ -378,6 +403,7 @@ class MissionController extends AsyncNotifier<MissionState> {
         question: now.question,
         playerName: now.playerName,
         earlierDraft: now.earlierDraft,
+        baselineDraft: now.baselineDraft,
       ),
     );
     await _guarded(() => ref.read(resumeStoreProvider).clear(now.mission.id));
@@ -571,6 +597,10 @@ class MissionController extends AsyncNotifier<MissionState> {
         score: score,
         hinted: now.mission.hinted,
         draft: now.draft,
+        beatPlays: [
+          for (final p in now.plays)
+            BeatPlayRecord(reasonId: p.reason?.id, decidedIn: p.decidedIn),
+        ],
       ),
     );
     final bucket = EventValue.name(ScoreBucket.of(score.total));

@@ -230,6 +230,7 @@ class MissionRow extends StatelessWidget {
   final double lighting;
 
   static const String play = 'Play';
+  static const String continuePlay = 'Continue';
   static String lockedLine(int before) => 'Finish Mission $before to open';
 
   static const double _disc = 40;
@@ -242,8 +243,12 @@ class MissionRow extends StatelessWidget {
   String get semantics {
     final m = room.mission;
     return switch (room.state) {
+      RoomState.done when room.inProgress =>
+        'Mission ${m.number}, ${m.title}. Done, best score ${room.best}. Left part-way: tap to continue.',
       RoomState.done =>
         'Mission ${m.number}, ${m.title}. Done, best score ${room.best}. Tap to play again.',
+      RoomState.current when room.inProgress =>
+        'Mission ${m.number}, ${m.title}. Left part-way: continue.',
       RoomState.current => 'Mission ${m.number}, ${m.title}. Play.',
       RoomState.locked => 'Mission ${m.number}, ${m.title}. Locked.',
     };
@@ -307,7 +312,9 @@ class MissionRow extends StatelessWidget {
               best: room.best ?? 0,
               size: 14,
             ),
-            RoomState.current => const _PlayChip(),
+            RoomState.current => _PlayChip(
+              label: room.inProgress ? continuePlay : play,
+            ),
             RoomState.locked => LockGlyph(
               color: BrandVivid.onDeepSoft,
               size: 18,
@@ -361,7 +368,9 @@ class _Disc extends StatelessWidget {
 }
 
 class _PlayChip extends StatelessWidget {
-  const _PlayChip();
+  const _PlayChip({required this.label});
+
+  final String label;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -375,7 +384,7 @@ class _PlayChip extends StatelessWidget {
         vertical: BrandSpace.xs + 2,
       ),
       child: Text(
-        MissionRow.play.toUpperCase(),
+        label.toUpperCase(),
         style: BrandVividType.kicker.copyWith(
           color: BrandVivid.onAccent,
           fontWeight: FontWeight.w800,

@@ -150,6 +150,10 @@ const missionFirstRoundReview = Mission(
         ],
         orderLessonId: 'lesson_one_story',
         missingLessonId: 'lesson_be_concrete',
+        weakReaction: SceneLine(
+          speakerId: marcusId,
+          text: "I can see it. Tell it start to finish, and don't skip a step.",
+        ),
       ),
       why: ReasonPrompt(
         line: SceneLine(speakerId: marcusId, text: 'Why tell it like that?'),

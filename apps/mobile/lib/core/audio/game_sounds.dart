@@ -71,6 +71,9 @@ abstract interface class GameSounds {
   /// The player tapped a locked room: its sound, heard through the door.
   void lockedRoomTapped();
 
+  /// Mission 7's epilogue begins: the chapter's cliffhanger sting (FR-30).
+  void cliffhanger();
+
   /// Every sound stops (leaving the scene, app paused).
   void stopAll();
 }
@@ -138,6 +141,9 @@ class SilentGameSounds implements GameSounds {
 
   @override
   void lockedRoomTapped() {}
+
+  @override
+  void cliffhanger() {}
 
   @override
   void stopAll() {}
