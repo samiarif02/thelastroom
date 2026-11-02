@@ -18,6 +18,7 @@ class BuildBeat implements Identified {
     required this.decoys,
     required this.orderLessonId,
     required this.missingLessonId,
+    required this.weakReaction,
   });
 
   @override
@@ -35,6 +36,11 @@ class BuildBeat implements Identified {
 
   /// The lesson taught when too much was left out ([Flag.vague]).
   final String missingLessonId;
+
+  /// What the interviewer says to a build that's weak with no decoy in it: the right pieces,
+  /// out of order or with one missing. The beat's own weak reaction is written for the picked
+  /// lines' mistakes ("we", vague), which such a build doesn't make (brief 30's playthrough).
+  final SceneLine weakReaction;
 
   /// Every fragment, parts then decoys. The mission player shuffles them.
   List<Fragment> get fragments => [...parts, ...decoys];

@@ -22,6 +22,7 @@ import 'debrief_facts.dart';
 import 'first_try_slip.dart';
 import 'reasoning_slip.dart';
 import 'red_pen_slip.dart';
+import 'then_now_slip.dart';
 
 /// The debrief (FR-15): the candidate file slides across the walnut into the lamp's pool, the
 /// four scores are stamped, the total sealed in wax, and the pen marks the line that cost the
@@ -36,6 +37,7 @@ class DebriefView extends ConsumerStatefulWidget {
     this.firstTry,
     this.reasoning = const [],
     this.scoreRequest,
+    this.baselineDraft,
   });
 
   final Mission mission;
@@ -53,6 +55,10 @@ class DebriefView extends ConsumerStatefulWidget {
 
   /// The answer for the AI recruiter (brief 22). Null: the engine's score, as "Offline score".
   final ScoreRequest? scoreRequest;
+
+  /// The player's Mission 1 draft, on the mission that closes the chapter: "Then / Now" sets it
+  /// beside this answer (FR-41). Null elsewhere, or when the draft was skipped.
+  final String? baselineDraft;
 
   static const String title = 'Candidate assessment';
   static const String continueLabel = 'Back to the tower';
@@ -230,6 +236,8 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                       )
                     else if (widget.score.guessed)
                       GuessedSlip(beats: widget.score.guessedBeats)
+                    else if (CostSlip.applies(widget.reasoning))
+                      CostSlip(beats: widget.reasoning)
                     else
                       const CleanRunSlip(),
                     if (widget.reasoning.any(
@@ -243,6 +251,15 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                       FirstTrySlip(
                         firstTry: words,
                         stronger: strongestOpening(widget.mission).text,
+                      ),
+                    ],
+                    if (widget.baselineDraft case final then?) ...[
+                      const SizedBox(height: BrandSpace.md),
+                      ThenNowSlip(
+                        then: then,
+                        now: [for (final b in widget.reasoning) b.line.text]
+                            .join(' '),
+                        nowMission: widget.mission.number,
                       ),
                     ],
                     const SizedBox(height: BrandSpace.lg),

@@ -165,3 +165,57 @@ class _BeatRow extends StatelessWidget {
     );
   }
 }
+
+/// No line had a lesson and nothing was guessed, yet points were lost: a built answer missing a
+/// piece or out of order, or the right line for the wrong reason. Says which beats and why, so
+/// the dossier never reads "nothing to mark" over a lower score (brief 30's playthrough).
+class CostSlip extends StatelessWidget {
+  const CostSlip({super.key, required this.beats});
+
+  /// Every beat, in order; only the ones that lost points are named.
+  final List<BeatReasoning> beats;
+
+  static const String heading = 'WHAT COST YOU';
+  static const String rightLineWrongReason = 'the right line, not why it works';
+  static const String notStrongest = 'not the strongest line';
+  static const String takeaway =
+      'Nothing to underline, but these beats kept less than full marks. Your reasoning, below, '
+      'shows each one.';
+
+  /// Whether [beat] lost points that no lesson explains.
+  static bool lost(BeatReasoning beat) =>
+      !beat.guessed &&
+      ((beat.built?.perfect == false) ||
+          beat.sound == false ||
+          (beat.built == null && !beat.strongest));
+
+  /// Whether any beat in [beats] did: the dossier shows this slip instead of the clean one.
+  static bool applies(List<BeatReasoning> beats) => beats.any(lost);
+
+  /// "The evidence: 1 piece out of order."
+  static String line(BeatReasoning beat) {
+    final what = switch (beat) {
+      BeatReasoning(:final built?) => ReasoningSlip.buildNote(
+        built,
+      ).toLowerCase(),
+      BeatReasoning(sound: false) => rightLineWrongReason,
+      _ => notStrongest,
+    };
+    return 'The ${beat.kind.name}: $what.';
+  }
+
+  @override
+  Widget build(BuildContext context) => PaperSlip(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(heading, style: BrandType.label.copyWith(color: SlipInk.soft)),
+        const SizedBox(height: BrandSpace.sm),
+        for (final beat in beats.where(lost))
+          Text(line(beat), style: BrandType.body.copyWith(color: SlipInk.mark)),
+        const SizedBox(height: BrandSpace.sm),
+        Text(takeaway, style: BrandType.body.copyWith(color: SlipInk.text)),
+      ],
+    ),
+  );
+}

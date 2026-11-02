@@ -71,6 +71,9 @@ abstract interface class GameSounds {
   /// The player tapped a locked room: its sound, heard through the door.
   void lockedRoomTapped();
 
+  /// Mission 7's epilogue begins: the chapter's cliffhanger sting (FR-30).
+  void cliffhanger();
+
   /// A skill unlocked (brief 32): a glassy rising shimmer and a soft bell.
   void skillUnlocked();
 
@@ -141,6 +144,9 @@ class SilentGameSounds implements GameSounds {
 
   @override
   void lockedRoomTapped() {}
+
+  @override
+  void cliffhanger() {}
 
   @override
   void skillUnlocked() {}

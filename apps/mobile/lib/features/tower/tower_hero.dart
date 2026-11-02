@@ -19,11 +19,18 @@ class TowerHero extends StatelessWidget {
   static const String upNext = 'UP NEXT';
   static const String beatYourBest = 'BEAT YOUR BEST';
   static const String playAgain = 'Play again';
+  static const String continueLabel = 'Continue';
+
+  /// What the Play button says on screen.
+  static String buttonLabel(TowerRoom room) => room.inProgress
+      ? continueLabel
+      : room.state == RoomState.done
+      ? playAgain
+      : VividButton.playLabel;
 
   /// What the Play button says to a screen reader.
   static String playLabel(TowerRoom room) =>
-      '${room.state == RoomState.done ? playAgain : VividButton.playLabel} '
-      'Mission ${room.mission.number}, ${room.mission.title}';
+      '${buttonLabel(room)} Mission ${room.mission.number}, ${room.mission.title}';
 
   static const double _badge = 84;
 
@@ -126,7 +133,7 @@ class TowerHero extends StatelessWidget {
                     excludeSemantics: true,
                     onTap: onPlay,
                     child: VividButton.play(
-                      label: replay ? playAgain : VividButton.playLabel,
+                      label: buttonLabel(room),
                       expand: true,
                       onPressed: onPlay,
                     ),

@@ -7,20 +7,31 @@ import 'package:the_last_room/core/profile/profile_repository.dart';
 /// The rows the app sends and the database's migrations must agree, or every sync fails on the
 /// phone while the tests stay green.
 void main() {
-  final sql = [
+  // In the order they're applied: by file name (the timestamp).
+  final files = [
     for (final f in Directory(
       '../../supabase/migrations',
     ).listSync().whereType<File>())
-      if (f.path.endsWith('.sql')) f.readAsStringSync(),
-  ].join('\n');
+      if (f.path.endsWith('.sql')) f,
+  ]..sort((a, b) => a.path.compareTo(b.path));
+  final sql = [for (final f in files) f.readAsStringSync()].join('\n');
 
-  /// The columns of the last `grant <privilege> (...) on table public.<table>`.
+  /// The columns a client holds `<privilege>` on for `public.<table>`: every column grant since
+  /// the last table-wide revoke. Postgres adds column grants up, so a later migration's grant
+  /// (brief 30's `beat_plays`) extends the earlier list rather than replacing it.
   Set<String> granted(String privilege, String table) {
-    final grants = RegExp(
-      'grant $privilege \\(([^)]*)\\)\\s*on table public\\.$table',
+    final revokes = RegExp(
+      'revoke [a-z, ]*$privilege[a-z, ]* on table public\\.$table\\b',
     ).allMatches(sql).toList();
+    final since = revokes.isEmpty ? 0 : revokes.last.end;
+    final grants = RegExp(
+      'grant $privilege \\(([^)]*)\\)\\s*on table public\\.$table\\b',
+    ).allMatches(sql.substring(since)).toList();
     expect(grants, isNotEmpty, reason: '$privilege grant on $table');
-    return grants.last.group(1)!.split(',').map((c) => c.trim()).toSet();
+    return {
+      for (final g in grants)
+        for (final c in g.group(1)!.split(',')) c.trim(),
+    };
   }
 
   final attempt = RemoteAttempt(
@@ -40,6 +51,9 @@ void main() {
     beatOptionIds: const ['o'],
     followUpId: 'f',
     replyOptionId: 'r',
+    beatPlays: const [
+      {'reason_id': 'o_r1', 'decided_us': 3200000},
+    ],
   );
 
   test('an attempt row sends exactly the columns a client may insert', () {

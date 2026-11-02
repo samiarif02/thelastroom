@@ -10,7 +10,9 @@ import 'package:the_last_room/features/debrief/ai_score_store.dart';
 import 'package:the_last_room/features/debrief/ai_verdict_cards.dart';
 import 'package:the_last_room/features/debrief/debrief_view.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
+import 'package:the_last_room/features/mission/scene/epilogue_scene.dart';
 import 'package:the_last_room/features/mission/widgets/leave_control.dart';
+import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
 import 'package:the_last_room/features/progress/chapter_report.dart';
 import 'package:the_last_room/features/progress/chapter_report_screen.dart';
@@ -281,6 +283,19 @@ void main() {
           1,
         );
         await _tapText(rig, DebriefView.reportLabel);
+        // The chapter's cliffhanger plays first (brief 30), then the report.
+        await rig.until(find.byType(EpilogueScene));
+        for (var i = 0; i < review.epilogue.length - 1; i++) {
+          await rig.until(find.byType(NextControl));
+          await tester.tap(find.byType(NextControl));
+          await tester.pump();
+        }
+        final done = find.descendant(
+          of: find.byType(EpilogueScene),
+          matching: find.text(DebriefView.reportLabel),
+        );
+        await rig.until(done);
+        await tester.tap(done);
         await rig.until(find.text(ChapterReportScreen.honest));
       },
     );

@@ -305,6 +305,7 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
         }
       }
     }
+    checkSpeaker(build.id, build.weakReaction);
     checkLesson(build.id, build.orderLessonId, Flag.rambling);
     checkLesson(build.id, build.missingLessonId, Flag.vague);
     checkWords(build.id, build.strongAnswer.text);

@@ -23,6 +23,7 @@ import 'package:the_last_room/features/mission/widgets/build_panel.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
+import 'package:the_last_room/features/recall/recall_store.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
 /// How long the harness "reads" the cards before picking: well past `guessThreshold`.
@@ -86,6 +87,9 @@ class RecordingSounds implements GameSounds {
 
   @override
   void subtitleCompleted() => calls.add(('subtitleCompleted', const []));
+
+  @override
+  void cliffhanger() => calls.add(('cliffhanger', const []));
 
   @override
   void questionLands() => calls.add(('questionLands', const []));
@@ -172,6 +176,7 @@ class MissionRig {
   final FlakyProgressRepository progress = FlakyProgressRepository();
   final InMemoryResumeStore resume = InMemoryResumeStore();
   final InMemoryAiScoreStore aiScores = InMemoryAiScoreStore();
+  final InMemoryRecallStore recall = InMemoryRecallStore();
   late final ProviderContainer container;
 
   /// The debrief's AI scorer; null keeps the app's (no backend in tests: "Offline score").
@@ -199,6 +204,7 @@ class MissionRig {
         attemptSeedProvider.overrideWithValue(() => testSeed),
         resumeStoreProvider.overrideWithValue(resume),
         aiScoreStoreProvider.overrideWithValue(aiScores),
+        recallStoreProvider.overrideWithValue(recall),
         routerProvider.overrideWithValue(router),
         if (scorer case final s?) aiScorerProvider.overrideWithValue(s),
       ],
@@ -257,7 +263,7 @@ class MissionRig {
 
   /// Records a played attempt (first options, read slowly) at every mission before [number], so
   /// the tower's rule (rooms open in order) lets a test start at [number]. Call before [boot].
-  Future<void> unlockThrough(int number) async {
+  Future<void> unlockThrough(int number, {String? baselineDraft}) async {
     for (final m in missions.where((m) => m.number < number)) {
       final beats = [
         for (final b in m.beats)
@@ -280,6 +286,7 @@ class MissionRig {
             ),
           ),
           hinted: m.hinted,
+          draft: m.isBaseline ? baselineDraft : null,
         ),
       );
     }

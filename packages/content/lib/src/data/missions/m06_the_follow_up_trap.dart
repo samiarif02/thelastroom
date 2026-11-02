@@ -195,6 +195,10 @@ const missionTheFollowUpTrap = Mission(
         ],
         orderLessonId: 'lesson_one_story',
         missingLessonId: 'lesson_be_concrete',
+        weakReaction: SceneLine(
+          speakerId: lenaId,
+          text: 'Right facts. Give me all of them, in the order they happened.',
+        ),
       ),
       why: ReasonPrompt(
         line: SceneLine(speakerId: lenaId, text: 'Why give me that?'),

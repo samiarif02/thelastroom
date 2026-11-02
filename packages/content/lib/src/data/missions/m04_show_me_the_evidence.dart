@@ -141,6 +141,10 @@ const missionShowMeTheEvidence = Mission(
         ],
         orderLessonId: 'lesson_one_story',
         missingLessonId: 'lesson_be_concrete',
+        weakReaction: SceneLine(
+          speakerId: marcusId,
+          text: 'Good facts. Now put them in order, and leave nothing out.',
+        ),
       ),
       why: ReasonPrompt(
         line: SceneLine(speakerId: marcusId, text: 'Why those details?'),

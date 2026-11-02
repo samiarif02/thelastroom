@@ -77,76 +77,80 @@ class _SceneSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final insets = MediaQuery.paddingOf(context);
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        ColoredBox(color: BrandVivid.night.withValues(alpha: _scrim)),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Semantics(
-            scopesRoute: true,
-            namesRoute: true,
-            explicitChildNodes: true,
-            label: title,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [grade.deep, grade.deeper],
+    // The sheet is all a screen reader reaches: the scene and its cards behind it are out of
+    // the semantics tree while it's up (brief 30's playthrough).
+    return BlockSemantics(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ColoredBox(color: BrandVivid.night.withValues(alpha: _scrim)),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Semantics(
+              scopesRoute: true,
+              namesRoute: true,
+              explicitChildNodes: true,
+              label: title,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [grade.deep, grade.deeper],
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(_radius),
+                  ),
+                  boxShadow: BrandVivid.cardShadow,
                 ),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(_radius),
-                ),
-                boxShadow: BrandVivid.cardShadow,
-              ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  BrandSpace.lg,
-                  BrandSpace.lg,
-                  BrandSpace.lg,
-                  insets.bottom + BrandSpace.lg,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Semantics(
-                      header: true,
-                      child: Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: BrandVividType.title,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    BrandSpace.lg,
+                    BrandSpace.lg,
+                    BrandSpace.lg,
+                    insets.bottom + BrandSpace.lg,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          title,
+                          textAlign: TextAlign.center,
+                          style: BrandVividType.title,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: BrandSpace.sm),
-                    Text(
-                      line,
-                      textAlign: TextAlign.center,
-                      style: BrandVividType.body,
-                    ),
-                    const SizedBox(height: BrandSpace.lg),
-                    VividButton(
-                      label: primary,
-                      expand: true,
-                      onPressed: onPrimary,
-                    ),
-                    const SizedBox(height: BrandSpace.sm),
-                    VividButton(
-                      label: secondary,
-                      primary: false,
-                      expand: true,
-                      onPressed: onSecondary,
-                    ),
-                  ],
+                      const SizedBox(height: BrandSpace.sm),
+                      Text(
+                        line,
+                        textAlign: TextAlign.center,
+                        style: BrandVividType.body,
+                      ),
+                      const SizedBox(height: BrandSpace.lg),
+                      VividButton(
+                        label: primary,
+                        expand: true,
+                        onPressed: onPrimary,
+                      ),
+                      const SizedBox(height: BrandSpace.sm),
+                      VividButton(
+                        label: secondary,
+                        primary: false,
+                        expand: true,
+                        onPressed: onSecondary,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

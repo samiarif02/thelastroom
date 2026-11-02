@@ -693,6 +693,10 @@ void main() {
       decoys: decoys,
       orderLessonId: orderLessonId,
       missingLessonId: missingLessonId,
+      weakReaction: const SceneLine(
+        speakerId: 'priya',
+        text: 'In order, please.',
+      ),
     );
 
     List<String> problemsWith(BuildBeat b) {
