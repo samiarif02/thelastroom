@@ -24,6 +24,7 @@ import 'tower_chapter_card.dart';
 import 'tower_extras.dart';
 import 'tower_hero.dart';
 import 'tower_rooms.dart';
+import 'welcome_back_card.dart';
 
 /// Home (FR-31, brief §9 "the building", rebuilt in brief 17): the evening sky over the city,
 /// and on it, top to bottom: the mission to play next as a hero card with one "Play" (one tap
@@ -313,6 +314,7 @@ class _TowerState extends State<_Tower> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        WelcomeBackCard(quiet: widget.lit != null),
                         if (hero != null)
                           enter(
                             TowerHero(

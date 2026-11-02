@@ -27,6 +27,7 @@ class PlannedReminder {
     required this.body,
     required this.variant,
     this.missionNumber,
+    this.interviewerId,
   });
 
   /// Stable per day of the plan, so a re-plan replaces rather than duplicates.
@@ -44,6 +45,9 @@ class PlannedReminder {
   /// Where a tap goes: the mission for a nudge, the Recall Room when null.
   final int? missionNumber;
 
+  /// Who sends a nudge ("from Priya" in Settings); null for the Recall Room.
+  final String? interviewerId;
+
   @override
   String toString() => 'PlannedReminder($id, $at, ${kind.name}, "$body")';
 }
@@ -54,9 +58,10 @@ class PlannedReminder {
 /// - **Never today.** The player is here now; the plan starts tomorrow.
 /// - **At most one a day,** at the time of day the player last opened the game (their habit),
 ///   kept between [earliestMinute] and [latestMinute]: never after 21:00, never early.
-/// - **Kind, then backing off.** Days 1, 2 and 3; if those three went unanswered the player
-///   hasn't opened the game since (any open re-plans), so after them only every third day
-///   (day 6), then silence until they come back. [planDays].
+/// - **Kind, then backing off.** The day after, then every other day (days 3 and 5: the days
+///   the game wants the player back, brief 42); if those three went unanswered the player
+///   hasn't opened the game since (any open re-plans), so after them a three-day gap (day 8),
+///   then silence until they come back. [planDays].
 /// - **Recall first:** a day with cards due in the Recall Room gets "N traps are waiting";
 ///   otherwise the next mission's interviewer nudges, in character. With nothing due and no
 ///   mission left, that day is quiet.
@@ -77,7 +82,7 @@ List<PlannedReminder> planReminders({
     latestMinute,
   );
   final plan = <PlannedReminder>[];
-  for (final day in planDays) {
+  for (final (index, day) in planDays.indexed) {
     final at = DateTime(
       now.year,
       now.month,
@@ -85,7 +90,8 @@ List<PlannedReminder> planReminders({
       minute ~/ _minutesPerHour,
       minute % _minutesPerHour,
     );
-    final variant = day % ReminderCopy.variants;
+    // By position, so the reminders in one plan never repeat a wording back to back.
+    final variant = index % ReminderCopy.variants;
     final due = recallDue(DateTime(at.year, at.month, at.day));
     if (due > 0) {
       plan.add(
@@ -108,6 +114,7 @@ List<PlannedReminder> planReminders({
           body: _nudgeBody(nextMission, variant, at, interviewDate),
           variant: variant,
           missionNumber: nextMission.number,
+          interviewerId: nextMission.interviewerId,
         ),
       );
     }
@@ -133,9 +140,12 @@ String _nudgeBody(
   return days < 0 ? line : ReminderCopy.withCountdown(days, line);
 }
 
-/// The days (from today) a plan may use: three in a row, then, if those were ignored, every
-/// third day. Seven days ahead at most (ADR 0004); the next open re-plans anyway.
-const List<int> planDays = [1, 2, 3, 6];
+/// The days (from today, the last time the game was open) a plan may use: tomorrow, then every
+/// other day, so a player who installs and plays on day 0 hears from us on days 1, 3 and 5
+/// (brief 42: the owner's day-3 and day-5 return); if all three were ignored, a longer gap
+/// (FR-51's back-off) to day 8, then nothing more until the next open re-plans. The gaps only
+/// grow: 1, 2, 2, 3.
+const List<int> planDays = [1, 3, 5, 8];
 
 /// 09:00: nothing before the day has started.
 const int earliestMinute = 9 * _minutesPerHour;
