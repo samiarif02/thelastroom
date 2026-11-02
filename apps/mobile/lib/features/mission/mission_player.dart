@@ -604,7 +604,9 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
         ],
         grade: grade,
         sounds: _sounds,
-        doneLabel: DebriefView.reportLabel,
+        doneLabel: mission.leadsToReport
+            ? DebriefView.reportLabel
+            : DebriefView.continueLabel,
         onDone: widget.onExit,
       );
     }

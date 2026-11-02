@@ -147,7 +147,11 @@ class _VoiceDebriefState extends ConsumerState<VoiceDebrief> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      DebriefRewards(mission: mission, grade: grade),
+                      DebriefRewards(
+                        mission: mission,
+                        grade: grade,
+                        ready: _settled,
+                      ),
                       const SizedBox(height: BrandSpace.md),
                       if (verdict != null)
                         AiBasisSlip(score: verdict.score, grade: grade)
@@ -180,7 +184,7 @@ class _VoiceDebriefState extends ConsumerState<VoiceDebrief> {
                       ],
                       const SizedBox(height: BrandSpace.lg),
                       VividButton(
-                        label: mission.closesChapter
+                        label: mission.leadsToReport
                             ? DebriefView.reportLabel
                             : DebriefView.continueLabel,
                         expand: true,
@@ -243,9 +247,10 @@ class SelfCheckBasisSlip extends StatelessWidget {
 
   static String basis(Dimension d, PointTally t) {
     final name = d.name;
-    final points = t.of == 1 ? 'point' : 'points';
+    // "1 point that earns", "2 points that earn" (brief 44: it said "1 point that earn").
+    final points = t.of == 1 ? 'point that earns' : 'points that earn';
     return t.direct
-        ? 'You ticked ${t.made} of the ${t.of} $points that earn $name.'
+        ? 'You ticked ${t.made} of the ${t.of} $points $name.'
         : 'No point earns $name on its own here, so it takes your share of all '
               'points: ${t.made} of ${t.of}.';
   }

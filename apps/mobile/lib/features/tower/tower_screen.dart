@@ -340,7 +340,7 @@ class _TowerState extends State<_Tower> {
                               ),
                             ),
                           ),
-                        enter(const LastRoomCard()),
+                        enter(LastRoomCard(room: widget.rooms.lastOrNull)),
                         if (!widget.recallFirst) enter(const RecallRoomCard()),
                         enter(const ProgressionCard()),
                       ],

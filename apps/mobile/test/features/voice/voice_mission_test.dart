@@ -289,6 +289,23 @@ void main() {
     );
   });
 
+  test('the self-check basis agrees with one point and with two', () {
+    expect(
+      SelfCheckBasisSlip.basis(
+        Dimension.structure,
+        const PointTally(made: 0, of: 1, direct: true),
+      ),
+      'You ticked 0 of the 1 point that earns structure.',
+    );
+    expect(
+      SelfCheckBasisSlip.basis(
+        Dimension.relevance,
+        const PointTally(made: 1, of: 2, direct: true),
+      ),
+      'You ticked 1 of the 2 points that earn relevance.',
+    );
+  });
+
   test('a stored voice attempt keeps no audio and no words', () {
     const record = VoiceAnswerRecord(
       madePointIds: ['m08_names_change'],
