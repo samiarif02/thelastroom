@@ -23,8 +23,8 @@ enum AnswerCardState {
 }
 
 /// An answer as a vivid card (brief 23: the mission's `ChoiceCard` look, everywhere): the
-/// chapter's gradient lifted off the sky with a soft deep shadow, the italic numeral in the
-/// chapter's glow. Focused, its edge brightens; selected, a sunflower ring lights it; locked, the
+/// chapter's gradient lifted off the sky with a soft deep shadow, the italic numeral in soft
+/// white. Focused, its edge brightens; selected, a sunflower ring lights it; locked, the
 /// ring holds and a sunflower bar marks it; disabled, it fades back. It sinks under the finger
 /// (`Pressable`). At least [BrandSpace.minTarget] tall; the text wraps (2x text grows the card,
 /// never clips it).
@@ -121,7 +121,10 @@ class AnswerCard extends StatelessWidget {
                           child: Text(
                             numeral,
                             style: BrandVividType.row.copyWith(
-                              color: lit ? BrandVivid.accent : grade.glow,
+                              // Glow isn't AA on a card's lit side in every theme; soft white is (brief 31).
+                              color: lit
+                                  ? BrandVivid.accent
+                                  : BrandVivid.onDeepSoft,
                               fontStyle: FontStyle.italic,
                             ),
                           ),

@@ -28,32 +28,10 @@ class SettingsScreen extends StatelessWidget {
         bottom: false,
         child: Column(
           children: [
-            ColoredBox(
-              color: BrandVivid.skyTop,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  BrandSpace.md,
-                  BrandSpace.sm,
-                  BrandSpace.md,
-                  BrandSpace.sm,
-                ),
-                child: Row(
-                  children: [
-                    VividButton(
-                      label: '‹  $back',
-                      primary: false,
-                      onPressed: () => context.go(Routes.tower()),
-                    ),
-                    const SizedBox(width: BrandSpace.md),
-                    Expanded(
-                      child: Semantics(
-                        header: true,
-                        child: Text(title, style: BrandVividType.title),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            VividHeader(
+              title: title,
+              backLabel: back,
+              onBack: () => context.go(Routes.tower()),
             ),
             Expanded(
               child: SingleChildScrollView(

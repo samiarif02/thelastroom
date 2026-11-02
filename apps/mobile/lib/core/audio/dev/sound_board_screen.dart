@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../features/settings/audio/audio_settings_section.dart';
+import '../../../ui/vivid/vivid_panel.dart';
 import '../audio_providers.dart';
 import '../audio_service.dart';
 import '../audio_settings.dart';
@@ -71,7 +72,9 @@ class _SoundBoardScreenState extends ConsumerState<SoundBoardScreen> {
                     'The section the Settings screen embeds. Defaults: on, '
                     'ambience ${_percent(AudioSettings.defaultAmbienceVolume)}, '
                     'effects ${_percent(AudioSettings.defaultEffectsVolume)}.',
-                child: const AudioSettingsSection(),
+                // The section is vivid (white on colour, brief 23), so it sits on its own panel
+                // here too, rather than white on the board's cream.
+                child: const VividPanel(child: AudioSettingsSection()),
               ),
               BoardSection(
                 title: 'ROOM TONE',

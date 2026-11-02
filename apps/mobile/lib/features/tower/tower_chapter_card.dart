@@ -109,6 +109,8 @@ class ChapterCard extends StatelessWidget {
                 ring: grade.glow,
                 grade: grade,
                 size: _badge,
+                // Three faces at 56 px: still, so only the hero's face breathes (brief 31).
+                idle: false,
               ),
             ],
           ),

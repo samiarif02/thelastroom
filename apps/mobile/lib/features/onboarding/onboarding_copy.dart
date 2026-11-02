@@ -27,7 +27,9 @@ abstract final class OnboardingCopy {
   static const String castTitle = 'Meet your interviewers.';
   static const String castLine =
       'Friendly, fair and fictional. They want you to do well.';
-  static String castChapter(int chapter) => 'Chapter $chapter';
+
+  /// Where the player first sits across from them.
+  static String castFirstMet(int mission) => 'First met in Mission $mission';
 
   // Step 3: the name.
   static const String nameKicker = 'LAST THING';

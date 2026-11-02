@@ -43,6 +43,8 @@ class _TitleGateState extends ConsumerState<TitleGate> {
       // The whole frame is the way in; the button is its accessible, obvious form.
       GestureDetector(
         behavior: HitTestBehavior.opaque,
+        // Begin is the accessible way in; the whole-frame tap is a shortcut for touch only.
+        excludeFromSemantics: true,
         onTap: _begin,
         child: TitleScreen(
           footer: Padding(
