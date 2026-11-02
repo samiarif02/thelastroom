@@ -5,8 +5,10 @@ import '../../ui/film_kit.dart';
 import '../title/title_screen.dart';
 import 'answer_card_demo.dart';
 import 'boardroom_scene_demo.dart';
+import 'cast_entries.dart';
 import 'catalog_backdrops.dart';
 import 'catalog_entry.dart';
+import 'daylight_entries.dart';
 import 'sample_mission.dart';
 import 'vivid_entries.dart';
 
@@ -15,10 +17,11 @@ import 'vivid_entries.dart';
 /// here is screenshotted without another line of test.
 abstract final class CatalogEntries {
   static final List<CatalogEntry> all = [
+    CastEntries.cast,
+    ...DaylightEntries.all,
     _title,
     _scene,
     _camera,
-    _people,
     _light,
     _letterbox,
     _subtitle,
@@ -142,39 +145,6 @@ abstract final class CatalogEntries {
         label: 'Tight',
         build: (grade) => CatalogRoom(grade: grade, t: 1, tight: true),
       ),
-    ],
-  );
-
-  static final CatalogEntry _people = CatalogEntry(
-    id: 'people',
-    name: 'The cast',
-    note:
-        'FriendlyInterviewer (brief 16): Priya, Marcus and Lena drawn in code, five '
-        'expressions, idle = breath, blink, a little sway. Reduced motion stills it.',
-    shots: [
-      for (final expression in InterviewerExpression.values)
-        CatalogShot(
-          id: expression.name,
-          label:
-              expression.name[0].toUpperCase() + expression.name.substring(1),
-          build: (grade) => CatalogDesk(
-            grade: grade,
-            children: [
-              Row(
-                children: [
-                  for (final figure in FriendlyFigure.byId.values)
-                    Expanded(
-                      child: FriendlyInterviewer(
-                        figure: figure,
-                        expression: expression,
-                        grade: grade,
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
     ],
   );
 
