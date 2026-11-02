@@ -145,6 +145,9 @@ class RecordingSounds implements GameSounds {
   void lockedRoomTapped() => calls.add(('lockedRoomTapped', const []));
 
   @override
+  void skillUnlocked() => calls.add(('skillUnlocked', const []));
+
+  @override
   void stopAll() => calls.add(('stopAll', const []));
 }
 

@@ -14,6 +14,7 @@ import '../../core/audio/game_sounds.dart';
 import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
 import '../mission/widgets/trust_meter.dart';
+import '../progression/debrief_rewards.dart';
 import 'ai_score.dart';
 import 'ai_score_store.dart';
 import 'ai_verdict_cards.dart';
@@ -214,6 +215,8 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     TrustMeter(trust: widget.trust, grade: grade),
+                    const SizedBox(height: BrandSpace.md),
+                    DebriefRewards(mission: widget.mission, grade: grade),
                     const SizedBox(height: BrandSpace.md),
                     if (ai != null) ...[
                       AiBasisSlip(score: ai, grade: grade),

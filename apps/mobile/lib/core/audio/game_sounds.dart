@@ -71,6 +71,9 @@ abstract interface class GameSounds {
   /// The player tapped a locked room: its sound, heard through the door.
   void lockedRoomTapped();
 
+  /// A skill unlocked (brief 32): a glassy rising shimmer and a soft bell.
+  void skillUnlocked();
+
   /// Every sound stops (leaving the scene, app paused).
   void stopAll();
 }
@@ -138,6 +141,9 @@ class SilentGameSounds implements GameSounds {
 
   @override
   void lockedRoomTapped() {}
+
+  @override
+  void skillUnlocked() {}
 
   @override
   void stopAll() {}

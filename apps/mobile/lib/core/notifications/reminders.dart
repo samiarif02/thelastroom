@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import '../../app/router.dart';
+import '../../features/progression/progression.dart';
 import '../../features/recall/recall_controller.dart';
 import '../../features/recall/recall_store.dart';
 import '../../features/tower/tower_rooms.dart';
@@ -63,11 +64,15 @@ class Reminders {
           .where((r) => r.state == RoomState.current)
           .firstOrNull
           ?.mission;
+      final interview = (await loadProgressionRecord(_ref)).interviewDate;
       final plan = planReminders(
         now: now,
         enabled: _ref.read(reminderSettingsProvider).enabled,
         recallDue: (day) =>
             schedule.cards.where((c) => !_dayOf(day).isBefore(c.due)).length,
+        interviewDate: interview == null
+            ? null
+            : DateTime(interview.year, interview.month, interview.day),
         nextMission: next == null
             ? null
             : NextMission(

@@ -14,14 +14,16 @@ import '../../core/analytics/event_value.dart';
 import '../../core/audio/game_sounds.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
+import '../progression/interview_date_choices.dart';
 import '../tower/tower_chapter_card.dart';
 import 'name_field.dart';
 import 'onboarding_copy.dart';
 
-/// The onboarding's steps, in order (brief 17): what the game is, who you'll meet, your name.
-enum OnboardingStep { game, cast, name }
+/// The onboarding's steps, in order (brief 17): what the game is, who you'll meet, when your
+/// interview is (optional, brief 32), your name.
+enum OnboardingStep { game, cast, interview, name }
 
-/// First launch only (brief 17): three short, colourful steps, each on a chapter's colour,
+/// First launch only (brief 17): four short, colourful steps, each on a chapter's colour,
 /// with a dot row, one obvious button and Skip. It ends on the Tower with Mission 1 ready to
 /// play. Only the first name is asked; the rest of the profile keeps its defaults. Saved once,
 /// at the end, with `onboarding_completed` (never the name: it's not a property).
@@ -42,7 +44,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   GameSounds get _sounds => ref.read(gameSoundsProvider);
 
-  ChapterGrade get _grade => ChapterGrade.values[_step.index];
+  ChapterGrade get _grade =>
+      ChapterGrade.values[_step.index % ChapterGrade.values.length];
 
   void _go(OnboardingStep step) {
     if (!mounted || step == _step) return;
@@ -186,6 +189,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget _body() => switch (_step) {
     OnboardingStep.game => const _GameStep(),
     OnboardingStep.cast => const _CastStep(),
+    OnboardingStep.interview => const _Heading(
+      kicker: InterviewDateChoices.kicker,
+      title: InterviewDateChoices.title,
+      line: InterviewDateChoices.line,
+      below: InterviewDateChoices(),
+    ),
     OnboardingStep.name => _Heading(
       kicker: OnboardingCopy.nameKicker,
       title: OnboardingCopy.nameTitle,
@@ -418,7 +427,7 @@ class _ColourCard extends StatelessWidget {
   );
 }
 
-/// Where you are in the three steps: a dot each, the current one a wide sunflower pill.
+/// Where you are in the steps: a dot each, the current one a wide sunflower pill.
 class _Dots extends StatelessWidget {
   const _Dots({required this.at});
 

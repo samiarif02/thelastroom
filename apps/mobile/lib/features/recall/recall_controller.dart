@@ -8,6 +8,7 @@ import '../../app/providers.dart';
 import '../../core/analytics/analytics_event.dart';
 import '../../core/analytics/event_value.dart';
 import '../../core/progress/progress_repository.dart';
+import '../progression/progression.dart';
 import 'recall_deck.dart';
 import 'recall_store.dart';
 
@@ -258,6 +259,10 @@ class RecallRoomController extends Notifier<RecallRoomState> {
       'box_moves': EventValue.count(_boxMoves),
     });
     state = finished;
+    // The round's XP and the day it counts towards the weekly goal (brief 32).
+    unawaited(
+      ref.read(progressionActionsProvider).recordRecallRound(s.verdicts),
+    );
   }
 
   /// The same day gives the same order of choices, so a card read twice in a day doesn't
