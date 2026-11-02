@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:content/content.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,6 +37,29 @@ void main() {
     await rig.until(find.byType(Dossier));
     await rig.settleDossier();
   }
+
+  testWidgets(
+    'the draft is one enabled, labelled text field for screen readers',
+    (tester) async {
+      final handle = tester.ensureSemantics();
+      final rig = MissionRig(tester);
+      await rig.boot(Routes.mission(1));
+      await rig.playLines(1);
+      await rig.until(find.byType(DraftPanel));
+      await rig.run(const Duration(seconds: 1));
+      final fields = find.semantics.byPredicate(
+        (n) => n.flagsCollection.isTextField && !n.isMergedIntoParent,
+      );
+      expect(fields, findsOne);
+      // The web marks a text field with no enabled state `disabled`: nothing could be typed
+      // with a screen reader on (brief 44).
+      expect(
+        fields.evaluate().single.flagsCollection.isEnabled,
+        Tristate.isTrue,
+      );
+      handle.dispose();
+    },
+  );
 
   testWidgets('the dossier shows "Your first try" beside a stronger version', (
     tester,

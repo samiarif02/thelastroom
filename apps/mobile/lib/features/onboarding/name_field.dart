@@ -99,10 +99,12 @@ class _NameFieldState extends State<NameField> {
                   ),
                 // One node for screen readers: the label merged into EditableText's own text
                 // field. (A second `textField: true` here made web screen readers see a dead,
-                // disabled input: brief 31.)
+                // disabled input: brief 31.) `enabled`, because the web marks a text field
+                // without an enabled state `disabled`, and nothing could be typed (brief 44).
                 MergeSemantics(
                   child: Semantics(
                     label: NameField.label,
+                    enabled: true,
                     child: EditableText(
                       controller: _text,
                       focusNode: _focus,

@@ -39,23 +39,23 @@ const missionTheInterruption = Mission(
     listenFor: [
       ListenFor(
         id: 'm16_listen_point_first',
-        text: 'Says what the work was and why it mattered in the first two sentences',
+        text: 'Says what the work was and why it mattered in the first two sentences.',
         dimension: Dimension.structure,
       ),
       ListenFor(
         id: 'm16_listen_fits_role',
-        text: 'Picks work that fits a product job: users, data or a decision',
+        text: 'Picks work that fits a product job: users, data or a decision.',
         dimension: Dimension.relevance,
       ),
       ListenFor(
         id: 'm16_listen_own_part',
         text:
-            'Says what you did yourself, with "I", not only what the team did',
+            'Says what you did yourself, with "I", not only what the team did.',
         dimension: Dimension.specificity,
       ),
       ListenFor(
         id: 'm16_listen_result',
-        text: 'Names one result someone could check: a number, or a change people noticed',
+        text: 'Names one result someone could check: a number, or a change people noticed.',
         dimension: Dimension.specificity,
       ),
     ],
@@ -66,17 +66,17 @@ const missionTheInterruption = Mission(
     followUpListenFor: [
       ListenFor(
         id: 'm16_listen_straight_back',
-        text: 'Goes straight to the result, without starting the story again',
+        text: 'Goes straight to the result, without starting the story again.',
         dimension: Dimension.adaptability,
       ),
       ListenFor(
         id: 'm16_listen_calm',
-        text: 'Stays calm: no long apology, no "as I was saying"',
+        text: 'Stays calm: no long apology, no "as I was saying".',
         dimension: Dimension.adaptability,
       ),
       ListenFor(
         id: 'm16_listen_stops',
-        text: 'Says it in a sentence or two, then stops',
+        text: 'Says it in a sentence or two, then stops.',
         dimension: Dimension.structure,
       ),
     ],

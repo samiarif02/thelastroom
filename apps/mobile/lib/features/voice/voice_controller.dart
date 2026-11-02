@@ -14,6 +14,7 @@ import '../../core/progress/progress_repository.dart';
 import '../debrief/ai_score_store.dart';
 import '../mission/mission_controller.dart';
 import '../mission/mission_lookup.dart';
+import '../progression/progression.dart';
 import 'recorder/take_recorder.dart';
 import 'voice_scoring.dart';
 
@@ -277,6 +278,7 @@ class VoiceController extends AsyncNotifier<VoiceState> {
       ),
     );
     final firstEver = (await _progress.attempts()).isEmpty;
+    final baseline = await _progress.baseline();
     final seconds = (now.answer?.seconds ?? 0) + (now.reply?.seconds ?? 0);
     await _progress.recordAttempt(
       AttemptRecord.voice(
@@ -291,6 +293,8 @@ class VoiceController extends AsyncNotifier<VoiceState> {
         ),
       ),
     );
+    // Read XP and skills again (see `MissionController`): the debrief shows this attempt's.
+    if (ref.mounted) ref.invalidate(progressionProvider);
     final shown = verdict?.score.overall.score ?? scored.score.total;
     _analytics
       ..track(AnalyticsEvent.voiceAnswerScored, {
@@ -305,6 +309,23 @@ class VoiceController extends AsyncNotifier<VoiceState> {
         'attempt_number': EventValue.count(now.attemptNumber),
       });
     if (firstEver) _analytics.track(AnalyticsEvent.userActivated);
+    // A chapter closed by voice (Missions 14 and 21), first time through: like Mission 7's,
+    // how far the player has come since Mission 1 (brief 44: it never fired for them).
+    if (now.mission.closesChapter &&
+        now.attemptNumber == 1 &&
+        baseline != null) {
+      _analytics.track(AnalyticsEvent.chapterCompleted, {
+        'chapter': EventValue.count(now.mission.chapter),
+        'score_delta_bucket': EventValue.name(
+          ScoreDeltaBucket.of(
+            compareToBaseline(
+              baseline: baseline.score,
+              latest: scored.score,
+            ).totalDelta,
+          ),
+        ),
+      });
+    }
   }
 
   /// After the debrief: the recordings leave memory (they were never on disk).

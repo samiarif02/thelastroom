@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
@@ -130,6 +132,8 @@ void main() {
     );
     expect(fields, findsOne);
     expect(fields.evaluate().single.label, NameField.label);
+    // Enabled: the web marks a text field with no enabled state `disabled` (brief 44).
+    expect(fields.evaluate().single.flagsCollection.isEnabled, Tristate.isTrue);
     handle.dispose();
   });
 

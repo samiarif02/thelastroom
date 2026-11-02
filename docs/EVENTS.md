@@ -32,7 +32,7 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `follow_up_answered` | The player answers the interviewer's follow-up | `mission_id`, `follow_up_id` |
 | `recall_session_completed` | A Recall Room session ends | `cards`, `correct`, `box_moves` |
 | `skill_unlocked` | A skill is demonstrated in an unhinted mission | `skill_id` |
-| `chapter_completed` | The chapter's review mission is completed | `chapter`, `score_delta_bucket` |
+| `chapter_completed` | A chapter's last mission (7, 14, 21) is completed for the first time | `chapter`, `score_delta_bucket` |
 | `progress_report_viewed` | The progress screen (the report vs. baseline) is opened | `source` |
 | `coach_feedback_requested` | "Say it your way" is sent to the AI coach | `mission_id`, `remaining_today` |
 | `notification_permission_prompted` | The custom pre-prompt is shown | |

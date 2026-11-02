@@ -11,6 +11,7 @@ import '../../core/analytics/analytics_event.dart';
 import '../../core/analytics/event_value.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../core/progress/progress_repository.dart';
+import '../progression/progression.dart';
 import 'mission_lookup.dart';
 import 'mission_resume.dart';
 
@@ -603,6 +604,9 @@ class MissionController extends AsyncNotifier<MissionState> {
         ],
       ),
     );
+    // XP and skills are read from the attempts: read them again, or the tower's progress card
+    // (alive under every mission) keeps the debrief on the last mission's (brief 44).
+    if (ref.mounted) ref.invalidate(progressionProvider);
     final bucket = EventValue.name(ScoreBucket.of(score.total));
     _analytics.track(AnalyticsEvent.missionCompleted, {
       'mission_id': EventValue.id(now.mission),

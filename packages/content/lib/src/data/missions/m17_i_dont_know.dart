@@ -38,22 +38,22 @@ const missionIDontKnow = Mission(
     listenFor: [
       ListenFor(
         id: 'm17_listen_names_gap',
-        text: "Says plainly which part you don't know, in a sentence, without bluffing",
+        text: "Says plainly which part you don't know, in a sentence, without bluffing.",
         dimension: Dimension.relevance,
       ),
       ListenFor(
         id: 'm17_listen_reasons',
-        text: 'Reasons from what you do know, like needing enough visitors in each version',
+        text: 'Reasons from what you do know, like needing enough visitors in each version.',
         dimension: Dimension.specificity,
       ),
       ListenFor(
         id: 'm17_listen_find_out',
-        text: "Says how you'd find out: who you'd ask, or what you'd check",
+        text: "Says how you'd find out: who you'd ask, or what you'd check.",
         dimension: Dimension.specificity,
       ),
       ListenFor(
         id: 'm17_listen_in_order',
-        text: 'Keeps it short and in order: the gap, your reasoning, your next step',
+        text: 'Keeps it short and in order: the gap, your reasoning, your next step.',
         dimension: Dimension.structure,
       ),
     ],
@@ -64,12 +64,12 @@ const missionIDontKnow = Mission(
     followUpListenFor: [
       ListenFor(
         id: 'm17_listen_first_step',
-        text: 'Gives a real first step, like asking the data team how past tests were sized',
+        text: 'Gives a real first step, like asking the data team how past tests were sized.',
         dimension: Dimension.adaptability,
       ),
       ListenFor(
         id: 'm17_listen_check_back',
-        text: 'Offers to bring a plan back for a check before the test starts',
+        text: 'Offers to bring a plan back for a check before the test starts.',
         dimension: Dimension.adaptability,
       ),
     ],
