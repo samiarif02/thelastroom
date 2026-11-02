@@ -1,6 +1,13 @@
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 
+/// The missions answered by picking lines (all of Chapter 1): the ones the path, option and
+/// reasoning checks apply to. A voice mission has no beats or options (brief 37).
+final List<Mission> choiceMissions = [
+  for (final m in gameContent.missions)
+    if (m.answerMode == AnswerMode.choices) m,
+];
+
 /// One way through a mission: the beat picks, the follow-up the engine asks for them, the
 /// reply, and the score.
 typedef MissionPath = ({
