@@ -53,18 +53,12 @@ void main() {
         handle.dispose();
       });
 
-      testWidgets(
-        'every tappable labelled',
-        (tester) async {
-          final handle = tester.ensureSemantics();
-          await open(tester, s.route, s.profile);
-          await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
-          handle.dispose();
-        },
-        // Three unlabelled taps in mission_player.dart, sent to its owner (w2-c1) with the
-        // one-line fixes; drop this skip when they land.
-        skip: name == 'mission',
-      );
+      testWidgets('every tappable labelled', (tester) async {
+        final handle = tester.ensureSemantics();
+        await open(tester, s.route, s.profile);
+        await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+        handle.dispose();
+      });
 
       testWidgets('2x text and reduced motion: nothing overflows', (
         tester,
