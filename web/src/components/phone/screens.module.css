@@ -1,0 +1,684 @@
+/* The app's screens at 390 × 844, from docs/design/mockups/daylight (02, 03, 04, 05, 01b). */
+.screen {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	background: var(--paper);
+	color: var(--ink);
+}
+.tinted {
+	background: var(--ch-tint);
+}
+.stage {
+	position: relative;
+}
+.muted {
+	color: var(--ink-2);
+}
+
+/* --- The why sheet ----------------------------------------------------------------------- */
+.sheet {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 4;
+	display: grid;
+	gap: 16px;
+	padding: 24px 16px;
+	border-radius: 24px 24px 0 0;
+	background: var(--raised);
+	box-shadow: 0 -8px 24px rgb(94 72 40 / 0.12);
+	transform: translateY(105%);
+	transition: transform var(--move) var(--ease);
+}
+.sheetKicker {
+	color: var(--ch-deep);
+}
+.reason {
+	display: flex;
+	gap: 12px;
+	align-items: flex-start;
+	padding: 12px;
+	border-radius: 16px;
+	background: color-mix(in srgb, var(--ch-tint) 45%, var(--raised));
+	box-shadow:
+		0 0 0 2px var(--ch),
+		0 4px 0 var(--ch-deep);
+}
+.reasonTile {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background: var(--ch);
+	color: var(--white);
+	font-size: 20px;
+}
+.verdict {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	padding: 12px;
+	border-radius: 16px;
+	background: var(--ch-tint);
+}
+.verdictArch {
+	flex: none;
+	width: 64px;
+	height: 72px;
+}
+.verdictTitle {
+	color: var(--ch-deep);
+}
+.sheetButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	height: 56px;
+	border-radius: 16px;
+	background: var(--honey);
+	box-shadow: 0 4px 0 var(--honey-edge);
+	color: var(--on-honey);
+	font: 600 18px/28px var(--ui);
+}
+.sheetButton svg {
+	font-size: 20px;
+}
+:global([data-step='why']) .sheet {
+	transform: none;
+}
+:global([data-step='why']) .sheet > * {
+	animation: rise var(--move) var(--ease) backwards;
+}
+:global([data-step='why']) .sheet > :nth-child(2) {
+	animation-delay: 60ms;
+}
+:global([data-step='why']) .sheet > :nth-child(3) {
+	animation-delay: 120ms;
+}
+:global([data-step='why']) .sheet > :nth-child(4) {
+	animation-delay: 180ms;
+}
+
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+}
+
+/* --- Screens that a demo step brings in --------------------------------------------------- */
+.overlay {
+	z-index: 5;
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity var(--fade) var(--ease),
+		visibility 0s linear var(--fade);
+}
+:global([data-step='score']) .debrief,
+:global([data-step='tower']) .towerOverlay {
+	opacity: 1;
+	visibility: visible;
+	transition: opacity var(--fade) var(--ease);
+}
+
+/* --- The debrief ------------------------------------------------------------------------ */
+.verdictRow {
+	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+	margin: 8px 16px 0;
+}
+.debriefArch {
+	flex: none;
+	width: 96px;
+	height: 112px;
+	background: var(--ch1-soft);
+}
+.verdictBubble {
+	flex: 1;
+	padding: 12px 16px;
+	border-radius: 16px;
+	background: var(--raised);
+	box-shadow: var(--edge);
+}
+.speakerDeep {
+	margin-bottom: 4px;
+	color: var(--ch1-deep);
+}
+.scoreCard {
+	margin: 16px 16px 0;
+	padding: 16px;
+	border-radius: 24px;
+	background: var(--raised);
+	box-shadow: var(--edge);
+}
+.scoreTop {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+.dial {
+	position: relative;
+	flex: none;
+	width: 112px;
+	height: 112px;
+}
+.dial svg {
+	width: 100%;
+	height: 100%;
+	transform: rotate(-90deg);
+}
+.dialTrack,
+.dialFill {
+	fill: none;
+	stroke-width: 10;
+}
+.dialTrack {
+	stroke: var(--sand);
+}
+.dialFill {
+	stroke: var(--ch1);
+	stroke-linecap: round;
+	stroke-dasharray: var(--dial);
+	stroke-dashoffset: var(--dial-left);
+}
+.dialText {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-content: center;
+	text-align: center;
+}
+.scoreSide {
+	display: grid;
+	justify-items: start;
+	gap: 8px;
+}
+.tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 24px;
+	padding: 0 8px;
+	border-radius: 6px;
+	white-space: nowrap;
+}
+.tag svg {
+	font-size: 14px;
+}
+.tagSand {
+	background: var(--sand);
+	color: var(--ink-2);
+}
+.tagHoney {
+	background: var(--honey);
+	color: var(--on-honey);
+}
+.dimensions {
+	display: grid;
+	gap: 12px;
+	margin-top: 16px;
+}
+.dimensions li {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	row-gap: 4px;
+}
+.track {
+	grid-column: 1 / -1;
+	height: 8px;
+	overflow: hidden;
+	border-radius: 4px;
+	background: var(--sand);
+}
+.fill {
+	display: block;
+	height: 100%;
+	border-radius: 4px;
+	background: var(--ch1);
+	transform: scaleX(var(--v));
+	transform-origin: left center;
+}
+.weak .fill {
+	background: var(--trap);
+}
+.weak .tnum {
+	color: var(--trap);
+}
+
+/* Moment 4: the dial sweeps and the bars fill one after another, 80 ms apart. */
+:global([data-step]:not([data-step='score'])) .fill {
+	transform: scaleX(0);
+}
+:global([data-step]:not([data-step='score'])) .dialFill {
+	stroke-dashoffset: var(--dial);
+}
+:global([data-step='score']) .fill {
+	transition: transform var(--move) var(--ease);
+	transition-delay: calc(300ms + var(--i) * 80ms);
+}
+:global([data-step='score']) .dialFill {
+	transition: stroke-dashoffset 1200ms var(--ease);
+}
+
+/* --- The tower ------------------------------------------------------------------------- */
+.towerHead {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px 16px;
+}
+.kickerDeep {
+	color: var(--ch1-deep);
+}
+.week {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.week > span {
+	display: grid;
+	color: var(--ink);
+}
+.week > span > :first-child {
+	color: var(--ink-2);
+}
+.ring {
+	width: 56px;
+	height: 56px;
+	transform: rotate(-90deg);
+}
+.ringTrack,
+.ringFill {
+	fill: none;
+	stroke-width: 8;
+}
+.ringTrack {
+	stroke: var(--sand-2);
+}
+.ringFill {
+	stroke: var(--ch1);
+	stroke-linecap: round;
+	stroke-dasharray: var(--ring);
+	stroke-dashoffset: var(--ring-left);
+}
+.sky {
+	position: relative;
+	margin: 0 16px;
+	height: 560px;
+	overflow: hidden;
+	border-radius: 24px;
+	background: var(--sky);
+}
+.cloud {
+	position: absolute;
+	top: 40px;
+	left: 16px;
+	width: 72px;
+	height: 24px;
+	border-radius: 9999px;
+	background: var(--sky-cloud);
+}
+.cloud::before {
+	content: '';
+	position: absolute;
+	left: 16px;
+	bottom: 8px;
+	width: 32px;
+	height: 32px;
+	border-radius: 9999px;
+	background: var(--sky-cloud);
+}
+.cloudRight {
+	left: auto;
+	right: 24px;
+	top: 24px;
+}
+.building {
+	position: absolute;
+	left: 24px;
+	right: 24px;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+}
+.mast {
+	align-self: center;
+	width: 4px;
+	height: 32px;
+	background: var(--dusk);
+}
+.mast::before {
+	content: '';
+	display: block;
+	width: 12px;
+	height: 12px;
+	margin: -8px 0 0 -4px;
+	border-radius: 9999px;
+	background: var(--honey);
+}
+.roof {
+	display: grid;
+	place-items: center;
+	height: 40px;
+	margin: 0 24px;
+	clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+	background: var(--dusk-deep);
+	color: var(--honey-tint);
+	font: 600 12px/16px var(--ui);
+	letter-spacing: 0.24em;
+	text-transform: uppercase;
+}
+.floor {
+	padding: 16px 12px 12px;
+}
+.floorDusk {
+	background: var(--dusk);
+	color: var(--white);
+}
+.floorWaiting {
+	background: var(--ch2-soft);
+	color: var(--ch2-deep);
+}
+.floorOne {
+	background: var(--ch1);
+	color: var(--white);
+}
+.windows {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 8px;
+}
+.window {
+	position: relative;
+	height: 72px;
+	overflow: hidden;
+	border-radius: 9999px 9999px 4px 4px;
+	background: var(--dusk-deep);
+}
+.floorWaiting .window {
+	background: var(--ch2-tint);
+	box-shadow: inset 0 0 0 3px var(--ch2-soft);
+	outline: 2px solid color-mix(in srgb, var(--ch2) 35%, transparent);
+	outline-offset: -2px;
+}
+.floorOne .window {
+	background: var(--ch1-deep);
+	overflow: visible;
+}
+.samWindow {
+	background: var(--honey);
+}
+.samWindow svg {
+	position: absolute;
+	inset: 12px -12px 0;
+	width: calc(100% + 24px);
+	height: calc(100% - 12px);
+}
+.windowFill {
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: var(--honey);
+	transform-origin: bottom center;
+}
+.check {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	font-size: 24px;
+	color: var(--on-honey);
+	transform: translate(-50%, -30%);
+}
+.glow {
+	position: absolute;
+	inset: -8px;
+	border: 4px solid var(--honey);
+	border-radius: 9999px 9999px 8px 8px;
+	opacity: 0;
+}
+.floorLabel {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	margin-top: 12px;
+	font: 500 14px/20px var(--ui);
+	white-space: nowrap;
+}
+.noteHoney {
+	color: var(--honey);
+}
+.lobby {
+	height: 24px;
+	background: var(--desk);
+}
+.litLine {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 16px;
+	color: var(--ink-2);
+}
+.litLine svg {
+	color: var(--honey-edge);
+	font-size: 16px;
+}
+
+/* Moment 5: room 4 fills with honey from the sill up, one glow ring expands, the check pops. */
+:global([data-step]:not([data-step='tower'])) .newRoom .windowFill {
+	transform: scaleY(0);
+}
+:global([data-step]:not([data-step='tower'])) .newRoom .check {
+	opacity: 0;
+	transform: translate(-50%, -30%) scale(0.4);
+}
+:global([data-step]:not([data-step='tower'])) .ringFill {
+	stroke-dashoffset: calc(var(--ring) * 2 / 3);
+}
+:global([data-step='tower']) .newRoom .windowFill {
+	transition: transform 700ms var(--ease) 400ms;
+}
+:global([data-step='tower']) .newRoom .check {
+	transition:
+		opacity var(--fade) var(--ease) 1100ms,
+		transform var(--fade) var(--ease) 1100ms;
+}
+:global([data-step='tower']) .newRoom .glow {
+	animation: glow var(--move) var(--ease) 1000ms;
+}
+:global([data-step='tower']) .ringFill {
+	transition: stroke-dashoffset 800ms var(--ease) 1300ms;
+}
+
+@keyframes glow {
+	from {
+		opacity: 1;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 0;
+		transform: scale(1.35);
+	}
+}
+
+/* --- The voice room -------------------------------------------------------------------- */
+.outLoud {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 40px;
+	padding: 0 12px;
+	border-radius: 12px;
+	background: var(--raised);
+	box-shadow: 0 2px 0 var(--sand-2);
+	color: var(--ch-deep);
+}
+.roomTag {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 24px;
+	padding: 0 8px;
+	border-radius: 6px;
+	background: var(--raised);
+	color: var(--ink);
+}
+.roomTagDeep {
+	background: var(--ch-tint);
+	color: var(--ch-deep);
+}
+.recDot {
+	width: 8px;
+	height: 8px;
+	border-radius: 9999px;
+	background: var(--trap);
+}
+:global(.motion-ready) .recDot {
+	animation: pulse 1.6s var(--ease) infinite alternate;
+}
+.points {
+	margin: 12px 16px 0;
+	padding: 16px;
+	border-radius: 24px;
+	background: var(--raised);
+	box-shadow: var(--edge);
+}
+.pointsHead {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+}
+.pointList {
+	display: grid;
+	gap: 8px;
+	margin-top: 12px;
+}
+.pointList li {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.pointNumber {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 6px;
+	background: var(--ch-tint);
+	color: var(--ch-deep);
+	font: 600 12px/16px var(--ui);
+}
+.privacyLine {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--sand-2);
+	color: var(--ink-2);
+}
+.privacyLine svg {
+	font-size: 16px;
+}
+.recorder {
+	position: absolute;
+	left: 16px;
+	right: 16px;
+	bottom: 24px;
+	padding: 16px;
+	border-radius: 24px;
+	background: var(--ch);
+	box-shadow: 0 4px 0 var(--ch-deep);
+	color: var(--white);
+}
+.recorderTop {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.time {
+	display: grid;
+}
+.time > :last-child {
+	color: var(--ch-on);
+}
+.wave {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	height: 48px;
+}
+.wave i {
+	width: 3px;
+	height: var(--h);
+	border-radius: 2px;
+	background: var(--white);
+	opacity: 0.28;
+}
+.wave i.spoken {
+	opacity: 1;
+}
+:global(.motion-ready) .wave i.spoken {
+	animation: speak 900ms var(--ease) infinite alternate;
+	animation-delay: calc(var(--i) * -70ms);
+}
+.stop {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 16px;
+	background: var(--honey);
+	box-shadow: 0 4px 0 var(--honey-edge);
+	color: var(--on-honey);
+	font-size: 24px;
+}
+.recorderFoot {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid color-mix(in srgb, var(--white) 25%, transparent);
+}
+.recorderFoot span {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+@keyframes speak {
+	from {
+		transform: scaleY(1);
+	}
+	to {
+		transform: scaleY(0.55);
+	}
+}
+
+@keyframes pulse {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0.4;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:global(.motion-ready) .wave i.spoken,
+	:global(.motion-ready) .recDot,
+	:global([data-step='why']) .sheet > * {
+		animation: none;
+	}
+}
