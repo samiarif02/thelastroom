@@ -16,6 +16,7 @@ import '../../core/notifications/reminder_primer.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
+import '../progression/progression_card.dart';
 import 'elevator.dart';
 import 'settings_gear.dart';
 import 'tower_chapter_card.dart';
@@ -313,6 +314,7 @@ class _TowerState extends State<_Tower> {
                           ),
                         enter(const LastRoomCard()),
                         enter(const RecallRoomCard()),
+                        enter(const ProgressionCard()),
                       ],
                     ),
                   ),

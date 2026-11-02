@@ -14,6 +14,7 @@ import '../debrief/ai_score_store.dart';
 import '../debrief/ai_verdict_cards.dart';
 import '../debrief/debrief_facts.dart';
 import '../mission/mission_lookup.dart';
+import '../progression/progression_card.dart';
 import '../tower/tower_hero.dart';
 import '../tower/tower_rooms.dart';
 import 'chapter_report.dart';
@@ -124,6 +125,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                                   ai: _aiFor(line, aiScores),
                                 ),
                               ),
+                            enter(const ProgressionCard()),
                           ],
                           enter(const _Section(ProgressScreen.settings)),
                           enter(

@@ -57,6 +57,14 @@ abstract final class ReminderCopy {
     return lines[variant % lines.length];
   }
 
+  /// A nudge before the interview leads with the countdown (FR-4, brief 32).
+  static String withCountdown(int daysToInterview, String line) =>
+      switch (daysToInterview) {
+        0 => 'Interview day. One warm-up? $line',
+        1 => 'Your interview is tomorrow. $line',
+        _ => '$daysToInterview days to your interview. $line',
+      };
+
   /// Every reminder kind has this many ways of saying it.
   static const int variants = 3;
 }

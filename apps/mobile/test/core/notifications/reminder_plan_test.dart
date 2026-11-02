@@ -125,4 +125,21 @@ void main() {
       expect(decodeReminderPayload('recallDue:x'), isNull);
     },
   );
+
+  test(
+    'with an interview ahead, nudges count down to it; after it, they do not',
+    () {
+      final reminders = planReminders(
+        now: afternoon,
+        enabled: true,
+        recallDue: none,
+        nextMission: priyaNext,
+        interviewDate: DateTime(2026, 11, 5),
+      );
+      expect(reminders[0].body, startsWith('2 days to your interview. '));
+      expect(reminders[1].body, startsWith('Your interview is tomorrow. '));
+      expect(reminders[2].body, startsWith('Interview day. '));
+      expect(reminders[3].body, ReminderCopy.nudgeBody('priya', 6 % 3));
+    },
+  );
 }

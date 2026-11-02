@@ -174,6 +174,9 @@ class AudioGameSounds implements GameSounds {
   void lockedRoomTapped() => _audio.play(Cue.lockedFloor);
 
   @override
+  void skillUnlocked() => _audio.play(Cue.skillUnlocked);
+
+  @override
   void stopAll() {
     _ticker.reset();
     _typing.clear();
