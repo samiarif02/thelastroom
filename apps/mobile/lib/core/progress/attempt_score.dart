@@ -52,8 +52,37 @@ MissionScore? scoreFromPicks({
   );
 }
 
-Mission? _mission(String id) {
-  for (final m in missions) {
+/// The engine's points for [voice]: the question's, then the follow-up's.
+List<VoicePoint> voicePoints(VoicePrompt voice) => [
+  for (final p in [...voice.listenFor, ...voice.followUpListenFor])
+    VoicePoint(id: p.id, dimension: p.dimension),
+];
+
+/// Scores a spoken answer to [mission] that made [madePointIds], with the engine. Null when
+/// [mission] isn't a voice mission.
+VoiceScore? voiceScoreFor(Mission mission, Iterable<String> madePointIds) {
+  final voice = mission.voice;
+  if (voice == null) return null;
+  return scoreVoiceAnswer(
+    points: voicePoints(voice),
+    made: madePointIds.toSet(),
+  );
+}
+
+/// [voiceScoreFor] by mission id, for a stored voice attempt. Null when the mission is gone or
+/// is no longer a voice mission (a later content version), so a stale row is skipped.
+MissionScore? scoreFromVoice({
+  required String missionId,
+  required List<String> madePointIds,
+  List<Mission> catalog = missions,
+}) {
+  final mission = _mission(missionId, catalog);
+  if (mission == null) return null;
+  return voiceScoreFor(mission, madePointIds)?.score;
+}
+
+Mission? _mission(String id, [List<Mission> catalog = missions]) {
+  for (final m in catalog) {
     if (m.id == id) return m;
   }
   return null;

@@ -21,6 +21,7 @@ class SupabaseBackend implements Backend {
   static const String _attempts = 'mission_attempts';
   static const String _profiles = 'profiles';
   static const String _scoreFunction = 'score';
+  static const String _scoreVoiceFunction = 'score-voice';
   static const String _aiScores = 'ai_scores';
 
   @override
@@ -77,11 +78,19 @@ class SupabaseBackend implements Backend {
   }
 
   @override
-  Future<Object?> scoreAnswer(Map<String, Object?> request) async {
+  Future<Object?> scoreAnswer(Map<String, Object?> request) =>
+      _invoke(_scoreFunction, request);
+
+  @override
+  Future<Object?> scoreVoiceAnswer(Map<String, Object?> request) =>
+      _invoke(_scoreVoiceFunction, request);
+
+  /// Calls the Edge Function [name]; an error status is a [ScoreRefused] with its code.
+  Future<Object?> _invoke(String name, Map<String, Object?> request) async {
     // The session's JWT goes with the call (supabase-dart sets it); the function checks it.
     try {
       final response = await (await _client()).functions.invoke(
-        _scoreFunction,
+        name,
         body: request,
       );
       final Object? data = response.data;

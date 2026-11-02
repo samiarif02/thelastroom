@@ -23,14 +23,19 @@ class RemoteAttempt {
     required this.followUpId,
     required this.replyOptionId,
     this.beatPlays,
+    this.voiceAnswer,
   });
 
-  /// Null when [row] lacks the picks (a row from before they were synced): it can't be
-  /// restored, because the score is recomputed from them.
+  /// Null when [row] lacks the picks (a row from before they were synced) and isn't a voice
+  /// answer: it can't be restored, because the score is recomputed from them.
   static RemoteAttempt? fromRow(Map<String, Object?> row) {
-    final picks = row['beat_option_ids'];
-    final followUp = row['follow_up_id'];
-    final reply = row['reply_option_id'];
+    final voice = switch (row['voice_answer']) {
+      final Map<String, Object?> v => v,
+      _ => null,
+    };
+    final picks = voice == null ? row['beat_option_ids'] : const <Object?>[];
+    final followUp = voice == null ? row['follow_up_id'] : '';
+    final reply = voice == null ? row['reply_option_id'] : '';
     final seed = row['seed'];
     final number = row['attempt_number'];
     if (picks is! List || followUp is! String || reply is! String) return null;
@@ -56,6 +61,7 @@ class RemoteAttempt {
         final List<Object?> plays => plays,
         _ => null,
       },
+      voiceAnswer: voice,
     );
   }
 
@@ -82,6 +88,10 @@ class RemoteAttempt {
   /// on rows synced before it existed; a restore then scores them at full credit.
   final List<Object?>? beatPlays;
 
+  /// A voice mission's answer (`voice_answer`, brief 35): `{made, source, seconds}`. Set, the row
+  /// sends no picks (the server's pick columns stay null); null on a built answer.
+  final Map<String, Object?>? voiceAnswer;
+
   Map<String, Object?> toRow() => {
     'attempt_id': attemptId,
     'mission_id': missionId,
@@ -96,10 +106,13 @@ class RemoteAttempt {
     'completed_at': completedAt.toUtc().toIso8601String(),
     'attempt_number': attemptNumber,
     'seed': seed,
-    'beat_option_ids': beatOptionIds,
-    'follow_up_id': followUpId,
-    'reply_option_id': replyOptionId,
+    if (voiceAnswer == null) ...{
+      'beat_option_ids': beatOptionIds,
+      'follow_up_id': followUpId,
+      'reply_option_id': replyOptionId,
+    },
     'beat_plays': ?beatPlays,
+    'voice_answer': ?voiceAnswer,
   };
 }
 

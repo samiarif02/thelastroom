@@ -4,6 +4,10 @@
          exact-alarm permission. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Voice missions (brief 35): the player answers out loud. Asked in the recorder, behind a
+         one-line explainer; refused, the mission offers the self-check instead. The audio is sent
+         for scoring and never stored. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
         android:label="The Last Room"
         android:name="${applicationName}"
@@ -56,6 +60,11 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- flutter_tts (brief 35): the interviewers' lines are read aloud by the device's text to
+             speech engine; Android 11+ only lets the app see that engine when it's declared. -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
         </intent>
     </queries>
 </manifest>

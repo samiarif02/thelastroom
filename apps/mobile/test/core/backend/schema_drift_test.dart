@@ -56,8 +56,41 @@ void main() {
     ],
   );
 
+  // A voice mission's attempt (brief 35): the points made instead of the picks.
+  final voiceAttempt = RemoteAttempt(
+    attemptId: 'v',
+    missionId: 'm',
+    contentSchemaVersion: 1,
+    relevance: 0,
+    specificity: 0,
+    structure: 0,
+    adaptability: 0,
+    total: 0,
+    hinted: true,
+    flags: const [],
+    completedAt: DateTime.utc(2026),
+    attemptNumber: 1,
+    seed: 0,
+    beatOptionIds: const [],
+    followUpId: '',
+    replyOptionId: '',
+    voiceAnswer: const {
+      'made': ['p1'],
+      'source': 'ai',
+      'seconds': 3,
+    },
+  );
+
   test('an attempt row sends exactly the columns a client may insert', () {
-    expect(attempt.toRow().keys.toSet(), granted('insert', 'mission_attempts'));
+    // Between them, a built answer and a spoken one use every granted column, and no other.
+    expect({
+      ...attempt.toRow().keys,
+      ...voiceAttempt.toRow().keys,
+    }, granted('insert', 'mission_attempts'));
+    expect(
+      granted('insert', 'mission_attempts'),
+      containsAll(voiceAttempt.toRow().keys),
+    );
   });
 
   test('a profile row sends only columns a client may insert and update', () {
@@ -67,7 +100,11 @@ void main() {
   });
 
   test('nothing the server sets, and never the draft, is in a sent row', () {
-    for (final row in [attempt.toRow(), const RemoteProfile().toRow()]) {
+    for (final row in [
+      attempt.toRow(),
+      voiceAttempt.toRow(),
+      const RemoteProfile().toRow(),
+    ]) {
       expect(row.keys, isNot(contains('user_id')));
       expect(row.keys, isNot(contains('created_at')));
       expect(row.keys, isNot(contains('draft')));

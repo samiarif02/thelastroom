@@ -102,6 +102,19 @@ class FakeBackend implements Backend {
     return scorer(request);
   }
 
+  /// What `score-voice` answers; null: the function isn't configured (503).
+  Future<Object?> Function(Map<String, Object?> request)? voiceScorer;
+  final List<Map<String, Object?>> voiceScoreRequests = [];
+
+  @override
+  Future<Object?> scoreVoiceAnswer(Map<String, Object?> request) async {
+    _network();
+    voiceScoreRequests.add(request);
+    final scorer = voiceScorer;
+    if (scorer == null) throw const ScoreRefused(503, 'not_configured');
+    return scorer(request);
+  }
+
   static const String guestId = '00000000-0000-4000-8000-000000000001';
 
   final Future<BackendSession> Function() _restore;

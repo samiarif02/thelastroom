@@ -57,7 +57,15 @@ enum AnalyticsEvent {
   answerBuilt('answer_built'),
 
   /// The player opens "How we scored this" on the debrief (brief 36): who scored it and how.
-  scoreBasisViewed('score_basis_viewed');
+  scoreBasisViewed('score_basis_viewed'),
+
+  /// A spoken answer is submitted on a voice mission (brief 35), once per take (the answer, then
+  /// the reply): how long it ran, how often it paused, how often it was thrown away. Never audio,
+  /// never words.
+  voiceAnswerRecorded('voice_answer_recorded'),
+
+  /// A voice mission is scored: by the AI recruiter, or by the player's self-check.
+  voiceAnswerScored('voice_answer_scored');
 
   const AnalyticsEvent(this.wireName);
 

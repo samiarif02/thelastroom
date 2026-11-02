@@ -60,6 +60,11 @@ abstract interface class Backend {
   /// parses. Throws [ScoreRefused] when the function answers with an error status.
   Future<Object?> scoreAnswer(Map<String, Object?> request);
 
+  /// Asks the `score-voice` function (brief 35) to transcribe and grade a spoken answer, as the
+  /// signed-in player. [request] carries the recordings (base64 WAV), which the function sends
+  /// to the model and never stores. Throws [ScoreRefused] like [scoreAnswer].
+  Future<Object?> scoreVoiceAnswer(Map<String, Object?> request);
+
   /// The signed-in player's AI verdicts (`ai_scores` rows, oldest first), for "Your file" on a
   /// fresh install. Raw rows: the caller parses them.
   Future<List<Object?>> fetchAiScores();
