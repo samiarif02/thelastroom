@@ -20,16 +20,18 @@ export interface GeminiModel {
 }
 
 /**
- * The models that grade, tried in order: the next one only when the one before is overloaded,
- * fails or runs out of time. Measured live with the owner's key on 2026-11-02 (brief 36):
- * `gemini-3.8-flash` answered 503 "high demand" or took 30 s+ and doesn't allow minimal
- * thinking; `gemini-3.6-flash` with minimal thinking answered in ~1.7 s and
- * `gemini-3.1-flash-lite` in ~1.3–2.7 s. The two timeouts add up to under the app's 8 s wait.
- * ADR 0006 (amended).
+ * The models that grade, tried in order: the next one only when the one before is overloaded
+ * (503), over its rate limit (429), fails or runs out of time. Measured live with the owner's key
+ * on 2026-11-02 (brief 36): `gemini-3.8-flash` answered 503 "high demand" or took 30 s+ and doesn't
+ * allow minimal thinking; with minimal thinking `gemini-3.6-flash` answered a verdict in ~2–7 s,
+ * `gemini-3.5-flash-lite` in ~1.2 s and `gemini-3.1-flash-lite` in 1.3–13 s. Rate limits are per
+ * model, so the chain also spreads the load. The timeouts add up to under the app's 30 s
+ * `AiScorer.lateLimit` (the app shows the offline score at 8 s meanwhile). ADR 0006 (amended).
  */
 export const GEMINI_CHAIN: readonly GeminiModel[] = [
-  { model: 'gemini-3.6-flash', thinkingLevel: 'minimal', timeoutMs: 14000 },
-  { model: 'gemini-3.1-flash-lite', thinkingLevel: 'minimal', timeoutMs: 10000 },
+  { model: 'gemini-3.6-flash', thinkingLevel: 'minimal', timeoutMs: 10000 },
+  { model: 'gemini-3.5-flash-lite', thinkingLevel: 'minimal', timeoutMs: 7000 },
+  { model: 'gemini-3.1-flash-lite', thinkingLevel: 'minimal', timeoutMs: 7000 },
 ];
 
 /** The first model in [GEMINI_CHAIN]: what a verdict normally records as its grader. */

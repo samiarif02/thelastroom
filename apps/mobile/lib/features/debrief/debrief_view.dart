@@ -22,6 +22,7 @@ import 'debrief_facts.dart';
 import 'first_try_slip.dart';
 import 'reasoning_slip.dart';
 import 'red_pen_slip.dart';
+import 'scoring_basis_sheet.dart';
 import 'then_now_slip.dart';
 
 /// The debrief (FR-15): the candidate file slides across the walnut into the lamp's pool, the
@@ -195,6 +196,30 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
             padding: const EdgeInsets.all(BrandSpace.lg),
             children: [
               ScoreSourceLabel(ai: ai != null, grade: grade),
+              // Brief 36: on what basis, and how we know it's sound (the reviewer's questions).
+              Center(
+                child: VividButton(
+                  label: ScoringBasisSheet.open,
+                  primary: false,
+                  onPressed: () {
+                    _analytics.track(AnalyticsEvent.scoreBasisViewed, {
+                      'mission_id': EventValue.id(widget.mission),
+                      'source': EventValue.name(
+                        ai == null ? ScoreSource.offline : ScoreSource.ai,
+                      ),
+                    });
+                    unawaited(
+                      ScoringBasisSheet.show(
+                        context,
+                        mission: widget.mission,
+                        engine: widget.score,
+                        ai: ai,
+                        grade: grade,
+                      ),
+                    );
+                  },
+                ),
+              ),
               const SizedBox(height: BrandSpace.sm),
               // The kit's ledger row has no room for a three-digit stamp at 2x text (its score
               // doesn't shrink), so the sheet clamps its own text, as the title card does.

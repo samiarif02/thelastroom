@@ -11,6 +11,7 @@ import 'package:the_last_room/core/env/env.dart';
 import 'package:the_last_room/core/logging/log.dart';
 import 'package:the_last_room/features/debrief/ai_score.dart';
 import 'package:the_last_room/features/debrief/ai_verdict_cards.dart';
+import 'package:the_last_room/features/debrief/scoring_basis_sheet.dart';
 import 'package:the_last_room/features/mission/mission_controller.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
@@ -254,10 +255,16 @@ void main() {
   group('the dossier', () {
     Future<MissionRig> playToDebrief(
       WidgetTester tester,
-      AiScorer? scorer,
-    ) async {
+      AiScorer? scorer, {
+      double textScale = 1,
+      bool reduceMotion = false,
+    }) async {
       final rig = MissionRig(tester)..scorer = scorer;
-      await rig.boot(Routes.mission(1));
+      await rig.boot(
+        Routes.mission(1),
+        textScale: textScale,
+        reduceMotion: reduceMotion,
+      );
       const m = missionTheOpportunity;
       await rig.playLines(1);
       await rig.skipDraft();
@@ -374,5 +381,70 @@ void main() {
         await rig.settleDossier();
       },
     );
+
+    Future<void> openBasis(MissionRig rig) async {
+      final open = find.text(ScoringBasisSheet.open.toUpperCase());
+      final button = open.evaluate().isEmpty
+          ? find.text(ScoringBasisSheet.open)
+          : open;
+      await rig.until(button);
+      await rig.tester.ensureVisible(button);
+      await rig.tester.pump();
+      await rig.tester.tap(button);
+      await rig.until(find.byType(ScoringBasisSheet));
+      await rig.run(const Duration(seconds: 1));
+    }
+
+    testWidgets(
+      '"How we scored this" with the AI: who scored, the weights, both scores, what it is told',
+      (tester) async {
+        final backend = FakeBackend()..scorer = (_) async => _verdict;
+        final rig = await playToDebrief(tester, _scorer(backend));
+        await rig.until(find.byType(Dossier));
+        await rig.settleDossier();
+        await openBasis(rig);
+        expect(find.text(missionTheOpportunity.practises!), findsOneWidget);
+        expect(find.text(ScoringBasisSheet.aiWho), findsOneWidget);
+        for (final d in Dimension.values) {
+          expect(find.textContaining('${d.weightPercent} %'), findsWidgets);
+        }
+        expect(
+          find.text('Recruiter 74  ·  Game ${rig.state(1).score!.total}'),
+          findsOneWidget,
+        );
+        expect(find.text(ScoringBasisSheet.neverSees), findsOneWidget);
+        expect(rig.analytics.only(AnalyticsEvent.scoreBasisViewed).wire, {
+          'mission_id': missionTheOpportunity.id,
+          'source': 'ai',
+        });
+        await tester.ensureVisible(find.text(ScoringBasisSheet.close));
+        await tester.tap(find.text(ScoringBasisSheet.close));
+        await rig.run(const Duration(seconds: 1));
+        expect(find.byType(ScoringBasisSheet), findsNothing);
+      },
+    );
+
+    for (final (scale, still) in [(1.0, false), (2.0, true)]) {
+      testWidgets(
+        '"How we scored this" offline, ${scale}x text, reduced motion: $still',
+        (tester) async {
+          final rig = await playToDebrief(
+            tester,
+            null,
+            textScale: scale,
+            reduceMotion: still,
+          );
+          await rig.until(find.byType(Dossier));
+          await rig.settleDossier();
+          await openBasis(rig);
+          expect(find.text(ScoringBasisSheet.offlineWho), findsOneWidget);
+          expect(find.textContaining('Recruiter '), findsNothing);
+          expect(
+            rig.analytics.only(AnalyticsEvent.scoreBasisViewed).wire['source'],
+            'offline',
+          );
+        },
+      );
+    }
   });
 }

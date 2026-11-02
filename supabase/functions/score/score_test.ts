@@ -237,7 +237,7 @@ Deno.test('scoreWithFallback: an overloaded first model hands over to the next',
     );
   }) as unknown as typeof fetch;
   const { result } = await scoreWithFallback(parseInput(body), 'k', fake);
-  assertEquals(seen, GEMINI_CHAIN.map((m) => m.model));
+  assertEquals(seen, GEMINI_CHAIN.slice(0, 2).map((m) => m.model), 'it stops at the first that answers');
   assertEquals(result.model, GEMINI_CHAIN[1].model, 'the verdict records the model that graded');
 });
 
@@ -246,9 +246,10 @@ Deno.test('scoreWithFallback: when every model fails, the last failure is thrown
   await assertRejects(() => scoreWithFallback(parseInput(body), 'k', down), UpstreamError);
 });
 
-Deno.test("scoreWithFallback: the chain fits inside the app's 8 s wait", () => {
+Deno.test("scoreWithFallback: the whole chain fits inside the app's 30 s late window", () => {
+  // The app shows the offline score at 8 s and accepts a late verdict until 30 s (AiScorer).
   const total = GEMINI_CHAIN.reduce((sum, m) => sum + m.timeoutMs, 0);
-  assert(total < 8000, `${total} ms`);
+  assert(total < 30000, `${total} ms`);
 });
 
 // ---------------------------------------------------------------- handler
