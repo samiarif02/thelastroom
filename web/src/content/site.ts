@@ -337,7 +337,7 @@ export const screens = {
 			'What you did to settle it',
 			'How it was settled, then stop'
 		],
-		privacy: 'Nothing is scored while you talk. The audio stays on this phone.',
+		privacy: 'Scored when you finish, on what you said. The audio is never stored.',
 		time: '0:47',
 		cap: 'of 2:00',
 		pause: 'Pause',
@@ -496,20 +496,20 @@ export const privacy = {
 			title: 'What the game keeps',
 			body: [
 				'Your progress (rooms played, scores, Recall Room notes, XP) is saved on your phone. The whole game works offline.',
-				'Nothing leaves the phone unless you turn on the optional backend for backup or AI scoring.'
+				'Nothing leaves the phone unless the app is set up with the optional backend, for backup and AI scoring.'
 			]
 		},
 		{
 			title: 'Your voice',
 			body: [
 				'A spoken answer is recorded on the phone so it can be scored, and deleted after the debrief.',
-				'If AI scoring is on, the answer is sent to be scored and then discarded. It is scored on what you said, never on how you sound.'
+				'With AI scoring, the recording is sent to be transcribed and scored, then discarded: the audio is never stored. The written transcript and the scores are kept in your own guest account, which only you can read. It is scored on what you said, never on how you sound.'
 			]
 		},
 		{
 			title: 'The optional backend',
 			body: [
-				'If you turn it on, a guest session with no name or email backs up your progress, and the AI recruiter receives the game content of your answer, never your name.'
+				'When the app is set up with it, a guest session with no name or email backs up your progress, and the AI recruiter receives your answer (the lines you chose, or your recording), never your name.'
 			]
 		},
 		{
