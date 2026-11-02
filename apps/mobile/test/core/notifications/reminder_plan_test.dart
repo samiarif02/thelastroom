@@ -26,12 +26,37 @@ void main() {
     expect(plan(enabled: false), isEmpty);
   });
 
-  test('never today; days 1, 2, 3, then backing off to day 6', () {
+  test('never today; days 1, 3 and 5, then backing off to day 8', () {
     final days = [
       for (final r in plan()) r.at.difference(DateTime(2026, 11, 2)).inDays,
     ];
-    expect(days, [1, 2, 3, 6]);
-    expect(planDays, [1, 2, 3, 6]);
+    expect(days, [1, 3, 5, 8]);
+    expect(planDays, [1, 3, 5, 8]);
+  });
+
+  test(
+    'installed and played on day 0, heard from on days 1, 3 and 5 (brief 42)',
+    () {
+      for (final day in [1, 3, 5]) {
+        expect(planDays, contains(day));
+      }
+    },
+  );
+
+  test('backing off: the gaps between reminders never shrink', () {
+    final gaps = [
+      for (var i = 0; i < planDays.length; i++)
+        planDays[i] - (i == 0 ? 0 : planDays[i - 1]),
+    ];
+    for (var i = 1; i < gaps.length; i++) {
+      expect(gaps[i], greaterThanOrEqualTo(gaps[i - 1]), reason: '$gaps');
+    }
+    expect(gaps.last, greaterThan(gaps.first));
+  });
+
+  test('a nudge names who sends it; the Recall Room does not', () {
+    expect(plan().first.interviewerId, 'priya');
+    expect(plan(recallDue: (_) => 2).first.interviewerId, isNull);
   });
 
   test('at most one a day', () {
@@ -64,7 +89,7 @@ void main() {
   test(
     'cards due come first: "N traps are waiting", opening the Recall Room',
     () {
-      final reminders = plan(recallDue: (day) => day.day >= 4 ? 3 : 0);
+      final reminders = plan(recallDue: (day) => day.day >= 5 ? 3 : 0);
       expect(reminders.map((r) => r.kind), [
         ReminderKind.nudge,
         ReminderKind.recallDue,
@@ -94,9 +119,12 @@ void main() {
     expect(plan(next: null), isEmpty);
   });
 
-  test('three wordings per kind, and a variant per day', () {
-    final bodies = plan().map((r) => r.body).toSet();
-    expect(bodies.length, greaterThanOrEqualTo(ReminderCopy.variants));
+  test('three wordings per kind, never the same one twice in a row', () {
+    final bodies = plan().map((r) => r.body).toList();
+    expect(bodies.toSet().length, greaterThanOrEqualTo(ReminderCopy.variants));
+    for (var i = 1; i < bodies.length; i++) {
+      expect(bodies[i], isNot(bodies[i - 1]));
+    }
     for (final id in ['priya', 'marcus', 'lena', 'sam']) {
       final lines = {
         for (var v = 0; v < ReminderCopy.variants; v++)
@@ -134,12 +162,21 @@ void main() {
         enabled: true,
         recallDue: none,
         nextMission: priyaNext,
+        interviewDate: DateTime(2026, 11, 6),
+      );
+      // Days 1, 3, 5 and 8: 3 Nov, 5 Nov, 7 Nov, 10 Nov.
+      expect(reminders[0].body, startsWith('3 days to your interview. '));
+      expect(reminders[1].body, startsWith('Your interview is tomorrow. '));
+      expect(reminders[2].body, ReminderCopy.nudgeBody('priya', 2));
+      expect(reminders[3].body, ReminderCopy.nudgeBody('priya', 0));
+      final onTheDay = planReminders(
+        now: afternoon,
+        enabled: true,
+        recallDue: none,
+        nextMission: priyaNext,
         interviewDate: DateTime(2026, 11, 5),
       );
-      expect(reminders[0].body, startsWith('2 days to your interview. '));
-      expect(reminders[1].body, startsWith('Your interview is tomorrow. '));
-      expect(reminders[2].body, startsWith('Interview day. '));
-      expect(reminders[3].body, ReminderCopy.nudgeBody('priya', 6 % 3));
+      expect(onTheDay[1].body, startsWith('Interview day. '));
     },
   );
 }
