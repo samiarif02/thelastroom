@@ -35,3 +35,10 @@ after Mission 2 behind a custom pre-prompt. The web build has none.
 - **No notifications.** Saves a day but drops the Day 3 / Day 7 answer the brief is built on.
 - **Web push on the demo.** Needs a service worker permission flow and a server; reviewers
   wouldn't see it in a short visit anyway.
+
+## Amendments
+
+- **2026-11-02, brief 42.** The plan's days are 1, 3 and 5 after the last open, then 8 (was 1,
+  2, 3, then 6), so a player who installs and plays on day 0 hears from us on days 3 and 5. The
+  horizon is therefore 8 days, not 7. A re-plan cancels pending reminders only, so a delivered
+  one (or the Settings test reminder) stays in the shade.
