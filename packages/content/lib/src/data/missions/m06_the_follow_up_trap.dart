@@ -16,6 +16,8 @@ const missionTheFollowUpTrap = Mission(
   chapter: 1,
   number: 6,
   title: 'The Follow-Up Trap',
+  practises:
+      'Holding your ground when the interviewer challenges something you said.',
   hinted: true,
   scene: [
     SceneLine(

@@ -14,6 +14,8 @@ const missionShowMeTheEvidence = Mission(
   chapter: 1,
   number: 4,
   title: 'Show Me the Evidence',
+  practises:
+      'Backing a claim with a specific result: what you did, and what changed.',
   hinted: true,
   scene: [
     SceneLine(

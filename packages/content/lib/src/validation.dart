@@ -342,6 +342,32 @@ List<ContentIssue> validateContent(ContentBundle bundle) {
     }
     checkSpeaker(mission.id, mission.question);
 
+    final voice = mission.voice;
+    if ((mission.answerMode == AnswerMode.voice) != (voice != null)) {
+      issue(mission.id, 'a voice prompt is set exactly on a voice mission');
+    }
+    if (voice != null) {
+      if (mission.beats.isNotEmpty || mission.followUps.isNotEmpty) {
+        issue(mission.id, 'a voice mission has no beats or option follow-ups');
+      }
+      if (voice.listenFor.length < 3 || voice.listenFor.length > 4) {
+        issue(mission.id, 'a voice mission listens for 3–4 points');
+      }
+      if (voice.followUpListenFor.isEmpty ||
+          voice.followUpListenFor.length > 3) {
+        issue(mission.id, 'a voice follow-up listens for 1–3 points');
+      }
+      for (final point in [...voice.listenFor, ...voice.followUpListenFor]) {
+        checkId(point);
+        checkWords(point.id, point.text);
+      }
+      checkSpeaker(mission.id, voice.followUp);
+      if (!bundle.lessons.any((l) => l.id == voice.lessonId)) {
+        issue(mission.id, 'teaches ${voice.lessonId}, which is not a lesson');
+      }
+      continue;
+    }
+
     final kinds = mission.beats.map((b) => b.kind).toList();
     final inOrder =
         kinds.length == BeatKind.values.length &&

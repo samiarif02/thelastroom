@@ -10,8 +10,15 @@ build/
 coverage/
 *.iml
 
-# Node (only the gate scripts use it; there are no npm dependencies)
+# Node (the gate scripts have no npm dependencies; web/ has its own package.json)
 node_modules/
+
+# The landing page (web/, Next.js): build output, generated types, Vercel's local link
+web/.next/
+web/out/
+web/next-env.d.ts
+web/*.tsbuildinfo
+web/.vercel/
 
 # Native build artifacts (the platform folders themselves ARE committed:
 # Flutter generates them once and we edit them by hand, unlike Expo prebuild)
