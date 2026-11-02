@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Recall Room, day 3</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mission.css">
+<style>
+body { background: var(--recall-tint); --ch: var(--recall); --ch-deep: #43348a; --ch-soft: var(--recall-soft); }
+.bar .title { flex: 1; }
+.bar .title .caption-4 { color: var(--ink-2); }
+.boxes { display: flex; gap: 4px; align-items: center; height: 40px; padding: 0 12px; border-radius: 12px; background: var(--raised); box-shadow: 0 2px 0 var(--sand-2); }
+.boxes b { width: 16px; height: 16px; border-radius: 4px; background: var(--recall); }
+.boxes b.off { background: var(--recall-soft); }
+.hello { display: flex; gap: 12px; align-items: flex-end; margin: 12px 16px 0; }
+.hello .face { flex: none; width: 96px; height: 116px; background: var(--recall-soft); position: relative; }
+.hello .face .cast { position: absolute; left: -10px; right: -10px; bottom: 0; height: 112px; }
+.hello .bubble { margin: 0 0 8px; flex: 1; }
+.hello .bubble::before { top: auto; bottom: 16px; left: -6px; }
+.note {
+	position: relative;
+	margin: 24px 24px 0;
+	padding: 24px 16px 16px;
+	background: #fffdf6;
+	border-radius: 8px;
+	transform: rotate(-1.5deg);
+	box-shadow: 0 8px 24px rgb(67 52 138 / 0.16);
+}
+.note .tape { position: absolute; top: -12px; left: 50%; width: 88px; height: 24px; margin-left: -44px; background: var(--honey); opacity: 0.85; transform: rotate(2deg); border-radius: 2px; }
+.note .caption-3 { color: var(--trap); display: flex; gap: 4px; align-items: center; }
+.note h2 { margin-top: 8px; }
+.note p.body-6 { margin-top: 8px; color: var(--ink-2); }
+.note .when { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--sand-2); display: flex; justify-content: space-between; color: var(--ink-2); }
+.pick-head { margin-top: 24px; }
+.week { position: fixed; left: 16px; right: 16px; bottom: 24px; padding: 12px 16px; border-radius: 16px; background: var(--raised); display: flex; gap: 12px; align-items: center; box-shadow: var(--lift); }
+.week p { flex: 1; color: var(--ink-2); }
+.week p b { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<header class="bar">
+	<span class="iconbtn" aria-label="Close"><i class="ph-bold ph-x"></i></span>
+	<div class="title"><p class="caption-4">Recall Room · note 1 of 2</p><h1 class="body-1">From Saturday, room 4</h1></div>
+	<span class="boxes" aria-label="Box 2 of 3"><b></b><b></b><b class="off"></b></span>
+</header>
+
+<section class="hello">
+	<div class="face arch"><div class="cast" data-cast="priya" data-expr="smile"></div></div>
+	<div class="bubble">
+		<p class="caption-3 speaker">Priya</p>
+		<p class="body-2">Welcome back, Sami. Marcus caught you on this one. Want another go?</p>
+	</div>
+</section>
+
+<article class="note">
+	<span class="tape" aria-hidden="true"></span>
+	<p class="caption-3"><i class="ph-bold ph-push-pin"></i>You fell for</p>
+	<h2 class="heading-6">“Saying ‘we’ sounds like a team player.”</h2>
+	<p class="body-6">It led you to: “We'd probably do it the same way again, as a team.”</p>
+	<p class="when caption-4"><span>Day 3 of 7</span><span>No hints this time</span></p>
+</article>
+
+<div class="pick-head"><h2 class="title-3"><b>What holds up better?</b></h2></div>
+<ul class="options">
+	<li class="card opt"><span class="letter">A</span><p class="body-3">Say what you did, then credit the team.</p></li>
+	<li class="card opt"><span class="letter">B</span><p class="body-3">Keep it humble: the team did it.</p></li>
+	<li class="card opt"><span class="letter">C</span><p class="body-3">Skip the detail and give the result.</p></li>
+</ul>
+
+<aside class="week">
+	<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="none" stroke="var(--sand-2)" stroke-width="6"/><circle cx="20" cy="20" r="16" fill="none" stroke="var(--ch1)" stroke-width="6" stroke-linecap="round" stroke-dasharray="67 100.5" transform="rotate(-90 20 20)"/></svg>
+	<p class="body-6"><b>This closes 3 of 3 for the week.</b> Two minutes, then you're done.</p>
+</aside>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>

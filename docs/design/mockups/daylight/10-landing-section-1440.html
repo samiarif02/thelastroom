@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="mockup-height" content="1300">
+<title>The Last Room · the panel</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="landing.css">
+<style>
+.reveal { padding: 96px 0 80px; }
+.reveal .wrap { padding-left: 48px; }
+.reveal h2 { font: 600 60px/60px var(--display); letter-spacing: -0.03em; max-width: 680px; }
+.reveal h2 span { color: rgb(36 32 28 / 0.3); transition: color 500ms var(--ease); }
+.reveal h2 span.lit { color: var(--ink); }
+.reveal .note { margin-top: 24px; color: var(--ink-2); max-width: 560px; }
+.panel { padding: 0 0 96px; }
+.panel .wrap { padding: 0 48px; display: grid; grid-template-columns: 360px 1fr; gap: 64px; }
+.panel .intro h3 { margin-bottom: 16px; }
+.panel .intro p { color: var(--ink-2); }
+.panel .intro .how { list-style: none; padding: 0; margin: 32px 0 0; display: grid; gap: 16px; }
+.panel .intro .how li { display: flex; gap: 12px; }
+.panel .intro .how b { flex: none; width: 32px; height: 32px; border-radius: 8px; background: var(--ink); color: #fff; display: grid; place-items: center; font: 600 14px/20px var(--ui); }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid article:nth-child(even) { margin-top: 64px; }
+.person { background: var(--raised); border-radius: 24px; padding: 16px; box-shadow: var(--edge); }
+.person .pic { height: 208px; position: relative; }
+.person .pic .cast { position: absolute; left: 24px; right: 24px; bottom: 0; height: 208px; }
+.person .name { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; }
+.person .role { color: var(--ink-2); }
+.person .line { margin-top: 12px; padding: 12px; border-radius: 8px; }
+.person .listens { margin-top: 12px; color: var(--ink-2); display: flex; gap: 8px; align-items: center; }
+.person .listens i { font-size: 16px; }
+.p1 .pic, .p1 .line { background: var(--ch1-tint); }
+.p2 .pic, .p2 .line { background: #f6ecd8; }
+.p3 .pic, .p3 .line { background: var(--ch2-tint); }
+.p4 .pic, .p4 .line { background: var(--ch3-tint); }
+.p1 .pic, .p2 .pic, .p3 .pic, .p4 .pic { border-radius: 9999px 9999px 8px 8px; overflow: hidden; }
+</style>
+</head>
+<body class="web">
+<section class="reveal" aria-label="Why it works">
+	<div class="wrap">
+		<h2 id="tag">Nerves fade when the questions stop being new.</h2>
+		<p class="note body-3">Each room is one real question. Missed something? It comes back in your Recall Room on day 1, 3 and 7, until it sticks.</p>
+	</div>
+</section>
+<section class="panel" id="panel">
+	<div class="wrap">
+		<div class="intro">
+			<h3 class="heading-3">Meet the panel</h3>
+			<p class="body-3">Four people at Northstar Labs, each listening for something different. They react to what you say, and they ask the follow up you were hoping to avoid.</p>
+			<ol class="how">
+				<li><b>1</b><p class="body-3"><strong>Build the answer.</strong> Pick a line for each beat, or say it out loud from floor 2.</p></li>
+				<li><b>2</b><p class="body-3"><strong>Say why it works.</strong> Choosing the principle is what makes it stick.</p></li>
+				<li><b>3</b><p class="body-3"><strong>Read the debrief.</strong> Four scores, the reason for each, one lesson.</p></li>
+			</ol>
+		</div>
+		<div class="grid">
+			<article class="person p1"><div class="pic"><div class="cast" data-cast="priya" data-expr="smile"></div></div><div class="name"><h4 class="heading-6">Priya</h4><span class="role caption-4">Recruiter</span></div><p class="line body-5">“Keep it to about a minute. I'll stop you if I want more.”</p><p class="listens caption-4"><i class="ph-bold ph-ear"></i>Listens for: did you answer her question</p></article>
+			<article class="person p2"><div class="pic"><div class="cast" data-cast="marcus" data-expr="hmm"></div></div><div class="name"><h4 class="heading-6">Marcus</h4><span class="role caption-4">Hiring manager</span></div><p class="line body-5">“I'd want the actual count. And whose it was.”</p><p class="listens caption-4"><i class="ph-bold ph-ear"></i>Listens for: your part, and a number</p></article>
+			<article class="person p3"><div class="pic"><div class="cast" data-cast="lena" data-expr="thinking"></div></div><div class="name"><h4 class="heading-6">Lena</h4><span class="role caption-4">Senior engineer</span></div><p class="line body-5">“You said ‘we’ caught the error. Who actually caught it?”</p><p class="listens caption-4"><i class="ph-bold ph-ear"></i>Listens for: how you handle the follow up</p></article>
+			<article class="person p4"><div class="pic"><div class="cast" data-cast="sam" data-expr="neutral"></div></div><div class="name"><h4 class="heading-6">Sam</h4><span class="role caption-4">Head of product</span></div><p class="line body-5">Waits for you on the top floor. Lets a silence sit.</p><p class="listens caption-4"><i class="ph-bold ph-ear"></i>Listens for: everything, together</p></article>
+		</div>
+	</div>
+</section>
+<script src="../shared/cast.js"></script>
+<script>
+Cast.mount()
+// The tagline reveal (skill B11): each word lights in reading order as it crosses a trigger line.
+// The still shows it mid scroll: the first six words lit.
+const h = document.getElementById('tag')
+h.innerHTML = h.textContent.split(' ').map((w, i) => `<span class="${i < 6 ? 'lit' : ''}">${w}</span>`).join(' ')
+</script>
+</body>
+</html>

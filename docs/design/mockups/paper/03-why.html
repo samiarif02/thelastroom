@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mission.css">
+<title>Mission, why that line</title>
+<style>
+.scene { height: 148px; }
+.scene .who { width: 156px; height: 168px; left: 0; bottom: -12px; }
+.scene .say { width: 200px; top: 24px; }
+.mine { position: relative; z-index: 2; margin: 32px 16px 0; padding: 16px; background: #fff; border-radius: 4px; box-shadow: var(--paper-shadow); transform: rotate(-0.8deg); }
+.mine .caption-3 { color: var(--ch-deep); }
+.mine p.body-2 { margin-top: 4px; }
+.opt { position: relative; }
+.opt .ico { flex: none; width: 32px; height: 32px; border-radius: 16px; border: 2px solid var(--line); display: grid; place-items: center; color: var(--ink-2); }
+.opt.on .ico { background: var(--sun); border-color: var(--sun); color: var(--on-sun); }
+.opt.on { padding-right: 64px; }
+.stampmark { position: absolute; right: -8px; top: -20px; width: 72px; height: 72px; border-radius: 36px; border: 3px solid var(--stamp); color: var(--stamp); display: grid; place-items: center; text-align: center; transform: rotate(-14deg); background: rgb(247 243 236 / 0.85); }
+.stampmark::before { content: ''; position: absolute; inset: 4px; border-radius: 32px; border: 1px solid var(--stamp); }
+.stampmark span { font: 600 16px/20px var(--display); font-variation-settings: 'SOFT' 100; }
+.stampmark small { display: block; font: 600 12px/16px var(--ui); }
+.feedback { position: fixed; left: 0; right: 0; bottom: 0; padding: 16px 16px 24px; background: var(--ch-tint); z-index: 4; border-radius: 24px 24px 0 0; }
+.feedback .row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.feedback .row p { flex: 1; color: var(--ink-2); }
+.feedback .row p b { display: block; color: var(--ink); font: 600 20px/28px var(--display); font-variation-settings: 'SOFT' 100; }
+.feedback .xp { background: var(--sun); color: var(--on-sun); height: 32px; padding: 0 12px; border-radius: 4px; transform: rotate(4deg); font-size: 14px; filter: var(--sticker); }
+</style>
+</head>
+<body class="ch1">
+<div class="field" style="height:232px"><svg class="tear" viewBox="0 0 390 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0 H390 V4 L376 10 L362 3 L350 9 L334 4 L320 11 L306 5 L292 10 L276 3 L262 9 L246 4 L232 11 L218 4 L204 9 L188 3 L174 10 L160 4 L146 11 L130 5 L116 9 L100 3 L86 10 L72 4 L58 11 L42 4 L28 9 L14 3 L0 8Z" fill="var(--ch)"/></svg></div>
+<div class="status"><span>9:41</span><span><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+<header class="bar">
+	<span class="iconbtn" aria-label="Leave the room"><i class="ph-bold ph-x"></i></span>
+	<ol class="beats"><li class="done"><b><i class="ph-bold ph-check"></i></b></li><li class="now"><b>2</b>Why it works</li><li><b>3</b></li></ol>
+	<span class="trust"><span></span><span></span><span></span><span></span><span class="off"></span></span>
+</header>
+<section class="scene">
+	<div class="cast who sticker" data-cast="marcus" data-expr="thinking" data-style="paper"></div>
+	<div class="say"><p class="caption-3">Marcus</p><p class="heading-5">Why those details?</p></div>
+</section>
+<section class="mine"><p class="caption-3">Your line</p><p class="body-2">“I tagged 600 tickets from one month. One in three were password resets, so I wrote a help page for them.”</p></section>
+<div class="head2"><h2 class="heading-6">What makes it work?</h2></div>
+<ul class="opts">
+	<li class="slip opt on"><span class="ico"><i class="ph-bold ph-hash"></i></span><p class="body-3">He asked about data, so give the actual numbers and what I did with them.</p><span class="stampmark" aria-label="Sound"><span>Sound<small>+1 trust</small></span></span></li>
+	<li class="slip opt"><span class="ico"><i class="ph-bold ph-users-three"></i></span><p class="body-3">Sharing credit with the team is the professional thing to do.</p></li>
+</ul>
+<section class="feedback">
+	<div class="row"><p class="body-6"><b>That's the principle.</b>Numbers plus your own action beat a summary.</p><span class="tag xp tnum">+10 XP</span></div>
+	<div class="btn">Next: land the answer<i class="ph-bold ph-arrow-right"></i></div>
+</section>
+<script src="../shared/cast.js"></script>
+<script>Cast.mount()</script>
+</body>
+</html>
