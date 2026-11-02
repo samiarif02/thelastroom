@@ -83,7 +83,11 @@ void main() {
           find.bySemanticsLabel(RegExp('^Mission 7, .*Done')),
           findsOneWidget,
         );
-        expect(find.textContaining(TowerHero.beatYourBest), findsOneWidget);
+        // Chapter 2 is open now, so the hero moves on to its first room.
+        expect(
+          find.textContaining('${TowerHero.upNext} · MISSION 8'),
+          findsOneWidget,
+        );
         // Cards due: the Recall Room sits under the hero, above the chapters.
         final recall = tester.getTopLeft(find.byType(RecallRoomCard)).dy;
         final chapter = tester.getTopLeft(find.text('Get Through the Door')).dy;

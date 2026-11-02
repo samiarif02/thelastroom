@@ -43,6 +43,8 @@ const List<Mission> missions = [
   missionSomethingWentWrong,
   missionTheFollowUpTrap,
   missionFirstRoundReview,
+  ...chapterTwoMissions,
+  ...chapterThreeMissions,
 ];
 
 /// Chapter 2, "Under Pressure" (brief 37): seven missions, all answered by voice. They

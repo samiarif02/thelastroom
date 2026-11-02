@@ -269,8 +269,12 @@ void main() {
   test('the fixture is valid content', () {
     expect(
       validateContent(
-        const ContentBundle(
-          missions: [...missions, voiceFixture],
+        ContentBundle(
+          // The fixture stands in for Mission 8, the first voice mission.
+          missions: [
+            for (final m in missions)
+              m.number == voiceFixture.number ? voiceFixture : m,
+          ],
           interviewers: interviewers,
           lessons: lessons,
           chapters: chapters,

@@ -1,7 +1,7 @@
 import '../mission.dart';
 
-/// The three floors of the tower (brief §6). Chapter 1 is playable; Chapters 2 and 3 are
-/// visible, locked and teased by their mission titles (FR-31).
+/// The three floors of the tower (brief §6), all playable: Chapter 1 answered by choices,
+/// Chapter 2 by voice, Chapter 3 by both (owner, 2026-11-02; briefs 37, 38).
 const List<Chapter> chapters = [
   Chapter(
     number: 1,
@@ -20,7 +20,7 @@ const List<Chapter> chapters = [
   Chapter(
     number: 2,
     title: 'Under Pressure',
-    playable: false,
+    playable: true,
     missionTitles: [
       'Team Conflict',
       'The Failure',
@@ -34,7 +34,7 @@ const List<Chapter> chapters = [
   Chapter(
     number: 3,
     title: 'The Final Round',
-    playable: false,
+    playable: true,
     missionTitles: [
       'Solve the Problem',
       'The Interruption',

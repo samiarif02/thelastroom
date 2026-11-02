@@ -44,8 +44,9 @@ const Duration _considered = Duration(seconds: 5);
 const Duration _guessed = Duration(milliseconds: 500);
 
 List<Map<String, Object?>> buildCases() => [
+  // The published evaluation covers Chapter 1 (docs/scoring-eval.md).
   for (final mission in missions.where(
-    (m) => m.answerMode == AnswerMode.choices,
+    (m) => m.chapter == 1 && m.answerMode == AnswerMode.choices,
   ))
     for (final kind in expectedBands.keys) _case(mission, kind),
 ];
