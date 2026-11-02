@@ -243,13 +243,17 @@ new email form.**
   cliffhanger, comeback and weekly-win types are still to come.
 - **FR-51** **[11, 26]** At most 1 per day, at the time of day the player last played, kept between
   09:00 and 20:30, so **never after 21:00** (brief 26 moved the old 21:30 quiet-hours start
-  earlier). Back-off: days 1, 2 and 3, then (those ignored) every third day; every app open and
-  close re-plans the next week (`planReminders`, unit-tested). An off switch in Settings; a tap
-  deep-links to `/tower/recall` or `/tower/mission/N`.
+  earlier). Back-off: days 1, 3 and 5 after the last open (brief 42: the owner wants players
+  back on days 3 and 5; was days 1, 2, 3), then (those ignored) a three-day gap to day 8, then
+  nothing until the next open; every app open and close re-plans (`planReminders`,
+  unit-tested). An off switch in Settings, with the next reminder's day, time and sender under it
+  and "Send a test reminder" (shows it now; brief 42); a tap deep-links to `/tower/recall` or
+  `/tower/mission/N`.
 - **FR-52** **[11, 26]** Permission asked **after the first mission's debrief** (brief 26; was
   after Mission 2), behind a vivid explainer card, once, never on launch. Android 13+ asks for
   `POST_NOTIFICATIONS` only if the player says yes.
-- **FR-53** **[11]** Web: no notifications; Settings says reminders are in the mobile app.
+- **FR-53** **[11]** Web: no notifications; Settings says reminders are phone-only, and "Send a
+  test reminder" explains it.
 
 ### Sync and accounts (brief §10)
 

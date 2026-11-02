@@ -65,7 +65,18 @@ enum AnalyticsEvent {
   voiceAnswerRecorded('voice_answer_recorded'),
 
   /// A voice mission is scored: by the AI recruiter, or by the player's self-check.
-  voiceAnswerScored('voice_answer_scored');
+  voiceAnswerScored('voice_answer_scored'),
+
+  /// The player sends themselves a test reminder from Settings (brief 42): tomorrow's planned
+  /// reminder, shown now. Its kind only, never its text.
+  testReminderSent('test_reminder_sent'),
+
+  /// The tower greets a player back after a day or more away (brief 42): how many days, and
+  /// where its one button goes.
+  welcomeBackShown('welcome_back_shown'),
+
+  /// The welcome-back card goes away: its button was followed, or it was dismissed.
+  welcomeBackClosed('welcome_back_closed');
 
   const AnalyticsEvent(this.wireName);
 

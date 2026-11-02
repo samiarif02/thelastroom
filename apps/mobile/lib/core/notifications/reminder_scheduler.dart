@@ -16,9 +16,21 @@ abstract interface class ReminderScheduler {
   /// Asks the system (Android 13+ `POST_NOTIFICATIONS`, iOS alerts). True when allowed.
   Future<bool> requestPermission();
 
-  /// Cancels every scheduled reminder and schedules [plan] instead.
+  /// Whether the system lets the game post notifications right now, without asking (the player
+  /// can revoke it in the phone's settings at any time).
+  Future<bool> hasPermission();
+
+  /// Cancels every scheduled reminder and schedules [plan] instead. A reminder already in the
+  /// notification shade (a delivered one, or a test) stays there.
   Future<void> replace(List<PlannedReminder> plan);
+
+  /// Shows [reminder] now, as the test reminder (brief 42): its own id, so a re-plan never
+  /// replaces it, and the same payload, so a tap goes where the real one would.
+  Future<void> show(PlannedReminder reminder);
 }
+
+/// The test reminder's notification id: plan ids are their days (1 and up), so 0 is free.
+const int testReminderId = 0;
 
 /// The payload a reminder carries, so a tap knows where to go and what to report:
 /// `recallDue:<variant>` or `nudge:<variant>:<mission number>`.
@@ -113,8 +125,40 @@ class LocalNotificationsScheduler implements ReminderScheduler {
   }
 
   @override
+  Future<bool> hasPermission() async {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        final android = _plugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+        return await android?.areNotificationsEnabled() ?? false;
+      case TargetPlatform.iOS:
+        final ios = _plugin
+            .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin
+            >();
+        final options = await ios?.checkPermissions();
+        return options?.isEnabled ?? false;
+      default:
+        return false;
+    }
+  }
+
+  @override
+  Future<void> show(PlannedReminder reminder) => _plugin.show(
+    id: testReminderId,
+    title: reminder.title,
+    body: reminder.body,
+    notificationDetails: _details,
+    payload: encodeReminderPayload(reminder),
+  );
+
+  @override
   Future<void> replace(List<PlannedReminder> plan) async {
-    await _plugin.cancelAll();
+    // Pending only: `cancelAll` would also clear the shade, so a test reminder (or yesterday's,
+    // unread) vanished the moment the app was hidden and re-planned.
+    await _plugin.cancelAllPendingNotifications();
     for (final r in plan) {
       await _plugin.zonedSchedule(
         id: r.id,

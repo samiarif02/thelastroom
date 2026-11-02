@@ -138,7 +138,10 @@ standards to Flutter (the divergences are listed there).
   directly, not for Google Play. The game has been played on Android (a realme 8) and in Chrome;
   iOS hasn't been tested.
 - **Reminders are Android-first.** The local "traps waiting" and in-character nudges are built
-  and tested; on iOS they're wired but untested, and the web has none (FR-50–53).
+  and tested; on iOS they're wired but untested, and the web has none (FR-50–53). They come the
+  day after you play, then on days 3 and 5, then day 8, never after 21:00 and at most one a
+  day. To see one now on a phone: finish Mission 1, allow notifications, then Settings → "Send
+  a test reminder".
 - No job is promised: story outcomes are narrative, not predictions.
 
 ## Optional: the backend and AI scoring

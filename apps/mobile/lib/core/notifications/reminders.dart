@@ -15,12 +15,16 @@ import '../../features/tower/tower_rooms.dart';
 import '../analytics/analytics_event.dart';
 import '../analytics/event_value.dart';
 import '../progress/progress_repository.dart';
+import 'reminder_outlook.dart';
 import 'reminder_plan.dart';
 import 'reminder_scheduler.dart';
 import 'reminder_settings.dart';
 
 /// Local reminders are a mobile thing (FR-53): the web build has none.
 const bool remindersSupported = !kIsWeb;
+
+/// [remindersSupported], as a provider so Settings' web state can be tested on any platform.
+final remindersSupportedProvider = Provider<bool>((ref) => remindersSupported);
 
 final reminderSchedulerProvider = Provider<ReminderScheduler>(
   (ref) => LocalNotificationsScheduler(),
@@ -33,6 +37,30 @@ final reminderClockProvider = Provider<DateTime Function()>(
 
 final remindersProvider = Provider<Reminders>(Reminders.new);
 
+/// The next reminder, or why there is none, for the line under the switch in Settings. Read
+/// again whenever the choices change.
+final reminderOutlookProvider = FutureProvider.autoDispose<ReminderOutlook>((
+  ref,
+) {
+  ref.watch(reminderSettingsProvider);
+  return ref.read(remindersProvider).outlook();
+});
+
+/// How "Send a test reminder" went.
+enum TestReminderResult {
+  /// Tomorrow's reminder is in the notification shade.
+  sent,
+
+  /// Nothing to remind the player of: every room is done and no cards are due.
+  nothingPlanned,
+
+  /// The web: reminders are phone-only.
+  unsupported,
+
+  /// The system refused it (no permission after all, an old OS).
+  failed,
+}
+
 /// Plans and schedules the reminders from the game's own state: the Recall Room's due cards and
 /// the next mission on the tower. It reads features' pure rules (`towerRooms`, the recall
 /// schedule) rather than duplicating them. Nothing here throws: a failure is logged and the
@@ -44,52 +72,112 @@ class Reminders {
 
   ReminderScheduler get _scheduler => _ref.read(reminderSchedulerProvider);
 
+  bool get _supported => _ref.read(remindersSupportedProvider);
+
+  /// The reminders the game would schedule now, from its own state; [enabled] false plans
+  /// none. Throws if the stores can't be read: callers catch.
+  Future<List<PlannedReminder>> plan({required bool enabled}) async {
+    final now = _ref.read(reminderClockProvider)();
+    final today = CalendarDay(now.year, now.month, now.day);
+    final progress = _ref.read(progressRepositoryProvider);
+    final schedule = await syncRecallSchedule(
+      store: _ref.read(recallStoreProvider),
+      progress: progress,
+      deck: _ref.read(recallDeckProvider),
+      today: today,
+    );
+    final rooms = towerRooms(missions, await progress.attempts());
+    final next = rooms
+        .where((r) => r.state == RoomState.current)
+        .firstOrNull
+        ?.mission;
+    final interview = (await loadProgressionRecord(_ref)).interviewDate;
+    return planReminders(
+      now: now,
+      enabled: enabled,
+      recallDue: (day) =>
+          schedule.cards.where((c) => !_dayOf(day).isBefore(c.due)).length,
+      interviewDate: interview == null
+          ? null
+          : DateTime(interview.year, interview.month, interview.day),
+      nextMission: next == null
+          ? null
+          : NextMission(
+              number: next.number,
+              interviewerId: next.question.speakerId,
+            ),
+    );
+  }
+
   /// Cancels what was scheduled and schedules the next week (on every open and every close).
   Future<void> reschedule() async {
-    if (!remindersSupported) return;
+    if (!_supported) return;
     try {
       final settings = _ref.read(reminderSettingsProvider.notifier);
       await settings.loaded;
-      final now = _ref.read(reminderClockProvider)();
-      final today = CalendarDay(now.year, now.month, now.day);
-      final progress = _ref.read(progressRepositoryProvider);
-      final schedule = await syncRecallSchedule(
-        store: _ref.read(recallStoreProvider),
-        progress: progress,
-        deck: _ref.read(recallDeckProvider),
-        today: today,
-      );
-      final rooms = towerRooms(missions, await progress.attempts());
-      final next = rooms
-          .where((r) => r.state == RoomState.current)
-          .firstOrNull
-          ?.mission;
-      final interview = (await loadProgressionRecord(_ref)).interviewDate;
-      final plan = planReminders(
-        now: now,
-        enabled: _ref.read(reminderSettingsProvider).enabled,
-        recallDue: (day) =>
-            schedule.cards.where((c) => !_dayOf(day).isBefore(c.due)).length,
-        interviewDate: interview == null
-            ? null
-            : DateTime(interview.year, interview.month, interview.day),
-        nextMission: next == null
-            ? null
-            : NextMission(
-                number: next.number,
-                interviewerId: next.question.speakerId,
-              ),
-      );
-      await _scheduler.replace(plan);
+      final enabled = _ref.read(reminderSettingsProvider).enabled;
+      await _scheduler.replace(await plan(enabled: enabled));
     } on Object catch (e) {
       _warn('reminders not scheduled', e);
+    }
+  }
+
+  /// Whether the phone lets the game post notifications now (false on the web, or on error).
+  Future<bool> hasPermission() async {
+    if (!_supported) return false;
+    try {
+      return await _scheduler.hasPermission();
+    } on Object catch (e) {
+      _warn('reminder permission unknown', e);
+      return false;
+    }
+  }
+
+  /// "Send a test reminder" (brief 42): tomorrow's real reminder, shown now, so the player sees
+  /// what will arrive and that a tap opens it. Permission is the caller's to ask for first,
+  /// behind the explainer. Planned as if reminders were on, so it works with the switch off.
+  Future<TestReminderResult> sendTest() async {
+    if (!_supported) return TestReminderResult.unsupported;
+    try {
+      final next = (await plan(enabled: true)).firstOrNull;
+      if (next == null) return TestReminderResult.nothingPlanned;
+      await _scheduler.show(next);
+      _ref.read(analyticsProvider).track(AnalyticsEvent.testReminderSent, {
+        'type': EventValue.name(next.kind),
+      });
+      return TestReminderResult.sent;
+    } on Object catch (e) {
+      _warn('test reminder not shown', e);
+      return TestReminderResult.failed;
+    }
+  }
+
+  /// The next reminder, or why there is none: the web, the switch off, the phone blocking them,
+  /// or nothing to remind the player of.
+  Future<ReminderOutlook> outlook() async {
+    if (!_supported) return const ReminderOutlook.quiet(ReminderQuiet.web);
+    await _ref.read(reminderSettingsProvider.notifier).loaded;
+    if (!_ref.read(reminderSettingsProvider).enabled) {
+      return const ReminderOutlook.quiet(ReminderQuiet.off);
+    }
+    if (!await hasPermission()) {
+      return const ReminderOutlook.quiet(ReminderQuiet.blocked);
+    }
+    try {
+      final next = (await plan(enabled: true)).firstOrNull;
+      return next == null
+          ? const ReminderOutlook.quiet(ReminderQuiet.nothingPlanned)
+          : ReminderOutlook.next(next);
+    } on Object catch (e) {
+      _warn('next reminder unknown', e);
+      return const ReminderOutlook.quiet(ReminderQuiet.nothingPlanned);
     }
   }
 
   /// The player said yes: ask the system, and switch reminders on if it allows them. Returns
   /// whether they're on.
   Future<bool> enable() async {
-    if (!remindersSupported) return false;
+    if (!_supported) return false;
     final settings = _ref.read(reminderSettingsProvider.notifier);
     var granted = false;
     try {

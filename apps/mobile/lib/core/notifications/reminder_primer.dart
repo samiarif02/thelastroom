@@ -14,34 +14,38 @@ import 'reminders.dart';
 /// debrief (FR-52, brief 26), never at launch. A vivid explainer card first; the system's own
 /// prompt only if the player says yes. Does nothing on the web or once it has been offered.
 Future<void> offerReminders(BuildContext context, WidgetRef ref) async {
-  if (!remindersSupported) return;
+  if (!ref.read(remindersSupportedProvider)) return;
   await ref.read(reminderSettingsProvider.notifier).loaded;
   if (ref.read(reminderSettingsProvider).offered) return;
   // Let the room light up and its notice land before the card comes in.
   await Future<void>.delayed(ReminderPrimer.settle);
   if (!context.mounted) return;
+  final reminders = ref.read(remindersProvider);
+  if (await showReminderPrimer(context, ref)) unawaited(reminders.enable());
+  // Answered or dismissed, it isn't offered again; Settings has the switch.
+  if (!ref.read(reminderSettingsProvider).enabled) {
+    await reminders.markOffered();
+  }
+}
+
+/// Shows the explainer and resolves true when the player says yes; asking the system is the
+/// caller's next step. Used after Mission 1 and by "Send a test reminder" without permission.
+Future<bool> showReminderPrimer(BuildContext context, WidgetRef ref) async {
   ref
       .read(analyticsProvider)
       .track(AnalyticsEvent.notificationPermissionPrompted);
-  final reminders = ref.read(remindersProvider);
-  await showGeneralDialog<void>(
+  final yes = await showGeneralDialog<bool>(
     context: context,
     barrierDismissible: true,
     barrierLabel: ReminderPrimer.notNow,
     barrierColor: BrandVivid.night.withValues(alpha: ReminderPrimer.scrim),
     transitionDuration: BrandMotion.standard,
     pageBuilder: (dialogContext, _, _) => ReminderPrimer(
-      onYes: () {
-        Navigator.of(dialogContext).pop();
-        unawaited(reminders.enable());
-      },
-      onNotNow: () => Navigator.of(dialogContext).pop(),
+      onYes: () => Navigator.of(dialogContext).pop(true),
+      onNotNow: () => Navigator.of(dialogContext).pop(false),
     ),
   );
-  // Answered or dismissed, it isn't offered again; Settings has the switch.
-  if (!ref.read(reminderSettingsProvider).enabled) {
-    await reminders.markOffered();
-  }
+  return yes ?? false;
 }
 
 /// The explainer: what the reminders are, how kind they are, and two clear answers.
@@ -72,7 +76,7 @@ class ReminderPrimer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Center(
+      child: _CentredScroll(
         child: Padding(
           padding: const EdgeInsets.all(BrandSpace.md),
           child: ConstrainedBox(
@@ -109,4 +113,16 @@ class ReminderPrimer extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Centred while the card fits; scrolls when it doesn't (2x text on a small phone), so the
+/// two answers are always reachable.
+class _CentredScroll extends StatelessWidget {
+  const _CentredScroll({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      Center(child: SingleChildScrollView(child: child));
 }

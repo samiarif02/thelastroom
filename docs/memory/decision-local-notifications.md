@@ -11,6 +11,11 @@ ladder after 3 ignored, permission asked after Mission 2 behind a custom pre-pro
 "Cancel all, reschedule next 7 days" on every open/close (iOS caps pending at 64). Android 13+
 `POST_NOTIFICATIONS`, boot receiver, inexact scheduling. Web skips them. Remote push (FCM) is v2.
 
+**As built (briefs 26, 42):** daily nudge and recall due only; days 1, 3, 5 after the last open,
+then day 8 (the owner wants returns on days 3 and 5); 09:00–20:30; permission after Mission 1.
+Settings shows the next one and has "Send a test reminder" (shows tomorrow's now). The tower's
+"welcome back" card covers the player who returns.
+
 **Why:** works offline, no server, still shows retention thinking (brief §8).
 **How to apply:** full design in `docs/product-brief.md` §8; events `notification_*` are
 already registered.

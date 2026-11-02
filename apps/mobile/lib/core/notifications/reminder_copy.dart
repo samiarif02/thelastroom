@@ -44,6 +44,9 @@ abstract final class ReminderCopy {
     ],
   };
 
+  /// An interviewer's name ("Priya"), or null for an id that isn't one.
+  static String? name(String? interviewerId) => _names[interviewerId];
+
   /// The interviewer's name over the nudge (unknown ids fall back to the company).
   static String nudgeTitle(String interviewerId) {
     final name = _names[interviewerId];
