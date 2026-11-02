@@ -8,6 +8,9 @@ Each mission is one interview question. You build your answer in three beats (op
 land), say **why** you chose each line, and the interviewer reacts, pushes back with a
 follow-up, and hands you a debrief that shows exactly what made your answer stronger or weaker.
 Then the **Recall Room** brings back every trap you fell for until it stops catching you.
+**Chapter 2** is answered out loud: the interviewer speaks, you record, and the AI recruiter
+scores what you said, never how you sound. **Chapter 3** mixes both. Every mission says what
+it practises before it starts.
 
 Built in Flutter for Android, iOS and the web, for a product assessment by
 [8x](https://github.com/8xsocial). **▶ Demo video:** _coming soon_ · **Android APK:** see
@@ -121,10 +124,10 @@ standards to Flutter (the divergences are listed there).
 
 ## Honest limits
 
-- **Chapter 1 only.** Seven missions are playable; Chapters 2 and 3 are visible, locked
-  teasers.
-- **It teaches choosing, not speaking.** Picking from written lines isn't answering live, and a
-  free-text answer mode isn't built.
+- **Speaking is scored on content only.** Chapters 2 and 3 score what you said from a
+  transcript; pace, fillers and confidence aren't measured (by design: never accent). Offline,
+  a spoken answer is scored by your own self-check against the mission's points.
+- **Typed free-text answers aren't built.** Chapter 1 is answered by building from lines.
 - **The scoring weights are a hypothesis.** They'd need human-rated answers to validate, and
   the AI's score isn't perfectly reproducible (temperature 0 narrows it but doesn't remove it).
 - **AI scoring needs a laptop.** Nothing is hosted, so the AI recruiter runs on a Mac on the

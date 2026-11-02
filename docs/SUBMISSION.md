@@ -9,6 +9,9 @@ is [`demo-script.md`](demo-script.md).
 **What's built and what isn't:** every requirement and plan phase, checked, in
 [`completion.md`](completion.md).
 
+**Landing page:** a static Next.js site in [`web/`](../web/), deployed on Vercel from `main`
+([ADR 0007](decisions/0007-landing-page-on-vercel.md), [#43](https://github.com/samiarif02/thelastroom/pull/43)).
+
 **Android APK:** the draft release on [Releases](https://github.com/samiarif02/thelastroom/releases)
 (published by the owner). It installs directly, needs no keys and plays offline.
 
@@ -19,8 +22,19 @@ recognition, not judgement: they can't tell why one answer works and a plausible
 and they don't remember the lesson next week.
 
 **The game.** You're a graduate interviewing for a Product Associate role at a fictional
-company. Chapter 1 has seven missions, each one interview question, with three interviewers
-(Priya the recruiter, Marcus the hiring manager, and Lena, who repeats your words back).
+company. Three chapters of seven missions each, one interview question per mission, with
+three interviewers (Priya the recruiter, Marcus the hiring manager, and Lena, who repeats your
+words back), and Sam, who runs the final round. Every mission names what it practises before
+it starts.
+- **Chapter 1, Get Through the Door:** you build the answer from lines (below).
+- **Chapter 2, Under Pressure:** you answer **out loud**. The interviewer's lines are spoken,
+  you record your answer and your reply to the follow-up; recording pauses by itself after 5
+  seconds of silence, Continue picks up where you stopped, Delete starts the take again. The
+  AI recruiter scores what you said, never your accent or how you sound, and shows which of the
+  mission's points you made. Offline, you listen back and tick the points yourself.
+- **Chapter 3, The Final Round:** both: three missions built from lines, four spoken.
+
+In Chapter 1:
 - **Build an answer** in three beats (open, evidence, land). Every option is plausible, and
   every wrong one is a realistic mistake: vague, "we" not "I", off the question, rambling,
   memorised.
@@ -52,6 +66,9 @@ It plays fully offline with zero setup. The backend (sign-in, sync, AI scoring) 
 | A bright, friendly look after a dark cinematic first draft, with the owner choosing from three directions | [DESIGN.md](../DESIGN.md), [#6](https://github.com/samiarif02/thelastroom/pull/6), [#16](https://github.com/samiarif02/thelastroom/pull/16), [#20](https://github.com/samiarif02/thelastroom/pull/20), [#21](https://github.com/samiarif02/thelastroom/pull/21) |
 | Sound: every cue synthesised in the repo (CC0, credited), quiet by default | [sound-design.md](sound-design.md), [audio-credits.md](audio-credits.md), [#13](https://github.com/samiarif02/thelastroom/pull/13), [#14](https://github.com/samiarif02/thelastroom/pull/14) |
 | Android back returns to the tower and asks before exiting; leaving a mission keeps your place | [#22](https://github.com/samiarif02/thelastroom/pull/22) |
+| Answer out loud from Chapter 2: spoken lines, a recorder that pauses on silence, scored on content only, a self-check offline; audio is never stored | [brief 35](briefs/35-voice-mission.md), [#44](https://github.com/samiarif02/thelastroom/pull/44), [#41](https://github.com/samiarif02/thelastroom/pull/41), [#42](https://github.com/samiarif02/thelastroom/pull/42), [#47](https://github.com/samiarif02/thelastroom/pull/47) |
+| Prove the AI scores well: a published evaluation, the basis on every result, and the fixes it led to | [brief 36](briefs/36-scoring-trust.md), [scoring-eval.md](scoring-eval.md), [#46](https://github.com/samiarif02/thelastroom/pull/46) |
+| A marketing landing page, hosted, while the game stays zero-setup | [ADR 0007](decisions/0007-landing-page-on-vercel.md), [#43](https://github.com/samiarif02/thelastroom/pull/43) |
 
 **How it was built.** Work ran in waves of parallel Claude Code sessions. A lead session wrote a
 brief per feature (`docs/briefs/`) with file ownership, and each worker took one worktree and
@@ -84,8 +101,18 @@ Flutter 3.47.8; no keys, no network. For AI scoring on a laptop, see the README 
   the weakest beat. Guessed beats score 0, and a strong line with the wrong principle keeps
   60%. It's deterministic and unit-tested, and it's what progress over time is measured with.
   See [FR-20–26](requirements.md).
-- **Verification:** AI scoring is verified with a mocked Gemini (15 Deno tests and the app's
-  fallback tests); the live run with a real key on a phone hasn't been done yet.
+- **Verification:** an evaluation against the live function ([scoring-eval.md](scoring-eval.md)):
+  21 answers (strong, weak and guessed, for every Chapter 1 mission) scored 3 times each. 63 of 63
+  verdicts returned, 92 % landed in the band the author intended, every mission ranked strong
+  above weak and guessed, r = 0.91 with the engine, median 2.1 s. The first run found the AI too
+  lenient on guesses (60) and on a blaming answer with good-sounding reasons (65); two prompt
+  rules fixed both. Every result screen has "How we scored this": the weights, the recruiter's
+  basis beside the game's own score, and what the recruiter is and isn't told.
+- **Voice (Chapters 2–3):** the same recruiter transcribes and scores the spoken answer on
+  content only. Live: a strong spoken answer 95, a weak one 5, transcripts word for word. The
+  audio is sent for scoring and never stored.
+- **The key:** the owner's Gemini key is on the free tier, so heavy use hits per-model rate
+  limits; the app then shows the offline score. Production needs billing on the key.
 
 ## Quality
 
@@ -102,9 +129,11 @@ Flutter 3.47.8; no keys, no network. For AI scoring on a laptop, see the README 
 ## The business model: a paywall mock (designed, not built)
 
 Chapter 1 is free and complete. What happens after it was decision D1
-([requirements](requirements.md#d1-the-argument)). The owner chose a **waitlist**, now built:
-the Chapter 1 report ends on Chapter 2's locked rooms and "Tell me when it opens", which
-records `waitlist_joined`. A real paywall (RevenueCat in sandbox) would have cost a day for a purchase
+([requirements](requirements.md#d1-the-argument)). The owner first chose a **waitlist**: the
+Chapter 1 report ended on Chapter 2's locked rooms and "Tell me when it opens", recording
+`waitlist_joined`. Since 2 Nov this build opens Chapters 2 and 3 for the demo, so the report
+offers "Start Chapter 2"; the waitlist still appears for any chapter that's locked. In a
+store release, Chapters 2 and 3 are the Pro content below. A real paywall (RevenueCat in sandbox) would have cost a day for a purchase
 no reviewer can make from a clone. So the paywall is designed here, as the plan asked, and the
 waitlist measures the same thing: demand for what comes next.
 
@@ -144,9 +173,8 @@ waitlist measures the same thing: demand for what comes next.
 
 ## What's next
 
-- Chapters 2 and 3 (visible now as locked teasers): the panel interview and the final round.
-- A free-text answer mode (not built): say your answer in your own words and get it graded on
-  content only.
+- More voice missions, and answering Chapter 1 out loud as a second pass.
+- Billing on the Gemini key, so AI scoring holds up under real use.
 - More reminder types from FR-50 (the cliffhanger, the weekly win), and reminders tested on iOS.
 - A hosted backend, so AI scoring works away from the laptop.
 - Validating the scoring weights against human-rated answers.
@@ -170,3 +198,9 @@ a session that moved worktree was never logged again.
   transcripts (136 KB → 268 KB, with the owner's prompts restored).
 - [#28](https://github.com/samiarif02/thelastroom/pull/28) names each log after the repo, not
   the worktree folder.
+
+**The 2 Nov enforcement.** Background agents log inside their parent session, so PRs they
+opened could reach `main` without a log commit. [#45](https://github.com/samiarif02/thelastroom/pull/45)
+regenerates every session from its transcript and makes the pre-push hook refuse any branch
+without a session-log commit, or with newer log changes left uncommitted. Each later PR carries
+the log of the session that made it.
