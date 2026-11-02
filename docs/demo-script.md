@@ -1,56 +1,311 @@
-# Demo video script
+# The Last Room — demo video script
 
-A 2½-minute screen recording for the owner. Phone in portrait, sound on (the game has its own
-sound), Do Not Disturb on, the default theme (Evening Forest). One line of narration per shot;
-say it over the shot or add it as a caption.
+About 2½ minutes. Phone in portrait. Sound ON. Do Not Disturb ON. Theme: Evening Forest.
 
-**Two takes, edited together.**
-- **Take A** is a fresh install (clear the app's data first), for the first launch and Mission 1.
-- **Take B** is a phone with Chapter 1 finished, for Mission 4, the Recall Room, Your file, the
-  report and themes.
+Two takes, edited together:
 
-Android's built-in screen recorder, or `scrcpy --record demo.mp4` with audio, both work.
+- TAKE A: fresh install (clear the app's data first). Shots 1–12.
+- TAKE B: a phone with Chapter 1 finished. Shots 13–19.
 
-## Take A: first launch to the first debrief (about 1:40)
+Each shot below has three parts:
 
-| # | Time | Screen | What to do | Narration |
-| --- | --- | --- | --- | --- |
-| 1 | 0:00 | Splash, animated title | Nothing; let it play | "The Last Room: an interview-practice game that plays like a film." |
-| 2 | 0:08 | Onboarding: "One room left between you and the offer." → "Meet your interviewers." → "What should we call you?" | Next, Next, type a first name, "Let's go" | "No sign-up. Three screens and a first name that never leaves the phone." |
-| 3 | 0:20 | The tower, "UP NEXT · MISSION 1" | Tap **Play** | "Your search for a job is a tower. One tap to play." |
-| 4 | 0:26 | Priya's office: her lines type out with a tick per letter | Tap once to complete a line if it's slow | "Priya, the recruiter, asks why you applied." |
-| 5 | 0:34 | The first four answers appear | **Tap one immediately**, in under a second | "Tapping at random doesn't work. Pick in under one and a half seconds and it's a guess: that beat scores nothing…" |
-| 6 | 0:38 | Priya: "That was quick, *your name*. Slow down, I've got time." | Wait for the line | "…and she notices." |
-| 7 | 0:44 | The evidence beat | **Read**, then pick the strongest line ("I interviewed twelve students… from 40% to 75%"); Priya: "Twelve interviews, two screens, 75%. That's what I wanted." | "Now properly: one story, my own part, a number." |
-| 8 | 0:52 | "Why that example?" with four reasons | Pick **"One story with my own part and a number beats a list of strengths."** | "Then she asks why. The reasons are interviewing principles: one holds, the others are the traps people fall for." |
-| 9 | 1:04 | The land beat, then Priya's reaction and her follow-up | Pick a line, then pick a reply | "She reacts, then pushes on the weakest part of the answer." |
-| 10 | 1:14 | Debrief: "The panel is deliberating…" → **"Scored by AI · Senior recruiter"** | Let it land; hold on one dimension's basis sentence | "A senior-recruiter AI grades the answer, with one sentence of basis for every number." |
-| 11 | 1:24 | Scroll to **YOUR REASONING**: "GUESSED IN 0.7 SECONDS", "You said", **"You fell for: …"**, "What holds" | Scroll slowly | "And every beat explained: the guess, what you said, the trap you fell for, and the principle that holds." |
-| 12 | 1:36 | Back to the tower: the room lights up, and "Want Priya to remind you?" | "Not now" (or "Yes") | "Kind reminders, only if you ask: at most once a day, never after nine." |
+- SCREEN: what is on the phone
+- DO: what you tap
+- SAY: the line you speak
 
-**If AI scoring isn't running live** (no laptop backend), shot 10 shows **"Offline score"**
-instead. Narrate: *"Offline, the built-in engine scores it. With the backend running, a Gemini
-senior recruiter scores it instead, with a reason for every number."* Don't fake it; the
-README says AI scoring has only been verified against a mocked model so far.
 
-## Take B: the rest of the game (about 1:00)
+---
+---
 
-| # | Time | Screen | What to do | Narration |
-| --- | --- | --- | --- | --- |
-| 13 | 1:40 | Mission 4 with Marcus, a **build** beat: fragments as chips | Tap the fragments in the order you'd say them, leave the vague one out, then **Lock it in** | "Some answers you build: tap the pieces in the order you'd say them, and leave out the one that sinks you." |
-| 14 | 1:52 | The tower's **Recall Room** card, "3 CARDS DUE" | Tap it | "Every trap you fell for comes back…" |
-| 15 | 1:56 | A Recall Room card: "YOU FELL FOR" and the line it led to | Read, then pick the principle that beats it; the ring fills and the streak counts | "…as a one-minute round on a 1, 3, 7-day schedule, until it stops catching you." |
-| 16 | 2:08 | **Your file**: missions with stars, "Scored by AI" or "Offline score", the skills radar | Scroll | "Your file: every mission, how it was scored, and your skills." |
-| 17 | 2:16 | **Chapter 1 report**: first try against the review, two radars, Chapter 2's locked rooms | Scroll to the end | "The Chapter 1 report: your first answer beside your last. Chapter 2 is next." |
-| 18 | 2:24 | Settings → **Theme** | Tap Sunset City, Ocean Night, Morning Light, back to Evening Forest | "Four themes, switched live." |
-| 19 | 2:32 | The tower | Hold | "Clone it and run it: no keys, no account, fully offline. github.com/samiarif02/thelastroom" |
 
-## Checklist before recording
+# TAKE A — first launch to the first debrief
 
-- [ ] Take A: clear the app's data, so it's a true first launch.
-- [ ] Take B: Chapter 1 finished (Mission 7 done) and at least one trap due in the Recall Room
-      (fall for one in a mission the same day).
-- [ ] Sound on, at a comfortable volume; notifications silenced.
-- [ ] The AI backend running on the laptop if you want shot 10 live (README, "Optional: the
-      backend and AI scoring"); otherwise use the fallback line.
-- [ ] Put the link in `docs/SUBMISSION.md` (first line) and the README header.
+
+---
+
+
+## Shot 1   ·   0:00
+
+SCREEN:   Splash and the animated title
+
+DO:   Nothing. Let it play.
+
+SAY:
+
+> **"The Last Room: an interview-practice game that plays like a film."**
+
+
+---
+
+
+## Shot 2   ·   0:08
+
+SCREEN:   Onboarding, four short screens
+
+DO:   Next → Next → (When's your interview? tap "Next week", or just Next) → type a first name → "Let's go"
+
+SAY:
+
+> **"No sign-up. Four quick screens, and nothing personal leaves the phone."**
+
+
+---
+
+
+## Shot 3   ·   0:20
+
+SCREEN:   The tower, "Up next · Mission 1"
+
+DO:   Tap **Play**
+
+SAY:
+
+> **"Your job search is a tower. One tap to play."**
+
+
+---
+
+
+## Shot 4   ·   0:26
+
+SCREEN:   Priya's office, her words typing out
+
+DO:   Tap once to finish a line if it's slow
+
+SAY:
+
+> **"Priya, the recruiter, asks why you applied."**
+
+
+---
+
+
+## Shot 5   ·   0:34
+
+SCREEN:   Four answers appear
+
+DO:   **Tap one immediately**, in under one second
+
+SAY:
+
+> **"Tapping at random doesn't work. Answer in under a second and a half, and it's a guess: it scores nothing…"**
+
+
+---
+
+
+## Shot 6   ·   0:38
+
+SCREEN:   Priya: "That was quick. Slow down, I've got time."
+
+DO:   Wait for her line
+
+SAY:
+
+> **"…and she notices."**
+
+
+---
+
+
+## Shot 7   ·   0:44
+
+SCREEN:   The next question
+
+DO:   Read the answers, then pick the strongest one ("I interviewed twelve students…")
+
+SAY:
+
+> **"Now properly: one story, my own part, and a number."**
+
+
+---
+
+
+## Shot 8   ·   0:52
+
+SCREEN:   "Why that example?" with four reasons
+
+DO:   Pick **"One story with my own part and a number beats a list of strengths."**
+
+SAY:
+
+> **"Then she asks why. One reason is a real interviewing principle. The others are traps people fall for."**
+
+
+---
+
+
+## Shot 9   ·   1:04
+
+SCREEN:   The last question, then Priya's reaction and her follow-up
+
+DO:   Pick an answer, then pick a reply
+
+SAY:
+
+> **"She reacts, then pushes on the weakest part of my answer."**
+
+
+---
+
+
+## Shot 10   ·   1:14
+
+SCREEN:   "The panel is deliberating…" then "Scored by AI · Senior recruiter"
+
+DO:   Let it land. Hold on one score's one-line reason.
+
+SAY:
+
+> **"A senior-recruiter AI scores the answer, with a reason for every number."**
+
+IF IT SHOWS "OFFLINE SCORE" INSTEAD (no laptop backend running), SAY THIS:
+
+> **"Offline, the built-in engine scores it. With the backend on, an AI senior recruiter scores it, with a reason for every number."**
+
+
+---
+
+
+## Shot 11   ·   1:24
+
+SCREEN:   Scroll to "Your reasoning": "Guessed in 0.7 seconds", "You fell for…", "What holds"
+
+DO:   Scroll slowly
+
+SAY:
+
+> **"Every step explained: the guess, the trap I fell for, and the principle that holds."**
+
+
+---
+
+
+## Shot 12   ·   1:36
+
+SCREEN:   Back on the tower: "Want Priya to remind you?"
+
+DO:   Tap "Not now" (or "Yes")
+
+SAY:
+
+> **"Kind reminders, only if I ask: at most once a day, never after nine."**
+
+
+---
+---
+
+
+# TAKE B — the rest of the game
+
+
+---
+
+
+## Shot 13   ·   1:40
+
+SCREEN:   Mission 4 with Marcus: "Build your answer", pieces as chips
+
+DO:   Tap the pieces in order, leave the vague one out, then **Lock it in**
+
+SAY:
+
+> **"Some answers you build: tap the pieces in the order you'd say them, and leave out the one that sinks you."**
+
+
+---
+
+
+## Shot 14   ·   1:52
+
+SCREEN:   The tower's Recall Room card, "Cards due"
+
+DO:   Tap it
+
+SAY:
+
+> **"Every trap I fell for comes back…"**
+
+
+---
+
+
+## Shot 15   ·   1:56
+
+SCREEN:   A Recall Room card: "You fell for…"
+
+DO:   Pick the principle that beats it
+
+SAY:
+
+> **"…as a one-minute round, again after 1, 3 and 7 days, until it stops catching me."**
+
+
+---
+
+
+## Shot 16   ·   2:08
+
+SCREEN:   Your file: missions, stars, scores, the skills radar
+
+DO:   Scroll
+
+SAY:
+
+> **"My file: every mission, how it was scored, and my skills."**
+
+
+---
+
+
+## Shot 17   ·   2:16
+
+SCREEN:   The Chapter 1 report: first try next to the last mission, two radars
+
+DO:   Scroll to the end
+
+SAY:
+
+> **"The Chapter 1 report: my first answer next to my last. Chapter 2 is next."**
+
+
+---
+
+
+## Shot 18   ·   2:24
+
+SCREEN:   Settings → Theme
+
+DO:   Tap Sunset City → Ocean Night → Morning Light → back to Evening Forest
+
+SAY:
+
+> **"Four themes, switched live."**
+
+
+---
+
+
+## Shot 19   ·   2:32
+
+SCREEN:   The tower
+
+DO:   Hold
+
+SAY:
+
+> **"Clone it and run it: no keys, no account, fully offline. github.com/samiarif02/thelastroom"**
+
+
+---
+---
+
+
+# Before you record
+
+- Take A: clear the app's data, so it's a true first launch.
+- Take B: Chapter 1 finished, with at least one card due in the Recall Room.
+- Sound on, notifications silenced.
+- For shot 10 live, start the AI backend on the laptop first. Otherwise use the "Offline score" line.
+- After recording, send me the video link and I'll add it to the README and SUBMISSION.md.

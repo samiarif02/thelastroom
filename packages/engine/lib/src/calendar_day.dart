@@ -17,6 +17,12 @@ class CalendarDay implements Comparable<CalendarDay> {
   int get month => _utc.month;
   int get day => _utc.day;
 
+  /// [DateTime.monday] (1) to [DateTime.sunday] (7).
+  int get weekday => _utc.weekday;
+
+  /// Whole days from this day to [later] (negative if [later] is earlier).
+  int daysUntil(CalendarDay later) => later._utc.difference(_utc).inDays;
+
   CalendarDay addDays(int days) =>
       CalendarDay._(_utc.add(Duration(days: days)));
 

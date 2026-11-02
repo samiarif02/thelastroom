@@ -74,6 +74,9 @@ abstract interface class GameSounds {
   /// Mission 7's epilogue begins: the chapter's cliffhanger sting (FR-30).
   void cliffhanger();
 
+  /// A skill unlocked (brief 32): a glassy rising shimmer and a soft bell.
+  void skillUnlocked();
+
   /// Every sound stops (leaving the scene, app paused).
   void stopAll();
 }
@@ -144,6 +147,9 @@ class SilentGameSounds implements GameSounds {
 
   @override
   void cliffhanger() {}
+
+  @override
+  void skillUnlocked() {}
 
   @override
   void stopAll() {}

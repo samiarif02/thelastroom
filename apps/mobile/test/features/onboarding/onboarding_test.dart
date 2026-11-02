@@ -7,6 +7,7 @@ import 'package:the_last_room/features/intro/title_gate.dart';
 import 'package:the_last_room/features/onboarding/name_field.dart';
 import 'package:the_last_room/features/onboarding/onboarding_copy.dart';
 import 'package:the_last_room/features/onboarding/onboarding_screen.dart';
+import 'package:the_last_room/features/progression/interview_date_choices.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
 
 import '../mission/mission_harness.dart';
@@ -24,7 +25,7 @@ void main() {
     await rig.tester.pump();
   }
 
-  /// The three steps, reading each, then the name.
+  /// The steps, reading each (the interview date left unanswered: it's optional), then the name.
   Future<MissionRig> onboard(
     WidgetTester tester, {
     double textScale = 1,
@@ -41,6 +42,9 @@ void main() {
     await tapText(rig, OnboardingCopy.next);
     await rig.run(read);
     await tapText(rig, OnboardingCopy.next);
+    await rig.until(find.text(InterviewDateChoices.title));
+    await rig.run(read);
+    await tapText(rig, OnboardingCopy.next);
     await rig.until(find.byType(NameField));
     await rig.run(read);
     await tester.enterText(find.byType(EditableText), '  Sami ');
@@ -50,7 +54,7 @@ void main() {
     return rig;
   }
 
-  testWidgets('first launch: three steps to the Tower in well under 60 s', (
+  testWidgets('first launch: four steps to the Tower in well under 60 s', (
     tester,
   ) async {
     final start = tester.binding.clock.now();
@@ -70,26 +74,30 @@ void main() {
     await rig.until(find.textContaining('Sami.'));
   });
 
-  testWidgets('the steps: the game, then Priya, Marcus and Lena, then you', (
-    tester,
-  ) async {
-    final rig = MissionRig(tester, profile: const PlayerProfile());
-    await rig.boot(Routes.onboarding);
-    await rig.until(find.text(OnboardingCopy.gameTitle));
-    for (final idea in OnboardingCopy.gameIdeas) {
-      expect(find.text(idea.title), findsOneWidget);
-    }
-    expect(find.bySemanticsLabel('Step 1 of 3'), findsOneWidget);
-    await tapText(rig, OnboardingCopy.next);
-    await rig.until(find.text(OnboardingCopy.castTitle));
-    await rig.run(read);
-    for (final name in ['Priya', 'Marcus', 'Lena']) {
-      expect(find.text(name), findsOneWidget);
-    }
-    await tapText(rig, OnboardingCopy.next);
-    await rig.until(find.text(OnboardingCopy.nameTitle));
-    expect(find.bySemanticsLabel('Step 3 of 3'), findsOneWidget);
-  });
+  testWidgets(
+    'the steps: the game, Priya, Marcus and Lena, your interview, then you',
+    (tester) async {
+      final rig = MissionRig(tester, profile: const PlayerProfile());
+      await rig.boot(Routes.onboarding);
+      await rig.until(find.text(OnboardingCopy.gameTitle));
+      for (final idea in OnboardingCopy.gameIdeas) {
+        expect(find.text(idea.title), findsOneWidget);
+      }
+      expect(find.bySemanticsLabel('Step 1 of 4'), findsOneWidget);
+      await tapText(rig, OnboardingCopy.next);
+      await rig.until(find.text(OnboardingCopy.castTitle));
+      await rig.run(read);
+      for (final name in ['Priya', 'Marcus', 'Lena']) {
+        expect(find.text(name), findsOneWidget);
+      }
+      await tapText(rig, OnboardingCopy.next);
+      await rig.until(find.text(InterviewDateChoices.title));
+      expect(find.bySemanticsLabel('Step 3 of 4'), findsOneWidget);
+      await tapText(rig, OnboardingCopy.next);
+      await rig.until(find.text(OnboardingCopy.nameTitle));
+      expect(find.bySemanticsLabel('Step 4 of 4'), findsOneWidget);
+    },
+  );
 
   testWidgets('the name never reaches analytics', (tester) async {
     final rig = await onboard(tester);
@@ -103,8 +111,8 @@ void main() {
   testWidgets('every step turns a page, every button taps', (tester) async {
     final rig = await onboard(tester);
     expect(rig.sounds.count('pageTurn'), OnboardingStep.values.length - 1);
-    // Next, Next, Let's go.
-    expect(rig.sounds.count('uiTap'), 3);
+    // Next, Next, Next, Let's go.
+    expect(rig.sounds.count('uiTap'), 4);
   });
 
   testWidgets('the name field is one labelled text field for screen readers', (
@@ -154,7 +162,7 @@ void main() {
       rig.analytics
           .only(AnalyticsEvent.onboardingCompleted)
           .wire['skipped_steps'],
-      2,
+      3,
     );
     expect(
       rig.analytics.only(AnalyticsEvent.onboardingCompleted).wire['named'],

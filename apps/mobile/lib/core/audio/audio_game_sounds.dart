@@ -177,6 +177,9 @@ class AudioGameSounds implements GameSounds {
   void cliffhanger() => _audio.play(Cue.cliffhanger);
 
   @override
+  void skillUnlocked() => _audio.play(Cue.skillUnlocked);
+
+  @override
   void stopAll() {
     _ticker.reset();
     _typing.clear();

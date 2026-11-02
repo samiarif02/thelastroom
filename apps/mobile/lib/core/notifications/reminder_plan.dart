@@ -62,12 +62,14 @@ class PlannedReminder {
 ///   mission left, that day is quiet.
 /// - Off ([enabled] false, or no permission): nothing.
 ///
-/// [recallDue] gives, for a calendar day, how many cards will be due by then.
+/// [recallDue] gives, for a calendar day, how many cards will be due by then. With an
+/// [interviewDate] (FR-4) still ahead, a nudge leads with the countdown to it.
 List<PlannedReminder> planReminders({
   required DateTime now,
   required bool enabled,
   required int Function(DateTime day) recallDue,
   NextMission? nextMission,
+  DateTime? interviewDate,
 }) {
   if (!enabled) return const [];
   final minute = (now.hour * _minutesPerHour + now.minute).clamp(
@@ -103,7 +105,7 @@ List<PlannedReminder> planReminders({
           at: at,
           kind: ReminderKind.nudge,
           title: ReminderCopy.nudgeTitle(nextMission.interviewerId),
-          body: ReminderCopy.nudgeBody(nextMission.interviewerId, variant),
+          body: _nudgeBody(nextMission, variant, at, interviewDate),
           variant: variant,
           missionNumber: nextMission.number,
         ),
@@ -111,6 +113,24 @@ List<PlannedReminder> planReminders({
     }
   }
   return plan;
+}
+
+String _nudgeBody(
+  NextMission next,
+  int variant,
+  DateTime at,
+  DateTime? interviewDate,
+) {
+  final line = ReminderCopy.nudgeBody(next.interviewerId, variant);
+  if (interviewDate == null) return line;
+  final day = DateTime.utc(at.year, at.month, at.day);
+  final interview = DateTime.utc(
+    interviewDate.year,
+    interviewDate.month,
+    interviewDate.day,
+  );
+  final days = interview.difference(day).inDays;
+  return days < 0 ? line : ReminderCopy.withCountdown(days, line);
 }
 
 /// The days (from today) a plan may use: three in a row, then, if those were ignored, every

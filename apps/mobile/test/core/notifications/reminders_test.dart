@@ -11,6 +11,7 @@ import 'package:the_last_room/core/notifications/reminder_scheduler.dart';
 import 'package:the_last_room/core/notifications/reminder_settings.dart';
 import 'package:the_last_room/core/notifications/reminders.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
+import 'package:the_last_room/features/progression/progression_store.dart';
 import 'package:the_last_room/features/recall/recall_store.dart';
 
 class FakeScheduler implements ReminderScheduler {
@@ -77,6 +78,7 @@ void main() {
           InMemoryProgressRepository(),
         ),
         recallStoreProvider.overrideWithValue(InMemoryRecallStore()),
+        progressionStoreProvider.overrideWithValue(InMemoryProgressionStore()),
         reminderSchedulerProvider.overrideWithValue(scheduler),
         reminderSettingsStoreProvider.overrideWithValue(store),
         reminderClockProvider.overrideWithValue(

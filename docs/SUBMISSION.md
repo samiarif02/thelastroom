@@ -151,6 +151,8 @@ waitlist measures the same thing: demand for what comes next.
 - A hosted backend, so AI scoring works away from the laptop.
 - Validating the scoring weights against human-rated answers.
 - A store build: a release signing key, then Play Store and TestFlight.
+- Metrics: a PostHog sink for the events (cut for v1 by the owner, 1 Nov; every event is already
+  defined, registered and logged on the device).
 
 ## Claude Code logs
 
