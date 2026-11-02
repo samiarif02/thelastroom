@@ -16,3 +16,4 @@ week. `check:standards` (`shared-brain`) fails on a dangling or unindexed file.
 - [Lead and workers](workflow-lead-and-workers.md): parallel worktrees, file ownership, status files, one lead docs PR per wave
 - [No chained destructive git](feedback-no-chained-destructive-git.md): delete/remove/reset only as a lone, checked step
 - [Gotcha: env deny rules](gotcha-env-deny-rules.md): deny rules have no exceptions; each real env file is denied by name
+- [Claude logs in every PR](feedback-claude-logs-every-pr.md): the session log goes in every push and merge; the pre-push hook refuses a branch without one (owner, 2026-11-02, flagged 3x)

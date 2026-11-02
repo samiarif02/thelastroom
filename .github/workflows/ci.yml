@@ -96,6 +96,37 @@ jobs:
       - name: Build web
         run: npm run build:web
 
+  # The landing page (web/, a static Next.js export; ADR 0007): lint, strict types and the
+  # static build, as 8x's web template runs them. Its own toolchain, so its own job.
+  # Vercel deploys it from its Git integration; CI only checks it, so it holds no secret.
+  web:
+    name: Landing page (web/)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # next/font downloads the two fonts here; the export lands in web/out/.
+      - name: Build
+        run: npm run build
+
   # The database, for real: replay every migration on a fresh local Postgres (the Supabase
   # image, so auth.users and the API roles exist), then the pgTAP RLS tests in supabase/tests/.
   # Only the database container starts; no hosted project and no secrets are involved.

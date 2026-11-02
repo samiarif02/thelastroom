@@ -66,6 +66,15 @@ header ≤ 72 characters, body after a blank line with a `Changelog:` line. Scop
 git add .claude-logs/ && git commit -m "chore(claude): add session logs"
 ```
 
+**Never ship or merge without logs** (the owner is scored on them; missing logs were flagged
+three times, 2026-11-02). The pre-push hook refuses a branch with no `.claude-logs/` change or
+with uncommitted log changes. A **background agent** has no log file of its own: its prompts
+and report live in the parent session's log, so copy that file into the agent's branch
+(`cp <parent worktree>/.claude-logs/<parent session>.md .claude-logs/`) and commit it before the
+push. **After merging**, regenerate every session's log from its transcript
+(`CLAUDE_TRANSCRIPT=<transcript.jsonl> CLAUDE_CWD=$PWD python3 .claude/hooks/extract-log.py`
+for each one) and land it in a `chore(claude)` PR, so `main` always shows the latest prompts.
+
 ## 5. Push the branch
 
 ```bash

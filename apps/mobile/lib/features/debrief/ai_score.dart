@@ -159,6 +159,11 @@ class AiScorer {
   /// The longest the player waits for the panel (brief 22: at most 8 s), then the offline score.
   static const Duration timeout = Duration(seconds: 8);
 
+  /// How long a verdict may still arrive after the offline score is showing. Gemini is often
+  /// slower than 8 s under load (measured live, brief 36); a late verdict replaces the offline
+  /// score instead of being thrown away. Longer than the function's own model chain (~24 s).
+  static const Duration lateLimit = Duration(seconds: 30);
+
   /// Why there's no point asking, known at once (so the debrief shows no loading state), or null.
   AiFallbackReason? get unavailable {
     if (!env.hasSupabase) return AiFallbackReason.noBackend;
@@ -169,10 +174,52 @@ class AiScorer {
   Future<AiVerdict> score(ScoreRequest request) async {
     final skip = unavailable;
     if (skip != null) return AiOffline(skip);
+    return _ask(request, timeout);
+  }
+
+  /// What the debrief shows, in order: the verdict if it comes within [timeout]; otherwise the
+  /// offline score at [timeout], then the verdict too if it still comes within [lateLimit].
+  /// The player never waits longer than [timeout] for something to read. Both timers stop as
+  /// soon as there's nothing left to show or nobody listening.
+  Stream<AiVerdict> verdicts(ScoreRequest request) {
+    final out = StreamController<AiVerdict>();
+    final skip = unavailable;
+    if (skip != null) {
+      out.add(AiOffline(skip));
+      unawaited(out.close());
+      return out.stream;
+    }
+    var offlineShown = false;
+    Timer? soon;
+    Timer? giveUp;
+    void finish() {
+      soon?.cancel();
+      giveUp?.cancel();
+      if (!out.isClosed) unawaited(out.close());
+    }
+
+    soon = Timer(timeout, () {
+      offlineShown = true;
+      out.add(const AiOffline(AiFallbackReason.timeout));
+    });
+    giveUp = Timer(lateLimit, finish);
+    out.onCancel = finish;
+    unawaited(
+      _ask(request, null).then((verdict) {
+        if (out.isClosed) return;
+        // After the offline score, only a real verdict is worth replacing it with.
+        if (!offlineShown || verdict is AiScored) out.add(verdict);
+        finish();
+      }),
+    );
+    return out.stream;
+  }
+
+  /// One call to the backend; [limit] null leaves the waiting to the caller's timers.
+  Future<AiVerdict> _ask(ScoreRequest request, Duration? limit) async {
     try {
-      final json = await backend()
-          .scoreAnswer(request.toJson())
-          .timeout(timeout);
+      final call = backend().scoreAnswer(request.toJson());
+      final json = await (limit == null ? call : call.timeout(limit));
       final score = AiScore.fromJson(json);
       if (score == null) {
         log.warn('ai score malformed');
