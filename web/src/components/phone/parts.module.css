@@ -1,0 +1,392 @@
+/* The app's kit at the app's size (390 wide). Values from docs/design/mockups/daylight. */
+.status {
+	display: flex;
+	justify-content: space-between;
+	height: 48px;
+	padding: 16px 24px 0;
+	font: 600 14px/20px var(--ui);
+	color: var(--ink);
+}
+.statusLight {
+	color: var(--white);
+}
+.statusIcons {
+	display: flex;
+	gap: 4px;
+	font-size: 16px;
+}
+
+.bar {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	height: 48px;
+	padding: 4px 16px 0;
+}
+
+.iconTile {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 12px;
+	background: var(--raised);
+	box-shadow: 0 2px 0 var(--sand-2);
+	font-size: 20px;
+	color: var(--ink);
+}
+
+.beats {
+	flex: 1;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 4px;
+	color: var(--ink-2);
+	font: 500 12px/16px var(--ui);
+}
+.beats span {
+	display: block;
+	position: relative;
+	height: 8px;
+	margin-bottom: 4px;
+	overflow: hidden;
+	border-radius: 4px;
+	background: var(--raised);
+}
+.done span {
+	background: var(--ch);
+}
+.now {
+	color: var(--ink);
+	font-weight: 600;
+}
+.now span::after {
+	content: '';
+	position: absolute;
+	inset: 0 55% 0 0;
+	background: var(--ch);
+}
+
+.trust {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	height: 40px;
+	padding: 0 12px;
+	border-radius: 12px;
+	background: var(--raised);
+	box-shadow: 0 2px 0 var(--sand-2);
+	color: var(--ch-deep);
+	font-size: 20px;
+}
+.trust svg {
+	margin-right: 4px;
+}
+.trust b {
+	width: 6px;
+	height: 12px;
+	border-radius: 2px;
+	background: var(--ch);
+}
+.trust b.off {
+	background: var(--sand-2);
+}
+
+.titleBar {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	height: 72px;
+	padding: 4px 16px 0;
+}
+.titleText {
+	flex: 1;
+	display: grid;
+	color: var(--ink);
+}
+.titleText > :first-child {
+	color: var(--ink-2);
+}
+
+.room {
+	position: relative;
+	height: 168px;
+	margin: 12px 16px 0;
+	overflow: hidden;
+	border-radius: 24px;
+	background: var(--ch-soft);
+}
+.glass {
+	position: absolute;
+	left: 24px;
+	right: 120px;
+	top: 16px;
+	height: 104px;
+	overflow: hidden;
+	border: 6px solid var(--raised);
+	border-radius: 9999px 9999px 8px 8px;
+	background: var(--sky);
+}
+.glass i {
+	position: absolute;
+	bottom: 0;
+	border-radius: 2px 2px 0 0;
+	background: var(--city-far);
+}
+.glass i:nth-child(even) {
+	background: var(--sky-cloud);
+}
+.plant {
+	position: absolute;
+	right: 24px;
+	bottom: 24px;
+	width: 56px;
+	height: 96px;
+}
+.plant::after {
+	content: '';
+	position: absolute;
+	left: 12px;
+	bottom: 0;
+	width: 32px;
+	height: 32px;
+	border-radius: 4px 4px 12px 12px;
+	background: var(--honey);
+}
+.plant span {
+	position: absolute;
+	bottom: 28px;
+	width: 20px;
+	height: 56px;
+	border-radius: 9999px 0;
+	background: var(--ch-deep);
+	transform-origin: bottom center;
+}
+.plant span:nth-child(1) {
+	left: 10px;
+	transform: rotate(-24deg);
+}
+.plant span:nth-child(2) {
+	left: 18px;
+	height: 68px;
+	background: var(--ch);
+	transform: rotate(4deg);
+}
+.plant span:nth-child(3) {
+	left: 26px;
+	transform: rotate(30deg);
+}
+.who {
+	position: absolute;
+	left: 50%;
+	bottom: 16px;
+	width: 188px;
+	height: 168px;
+	transform: translateX(-46%);
+}
+.desk {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 24px;
+	background: var(--desk);
+}
+.desk::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 8px;
+	background: var(--desk-top);
+}
+.tags {
+	position: absolute;
+	inset: 16px 16px auto;
+	display: flex;
+	justify-content: space-between;
+}
+
+.bubble {
+	position: relative;
+	z-index: 2;
+	margin: -32px 8px 0;
+	padding: 12px 16px 16px;
+	border-radius: 16px;
+	background: var(--raised);
+	box-shadow: var(--lift);
+}
+.bubble::before {
+	content: '';
+	position: absolute;
+	top: -8px;
+	left: 50%;
+	width: 16px;
+	height: 16px;
+	border-radius: 2px;
+	background: var(--raised);
+	transform: translateX(-50%) rotate(45deg);
+}
+.speaker {
+	margin-bottom: 4px;
+	color: var(--ch-deep);
+}
+.typedLine {
+	display: grid;
+}
+.typedLine > span {
+	grid-area: 1 / 1;
+}
+.ghost {
+	visibility: hidden;
+}
+
+.soFar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 12px 16px 0;
+	padding: 8px 12px;
+	border-radius: 12px;
+	background: color-mix(in srgb, var(--raised) 60%, transparent);
+	color: var(--ink-2);
+}
+.soFar svg {
+	color: var(--ch);
+	font-size: 20px;
+}
+.soFar p {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.soFar b {
+	margin-right: 4px;
+	color: var(--ink);
+	font-weight: 600;
+}
+
+.pickHead {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin: 12px 16px 8px;
+}
+.hint {
+	color: var(--ink-2);
+}
+.options {
+	display: grid;
+	gap: 8px;
+	margin: 0 16px;
+}
+.option {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 12px;
+	border-radius: 16px;
+	background: var(--raised);
+	box-shadow: var(--edge);
+	transition:
+		transform var(--move) var(--ease),
+		opacity var(--fade) var(--ease),
+		box-shadow var(--fade) var(--ease),
+		background-color var(--fade) var(--ease);
+}
+.option p {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+}
+.letter {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background: var(--sand);
+	color: var(--ink-2);
+	font: 600 14px/20px var(--ui);
+	transition:
+		background-color var(--fade) var(--ease),
+		color var(--fade) var(--ease);
+}
+.chosen {
+	background: color-mix(in srgb, var(--ch-tint) 45%, var(--raised));
+	box-shadow:
+		0 0 0 2px var(--ch),
+		0 4px 0 var(--ch-deep);
+	transform: translateY(-2px);
+}
+.chosen .letter {
+	background: var(--ch);
+	color: var(--white);
+}
+
+.dock {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 12px 16px 24px;
+	background: var(--ch-tint);
+}
+.dockPaper {
+	background: var(--paper);
+}
+.button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	height: 56px;
+	border-radius: 16px;
+	background: var(--honey);
+	box-shadow: 0 4px 0 var(--honey-edge);
+	color: var(--on-honey);
+	font: 600 18px/28px var(--ui);
+	transition: opacity var(--fade) var(--ease);
+}
+.button svg {
+	font-size: 20px;
+}
+
+.archPortrait {
+	display: block;
+	overflow: hidden;
+	border-radius: 9999px 9999px 8px 8px;
+	background: var(--ch-soft);
+}
+
+/*
+ * The hero demo's steps (HeroDemo sets `data-step` on an ancestor). With no step, or `pick`, the
+ * picture rests on its frame: line B chosen, the button ready.
+ * talk: the line types out and the cards are not up yet. choose: the cards rise in, 60 ms apart.
+ */
+:global([data-step='talk']) .option {
+	opacity: 0;
+	transform: translateY(16px);
+	transition: none;
+}
+:global([data-step='choose']) .option {
+	transition-delay: calc(var(--i) * 60ms);
+}
+:global(:is([data-step='talk'], [data-step='choose'])) .chosen {
+	background: var(--raised);
+	box-shadow: var(--edge);
+}
+:global([data-step='choose']) .chosen {
+	transform: none;
+}
+:global(:is([data-step='talk'], [data-step='choose'])) .chosen .letter {
+	background: var(--sand);
+	color: var(--ink-2);
+}
+:global(:is([data-step='talk'], [data-step='choose'])) .button {
+	opacity: 0.45;
+}

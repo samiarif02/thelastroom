@@ -1,9 +1,11 @@
 # The Last Room: landing page
 
-The marketing page for The Last Room: what the game is, how a mission works, how the score
-works, privacy, and "coming soon on Google Play and the App Store". A static Next.js site:
-no server, no secrets, no environment variables
-([ADR 0007](../docs/decisions/0007-landing-page-on-vercel.md)). The game itself is in
+The marketing page for The Last Room, in the **Daylight Tower** look
+([`docs/design/direction.md`](../docs/design/direction.md), "The landing page"): the four
+interviewers drawn as people who react, the game playing on a phone in the hero, the three
+floors, how the score works with its published evaluation, a plain FAQ and one call to action
+(the free Android preview). A static Next.js site: no server, no secrets, no environment
+variables ([ADR 0007](../docs/decisions/0007-landing-page-on-vercel.md)). The game itself is in
 `apps/mobile/` and isn't hosted ([ADR 0005](../docs/decisions/0005-zero-setup-offline-backend-optional.md)).
 
 ## Run it
@@ -32,33 +34,43 @@ npm run build        # static export to web/out/
 ## Where things are
 
 ```
-src/app/            layout (fonts, metadata), page (composition only), robots, sitemap,
-                    icon.svg, opengraph-image.jpg (+ its alt text), globals.css (the tokens)
-src/components/     one component per section or piece, each with its CSS module
+src/app/            layout (fonts, metadata, FAQ schema), page (composition only), privacy/,
+                    terms/, not-found (the branded 404), robots, sitemap, icon.svg,
+                    opengraph-image.jpg (+ its alt text), globals.css (tokens and text styles)
+src/cast/           the interviewers as inline SVG: people.ts (colours, the seven expressions),
+                    Figure.tsx (the drawing), Figure.module.css (blends, breath, sway, blinks)
+src/components/     one component per section, each with its CSS module; phone/ holds the
+                    app's screens drawn in HTML at 390 × 844 and scaled into a phone
 src/content/site.ts every word on the page, typed; change copy here, not in components
-public/screens/     stills from the app (docs/screenshots/ and .pr-screenshots/35/), status bar
-                    cropped, 480 px wide, compressed
 ```
 
-- **Identity**: "wayfinding", shared with the app. The page is Northstar Labs' building: the
-  lobby's directory board (21 rooms on three floors, the last room at the top, each row a link),
-  then a section per floor with its colour band and sign, the Recall Room, the notice board
-  (scoring) and the house rules (privacy). The lift's floor indicator in the header rolls to
-  the floor you've scrolled to (`LiftIndicator`, the page's only client component;
-  with reduced motion it changes without rolling).
-- **Colours** are the custom properties at the top of `src/app/globals.css`: petrol ground,
-  concrete text, slate, one action colour (lift-button amber, the primary call to action only)
-  and a colour per floor (teal, signal blue, oxblood). Components use the roles (`--fg`,
-  `--muted`, `--tone`…), never a raw colour; `.light` flips them for the notice board. Every
-  text pair is AA (4.5:1) or better; the figures are in the comment there.
-- **Fonts**: Overpass (display), Atkinson Hyperlegible (text) and Overpass Mono (labels and
-  numbers), all SIL OFL, through `next/font/google`, one weight each to stay inside the mobile
-  performance budget. They're downloaded at build time and served from the site, so a visitor's
-  browser never calls Google. The build needs network access for that.
+- **Look**: warm paper grounds, the floors' colours (green, blue, raspberry) as solid blocks,
+  one action colour (honey, the primary button only), and dark only for the top floor at dusk
+  (the final call to action). The arched window is the one motif: the logo, the portraits, the
+  floors' screens, the 404. Colours are the custom properties at the top of
+  `src/app/globals.css`, mirroring `packages/brand`; components never write a raw colour
+  (the cast's illustration fills live in `src/cast/people.ts`). Every text pair is AA or better;
+  the figures are in the comment there.
+- **Type**: Bricolage Grotesque 600 for display, Geist 400/500/600 for reading, both SIL OFL,
+  through `next/font/google`: downloaded at build time and served from the site, so a visitor's
+  browser never calls Google (the build needs network access). Every size is a named text style
+  (`heading-1` … `caption-4`) on the Tailwind scale; spacing and radii come from the
+  landing-page-design skill's scales.
+- **The cast** is a port of `docs/design/mockups/shared/cast.js`, the source of truth in the
+  design direction, with the same geometry. When `packages/brand/assets/cast/cast.json` lands,
+  `src/cast/people.ts` should read from it so the app and the site can't drift.
+- **Motion** (only transform and opacity, the base curve `cubic-bezier(0.22, 1, 0.36, 1)`):
+  the hero phone plays room 4 on a loop (`HeroDemo`, pausable, paused off screen; under reduced
+  motion it rests on one frame until played), sections rise in once as they scroll in, the
+  tagline lights word by word, and the interviewers breathe, sway, blink and react on hover
+  (`PageMotion`, `Figure.module.css`). Nothing is hidden at rest: without JavaScript, or with
+  reduced motion, everything shows. The idle starts after the load event, off the first paint.
 - **Honesty**: no invented users, ratings, testimonials or numbers (`docs/rules/analytics.md`).
-  Every figure on the page (weights, intervals, thresholds) is one the game's code states.
+  Every figure is one the game's content, engine or `docs/scoring-eval.md` states, and every
+  interviewer's line is one they say in the game. The hero's 82, its four dimensions and the
+  91 XP are the offline engine's for room 4's strongest play.
 - **The site's URL** is `site.url` in `src/content/site.ts` (canonical link, Open Graph,
-  sitemap): Vercel's production address at build time, `https://thelastroom.vercel.app` locally.
+  sitemap): Vercel's production address at build time, `https://thelastroom-ten.vercel.app` locally.
 
 ## Deploy on Vercel
 

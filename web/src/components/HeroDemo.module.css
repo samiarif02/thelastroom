@@ -1,0 +1,40 @@
+.demo {
+	position: relative;
+}
+
+/* Pause and play: small, quiet, under the phone; a 44 px target. */
+.toggle {
+	position: absolute;
+	left: 50%;
+	bottom: -56px;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	padding: 8px 12px;
+	border: 0;
+	border-radius: 12px;
+	background: var(--raised);
+	box-shadow: 0 2px 0 var(--sand-2);
+	color: var(--ink-2);
+	cursor: pointer;
+	white-space: nowrap;
+	transform: translateX(-50%);
+	transition:
+		color var(--fade) var(--ease),
+		transform var(--press) var(--ease),
+		box-shadow var(--press) var(--ease);
+}
+.toggle:hover {
+	color: var(--ink);
+}
+.toggle:active {
+	transform: translateX(-50%) translateY(2px);
+	box-shadow: 0 0 0 var(--sand-2);
+}
+.toggle[hidden] {
+	display: none;
+}
+.toggle svg {
+	font-size: 16px;
+}

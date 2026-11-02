@@ -1,44 +1,38 @@
-import { footer, hero, site } from '@/content/site'
+import Link from 'next/link'
 
-import { ButtonLink } from './ButtonLink'
-import { SignArrow } from './SignArrow'
-import { StoresLine } from './StoresLine'
+import { footer, site } from '@/content/site'
+
+import { BrandMark } from './BrandMark'
 import styles from './SiteFooter.module.css'
 
-/** The way out: the line once more, the Android preview, the stores, links and fine print. */
 export function SiteFooter() {
 	return (
 		<footer className={styles.footer}>
-			<div className="container">
-				<div className={styles.exit}>
-					<p className={`label ${styles.label}`}>
-						<SignArrow className={styles.exitArrow} />
-						{footer.label}
-					</p>
-					<p className={styles.line}>{footer.line}</p>
-					<div className={styles.actions}>
-						<ButtonLink href={hero.preview.href}>{hero.preview.label}</ButtonLink>
-						<StoresLine />
-					</div>
+			<div className={`container ${styles.grid}`}>
+				<div>
+					<BrandMark />
+					<p className={`body-6 ${styles.muted}`}>{footer.line}</p>
 				</div>
-				<div className={styles.base}>
-					<p className={styles.name}>{site.name}</p>
-					<nav aria-label="Project links">
-						<ul className={styles.links}>
-							{footer.links.map((link) => (
-								<li key={link.href}>
-									<a href={link.href} className={`label ${styles.link}`}>
+				<nav aria-label="Footer">
+					<ul className={styles.links}>
+						{footer.links.map((link) => (
+							<li key={link.href}>
+								{link.href.startsWith('/') ? (
+									<Link className={`body-5 ${styles.link}`} href={link.href}>
+										{link.label}
+									</Link>
+								) : (
+									<a className={`body-5 ${styles.link}`} href={link.href}>
 										{link.label}
 									</a>
-								</li>
-							))}
-						</ul>
-					</nav>
-					<div className={styles.fine}>
-						<p>{footer.privacy}</p>
-						<p>{`© ${site.year} ${site.name}. ${footer.note}`}</p>
-					</div>
-				</div>
+								)}
+							</li>
+						))}
+					</ul>
+				</nav>
+				<p className={`caption-4 ${styles.note}`}>
+					{footer.note} © {site.year} {site.name}
+				</p>
 			</div>
 		</footer>
 	)
