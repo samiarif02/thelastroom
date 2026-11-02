@@ -134,10 +134,10 @@ void main() {
     }
   });
 
-  test('every lesson is taught by some line', () {
+  test('every lesson is taught by some line or voice mission', () {
     final taught = {
       for (final o in choicesMissions.expand(allOptions)) o.lessonId,
-      for (final m in writtenMissions) m.voice?.lessonId,
+      for (final m in writtenMissions) ?m.voice?.lessonId,
     };
     for (final lesson in gameContent.lessons) {
       expect(taught, contains(lesson.id), reason: lesson.id);

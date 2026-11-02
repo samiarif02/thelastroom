@@ -4,7 +4,7 @@
 // Local:  supabase start && supabase functions serve score --env-file .env
 // Remote: supabase secrets set --env-file .env && supabase functions deploy score
 
-import { scoreWithGemini } from './gemini.ts';
+import { scoreWithFallback } from './gemini.ts';
 import { type Deps, handle, NotConfigured, Unauthorized } from './handler.ts';
 import type { ScoreInput, ScoreResult } from './scoring.ts';
 
@@ -30,7 +30,7 @@ const deps: Deps = {
   score(input: ScoreInput) {
     const key = Deno.env.get('GEMINI_API_KEY');
     if (!key) return Promise.reject(new NotConfigured());
-    return scoreWithGemini(input, key);
+    return scoreWithFallback(input, key);
   },
 
   async claimQuota(jwt: string) {

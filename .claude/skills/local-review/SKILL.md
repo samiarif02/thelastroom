@@ -1,6 +1,6 @@
 ---
 name: local-review
-description: 'Run the full local pre-push gate: exactly the commands CI runs, in CI''s order (secrets, standards, format, analyze, events, env, RLS, tests, web build, then migrations + RLS tests), then the commit-message range check and a manual review pass against AGENTS.md and docs/rules. Use when the person says "/local-review", "review this before I push", "is this ready", or has finished a change and wants it validated before CI sees it.'
+description: 'Run the full local pre-push gate: exactly the commands CI runs, in CI''s order (secrets, standards, format, analyze, events, env, RLS, tests, web build, the landing page, then migrations + RLS tests), then the commit-message range check and a manual review pass against AGENTS.md and docs/rules. Use when the person says "/local-review", "review this before I push", "is this ready", or has finished a change and wants it validated before CI sees it.'
 ---
 
 # Local review
@@ -15,7 +15,7 @@ broken web build is found.
 ## 1. Automated gates, in CI's order
 
 These are exactly the `npm run` commands in the `check` job of `.github/workflows/ci.yml`, then
-the `db` job, in the same order. A gate added to one is added to the other in the same PR;
+the `web` job, then the `db` job, in the same order. A gate added to one is added to the other in the same PR;
 `check:standards` (`local-review-mirrors-ci`) reads both files and fails if they drift.
 
 Stop at the first failure and fix it (or report it) before continuing. Report each command's
@@ -38,6 +38,19 @@ npm run build:web        # flutter build web --release: a compile check only, no
 
 No Deno on the machine? Run the same gate in Docker:
 `docker run --rm -v "$PWD:/repo" -w /repo denoland/deno:2.9.8 sh -c 'deno lint supabase/functions && deno fmt --check --line-width 120 --single-quote supabase/functions && deno test --no-prompt supabase/functions'`.
+
+Then CI's `web` job: the landing page (`web/`, a static Next.js export, ADR 0007). Node 22;
+`npm ci` installs exactly the lockfile, like CI. The build downloads its two fonts, so it needs
+the network.
+
+```bash
+cd web
+npm ci
+npm run lint             # ESLint, --max-warnings=0
+npm run typecheck        # next typegen && tsc --noEmit (strict)
+npm run build            # static export to web/out/
+cd ..
+```
 
 Then the commit messages, the same check CI's `commits` job runs over the branch:
 

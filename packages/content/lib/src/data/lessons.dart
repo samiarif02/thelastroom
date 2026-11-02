@@ -349,6 +349,143 @@ const lessonKeepYourStory = Lesson(
   ),
 );
 
+// Chapter 2, "Under Pressure" (brief 37): the lessons the voice missions teach where no
+// Chapter 1 lesson fits. Missions 9 and 14 reuse Chapter 1's.
+
+const lessonBothSides = Lesson(
+  id: 'lesson_both_sides',
+  title: 'Give the other side its due',
+  flag: Flag.blame,
+  flaw: 'It makes the other person the problem, so the listener wonders what they would say.',
+  takeaway: 'Say what the other person wanted and why it made sense, then what you did to settle it. How you settled it matters more than who was right.',
+  recall: RecallCheck(
+    prompt: 'You disagreed with a teammate. Which line tells it best?',
+    options: [
+      RecallOption(
+        id: 'recall_both_sides_difficult',
+        text: 'He was honestly quite difficult to work with, so I had to push back.',
+      ),
+      RecallOption(
+        id: 'recall_both_sides_fair',
+        text:
+            'She wanted to ship fast; I wanted to test first. Both made sense.',
+      ),
+      RecallOption(
+        id: 'recall_both_sides_avoid',
+        text: "I don't really get into conflicts, I just get along with everyone.",
+      ),
+    ],
+    correctOptionId: 'recall_both_sides_fair',
+  ),
+);
+
+const lessonAskThenAct = Lesson(
+  id: 'lesson_ask_then_act',
+  title: 'Show what you asked and assumed',
+  flag: Flag.vague,
+  flaw: 'It says you took the initiative, but not what you asked or what you decided.',
+  takeaway: 'Say who you asked, what you assumed where nobody knew, and how you checked that assumption early.',
+  recall: RecallCheck(
+    prompt:
+        'Your brief is one line long. Which answer shows how you handled it?',
+    options: [
+      RecallOption(
+        id: 'recall_ask_then_act_initiative',
+        text: "I'm a natural self-starter, so I just used my initiative and figured it out.",
+      ),
+      RecallOption(
+        id: 'recall_ask_then_act_asked',
+        text: 'I asked the lead two questions and shared my guesses before starting.',
+      ),
+      RecallOption(
+        id: 'recall_ask_then_act_waited',
+        text: 'I waited until my manager had time to give me a proper, full brief.',
+      ),
+    ],
+    correctOptionId: 'recall_ask_then_act_asked',
+  ),
+);
+
+const lessonCutDontCram = Lesson(
+  id: 'lesson_cut_dont_cram',
+  title: 'Say what you cut, not how late you stayed',
+  flag: Flag.generic,
+  flaw: 'Working late shows effort, but not how you decided what mattered.',
+  takeaway: 'Say what you did first, what you dropped or delayed, and who you told. Choosing is the skill; extra hours are not.',
+  recall: RecallCheck(
+    prompt: 'Which answer shows how you handled a tight deadline?',
+    options: [
+      RecallOption(
+        id: 'recall_cut_dont_cram_late',
+        text: 'I stayed late every night that week, and I got everything finished.',
+      ),
+      RecallOption(
+        id: 'recall_cut_dont_cram_cut',
+        text: "I did the client's part first and told my lead the report would slip.",
+      ),
+      RecallOption(
+        id: 'recall_cut_dont_cram_pressure',
+        text: 'I honestly work best under pressure, so deadlines never worry me much.',
+      ),
+    ],
+    correctOptionId: 'recall_cut_dont_cram_cut',
+  ),
+);
+
+const lessonNoWithAWay = Lesson(
+  id: 'lesson_no_with_a_way',
+  title: 'Say no, then offer another way',
+  flag: Flag.generic,
+  flaw: 'It talks about your values but never shows what you said in the room.',
+  takeaway: 'Say what you were asked, what you said back, and what you offered instead. Firm and helpful beats a speech about principles.',
+  recall: RecallCheck(
+    prompt: 'A lead asks you to leave a bad number out. What do you say?',
+    options: [
+      RecallOption(
+        id: 'recall_no_with_a_way_values',
+        text: "I'd tell them I have strong values and I never compromise on integrity.",
+      ),
+      RecallOption(
+        id: 'recall_no_with_a_way_offer',
+        text:
+            "I'd keep the number in and offer to add a note that explains it.",
+      ),
+      RecallOption(
+        id: 'recall_no_with_a_way_comply',
+        text: "It's their call in the end, so I'd do it and raise it some other time.",
+      ),
+    ],
+    correctOptionId: 'recall_no_with_a_way_offer',
+  ),
+);
+
+const lessonPauseThenAnswer = Lesson(
+  id: 'lesson_pause_then_answer',
+  title: 'Pause, then answer',
+  flag: Flag.rambling,
+  flaw: 'Thinking out loud to fill the silence buries the answer when it finally comes.',
+  takeaway: "It's fine to say \"Give me a second.\" Then answer in one sentence, add one example, and stop.",
+  recall: RecallCheck(
+    prompt: 'A follow-up catches you off guard. What is the best first move?',
+    options: [
+      RecallOption(
+        id: 'recall_pause_then_answer_fill',
+        text: "Start talking straight away so there's no awkward silence in the room.",
+      ),
+      RecallOption(
+        id: 'recall_pause_then_answer_pause',
+        text:
+            "Say 'Give me a second', think, then answer in one clear sentence.",
+      ),
+      RecallOption(
+        id: 'recall_pause_then_answer_dodge',
+        text: 'Steer back to the story you prepared, since you know that one well.',
+      ),
+    ],
+    correctOptionId: 'recall_pause_then_answer_pause',
+  ),
+);
+
 // Chapter 3, "The Final Round" (brief 38).
 
 const lessonCauseBeforeFix = Lesson(
@@ -660,6 +797,11 @@ const List<Lesson> lessons = [
   lessonTellItDontRecite,
   lessonOwnYourPart,
   lessonKeepYourStory,
+  lessonBothSides,
+  lessonAskThenAct,
+  lessonCutDontCram,
+  lessonNoWithAWay,
+  lessonPauseThenAnswer,
   lessonCauseBeforeFix,
   lessonFirstStep,
   lessonUseTheMethod,

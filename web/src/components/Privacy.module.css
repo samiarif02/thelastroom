@@ -1,0 +1,42 @@
+.section {
+	padding-block: var(--space-9);
+	background: var(--ink-800);
+	border-top: 1px solid var(--line-soft);
+}
+
+.points {
+	display: grid;
+	gap: var(--space-4);
+}
+
+.point {
+	display: grid;
+	gap: var(--space-3);
+	align-content: start;
+	padding: var(--space-6);
+	background: var(--ink-900);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+}
+
+.index {
+	font-family: var(--font-serif), Georgia, serif;
+	font-size: 1.1rem;
+	font-weight: 500;
+	letter-spacing: 0.12em;
+	color: var(--brass);
+}
+
+.title {
+	font-size: 1.6rem;
+}
+
+.body {
+	color: var(--text-2);
+}
+
+@media (min-width: 48rem) {
+	.points {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}

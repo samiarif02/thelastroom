@@ -7,11 +7,12 @@ import 'paths.dart';
 /// Brief 38: Chapter 3, "The Final Round", seven missions, three answered by choices and four
 /// by voice. Checked as the game will ship them once Chapter 3 opens, before the flip.
 void main() {
-  /// The shipped content with Chapter 3 open: what the flip will ship.
+  /// The shipped content with Chapters 2 and 3 open (they open together, once the voice player
+  /// is in): what the flip will ship.
   final opened = ContentBundle(
     chapters: [
       for (final c in chapters)
-        c.number == 3
+        c.number >= 2
             ? Chapter(
                 number: c.number,
                 title: c.title,

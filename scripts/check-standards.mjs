@@ -53,9 +53,10 @@ export const REQUIRED_SCRIPTS = {
 // Gates CI must run on every PR (format runs as format:check).
 export const CI_GATES = [...Object.keys(REQUIRED_SCRIPTS), 'build:web']
 
-// The CI jobs whose `npm run` gates local-review runs too, in this order: the gates job, then
-// the database job (migrations replayed + pgTAP RLS tests, which needs Docker).
-export const CI_MIRRORED_JOBS = ['check', 'db']
+// The CI jobs whose `npm run` gates local-review runs too, in this order: the gates job, the
+// landing page (web/, ADR 0007), then the database job (migrations replayed + pgTAP RLS tests,
+// which needs Docker).
+export const CI_MIRRORED_JOBS = ['check', 'web', 'db']
 
 export const HANDOFF_SECTIONS = [
 	'Current goal',
