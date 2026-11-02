@@ -38,7 +38,7 @@ extension MissionLookup on Mission {
 
   /// Whether this mission opens its chapter (its title card plays the chapter's sound).
   bool get opensChapter =>
-      missions.firstWhere((m) => m.chapter == chapter).number == number;
+      missions.where((m) => m.chapter == chapter).firstOrNull?.number == number;
 
   /// The last playable mission of its chapter: finishing it opens the chapter report.
   bool get closesChapter {

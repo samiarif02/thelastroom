@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 
 import '../backend/backend.dart';
@@ -25,6 +26,7 @@ class SyncWorker {
     required this._signal,
     this._onRestored,
     DateTime Function()? clock,
+    this._catalog = missions,
   }) : _clock = clock ?? DateTime.now;
 
   final AppDatabase _db;
@@ -35,6 +37,9 @@ class SyncWorker {
   /// Called after the restore wrote anything, so the app re-reads the profile.
   final void Function()? _onRestored;
   final DateTime Function() _clock;
+
+  /// The missions a queued attempt is rescored against before it's sent.
+  final List<Mission> _catalog;
 
   StreamSubscription<void>? _queued;
   Timer? _retry;
@@ -122,7 +127,7 @@ class SyncWorker {
     final progress = DriftProgressRepository(_db, log: _log);
     for (final e in entries) {
       final stored = await progress.byId(e.ref);
-      final record = stored?.toRecord();
+      final record = stored?.toRecord(catalog: _catalog);
       if (stored == null || record == null) {
         stale.add(e);
         continue;
@@ -214,6 +219,7 @@ RemoteAttempt remoteAttempt(StoredAttempt a, MissionScore score) =>
       beatPlays: a.beatPlays.isEmpty
           ? null
           : [for (final p in a.beatPlays) p.toJson()],
+      voiceAnswer: a.voice?.toJson(),
     );
 
 /// A restored attempt as the device stores it (no draft: it never left the old device).
@@ -229,6 +235,7 @@ StoredAttempt storedAttempt(RemoteAttempt a) => StoredAttempt(
   completedAt: a.completedAt,
   contentSchemaVersion: a.contentSchemaVersion,
   beatPlays: BeatPlayRecord.listFrom(a.beatPlays),
+  voice: VoiceAnswerRecord.fromJson(a.voiceAnswer),
 );
 
 RemoteProfile remoteProfile(PlayerProfile p) => RemoteProfile(

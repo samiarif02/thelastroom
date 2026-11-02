@@ -19,3 +19,4 @@ export 'src/recall.dart';
 export 'src/scoring.dart';
 export 'src/shuffle.dart';
 export 'src/skill.dart';
+export 'src/voice_score.dart';

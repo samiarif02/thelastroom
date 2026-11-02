@@ -84,6 +84,10 @@ class AppDatabase extends GeneratedDatabase {
     // attempt rescores exactly as the debrief scored it. JSON, like beat_option_ids; null on
     // rows from version 1, which rescore at full credit as they always did.
     ['alter table attempts add column beat_plays text'],
+    // 3 (brief 35): a voice mission's answer, as JSON ({made, source, seconds}): the points the
+    // spoken answer made and who judged them. Null on a built answer. A voice row has no picks
+    // (beat_option_ids '[]', follow_up_id and reply_option_id ''); never any audio or words.
+    ['alter table attempts add column voice text'],
   ];
 
   @override

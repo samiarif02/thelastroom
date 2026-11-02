@@ -48,3 +48,5 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `ai_score_shown` | The AI's verdict is shown on the dossier | `mission_id`, `score_bucket` |
 | `ai_score_fallback` | No AI verdict, so the dossier shows the engine's "Offline score" | `mission_id`, `reason` (`noBackend`, `noSession`, `timeout`, `limited`, `error`) |
 | `answer_built` | The player locks in an answer built from fragments (brief 27) | `mission_id`, `beat`, `fragments`, `missing`, `out_of_order`, `decoy_used`, `guessed` |
+| `voice_answer_recorded` | A spoken answer is submitted on a voice mission (brief 35), once per take: the answer, then the reply. Never audio or words | `mission_id`, `seconds`, `paused_count`, `retakes` |
+| `voice_answer_scored` | A voice mission's answer is scored and its debrief shown | `mission_id`, `score_bucket`, `source` (`ai`, `selfCheck`) |

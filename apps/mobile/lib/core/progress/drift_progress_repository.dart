@@ -21,6 +21,7 @@ class DriftProgressRepository implements ProgressRepository {
     DateTime Function()? clock,
     math.Random? random,
     String? baselineMissionId,
+    this._catalog = missions,
   }) : _clock = clock ?? DateTime.now,
        _random = random ?? math.Random.secure(),
        _baselineMissionId =
@@ -32,6 +33,9 @@ class DriftProgressRepository implements ProgressRepository {
   final DateTime Function() _clock;
   final math.Random _random;
   final String _baselineMissionId;
+
+  /// The missions stored attempts are rescored against (tests pass a fixture catalog).
+  final List<Mission> _catalog;
 
   @override
   Future<void> recordAttempt(AttemptRecord attempt) async {
@@ -52,6 +56,7 @@ class DriftProgressRepository implements ProgressRepository {
           draft: attempt.draft,
           completedAt: completedAt,
           beatPlays: attempt.beatPlays,
+          voice: attempt.voice,
         ),
       );
       await Outbox(_db).add(OutboxKind.attempt, id);
@@ -72,7 +77,7 @@ class DriftProgressRepository implements ProgressRepository {
     final records = <AttemptRecord>[];
     for (final row in rows) {
       final stored = StoredAttempt.fromRow(row);
-      final record = stored.toRecord();
+      final record = stored.toRecord(catalog: _catalog);
       if (record == null) {
         // Content changed under an old row: skip it rather than show a wrong score.
         _log.warn('stored attempt no longer matches content', {
@@ -129,6 +134,7 @@ class StoredAttempt {
     this.draft,
     this.contentSchemaVersion = currentContentVersion,
     this.beatPlays = const [],
+    this.voice,
   });
 
   factory StoredAttempt.fromRow(QueryRow row) => StoredAttempt(
@@ -154,6 +160,10 @@ class StoredAttempt {
       final json? => BeatPlayRecord.listFrom(jsonDecode(json)),
       null => const [],
     },
+    voice: switch (row.readNullable<String>('voice')) {
+      final json? => VoiceAnswerRecord.fromJson(jsonDecode(json)),
+      null => null,
+    },
   );
 
   final String attemptId;
@@ -173,9 +183,30 @@ class StoredAttempt {
   /// How each beat was played ([AttemptRecord.beatPlays]); empty on a version-1 row.
   final List<BeatPlayRecord> beatPlays;
 
-  /// The record the game reads, scored by the engine; null when the picks no longer match the
-  /// content.
-  AttemptRecord? toRecord() {
+  /// A voice mission's answer ([AttemptRecord.voice]); null on a built one.
+  final VoiceAnswerRecord? voice;
+
+  /// The record the game reads, scored by the engine; null when the picks (or a voice answer's
+  /// mission) no longer match the content in [catalog].
+  AttemptRecord? toRecord({List<Mission> catalog = missions}) {
+    final voice = this.voice;
+    if (voice != null) {
+      final score = scoreFromVoice(
+        missionId: missionId,
+        madePointIds: voice.madePointIds,
+        catalog: catalog,
+      );
+      if (score == null) return null;
+      return AttemptRecord.voice(
+        missionId: missionId,
+        attemptNumber: attemptNumber,
+        score: score,
+        hinted: hinted,
+        voice: voice,
+        attemptId: attemptId,
+        completedAt: completedAt,
+      );
+    }
     final score = scoreFromPicks(
       missionId: missionId,
       beatOptionIds: beatOptionIds,
@@ -207,8 +238,8 @@ Future<void> insertAttemptRow(AppDatabase db, StoredAttempt a) =>
     db.customStatement(
       'insert into attempts (attempt_id, mission_id, attempt_number, seed, beat_option_ids, '
       'follow_up_id, reply_option_id, hinted, draft, completed_at, content_schema_version, '
-      'beat_plays) '
-      'values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (attempt_id) do nothing',
+      'beat_plays, voice) '
+      'values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (attempt_id) do nothing',
       [
         a.attemptId,
         a.missionId,
@@ -225,5 +256,9 @@ Future<void> insertAttemptRow(AppDatabase db, StoredAttempt a) =>
           null
         else
           jsonEncode([for (final p in a.beatPlays) p.toJson()]),
+        switch (a.voice) {
+          final voice? => jsonEncode(voice.toJson()),
+          null => null,
+        },
       ],
     );

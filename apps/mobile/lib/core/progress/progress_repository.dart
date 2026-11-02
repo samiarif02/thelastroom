@@ -18,7 +18,25 @@ class AttemptRecord {
     this.attemptId,
     this.completedAt,
     this.beatPlays = const [],
+    this.voice,
   });
+
+  /// A spoken answer (brief 35): which points it made and who judged them. A voice attempt has
+  /// no picks: [beatOptionIds] is empty and [followUpId] and [replyOptionId] are blank.
+  const AttemptRecord.voice({
+    required this.missionId,
+    required this.attemptNumber,
+    required this.score,
+    required this.hinted,
+    required VoiceAnswerRecord this.voice,
+    this.attemptId,
+    this.completedAt,
+  }) : seed = 0,
+       beatOptionIds = const [],
+       followUpId = '',
+       replyOptionId = '',
+       draft = null,
+       beatPlays = const [];
 
   final String missionId;
 
@@ -50,6 +68,9 @@ class AttemptRecord {
 
   /// When the player finished, by the device's clock. Set by the store, like [attemptId].
   final DateTime? completedAt;
+
+  /// Set on a voice mission's attempt, null on a built one.
+  final VoiceAnswerRecord? voice;
 
   @override
   String toString() =>
@@ -85,6 +106,61 @@ class BeatPlayRecord {
   /// A list of [fromJson]s from a decoded `beat_plays` value; empty for anything else.
   static List<BeatPlayRecord> listFrom(Object? json) =>
       json is List ? [for (final p in json) fromJson(p)] : const [];
+}
+
+/// Who judged which points a spoken answer made.
+enum VoiceScoreSource {
+  /// The AI recruiter, from the recording (`score-voice`).
+  ai('ai'),
+
+  /// The player, ticking what they said (offline, no backend, a timeout, or no microphone).
+  selfCheck('self_check');
+
+  const VoiceScoreSource(this.wireName);
+
+  /// As stored and synced (`voice_answer.source`).
+  final String wireName;
+}
+
+/// A voice attempt as stored and synced: the listen-for points made, never the audio or the
+/// words. The engine rescores it from [madePointIds] (`scoreVoiceAnswer`), so a restored attempt
+/// scores exactly as it did on the device.
+class VoiceAnswerRecord {
+  const VoiceAnswerRecord({
+    required this.madePointIds,
+    required this.source,
+    required this.seconds,
+  });
+
+  final List<String> madePointIds;
+  final VoiceScoreSource source;
+
+  /// Whole seconds spoken, the answer and the reply together.
+  final int seconds;
+
+  Map<String, Object?> toJson() => {
+    'made': madePointIds,
+    'source': source.wireName,
+    'seconds': seconds,
+  };
+
+  /// Reads [toJson]'s shape; null for anything malformed (the row then can't be rescored).
+  static VoiceAnswerRecord? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final made = json['made'];
+    final source = json['source'];
+    final seconds = json['seconds'];
+    if (made is! List || seconds is! num) return null;
+    final known = VoiceScoreSource.values
+        .where((s) => s.wireName == source)
+        .firstOrNull;
+    if (known == null) return null;
+    return VoiceAnswerRecord(
+      madePointIds: [for (final id in made) '$id'],
+      source: known,
+      seconds: seconds.toInt(),
+    );
+  }
 }
 
 /// Where the player's progress is kept. [InMemoryProgressRepository] for tests and the catalog;

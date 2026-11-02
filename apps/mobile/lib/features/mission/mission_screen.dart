@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../app/providers.dart';
 import '../../app/router.dart';
 import '../../ui/film_kit.dart';
+import '../voice/voice_controller.dart';
+import '../voice/voice_player.dart';
 import 'mission_controller.dart';
 import 'mission_lookup.dart';
 import 'mission_player.dart';
@@ -30,6 +32,35 @@ class MissionScreen extends ConsumerWidget {
         title: _LockedDoor.notYetTitle,
         line: _LockedDoor.notYet(before),
       );
+    }
+    // A voice mission (brief 35) plays in the voice player: spoken lines, recorded answers.
+    final mission = missionByNumber(
+      number,
+      catalog: ref.watch(missionCatalogProvider),
+    );
+    if (mission?.answerMode == AnswerMode.voice) {
+      return switch (ref.watch(voiceControllerProvider(number))) {
+        AsyncData() => VoicePlayer(
+          key: ValueKey(number),
+          number: number,
+          onExit: () => context.go(
+            mission!.closesChapter ? Routes.report : Routes.tower(lit: number),
+          ),
+          onLeave: () => context.go(Routes.tower()),
+        ),
+        AsyncError(:final error, :final stackTrace) => _LockedDoor(
+          title: _LockedDoor.brokenTitle,
+          line: _LockedDoor.broken,
+          onLog: () => ref
+              .read(logProvider)
+              .error(
+                'voice mission failed to load',
+                error: error,
+                stackTrace: stackTrace,
+              ),
+        ),
+        _ => const _DarkRoom(),
+      };
     }
     final attempt = ref.watch(missionControllerProvider(number));
     return switch (attempt) {
