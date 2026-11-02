@@ -13,7 +13,7 @@ class SettingsGear extends StatelessWidget {
 
   static const String label = 'Settings';
 
-  static const double _size = 44;
+  static const double _size = BrandSpace.minTarget;
   static const double _glyph = 22;
   static const double _ringAlpha = 0.5;
 

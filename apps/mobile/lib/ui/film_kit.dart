@@ -45,5 +45,6 @@ export 'vivid/theme_preview.dart';
 export 'vivid/tower_painter.dart';
 export 'vivid/vivid_backdrop.dart';
 export 'vivid/vivid_button.dart';
+export 'vivid/vivid_header.dart';
 export 'vivid/vivid_panel.dart';
 export 'vivid/vivid_toggle.dart';

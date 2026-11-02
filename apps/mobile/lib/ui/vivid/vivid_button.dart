@@ -36,7 +36,6 @@ class VividButton extends StatelessWidget {
   final bool expand;
 
   static const double _height = 56;
-  static const double _quietHeight = 44;
   static const double _glyph = 16;
   static const double _quietAlpha = 0.5;
   static const double _disabledOpacity = 0.45;
@@ -70,7 +69,7 @@ class VividButton extends StatelessWidget {
       opacity: enabled ? 1 : _disabledOpacity,
       child: Container(
         constraints: BoxConstraints(
-          minHeight: primary ? _height : _quietHeight,
+          minHeight: primary ? _height : BrandSpace.minTarget,
         ),
         padding: EdgeInsets.symmetric(
           horizontal: primary ? BrandSpace.lg : BrandSpace.md,

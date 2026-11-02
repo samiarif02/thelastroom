@@ -81,7 +81,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           bottom: false,
           child: Column(
             children: [
-              _Header(onBack: () => context.go(Routes.tower())),
+              VividHeader(
+                title: ProgressScreen.title,
+                backLabel: ProgressScreen.back,
+                onBack: () => context.go(Routes.tower()),
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
@@ -160,42 +164,6 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       ],
     );
   }
-}
-
-/// The back button and the title, on their own ground (nothing scrolls through them).
-class _Header extends StatelessWidget {
-  const _Header({required this.onBack});
-
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context) => ColoredBox(
-    color: BrandVivid.skyTop,
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(
-        BrandSpace.md,
-        BrandSpace.sm,
-        BrandSpace.md,
-        BrandSpace.sm,
-      ),
-      child: Row(
-        children: [
-          VividButton(
-            label: '‹  ${ProgressScreen.back}',
-            primary: false,
-            onPressed: onBack,
-          ),
-          const SizedBox(width: BrandSpace.md),
-          Expanded(
-            child: Semantics(
-              header: true,
-              child: Text(ProgressScreen.title, style: BrandVividType.title),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
 }
 
 /// Who, and Chapter 1 at a glance: the ring, the average, the change since Mission 1.

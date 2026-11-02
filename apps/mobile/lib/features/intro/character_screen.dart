@@ -125,7 +125,7 @@ class _CvSheet extends StatelessWidget {
                     width: _labelWidth,
                     child: Text(
                       fact.label.toUpperCase(),
-                      style: BrandVividType.kicker.copyWith(color: grade.glow),
+                      style: BrandVividType.kicker,
                     ),
                   ),
                   Expanded(
