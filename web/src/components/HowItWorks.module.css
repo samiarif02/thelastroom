@@ -1,75 +1,89 @@
-.section {
-	padding-block: var(--space-9);
+.block {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-5);
 }
 
+.label {
+	color: var(--muted);
+}
+
+/* On a phone: each step is a small still beside its text. */
 .steps {
-	display: grid;
-	gap: var(--space-8);
+	display: flex;
+	flex-direction: column;
+	border-top: 1px solid var(--line);
 }
 
 .step {
 	display: grid;
+	grid-template-columns: 40% minmax(0, 1fr);
 	gap: var(--space-5);
-	justify-items: center;
-}
-
-.still {
-	width: min(66vw, 240px);
+	align-items: start;
+	padding-block: var(--space-6);
+	border-bottom: 1px solid var(--line);
 }
 
 .text {
-	display: grid;
-	gap: var(--space-3);
-	max-width: 30rem;
-	text-align: center;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
 }
 
 .numeral {
-	font-family: var(--font-serif), Georgia, serif;
-	font-style: italic;
-	font-size: 1.75rem;
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	color: var(--tone);
+	font-family: var(--font-mono), ui-monospace, monospace;
+	font-size: 2rem;
+	font-weight: 600;
 	line-height: 1;
-	color: var(--brass);
+}
+
+.next {
+	display: none;
+	font-size: 1.25rem;
+	color: var(--muted);
 }
 
 .title {
-	font-size: 1.85rem;
+	font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+	line-height: 1.1;
 }
 
-.body {
-	color: var(--text-2);
+.copy {
+	color: var(--muted);
+	font-size: 1rem;
+	line-height: 1.6;
 }
 
-@media (min-width: 40rem) and (max-width: 59.99rem) {
-	.step {
-		grid-template-columns: 220px minmax(0, 1fr);
-		align-items: center;
-		justify-items: start;
-		gap: var(--space-7);
-	}
-
-	.still {
-		width: 220px;
-	}
-
-	.text {
-		text-align: left;
-	}
+.sideStill {
+	width: min(56vw, 13.75rem);
 }
 
-@media (min-width: 60rem) {
+/* Wide: three steps across, each pointing to the next. */
+@media (min-width: 48rem) {
 	.steps {
+		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: var(--space-7);
+		gap: var(--space-6);
+		border-top: 0;
+	}
+
+	.step {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-5);
+		padding: 0;
+		border-bottom: 0;
 	}
 
 	.still {
-		width: 240px;
+		width: min(100%, 13.75rem);
 	}
 
-	.text {
-		text-align: left;
-		justify-self: stretch;
-		padding-inline: var(--space-2);
+	.next {
+		display: block;
 	}
 }

@@ -1,56 +1,111 @@
-.section {
-	padding-block: var(--space-9);
-	background: var(--ink-800);
-	border-block: 1px solid var(--line-soft);
+.layout {
+	display: flex;
+	flex-direction: column;
+	gap: clamp(2.5rem, 5vw, 4rem);
 }
 
 .grid {
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	gap: var(--space-8);
-	align-items: center;
 }
 
 .reasons {
-	display: grid;
-	gap: var(--space-4);
+	display: flex;
+	flex-direction: column;
+	border-top: 1px solid var(--line);
 }
 
 .reason {
 	display: grid;
-	gap: var(--space-2);
-	padding: var(--space-5);
-	background: var(--ink-900);
-	border: 1px solid var(--line);
-	border-left: 2px solid var(--brass);
-	border-radius: var(--radius-sm);
+	grid-template-columns: 3rem minmax(0, 1fr);
+	gap: var(--space-3);
+	padding-block: var(--space-5);
+	border-bottom: 1px solid var(--line);
+}
+
+.index {
+	padding-top: 0.3rem;
+	color: var(--muted);
 }
 
 .title {
-	font-size: 1.55rem;
+	font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+	line-height: 1.15;
 }
 
-.body {
-	color: var(--text-2);
+.text {
+	margin-top: var(--space-2);
+	max-width: 36rem;
+	color: var(--muted);
+	line-height: 1.6;
+}
+
+.exhibit {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-6);
 }
 
 .still {
-	width: min(62vw, 240px);
-	justify-self: center;
+	width: min(56vw, 13.75rem);
 }
 
-@media (min-width: 40rem) {
-	.reasons {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
+.recall {
+	width: min(100%, 17rem);
 }
 
-@media (min-width: 60rem) {
+.recallLabel {
+	color: var(--muted);
+}
+
+/* Day 0 to day 7 on a rule, a mark at each return, like stops on a lift shaft drawn sideways. */
+.timeline {
+	position: relative;
+	height: 3rem;
+	margin-top: var(--space-4);
+	margin-right: var(--space-6);
+	border-top: 2px solid var(--line-strong);
+}
+
+.timeline::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: -6px;
+	width: 10px;
+	height: 10px;
+	border-radius: 2px;
+	background: var(--fg);
+}
+
+.day {
+	position: absolute;
+	top: -0.45rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--space-2);
+	transform: translateX(-50%);
+	white-space: nowrap;
+}
+
+.day::before {
+	content: '';
+	width: 10px;
+	height: 10px;
+	border: 2px solid var(--fg);
+	border-radius: 2px;
+	background: var(--ground);
+}
+
+@media (min-width: 48rem) {
 	.grid {
-		grid-template-columns: minmax(0, 1fr) 280px;
-		gap: var(--space-9);
+		grid-template-columns: minmax(0, 1fr) 17rem;
+		gap: var(--space-8);
 	}
 
 	.still {
-		width: 280px;
+		width: 13.75rem;
 	}
 }

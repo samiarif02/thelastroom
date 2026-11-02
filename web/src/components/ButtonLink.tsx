@@ -1,18 +1,20 @@
 import type { ReactNode } from 'react'
 
+import { SignArrow } from './SignArrow'
 import styles from './ButtonLink.module.css'
 
 type ButtonLinkProps = {
 	readonly href: string
-	readonly variant?: 'primary' | 'secondary' | 'text'
+	readonly variant?: 'primary' | 'text'
 	readonly children: ReactNode
 }
 
-/** A link styled as the app's engraved plate: solid brass, a brass outline, or a quiet text link. */
+/** The page's one amber action, like a lift call button, or a quiet signposted link. */
 export function ButtonLink({ href, variant = 'primary', children }: ButtonLinkProps) {
 	return (
 		<a href={href} className={`${styles.button} ${styles[variant]}`}>
-			{children}
+			<span>{children}</span>
+			<SignArrow className={styles.arrow} />
 		</a>
 	)
 }

@@ -1,24 +1,36 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, Manrope } from 'next/font/google'
+import { Atkinson_Hyperlegible, Overpass, Overpass_Mono } from 'next/font/google'
 import type { ReactNode } from 'react'
 
 import { site } from '@/content/site'
 
 import './globals.css'
 
-// The app's pair (DESIGN.md, D4). next/font downloads them at build time and serves them from
-// this site, so a visitor's browser never calls Google.
-const serif = Cormorant_Garamond({
+// "Wayfinding" type, shared with the app: Overpass (drawn from highway signage) for display, set
+// heavy and tight like floor signs; Atkinson Hyperlegible for text; Overpass Mono for labels, floor
+// and room numbers, and scores. All SIL OFL. next/font downloads them at build time and serves them
+// from this site, so a visitor's browser never calls Google.
+//
+// One weight each, three small files: the page stays inside Lighthouse's mobile budget (every
+// extra weight is another font in the way of the first paint on a throttled phone).
+const display = Overpass({
 	subsets: ['latin'],
-	weight: '500',
-	style: ['normal', 'italic'],
-	variable: '--font-serif',
+	weight: '800',
+	variable: '--font-display',
 	display: 'swap'
 })
 
-const sans = Manrope({
+const body = Atkinson_Hyperlegible({
 	subsets: ['latin'],
-	variable: '--font-sans',
+	weight: '400',
+	variable: '--font-body',
+	display: 'swap'
+})
+
+const mono = Overpass_Mono({
+	subsets: ['latin'],
+	weight: '600',
+	variable: '--font-mono',
 	display: 'swap'
 })
 
@@ -45,13 +57,13 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-	themeColor: '#0a0e16',
+	themeColor: '#0b1d22',
 	colorScheme: 'dark'
 }
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
 	return (
-		<html lang="en-GB" className={`${serif.variable} ${sans.variable}`}>
+		<html lang="en-GB" className={`${display.variable} ${body.variable} ${mono.variable}`}>
 			<body>
 				<a className="skip-link" href="#main">
 					Skip to content
