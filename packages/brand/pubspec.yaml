@@ -16,11 +16,41 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-# The Boardroom's pair (DESIGN.md, D4): Cormorant Garamond (display) + Manrope (body). Bundled,
-# never fetched at runtime (zero setup, ADR 0005). Static, Latin-subset instances of the OFL
-# originals, one OFL.txt per family.
+# Daylight's pair (docs/design/direction.md, "Type"): Bricolage Grotesque (display) + Geist
+# (reading), the variable fonts exactly as github.com/google/fonts ships them, each with its
+# OFL.txt. Bundled, never fetched at runtime (zero setup, ADR 0005). The axes are set per style
+# (`DaylightType`), so one file per family covers every weight and optical size.
+#
+# The film pair below (Cormorant Garamond + Manrope) stays only until the last screen still on
+# the film and vivid tokens is restyled (WS2); then it goes.
+#
+# Each variable file is listed once per weight the styles use, so the engine finds an exact
+# match and never synthesises a fake bold over the `wght` axis.
 flutter:
   fonts:
+    - family: BricolageGrotesque
+      fonts:
+        - asset: fonts/bricolage_grotesque/BricolageGrotesque-Variable.ttf
+          weight: 600
+    - family: Geist
+      fonts:
+        - asset: fonts/geist/Geist-Variable.ttf
+        - asset: fonts/geist/Geist-Variable.ttf
+          weight: 500
+        - asset: fonts/geist/Geist-Variable.ttf
+          weight: 600
+    # Phosphor (MIT, fonts/phosphor/LICENSE): the icon fonts of @phosphor-icons/web 2.1.1, the
+    # glyphs named in lib/src/phosphor_icons.dart (tool/phosphor_icons.py). Release builds
+    # subset them to the glyphs used.
+    - family: PhosphorRegular
+      fonts:
+        - asset: fonts/phosphor/Phosphor-Regular.ttf
+    - family: PhosphorBold
+      fonts:
+        - asset: fonts/phosphor/Phosphor-Bold.ttf
+    - family: PhosphorFill
+      fonts:
+        - asset: fonts/phosphor/Phosphor-Fill.ttf
     - family: CormorantGaramond
       fonts:
         - asset: fonts/cormorant_garamond/CormorantGaramond-Medium.ttf
