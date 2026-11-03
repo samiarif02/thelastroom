@@ -19,7 +19,7 @@ hosted; ADR 0005).
 | --- | --- | --- | --- | --- |
 | D1 | **Decided (owner, 2026-10-29): (b) waitlist**, as a flag on the player's profile (`chapter_2_waitlist_at` on `profiles`), not a separate email form | (a) designed Pro paywall with RevenueCat in sandbox, (b) "Chapter 2 is coming, notify me" waitlist, (c) just the teaser | See "D1: the argument" below | Brief §7 |
 | D2 | Interviewer portrait art. **Decided (owner, 2026-10-30): rim-lit silhouettes drawn in code for v1**, with a code-driven idle; painterly portraits are a stretch goal | commission, draw in Rive (animated idle), or AI-generated images you have rights to | Decide in the design session; credit it in the README | Kit README §7 |
-| D3 | **Decided (owner, 2026-10-29): no hosted web demo.** Reviewers clone and run; the owner records a video. Web build is a CI compile check (ADR 0005) | GitHub Pages, Firebase Hosting, Vercel/Netlify static, Cloudflare Pages | [ADR 0005](decisions/0005-zero-setup-offline-backend-optional.md); `docs/rules/deployment.md` | Brief §10, kit README §5 |
+| D3 | **Decided (owner, 2026-10-29): no hosted web demo.** Reviewers clone and run; the owner records a video. Web build is a CI compile check (ADR 0005). The marketing landing page is a separate decision: hosted on Vercel (ADR 0007, 2026-11-02) | GitHub Pages, Firebase Hosting, Vercel/Netlify static, Cloudflare Pages | [ADR 0005](decisions/0005-zero-setup-offline-backend-optional.md); `docs/rules/deployment.md` | Brief §10, kit README §5 |
 | D4 | Display serif and body sans. **Decided (owner, 2026-10-30): Cormorant Garamond + Manrope** (direction C, The Boardroom) | any OFL-licensed pair, bundled | Decide in the design session (DESIGN.md) | Brief §9 |
 | D5 | Sound design in v1. **Decided (owner, 2026-10-30): sound ships in v1**, on by default but quiet (effects 60%, ambience 35%), with a master toggle and two volumes, licensed sounds only (brief 09, FR-17) | none, or subtle licensed UI sounds (off by default) | Brief 09; the spec is `docs/sound-design.md` (lands with brief 09) | Brief §9 |
 
@@ -306,7 +306,7 @@ new email form.**
 - **NFR-4 Offline** **[10, then 07 and 13 for all of Chapter 1]:** Chapter 1 fully playable offline;
   offline, loading, empty and error states designed and cinematic.
   - [10] With the device in airplane mode from a cold start, Mission 1 plays from the scene to
-    the dossier and the attempt is stored. On the web (run locally; nothing is hosted, ADR 0005),
+    the dossier and the attempt is stored. On the web (run locally; the game isn't hosted, ADR 0005),
     a loaded session keeps playing when the network drops.
   - [10] Nothing in the mission loop shows a spinner waiting on the network.
   - [08] Going offline mid-session shows the designed offline state ("The lights are out. Your
