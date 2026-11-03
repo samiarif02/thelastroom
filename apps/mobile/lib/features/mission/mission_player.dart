@@ -10,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/audio/game_sounds.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
-import '../../ui/film/film_overlay.dart';
 import '../../ui/haptics.dart';
 import '../../ui/subtitle/typewriter_subtitle.dart';
 import '../debrief/ai_score.dart';
@@ -632,19 +631,18 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
       );
     }
     if (_stage == SceneStage.epilogue) {
-      return FilmGrain(
-        child: EpilogueScene(
-          lines: [
-            for (final line in mission.epilogue)
-              line.addressedTo(game.playerName),
-          ],
-          grade: grade,
-          sounds: _sounds,
-          doneLabel: mission.leadsToReport
-              ? DebriefView.reportLabel
-              : DebriefView.continueLabel,
-          onDone: widget.onExit,
-        ),
+      // Daylight (brief 48): the epilogue draws its own ground, no film grain over it.
+      return EpilogueScene(
+        lines: [
+          for (final line in mission.epilogue)
+            line.addressedTo(game.playerName),
+        ],
+        grade: grade,
+        sounds: _sounds,
+        doneLabel: mission.leadsToReport
+            ? DebriefView.reportLabel
+            : DebriefView.continueLabel,
+        onDone: widget.onExit,
       );
     }
 

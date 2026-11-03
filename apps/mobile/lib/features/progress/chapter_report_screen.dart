@@ -13,6 +13,7 @@ import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
 import '../../ui/daylight/daylight_radar.dart';
 import '../debrief/debrief_facts.dart';
+import '../debrief/then_now_slip.dart';
 import 'chapter_report.dart';
 import 'file_trouble.dart';
 import 'progress_screen.dart';
@@ -37,9 +38,6 @@ class ChapterReportScreen extends ConsumerStatefulWidget {
       'Both numbers come from the game\'s own scoring of the lines you chose and the reasons '
       'you gave, so they compare like for like. They show how your choices changed between '
       'Mission 1 and the review, not how a real interview would go, and they promise no offer.';
-  static const String thenNowHeading = 'Then and now';
-  static const String thenHeading = 'Room 1, in your own words';
-  static String nowHeading(int room) => 'Room $room, the lines you chose';
   static const String nextKicker = 'Coming next';
   static const String nextLine =
       'Chapter 2 isn\'t in this version yet. Ask to hear when it opens: nothing is sent '
@@ -297,13 +295,10 @@ class _Report extends ConsumerWidget {
         ),
         if (report.firstDraft case final draft?)
           enter(
-            _Block(
-              title: ChapterReportScreen.thenNowHeading,
-              child: _ThenNow(
-                then: draft,
-                now: report.latestAnswer,
-                nowRoom: report.review.number,
-              ),
+            ThenNowSlip(
+              then: draft,
+              now: report.latestAnswer,
+              nowMission: report.review.number,
             ),
           ),
         enter(
@@ -548,60 +543,6 @@ class _SkillRow extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// "Then and now" (FR-41): the player's Mission 1 draft beside the lines they chose at the
-/// review, roman inside quotation marks (Daylight sets no italics). The draft never leaves the
-/// device.
-class _ThenNow extends StatelessWidget {
-  const _ThenNow({
-    required this.then,
-    required this.now,
-    required this.nowRoom,
-  });
-
-  final String then;
-  final String now;
-  final int nowRoom;
-
-  @override
-  Widget build(BuildContext context) {
-    final f = ChapterTint.floorOf(context);
-    return DaylightPanel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            ChapterReportScreen.thenHeading,
-            style: DaylightType.caption3.copyWith(color: DaylightColors.ink2),
-          ),
-          const SizedBox(height: DaylightSpace.s4),
-          Text('“$then”', style: DaylightType.body3),
-          const SizedBox(height: DaylightSpace.s16),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: f.tint,
-              borderRadius: BorderRadius.circular(DaylightRadius.inner),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(DaylightSpace.s12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    ChapterReportScreen.nowHeading(nowRoom),
-                    style: DaylightType.caption3.copyWith(color: f.deep),
-                  ),
-                  const SizedBox(height: DaylightSpace.s4),
-                  Text('“$now”', style: DaylightType.body3),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
