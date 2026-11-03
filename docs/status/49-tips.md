@@ -39,3 +39,19 @@ tip 1 of a small tips system.
 - Settings: "First-time tips" panel, "Show tips again" → `replayAll()` → tower.
 - Tests: `test/features/tips/tips_test.dart` (17); harness/VoiceRig override the store with all
   tips seen (`InMemoryTipStore.allSeen()`); the tour group left `tower_test.dart`.
+- `1fd78cc` feat(mobile): the tips (events `tower_tour_*` removed from the enum and EVENTS.md).
+- Stills `.pr-screenshots/48/tips-*.jpg` (360 × 800; door and cards at 2x too; mic at the
+  voice rig's 390 × 844) from `test/features/tips/stills` (`WRITE_STILLS=1`), each looked at.
+  The cut-out gives way to the bubble when the target is tall (4 answer cards, 2x text).
+- Gates: secrets, standards 25/25, format, analyze (no issues), events (41), env, `npm run
+  test` (mobile 1,029, brand 349, content 309, engine 137), build:web, commit range: pass.
+  `ui/paper/**`, `packages/brand` and the paper goldens: no diff.
+- Goldens compared on Linux (Docker, ubuntu:24.04 amd64, Flutter 3.47.8, SDK sha256
+  baf7dcc5… = releases_linux.json) at 1fd78cc: all 59 pass against the committed images, so
+  none changed and none needed redrawing (the paper ones included).
+- Release APK built at 1fd78cc.
+
+## Next
+
+1. Session log commit, push, dispatch CI on the branch, PR #57 body "First-time tips".
+2. Release APK on the realme (LFCQ8HKNAUDIFUPR). Never merge.
