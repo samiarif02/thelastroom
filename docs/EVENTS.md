@@ -59,3 +59,5 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `floor_previewed` | A floor of the tower is opened as a sheet from Home (tapping the floor or one of its locked windows): its rooms, interviewers and how it's answered | `chapter`, `open` |
 | `tower_tour_shown` | The first-run tower tour (a spotlight on the room to play and Priya's bubble) is shown: the first tower visit, or after "Show the tower tour again" in Settings | `replay` |
 | `tower_tour_done` | The tower tour ends | `action` (`started`, `dismissed`) |
+| `tip_shown` | A first-time tip (one line from the cast in a bubble, a spotlight on its target where there is one) is shown, once, the first time the player reaches its moment, or again after "Show tips again" in Settings | `tip` (`towerDoor`, `answerCards`, `whyStep`, `firstResult`, `voiceMic`, `recallDue`, `yourFile`), `replay` |
+| `tip_done` | A first-time tip is put away: its target was tapped (and did its normal action) or it was dismissed ("Got it", or a tap elsewhere) | `tip`, `action` (`followed`, `dismissed`) |
