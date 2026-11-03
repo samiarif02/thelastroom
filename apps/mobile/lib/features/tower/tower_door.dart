@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:brand/brand.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../ui/daylight/daylight_kit.dart';
@@ -376,32 +377,114 @@ class _PlayCueState extends State<PlayCue> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  late final Animation<double> _eased = CurvedAnimation(
+    parent: _bob,
+    curve: DaylightMotion.ease,
+  );
+
+  // The bob moves the painted tile on its own layer and rebuilds nothing (NFR-3): a rebuild
+  // under the room's LayoutBuilder lays it out again, which repainted the whole tower (some
+  // 390 render objects) every frame.
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-    animation: _bob,
-    builder: (context, child) => Transform.translate(
-      offset: Offset(0, -_lift * DaylightMotion.ease.transform(_bob.value)),
-      child: child,
-    ),
-    child: Container(
-      width: PlayCue.size,
-      height: PlayCue.size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: DaylightColors.honey,
-        borderRadius: BorderRadius.circular(DaylightRadius.tag),
-        boxShadow: DaylightElevation.edgeOf(
-          DaylightColors.honeyEdge,
-          depth: DaylightSize.edgeSmall,
+  Widget build(BuildContext context) => RepaintBoundary(
+    child: _Lifted(
+      by: _eased,
+      lift: _lift,
+      child: Container(
+        width: PlayCue.size,
+        height: PlayCue.size,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: DaylightColors.honey,
+          borderRadius: BorderRadius.circular(DaylightRadius.tag),
+          boxShadow: DaylightElevation.edgeOf(
+            DaylightColors.honeyEdge,
+            depth: DaylightSize.edgeSmall,
+          ),
         ),
-      ),
-      child: const Icon(
-        PhosphorFill.play,
-        size: _glyph,
-        color: DaylightColors.onHoney,
+        child: const Icon(
+          PhosphorFill.play,
+          size: _glyph,
+          color: DaylightColors.onHoney,
+        ),
       ),
     ),
   );
+}
+
+/// Paints [child] raised by [lift] × [by]'s value. It repaints when [by] ticks and never
+/// rebuilds or lays out: the paint-only twin of `Transform.translate` in an `AnimatedBuilder`.
+class _Lifted extends SingleChildRenderObjectWidget {
+  const _Lifted({required this.by, required this.lift, super.child});
+
+  final Animation<double> by;
+  final double lift;
+
+  @override
+  _RenderLifted createRenderObject(BuildContext context) =>
+      _RenderLifted(by: by, lift: lift);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderLifted renderObject) =>
+      renderObject
+        ..by = by
+        ..lift = lift;
+}
+
+/// [_Lifted]'s render object.
+class _RenderLifted extends RenderProxyBox {
+  _RenderLifted({required this._by, required this._lift});
+
+  Animation<double> _by;
+  set by(Animation<double> value) {
+    if (value == _by) return;
+    if (attached) _by.removeListener(markNeedsPaint);
+    _by = value;
+    if (attached) _by.addListener(markNeedsPaint);
+    markNeedsPaint();
+  }
+
+  double _lift;
+  set lift(double value) {
+    if (value == _lift) return;
+    _lift = value;
+    markNeedsPaint();
+  }
+
+  Offset get _shift => Offset(0, -_lift * _by.value);
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _by.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    _by.removeListener(markNeedsPaint);
+    super.detach();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final child = this.child;
+    if (child != null) context.paintChild(child, offset + _shift);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final child = this.child;
+    if (child == null) return false;
+    return result.addWithPaintOffset(
+      offset: _shift,
+      position: position,
+      hitTest: (result, position) => child.hitTest(result, position: position),
+    );
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) =>
+      transform.translateByDouble(_shift.dx, _shift.dy, 0, 1);
 }
 
 /// The light from the open door, fanning out on the floor below its sill.

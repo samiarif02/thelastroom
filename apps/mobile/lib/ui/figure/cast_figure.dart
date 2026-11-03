@@ -11,7 +11,8 @@ import 'cast_painter.dart';
 /// [CastExpression.nod] dips the head 4 and brings it back over [DaylightMotion.nod].
 ///
 /// Reduced motion (`MediaQuery.disableAnimations`) stops the idle and makes every change
-/// instant; the nod then holds the head down, like the cast sheet.
+/// instant; the nod then holds the head down, like the cast sheet. Off screen (`TickerMode`
+/// off, as under a covering route) the idle rests too.
 ///
 /// Fills its box with the 200 × 200 bust standing on the bottom edge; in an unbounded box it
 /// takes a square. Crop or frame it from outside (`ArchFrame`, a `ClipRRect`).
@@ -80,13 +81,16 @@ class _CastFigureState extends State<CastFigure> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final still = MediaQuery.disableAnimationsOf(context);
+    // A face on a screen that's covered (the tower under a room) doesn't breathe: nothing would
+    // see it, and its clock would ask for every frame (NFR-3).
+    final shown = TickerMode.valuesOf(context).enabled;
     final painter = CastPainter(
       person: widget.person,
       from: _from,
       to: widget.expression.pose,
       blend: _blend,
       nod: _nod,
-      clock: widget.idle && !still ? AmbientClock.of(context) : null,
+      clock: widget.idle && !still && shown ? AmbientClock.of(context) : null,
       nodMoves: !still,
       extendBelow: widget.extendBelow,
     );
