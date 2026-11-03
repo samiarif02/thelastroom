@@ -446,8 +446,14 @@ quote that names the strongest and weakest moment. The **score card** (white, r2
 **basis line** (Caption 4); the weakest is drawn in trap clay. "The line that cost the most"
 (trap-tint, r24) holds the quote, the reason and **the dated recall promise**. Then the **one
 lesson** card, and below it "Say it your way" (the AI coach, online only) and the full reasoning
-replay. CTA: "Light room 4" (moment 5). This replaces the dossier, stamps and red pen of
-`features/debrief/*_slip.dart`, with the same facts in a calmer form.
+replay. CTA: "Light room 4" (moment 5).
+
+**Kept by the owner's decision (2026-11-03).** The debrief's Candidate assessment dossier stays
+exactly as it is, look and animations both: the paper sheet, letterhead, "/100" stamps, red-pen
+underline, lesson note, wax seal and their timeline. The owner: "the assessment complete in the
+current design is okay… the reviewer liked it, so don't change this and its animations." This
+section's score card is therefore not built; only the controls after the sheet may take Daylight
+styling. See `docs/memory/feedback-keep-candidate-assessment.md`.
 
 ### 6 · Reward, floor cleared (`features/progression/`, `06-reward`)
 
