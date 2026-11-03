@@ -47,8 +47,12 @@ class FeedbackSheet extends StatefulWidget {
   /// "Marcus nods. Trust goes up one."
   final String? note;
 
-  /// XP earned, shown as "+10 XP".
+  /// XP the reason earned (`ReasonVerdict.xp`), shown as "+10 XP": counted up as it pops in,
+  /// still under reduced motion. Null or 0: no tag (a guess, or a beat with no why step).
   final int? xp;
+
+  /// "+10 XP".
+  static String xpLabel(int xp) => '+$xp XP';
 
   /// The one line to keep.
   final String? lesson;
@@ -128,7 +132,7 @@ class _FeedbackSheetState extends State<FeedbackSheet>
               ],
             ),
           ),
-          if (xp != null) ...[
+          if (xp != null && xp > 0) ...[
             const SizedBox(width: DaylightSpace.s8),
             _XpPop(xp: xp, still: still),
           ],
@@ -207,37 +211,61 @@ class _XpPop extends StatelessWidget {
   final int xp;
   final bool still;
 
-  @override
-  Widget build(BuildContext context) {
-    final chip = Transform.rotate(
-      angle: _FeedbackSheetState._xpTurn,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: DaylightSpace.s12,
-          vertical: DaylightSpace.s4,
-        ),
-        decoration: BoxDecoration(
-          color: DaylightColors.honey,
-          borderRadius: BorderRadius.circular(DaylightRadius.inner),
-          boxShadow: DaylightElevation.edgeOf(
-            DaylightColors.honeyEdge,
-            depth: DaylightSize.edgeSmall,
-          ),
-        ),
-        child: Text(
-          '+$xp XP',
-          style: DaylightType.tabular(DaylightType.body4)
-              .copyWith(color: DaylightColors.onHoney),
+  Widget _chip(BuildContext context, int shown) => Transform.rotate(
+    angle: _FeedbackSheetState._xpTurn,
+    child: Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: DaylightSpace.s12,
+        vertical: DaylightSpace.s4,
+      ),
+      decoration: BoxDecoration(
+        color: DaylightColors.honey,
+        borderRadius: BorderRadius.circular(DaylightRadius.inner),
+        boxShadow: DaylightElevation.edgeOf(
+          DaylightColors.honeyEdge,
+          depth: DaylightSize.edgeSmall,
         ),
       ),
-    );
-    if (still) return chip;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: _FeedbackSheetState._xpFrom, end: 1),
-      duration: DaylightMotion.move,
-      curve: DaylightMotion.ease,
-      builder: (context, s, child) => Transform.scale(scale: s, child: child),
-      child: chip,
-    );
-  }
+      // Sized for the final number while it counts, so the title beside it never re-wraps:
+      // an invisible paint of the final label holds the width.
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Opacity(
+            opacity: 0,
+            child: RichText(
+              textScaler: MediaQuery.textScalerOf(context),
+              text: TextSpan(text: FeedbackSheet.xpLabel(xp), style: _style),
+            ),
+          ),
+          Text(FeedbackSheet.xpLabel(shown), style: _style),
+        ],
+      ),
+    ),
+  );
+
+  static final TextStyle _style = DaylightType.tabular(DaylightType.body4)
+      .copyWith(color: DaylightColors.onHoney);
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: FeedbackSheet.xpLabel(xp),
+    excludeSemantics: true,
+    child: still
+        ? _chip(context, xp)
+        // It pops from 0.6 at −4° (motion 3) while the number counts up to [xp].
+        : TweenAnimationBuilder<double>(
+            tween: Tween(begin: _FeedbackSheetState._xpFrom, end: 1),
+            duration: DaylightMotion.move,
+            curve: DaylightMotion.ease,
+            builder: (context, s, child) =>
+                Transform.scale(scale: s, child: child),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: DaylightMotion.countUp,
+              curve: DaylightMotion.ease,
+              builder: (context, t, _) => _chip(context, (xp * t).round()),
+            ),
+          ),
+  );
 }

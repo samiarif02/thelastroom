@@ -185,6 +185,13 @@ class MissionState {
     );
   }
 
+  /// How beat [index]'s "why that line?" was answered, for its XP on the feedback sheet (brief
+  /// 55); null when the beat asks no why or has no reason yet. The same verdict the attempt's
+  /// score keeps, so the sheet's "+10 XP" is part of the debrief's total.
+  ReasonVerdict? reasonVerdictOf(int index) => index < plays.length
+      ? ReasonVerdict.of(plays[index].pick(mission.beats[index]))
+      : null;
+
   /// What the interviewer says to beat [index]'s play, landing as [quality]. A built answer
   /// that's weak with no decoy in it (the right pieces, out of order or one short) gets its
   /// build's own line: the beat's weak reaction answers the picked lines' mistakes instead.

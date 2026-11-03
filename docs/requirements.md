@@ -142,6 +142,17 @@ new email form.**
     round `recallXp` (5 per card known, 1 per other answer); the debrief shows "+N XP". A skill
     unlocks on an unhinted attempt that meets its requirement (`unlockedSkills`); the debrief
     shows its card once, with its sound and `skill_unlocked`.
+  - [55] **Built.** XP for each explained reason, on top of the room's: a "why that line?"
+    answered with the right principle earns +10 (`reasonSoundXp`), a considered wrong one +5
+    (`reasonCloseXp`), a guessed line 0; a built beat asks no why and earns nothing
+    (`ReasonVerdict`, `reasonXp`). A voice room earns +5 per listen-for point made
+    (`voicePointXp`), from the same points its content-only score reads. The feedback sheet
+    shows the reason's "+10 XP" / "+5 XP" counting up (static under reduced motion); the
+    debrief's line reads "+62 XP · 40 for the room, 22 for your reasons" ("your points" in a
+    voice room), outside the assessment sheet. XP stays derived from the stored picks, never
+    stored, so a resume or restore never awards twice and attempts from before wave 5 earn what
+    they did. Nothing unlocks on XP (skills read dimension scores, rooms open in order, the
+    weekly ring counts days), so no unlock moved.
 - **FR-17** **[09]** Sound design: typing ticks, named cues and per-chapter ambience, under the
   scene and never in the way of it (D5; spec in `docs/sound-design.md`).
   - Every sound is licensed for this use, and the README credits each one.

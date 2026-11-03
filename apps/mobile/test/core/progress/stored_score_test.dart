@@ -160,6 +160,97 @@ void main() {
     expect(storedAttempt(RemoteAttempt.fromRow(row)!).beatPlays, isEmpty);
   });
 
+  group('reason XP is rescored from the stored picks (brief 55)', () {
+    test('the stored attempt earns the debrief\'s reason XP, once', () {
+      // Open: the wrong principle (close, 5); evidence guessed (0); land: sound (10).
+      expect(live.reasonVerdicts, [
+        ReasonVerdict.close,
+        ReasonVerdict.guessed,
+        ReasonVerdict.sound,
+      ]);
+      expect(reasonXp(live), 15);
+      final again = scoreFromPicks(
+        missionId: mission.id,
+        beatOptionIds: record.beatOptionIds,
+        followUpId: followUp.id,
+        replyOptionId: record.replyOptionId,
+        hinted: mission.hinted,
+        beatPlays: plays,
+      )!;
+      expect(reasonXp(again), reasonXp(live));
+    });
+
+    test('an attempt stored before brief 30 earns no reason XP', () {
+      final old = scoreFromPicks(
+        missionId: mission.id,
+        beatOptionIds: record.beatOptionIds,
+        followUpId: followUp.id,
+        replyOptionId: record.replyOptionId,
+        hinted: mission.hinted,
+      )!;
+      expect(old.reasonVerdicts, isEmpty);
+      expect(reasonXp(old), 0);
+    });
+
+    test('a reason an older build stored on a built beat keeps its score but earns nothing', () {
+      final m = missions.firstWhere((m) => m.beats.any((b) => b.build != null));
+      final reply = m.followUps.firstWhere((f) => f.trigger == null);
+      final ids = [
+        for (final b in m.beats)
+          b.build?.strongAnswer.id ??
+              b.options.firstWhere((o) => b.isStrongest(o.id)).id,
+      ];
+      // A sound reason everywhere a why is asked; on the built beat, a wrong one (QA 51).
+      final stored = [
+        for (var i = 0; i < m.beats.length; i++)
+          BeatPlayRecord(
+            reasonId: m.beats[i].build == null
+                ? m.beats[i].why!.reasons
+                      .firstWhere((r) => r.isSoundFor(ids[i]))
+                      .id
+                : m.beats[i].why!.reasons
+                      .firstWhere((r) => !r.isSoundFor(ids[i]))
+                      .id,
+            decidedIn: const Duration(seconds: 4),
+          ),
+      ];
+      final rescored = scoreFromPicks(
+        missionId: m.id,
+        beatOptionIds: ids,
+        followUpId: reply.id,
+        replyOptionId: reply.replies.first.id,
+        hinted: m.hinted,
+        beatPlays: stored,
+      )!;
+      // As scored when it was played: the reason kept on the built beat.
+      final asPlayed = scoreAttempt(
+        AttemptInput(
+          picks: [
+            for (var i = 0; i < m.beats.length; i++)
+              BeatPick(
+                beat: m.beats[i].kind,
+                choice: m.beats[i].optionById(ids[i])!.scored,
+                decidedIn: stored[i].decidedIn,
+                reason: m.beats[i].reasonPick(
+                  m.beats[i].why!.reasons.firstWhere(
+                    (r) => r.id == stored[i].reasonId,
+                  ),
+                  ids[i],
+                ),
+              ),
+          ],
+          followUpReply: reply.replies.first.scored,
+          hinted: m.hinted,
+        ),
+      );
+      expect(rescored.total, asPlayed.total);
+      expect(rescored.beatCredits, asPlayed.beatCredits);
+      final asked = m.beats.where((b) => b.build == null).length;
+      expect(rescored.reasonVerdicts, List.filled(asked, ReasonVerdict.sound));
+      expect(reasonXp(rescored), asked * reasonSoundXp);
+    });
+  });
+
   test(
     'a version-1 database upgrades in place and keeps its attempts',
     () async {

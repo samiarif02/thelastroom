@@ -1,5 +1,5 @@
 import 'package:content/content.dart';
-import 'package:engine/engine.dart' show missionXp;
+import 'package:engine/engine.dart' show ReasonVerdict, missionXp, reasonXp;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/providers.dart';
 import 'package:the_last_room/app/router.dart';
@@ -237,24 +237,43 @@ Future<void> _playChoices(MissionRig rig, Mission m) async {
     1,
   );
 
+  // Every why step was answered after reading, so each earns its reason XP (brief 55); a
+  // built beat asks none.
+  expect(
+    score.reasonVerdicts,
+    hasLength(m.beats.where((b) => b.asksWhy).length),
+  );
+  expect(score.reasonVerdicts, isNot(contains(ReasonVerdict.guessed)));
+
   // Stored: one attempt, with the dossier's score.
   final stored = await rig.progress.attempts(missionId: m.id);
   expect(stored, hasLength(1));
   expect(stored.single.score.total, score.total);
+  expect(stored.single.score.reasonVerdicts, score.reasonVerdicts);
   await _expectXp(rig, stored.single);
 }
 
-/// The debrief's "+N XP" is this attempt's, though the tower (and its progress card) stayed
-/// mounted under the mission the whole time.
+/// The debrief's "+N XP" is this attempt's, the room and its reasons (or spoken points), though
+/// the tower (and its progress card) stayed mounted under the mission the whole time; the
+/// breakdown beside it adds up to it.
 Future<void> _expectXp(MissionRig rig, AttemptRecord attempt) async {
   await rig.run(const Duration(milliseconds: 500));
-  final xp = find.text(
-    DebriefRewards.xpGained(
-      missionXp(total: attempt.score.total, firstClear: true),
-    ),
-  );
+  final room = missionXp(total: attempt.score.total, firstClear: true);
+  final reasons = reasonXp(attempt.score);
+  expect(reasons, greaterThan(0));
+  final xp = find.text(DebriefRewards.xpGained(room + reasons));
   await rig.tester.ensureVisible(xp);
   expect(xp, findsOneWidget);
+  expect(
+    find.text(
+      DebriefRewards.xpBreakdown(
+        room: room,
+        reasons: reasons,
+        spoken: attempt.voice != null,
+      ),
+    ),
+    findsOneWidget,
+  );
 }
 
 /// A voice mission from its card to the settled debrief: each line typed and spoken, the

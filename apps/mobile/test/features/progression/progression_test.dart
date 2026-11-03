@@ -9,25 +9,37 @@ import 'package:the_last_room/core/progress/progress_repository.dart';
 import 'package:the_last_room/features/progression/progression.dart';
 import 'package:the_last_room/features/progression/progression_store.dart';
 
-MissionScore scoreOf(int each) => MissionScore(
+MissionScore scoreOf(
+  int each, {
+  List<ReasonVerdict> reasons = const [],
+  int pointsMade = 0,
+}) => MissionScore(
   dimensions: {for (final d in Dimension.values) d: each},
   total: each,
   optionIdsByCost: const [],
   flags: const {},
+  reasonVerdicts: reasons,
+  pointsMade: pointsMade,
 );
 
-AttemptRecord attempt(Mission m, int score, {int number = 1, DateTime? at}) =>
-    AttemptRecord(
-      missionId: m.id,
-      attemptNumber: number,
-      seed: 1,
-      beatOptionIds: const [],
-      followUpId: '',
-      replyOptionId: '',
-      score: scoreOf(score),
-      hinted: m.hinted,
-      completedAt: at,
-    );
+AttemptRecord attempt(
+  Mission m,
+  int score, {
+  int number = 1,
+  DateTime? at,
+  List<ReasonVerdict> reasons = const [],
+  int pointsMade = 0,
+}) => AttemptRecord(
+  missionId: m.id,
+  attemptNumber: number,
+  seed: 1,
+  beatOptionIds: const [],
+  followUpId: '',
+  replyOptionId: '',
+  score: scoreOf(score, reasons: reasons, pointsMade: pointsMade),
+  hinted: m.hinted,
+  completedAt: at,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -83,6 +95,61 @@ void main() {
       expect(p.lastXp, missionXp(total: 60, firstClear: false));
     },
   );
+
+  test('reason XP is in the total and the +N, and its part is kept apart (brief 55)', () async {
+    const reasons = [
+      ReasonVerdict.sound,
+      ReasonVerdict.close,
+      ReasonVerdict.guessed,
+    ];
+    await progress.recordAttempt(
+      attempt(missionTheOpportunity, 40, at: now, reasons: reasons),
+    );
+    await progress.recordAttempt(
+      attempt(
+        missionTheOpportunity,
+        60,
+        number: 2,
+        at: now,
+        reasons: const [ReasonVerdict.sound, ReasonVerdict.sound],
+      ),
+    );
+    final p = await read(container());
+    expect(
+      p.xp,
+      missionXp(total: 40, firstClear: true) +
+          15 +
+          missionXp(total: 60, firstClear: false) +
+          20,
+    );
+    expect(p.lastXp, missionXp(total: 60, firstClear: false) + 20);
+    expect(p.lastReasonXp, 20);
+    expect(p.lastRoomXp, missionXp(total: 60, firstClear: false));
+  });
+
+  test('reason XP moves no unlock: skills read dimension scores only', () async {
+    final m7 = missions.firstWhere((m) => m.number == 7);
+    // Every reason sound, but the answer too weak for the skill: still locked.
+    await progress.recordAttempt(
+      attempt(
+        m7,
+        30,
+        at: now,
+        reasons: const [ReasonVerdict.sound, ReasonVerdict.sound],
+      ),
+    );
+    final p = await read(container());
+    expect(p.lastReasonXp, 20);
+    expect(p.unlocked, isEmpty);
+  });
+
+  test('a voice room earns 5 per point said out loud', () async {
+    final voice = missions.firstWhere((m) => m.voice != null);
+    await progress.recordAttempt(attempt(voice, 50, at: now, pointsMade: 4));
+    final p = await read(container());
+    expect(p.lastReasonXp, 4 * voicePointXp);
+    expect(p.xp, missionXp(total: 50, firstClear: true) + 20);
+  });
 
   test(
     'a strong Mission 7 unlocks Evidence Builder, celebrated once',
