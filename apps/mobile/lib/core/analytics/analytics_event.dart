@@ -96,7 +96,12 @@ enum AnalyticsEvent {
 
   /// A first-time tip is put away: its target was tapped (and did its normal action), or it
   /// was dismissed ("Got it", or a tap anywhere else).
-  tipDone('tip_done');
+  tipDone('tip_done'),
+
+  /// "Share your floor card" on the floor-cleared screen: which floor, and how it went (the
+  /// share sheet was used, closed without sharing, or sharing isn't available here). Never the
+  /// card, never the player's name.
+  floorCardShared('floor_card_shared');
 
   const AnalyticsEvent(this.wireName);
 
