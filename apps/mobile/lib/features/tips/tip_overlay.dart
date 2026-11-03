@@ -112,10 +112,22 @@ class TipBubble extends StatelessWidget {
 /// The cut-out's shape: an arch round a door, a rounded card round anything else.
 enum TipShape { arch, card }
 
+/// What the target under a tip is, and so what a tap on it through the cut-out does.
+enum TipTarget {
+  /// One obvious action (the door, a tab, the recorder): the tap goes through and does it.
+  action,
+
+  /// Things to choose between (answer cards, reason cards): the tap only puts the tip away and
+  /// leaves them lit, never picks one (QA 51, BUG-2: a tap meant for the tip gave a reason the
+  /// player never saw). The player then picks on purpose.
+  choice,
+}
+
 /// A tip over its target (the tower tour, generalised): the screen dims except for a lit
 /// cut-out round [target], and the cast member says the line in a bubble beside it. A tap on
-/// the target goes through to it and does its normal action ([onTarget] puts the tip away);
-/// "Got it" or a tap anywhere else is [onDismiss]. Under reduced motion it simply appears.
+/// the target puts the tip away ([onTarget]); on an [TipTarget.action] target it also goes
+/// through and does its normal action, on a [TipTarget.choice] it picks nothing. "Got it" or a
+/// tap anywhere else is [onDismiss]. Under reduced motion it simply appears.
 class TipOverlay extends StatelessWidget {
   const TipOverlay({
     super.key,
@@ -125,6 +137,7 @@ class TipOverlay extends StatelessWidget {
     required this.onTarget,
     required this.onDismiss,
     this.shape = TipShape.card,
+    this.kind = TipTarget.action,
   });
 
   final TipVoice voice;
@@ -135,6 +148,7 @@ class TipOverlay extends StatelessWidget {
   final VoidCallback onTarget;
   final VoidCallback onDismiss;
   final TipShape shape;
+  final TipTarget kind;
 
   static const String label = 'Tip';
 
@@ -207,14 +221,21 @@ class TipOverlay extends StatelessWidget {
               painter: _Spotlight(hole: cut, shape: shape, dim: _scrim),
             ),
           ),
-          // The target itself, through the cut-out: it does its normal action, and the tip
-          // goes. Translucent, so the tap still reaches what's underneath.
+          // The target itself, through the cut-out: the tip goes. An action's tap still reaches
+          // what's underneath (translucent); a choice's stops here, so nothing is picked.
           Positioned.fromRect(
             rect: cut,
-            child: Listener(
-              behavior: HitTestBehavior.translucent,
-              onPointerUp: (_) => onTarget(),
-            ),
+            child: switch (kind) {
+              TipTarget.action => Listener(
+                behavior: HitTestBehavior.translucent,
+                onPointerUp: (_) => onTarget(),
+              ),
+              TipTarget.choice => GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                excludeFromSemantics: true,
+                onTap: onTarget,
+              ),
+            },
           ),
           // The bubble in the space above or below, scrolling if it's taller (large text), so
           // "Got it" is always reachable.

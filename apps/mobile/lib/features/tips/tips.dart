@@ -65,8 +65,9 @@ enum Tip {
       'This is your next room. Tap the door to start your interview.';
 }
 
-/// How a tip went away (`tip_done`'s `action`): its target was tapped and did its normal
-/// action, or it was dismissed ("Got it", or a tap anywhere else).
+/// How a tip went away (`tip_done`'s `action`): its target was tapped (an action target does
+/// its normal action; a choice target only puts the tip away, nothing picked), or it was
+/// dismissed ("Got it", or a tap anywhere else).
 enum TipAction { followed, dismissed }
 
 /// Which tips have been seen, on the device (offline, like the last visit).
