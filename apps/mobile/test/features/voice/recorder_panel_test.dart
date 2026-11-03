@@ -231,13 +231,13 @@ void main() {
       expect(find.text(RecorderPanel.recordingLine), findsOneWidget);
       mic.speak(const Duration(seconds: 2));
       await tester.pump();
-      expect(find.text('0:02 / 0:30'), findsOneWidget);
+      expect(find.bySemanticsLabel('0:02 of 0:30'), findsOneWidget);
 
       // Quiet for 5 s: it pauses by itself and says so.
       mic.hush(const Duration(seconds: 5));
       await tester.pump();
       expect(find.text(RecorderPanel.silenceLine), findsOneWidget);
-      expect(find.text('0:07 / 0:30'), findsOneWidget);
+      expect(find.bySemanticsLabel('0:07 of 0:30'), findsOneWidget);
 
       // Continue: the same take goes on from 0:07.
       await tester.tap(find.text(RecorderPanel.resume));
@@ -245,7 +245,7 @@ void main() {
       await tester.pump();
       mic.speak(const Duration(seconds: 1));
       await tester.pump();
-      expect(find.text('0:08 / 0:30'), findsOneWidget);
+      expect(find.bySemanticsLabel('0:08 of 0:30'), findsOneWidget);
 
       // Delete asks first; Keep it keeps it.
       await tester.tap(find.text(RecorderPanel.delete));
@@ -253,7 +253,7 @@ void main() {
       expect(find.text(DeleteTakeSheet.title), findsOneWidget);
       await tester.tap(find.text(DeleteTakeSheet.keep));
       await tester.pump();
-      expect(find.text('0:08 / 0:30'), findsOneWidget);
+      expect(find.bySemanticsLabel('0:08 of 0:30'), findsOneWidget);
 
       // Delete, confirmed: empty again.
       await tester.tap(find.text(RecorderPanel.delete));
@@ -261,7 +261,7 @@ void main() {
       await tester.tap(find.text(DeleteTakeSheet.delete).last);
       await tester.pump();
       expect(find.text(RecorderPanel.readyLine), findsOneWidget);
-      expect(find.text('0:00 / 0:30'), findsOneWidget);
+      expect(find.bySemanticsLabel('0:00 of 0:30'), findsOneWidget);
 
       await tester.tap(find.bySemanticsLabel(RecorderPanel.recordLabel));
       await tester.pump();

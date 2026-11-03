@@ -12,7 +12,7 @@ const missionTellMeAboutYourself = Mission(
   id: 'm02_tell_me_about_yourself',
   chapter: 1,
   number: 2,
-  title: 'Tell Me About Yourself',
+  title: 'Tell me about yourself',
   practises: "Introducing yourself in under a minute: present, past, and why you're here.",
   hinted: true,
   scene: [

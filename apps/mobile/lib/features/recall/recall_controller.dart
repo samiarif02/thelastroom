@@ -83,10 +83,13 @@ final class RecallLoading extends RecallRoomState {
 
 /// Nothing due: every card is scheduled for later, or there are none yet.
 final class RecallEmpty extends RecallRoomState {
-  const RecallEmpty({required this.hasCards});
+  const RecallEmpty({required this.hasCards, this.nextDue});
 
   /// False before the first mission with a mistake: the room explains where cards come from.
   final bool hasCards;
+
+  /// When the next note comes back; null with none scheduled.
+  final CalendarDay? nextDue;
 }
 
 final class RecallPlaying extends RecallRoomState {
@@ -95,9 +98,13 @@ final class RecallPlaying extends RecallRoomState {
     required this.index,
     required this.verdicts,
     this.chosenId,
+    this.boxes = const [],
   });
 
   final List<RecallQuestion> round;
+
+  /// Each card's Leitner box, card for card with [round] (empty in older callers).
+  final List<LeitnerBox> boxes;
   final int index;
 
   /// One per answered card, in order.
@@ -107,6 +114,9 @@ final class RecallPlaying extends RecallRoomState {
   final String? chosenId;
 
   RecallQuestion get question => round[index];
+
+  /// The current card's box; null when unknown.
+  LeitnerBox? get box => index < boxes.length ? boxes[index] : null;
   bool get answered => chosenId != null;
   RecallVerdict? get verdict => answered ? verdicts.last : null;
   int get streak => recallStreak(verdicts);
@@ -175,19 +185,40 @@ class RecallRoomController extends Notifier<RecallRoomState> {
     if (!ref.mounted) return;
     final deck = ref.read(recallDeckProvider);
     final seed = _seedFor(today);
-    final round = [
+    final due = [
       for (final card in dueRecallCards(_schedule.cards, today: today))
-        ?deck.question(card.cardId, seed: seed),
+        if (deck.question(card.cardId, seed: seed) case final q?) (q, card.box),
     ];
+    final round = [for (final (q, _) in due) q];
     ref.read(analyticsProvider).track(AnalyticsEvent.recallRoomOpened, {
       'due_cards': EventValue.count(round.length),
     });
     if (round.isEmpty) {
-      state = RecallEmpty(hasCards: _schedule.cards.isNotEmpty);
+      CalendarDay? next;
+      for (final c in _schedule.cards) {
+        if (next == null || c.due.compareTo(next) < 0) next = c.due;
+      }
+      state = RecallEmpty(hasCards: _schedule.cards.isNotEmpty, nextDue: next);
       return;
     }
     _shownAt = _now();
-    state = RecallPlaying(round: round, index: 0, verdicts: const []);
+    state = RecallPlaying(
+      round: round,
+      index: 0,
+      verdicts: const [],
+      boxes: [for (final (_, b) in due) b],
+    );
+    _noteOpened(state);
+  }
+
+  /// `recall_note_opened`: a note is on screen (once per card per round).
+  void _noteOpened(RecallRoomState s) {
+    if (s is! RecallPlaying) return;
+    final box = s.box;
+    ref.read(analyticsProvider).track(AnalyticsEvent.recallNoteOpened, {
+      'card_kind': EventValue.name(s.question.kind),
+      if (box != null) 'box': EventValue.name(box),
+    });
   }
 
   /// The player taps [choiceId] on the current card. A second tap is ignored.
@@ -224,6 +255,7 @@ class RecallRoomController extends Notifier<RecallRoomState> {
       index: s.index,
       verdicts: [...s.verdicts, outcome.verdict],
       chosenId: choiceId,
+      boxes: s.boxes,
     );
     ref.read(analyticsProvider).track(AnalyticsEvent.recallCardAnswered, {
       'card_kind': EventValue.name(question.kind),
@@ -249,7 +281,9 @@ class RecallRoomController extends Notifier<RecallRoomState> {
         round: s.round,
         index: s.index + 1,
         verdicts: s.verdicts,
+        boxes: s.boxes,
       );
+      _noteOpened(state);
       return;
     }
     final finished = RecallFinished(verdicts: s.verdicts);

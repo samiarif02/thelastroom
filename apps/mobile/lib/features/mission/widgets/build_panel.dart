@@ -2,7 +2,8 @@ import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../ui/film_kit.dart';
+import '../../../ui/daylight/daylight_kit.dart';
+import '../../../ui/film/timeline.dart';
 
 /// "Build your answer" (brief 27): the answer so far, live in the speech panel, the fragments
 /// as big chips, and "Lock it in". **One tap places** a fragment at the end of the answer; a
@@ -42,7 +43,7 @@ class BuildPanel extends StatelessWidget {
 
   static const String lockIn = 'Lock it in';
   static const String empty = 'Tap the pieces in the order you’d say them.';
-  static const String hint = 'TAP A PLACED PIECE TO TAKE IT OUT';
+  static const String hint = 'Tap a placed piece to take it out';
 
   /// The answer as built so far, the fragments' words joined.
   static String answerSoFar(List<Fragment> fragments, List<String> placed) {
@@ -53,62 +54,79 @@ class BuildPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final soFar = answerSoFar(fragments, placed);
+    final f = grade.floor;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          header: true,
-          child: Text(
-            placed.isEmpty || locked ? label : hint,
-            textAlign: TextAlign.center,
-            style: BrandVividType.kicker.copyWith(color: grade.glow),
-          ),
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.end,
+          spacing: DaylightSpace.s12,
+          runSpacing: DaylightSpace.s2,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                label,
+                style: DaylightType.title3.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontVariations: const [FontVariation.weight(600)],
+                ),
+              ),
+            ),
+            if (placed.isNotEmpty && !locked)
+              Text(
+                hint,
+                style: DaylightType.caption4.copyWith(
+                  color: DaylightColors.ink2,
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: BrandSpace.sm),
-        // The line, building as the player taps: in the speech panel, where her lines are.
+        const SizedBox(height: DaylightSpace.s8),
+        // The line, building as the player taps: a white card, the words in Body 3.
         Semantics(
           liveRegion: true,
           label: soFar.isEmpty ? empty : 'Your answer: $soFar',
           excludeSemantics: true,
-          child: SpeechPanel(
+          child: DaylightPanel(
+            radius: DaylightRadius.card,
+            edge: soFar.isEmpty ? null : f.soft,
             child: Text(
               soFar.isEmpty ? empty : soFar,
-              style: BrandType.choice.copyWith(
-                color: soFar.isEmpty
-                    ? BrandColors.textSecondary
-                    : BrandColors.textPrimary,
-                fontStyle: soFar.isEmpty ? FontStyle.italic : FontStyle.normal,
+              style: DaylightType.body3.copyWith(
+                color: soFar.isEmpty ? DaylightColors.ink2 : DaylightColors.ink,
               ),
             ),
           ),
         ),
-        const SizedBox(height: BrandSpace.md),
+        const SizedBox(height: DaylightSpace.s12),
         Timeline(
-          duration: BrandMotion.cinematic,
+          duration: DaylightMotion.move,
           onFinished: onArrived,
           builder: (context, t, _) => Opacity(
             opacity: t,
             child: Wrap(
-              spacing: BrandSpace.sm,
-              runSpacing: BrandSpace.sm,
+              spacing: DaylightSpace.s8,
+              runSpacing: DaylightSpace.s8,
               children: [
-                for (final f in fragments)
+                for (final fr in fragments)
                   FragmentChip(
-                    text: f.text,
+                    text: fr.text,
                     grade: grade,
-                    position: placed.contains(f.id)
-                        ? placed.indexOf(f.id) + 1
+                    position: placed.contains(fr.id)
+                        ? placed.indexOf(fr.id) + 1
                         : null,
-                    onTap: locked ? null : () => onToggle(f),
+                    onTap: locked ? null : () => onToggle(fr),
                   ),
               ],
             ),
           ),
         ),
-        const SizedBox(height: BrandSpace.md),
-        VividButton(
+        const SizedBox(height: DaylightSpace.s16),
+        TactileButton(
           label: lockIn,
-          expand: true,
+          icon: PhosphorBold.lockSimple,
           onPressed: placed.isEmpty || locked ? null : onLockIn,
         ),
       ],
@@ -116,8 +134,8 @@ class BuildPanel extends StatelessWidget {
   }
 }
 
-/// One fragment: a vivid pill at least [BrandSpace.minTarget] tall. Placed, it lights with the
-/// sunflower ring and carries its place in the answer.
+/// One fragment: a Daylight chip at least 48 tall, white on its edge. Placed, it takes the
+/// floor's ring and tint and carries its place in the answer.
 class FragmentChip extends StatelessWidget {
   const FragmentChip({
     super.key,
@@ -134,67 +152,59 @@ class FragmentChip extends StatelessWidget {
   final int? position;
   final VoidCallback? onTap;
 
-  static const double _radius = 16;
-  static const double _ring = 2;
   static const double _badge = 22;
 
   @override
   Widget build(BuildContext context) {
     final position = this.position;
     final placed = position != null;
-    final duration = MediaQuery.disableAnimationsOf(context)
-        ? BrandMotion.quick
-        : BrandMotion.standard;
-    return Pressable(
+    final f = grade.floor;
+    return Tactile(
       label: placed ? '$text, placed ${_ordinal(position)}' : text,
       selected: placed,
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: duration,
-        curve: BrandMotion.enter,
-        constraints: const BoxConstraints(minHeight: BrandSpace.minTarget),
-        padding: const EdgeInsets.symmetric(
-          horizontal: BrandSpace.md - BrandSpace.xs,
-          vertical: BrandSpace.sm,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(_radius),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: placed ? [grade.deeper, grade.deeper] : grade.cardGradient,
+      style: TactileStyle(
+        face: placed
+            ? Color.alphaBlend(
+                f.tint.withValues(alpha: 0.6),
+                DaylightColors.raised,
+              )
+            : DaylightColors.raised,
+        edge: placed ? f.deep : DaylightColors.sand2,
+        ring: placed ? f.base : null,
+        radius: BorderRadius.circular(DaylightRadius.tile),
+        depth: DaylightSize.edgeSmall,
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: DaylightSize.hit - 4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: DaylightSpace.s12,
+            vertical: DaylightSpace.s8,
           ),
-          border: Border.all(
-            color: placed ? BrandVivid.accent : BrandVivid.hairline(),
-            width: placed ? _ring : 1,
-          ),
-          boxShadow: placed
-              ? BrandVivid.glowShadow(BrandVivid.accent)
-              : BrandVivid.cardShadow,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (placed) ...[
-              Container(
-                width: _badge,
-                height: _badge,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: BrandVivid.accent,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '$position',
-                  style: BrandVividType.kicker.copyWith(
-                    color: BrandVivid.night,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (placed) ...[
+                Container(
+                  width: _badge,
+                  height: _badge,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: f.base,
+                    borderRadius: BorderRadius.circular(DaylightRadius.tag),
+                  ),
+                  child: Text(
+                    '$position',
+                    style: DaylightType.tabular(DaylightType.caption3)
+                        .copyWith(color: DaylightColors.raised),
                   ),
                 ),
-              ),
-              const SizedBox(width: BrandSpace.sm),
+                const SizedBox(width: DaylightSpace.s8),
+              ],
+              Flexible(child: Text(text, style: DaylightType.body5)),
             ],
-            Flexible(child: Text(text, style: BrandVividType.row)),
-          ],
+          ),
         ),
       ),
     );

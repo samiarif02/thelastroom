@@ -14,7 +14,7 @@ const missionYourTurnToAsk = Mission(
   id: 'm19_your_turn_to_ask',
   chapter: 3,
   number: 19,
-  title: 'Your Turn to Ask',
+  title: 'Your turn to ask',
   practises: 'Asking questions that show you listened and that you care about the work.',
   hinted: true,
   scene: [

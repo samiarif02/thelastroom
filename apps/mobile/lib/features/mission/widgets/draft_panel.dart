@@ -3,7 +3,7 @@ import 'package:content/content.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../ui/film_kit.dart';
+import '../../../ui/daylight/daylight_kit.dart';
 
 /// Draft first (FR-11): before Jordan's lines appear, the player may start the answer in their
 /// own words. A sheet of the candidate's notepad on the desk: the prompt, a ruled line to
@@ -19,7 +19,7 @@ class DraftPanel extends StatefulWidget {
   final ValueChanged<String?> onDone;
   final ChapterGrade grade;
 
-  static const String heading = 'YOUR OWN WORDS FIRST';
+  static const String heading = 'Your own words first';
   static const String placeholder = 'Start with one sentence…';
   static const String skip = 'Skip';
   static const String keep = 'Keep it';
@@ -37,8 +37,6 @@ class _DraftPanelState extends State<DraftPanel> {
   bool _done = false;
 
   static const int _maxLines = 4;
-  static const double _radius = 18;
-  static const double _hairline = 0.8;
 
   @override
   void initState() {
@@ -65,121 +63,104 @@ class _DraftPanelState extends State<DraftPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final grade = widget.grade;
-    final brass = grade.glow;
+    final f = widget.grade.floor;
     final hasText = _text.text.trim().isNotEmpty;
-    return DecoratedBox(
-      // A vivid card like the answers': the player's own page, lifted off the scene.
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(_radius),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: grade.cardGradient,
-        ),
-        border: Border.all(color: BrandVivid.hairline()),
-        boxShadow: BrandVivid.cardShadow,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(BrandSpace.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Semantics(
-              header: true,
-              child: Text(
-                DraftPanel.heading,
-                style: BrandVividType.kicker.copyWith(color: brass),
-              ),
+    return DaylightPanel(
+      // The player's own page: a white card on the floor's tint.
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              DraftPanel.heading,
+              style: DaylightType.caption3.copyWith(color: f.deep),
             ),
-            const SizedBox(height: BrandSpace.sm),
-            Text(draftPrompt, style: BrandVividType.body),
-            const SizedBox(height: BrandSpace.md),
-            GestureDetector(
-              onTap: _focus.requestFocus,
-              child: Container(
-                constraints: const BoxConstraints(
-                  minHeight: BrandSpace.minTarget,
+          ),
+          const SizedBox(height: DaylightSpace.s4),
+          Text(draftPrompt, style: DaylightType.body6),
+          const SizedBox(height: DaylightSpace.s12),
+          GestureDetector(
+            onTap: _focus.requestFocus,
+            child: Container(
+              constraints: const BoxConstraints(minHeight: DaylightSize.hit),
+              padding: const EdgeInsets.all(DaylightSpace.s12),
+              decoration: BoxDecoration(
+                color: DaylightColors.sand,
+                borderRadius: BorderRadius.circular(DaylightRadius.tile),
+                border: Border.all(
+                  color: _focus.hasFocus ? f.base : DaylightColors.sand,
+                  width: _ring,
                 ),
-                padding: const EdgeInsets.symmetric(vertical: BrandSpace.sm),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: brass.withValues(
-                        alpha: _focus.hasFocus ? 0.9 : 0.4,
+              ),
+              child: Stack(
+                children: [
+                  if (!hasText)
+                    ExcludeSemantics(
+                      child: Text(
+                        DraftPanel.placeholder,
+                        style: DaylightType.body3.copyWith(
+                          color: DaylightColors.ink2,
+                        ),
                       ),
-                      width: _hairline,
                     ),
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    if (!hasText)
-                      ExcludeSemantics(
-                        child: Text(
-                          DraftPanel.placeholder,
-                          style: BrandVividType.row.copyWith(
-                            color: BrandVivid.onDeepSoft,
+                  // One node for screen readers: the label merges into EditableText's own
+                  // text field. A second `textField: true` here made the web's textarea
+                  // read as disabled until focused (brief 30, as 1e found on the name field).
+                  // `enabled`: without it the web still marks the textarea `disabled` (brief 44).
+                  MergeSemantics(
+                    child: Semantics(
+                      label: DraftPanel.heading,
+                      enabled: true,
+                      child: EditableText(
+                        controller: _text,
+                        focusNode: _focus,
+                        style: DaylightType.body3,
+                        cursorColor: f.base,
+                        backgroundCursorColor: DaylightColors.ink2,
+                        selectionColor: f.soft,
+                        minLines: 1,
+                        maxLines: _maxLines,
+                        keyboardType: TextInputType.multiline,
+                        textCapitalization: TextCapitalization.sentences,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(
+                            DraftPanel.maxLength,
                           ),
-                        ),
-                      ),
-                    // One node for screen readers: the label merges into EditableText's own
-                    // text field. A second `textField: true` here made the web's textarea
-                    // read as disabled until focused (brief 30, as 1e found on the name field).
-                    // `enabled`: without it the web still marks the textarea `disabled` (brief 44).
-                    MergeSemantics(
-                      child: Semantics(
-                        label: DraftPanel.heading,
-                        enabled: true,
-                        child: EditableText(
-                          controller: _text,
-                          focusNode: _focus,
-                          style: BrandVividType.row,
-                          cursorColor: brass,
-                          backgroundCursorColor: BrandVivid.onDeepSoft,
-                          selectionColor: brass.withValues(alpha: 0.3),
-                          minLines: 1,
-                          maxLines: _maxLines,
-                          keyboardType: TextInputType.multiline,
-                          keyboardAppearance: Brightness.dark,
-                          textCapitalization: TextCapitalization.sentences,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(
-                              DraftPanel.maxLength,
-                            ),
-                          ],
-                        ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: BrandSpace.md),
-            Row(
-              children: [
-                Expanded(
-                  child: VividButton(
-                    label: DraftPanel.skip,
-                    primary: false,
-                    expand: true,
-                    onPressed: () => _finish(null),
-                  ),
+          ),
+          const SizedBox(height: DaylightSpace.s16),
+          Row(
+            children: [
+              Expanded(
+                child: TactileButton(
+                  label: DraftPanel.skip,
+                  tone: TactileTone.quiet,
+                  compact: true,
+                  onPressed: () => _finish(null),
                 ),
-                const SizedBox(width: BrandSpace.sm),
-                Expanded(
-                  child: VividButton(
-                    label: DraftPanel.keep,
-                    expand: true,
-                    onPressed: hasText ? () => _finish(_text.text) : null,
-                  ),
+              ),
+              const SizedBox(width: DaylightSpace.s8),
+              Expanded(
+                child: TactileButton(
+                  label: DraftPanel.keep,
+                  compact: true,
+                  onPressed: hasText ? () => _finish(_text.text) : null,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
+
+  static const double _ring = 2;
 }

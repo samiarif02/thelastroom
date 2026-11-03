@@ -74,12 +74,16 @@ extension AddressedLine on SceneLine {
   /// [name] ("Hi Sami"). The answer lines stay the practice CV's, in the first person.
   SceneLine addressedTo(String name) => SceneLine(
     speakerId: speakerId,
-    text: text.replaceAll(_candidateName, name),
+    // A name typed with a full stop ("Sami.") would end "Why lead with that, Sami.?".
+    text: text.replaceAll(_candidateName, name.replaceAll(_trailing, '')),
   );
 }
 
 /// The one chapter with a report: Chapter 1, whose review (Mission 7) is set against Mission 1.
 const int reportedChapter = 1;
+
+/// Punctuation and spaces a player may have typed after their name.
+final RegExp _trailing = RegExp(r'[\s.!?,;:]+$');
 
 /// The practice candidate's first name as the interviewers say it, as a whole word.
 final RegExp _candidateName = RegExp(

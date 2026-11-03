@@ -10,7 +10,7 @@ import '../tower/tower_screen.dart';
 
 /// The app's front door: a returning player sees the title for a moment, then the Tower; a new
 /// one gets the title with "Begin", then onboarding (brief 20). The profile loads from the
-/// device, so the sky shows for a moment at most. A profile that fails to load counts as new.
+/// device, so the paper shows for a moment at most. A profile that fails to load counts as new.
 class HomeGate extends ConsumerWidget {
   const HomeGate({super.key});
 
@@ -21,6 +21,6 @@ class HomeGate extends ConsumerWidget {
           child: TowerScreen(),
         ),
         AsyncData() || AsyncError() => const BackToExit(child: TitleGate()),
-        _ => ColoredBox(color: BrandVivid.skyTop),
+        _ => const ColoredBox(color: DaylightColors.paper),
       };
 }

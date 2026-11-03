@@ -15,7 +15,7 @@ const missionPanelReview = Mission(
   id: 'm14_panel_review',
   chapter: 2,
   number: 14,
-  title: 'Panel Review',
+  title: 'Panel review',
   practises: 'Answering a panel under pressure: one story, your own part, and a calm reply to a push.',
   answerMode: AnswerMode.voice,
   hinted: false,

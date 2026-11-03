@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
 import '../analytics/analytics_event.dart';
 import 'reminder_settings.dart';
 import 'reminders.dart';
@@ -38,8 +38,8 @@ Future<bool> showReminderPrimer(BuildContext context, WidgetRef ref) async {
     context: context,
     barrierDismissible: true,
     barrierLabel: ReminderPrimer.notNow,
-    barrierColor: BrandVivid.night.withValues(alpha: ReminderPrimer.scrim),
-    transitionDuration: BrandMotion.standard,
+    barrierColor: DaylightColors.ink.withValues(alpha: ReminderPrimer.scrim),
+    transitionDuration: DaylightMotion.colour,
     pageBuilder: (dialogContext, _, _) => ReminderPrimer(
       onYes: () => Navigator.of(dialogContext).pop(true),
       onNotNow: () => Navigator.of(dialogContext).pop(false),
@@ -59,7 +59,7 @@ class ReminderPrimer extends StatelessWidget {
   final VoidCallback onYes;
   final VoidCallback onNotNow;
 
-  static const String kicker = 'A FRIENDLY NUDGE';
+  static const String kicker = 'A friendly nudge';
   static const String title = 'Want Priya to remind you?';
   static const String line =
       'When traps are waiting in the Recall Room, or your next interview is ready. At most once '
@@ -67,43 +67,70 @@ class ReminderPrimer extends StatelessWidget {
   static const String yes = 'Yes, remind me';
   static const String notNow = 'Not now';
 
-  static const double scrim = 0.7;
+  static const double scrim = 0.4;
 
   /// How long the tower's reward moment plays before the explainer appears.
   static const Duration settle = Duration(milliseconds: 1600);
   static const double _maxWidth = 420;
+
+  static const double _face = 56;
+  static const double _faceHeight = 64;
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: _CentredScroll(
         child: Padding(
-          padding: const EdgeInsets.all(BrandSpace.md),
+          padding: const EdgeInsets.all(DaylightSpace.s16),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _maxWidth),
-            child: VividPanel(
-              colors: ChapterGrade.lobby.cardGradient,
-              glow: BrandVivid.accent,
+            child: DaylightPanel(
+              edge: null,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(kicker, style: BrandVividType.kicker),
-                  const SizedBox(height: BrandSpace.sm),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: ArchPortrait(
+                      person: CastPeople.priya,
+                      expression: CastExpression.smile,
+                      width: _face,
+                      height: _faceHeight,
+                      ground: DaylightColors.recallSoft,
+                    ),
+                  ),
+                  const SizedBox(height: DaylightSpace.s12),
+                  Text(
+                    kicker,
+                    style: DaylightType.caption3.copyWith(
+                      color: DaylightColors.recall,
+                    ),
+                  ),
+                  const SizedBox(height: DaylightSpace.s4),
                   Semantics(
                     header: true,
-                    child: Text(title, style: BrandVividType.title),
+                    child: Text(title, style: DaylightType.heading5),
                   ),
-                  const SizedBox(height: BrandSpace.sm),
-                  Text(line, style: BrandVividType.body),
-                  const SizedBox(height: BrandSpace.lg),
-                  VividButton(label: yes, onPressed: onYes, expand: true),
-                  const SizedBox(height: BrandSpace.sm),
-                  VividButton(
+                  const SizedBox(height: DaylightSpace.s8),
+                  Text(
+                    line,
+                    style: DaylightType.body6.copyWith(
+                      color: DaylightColors.ink2,
+                    ),
+                  ),
+                  const SizedBox(height: DaylightSpace.s24),
+                  TactileButton(
+                    label: yes,
+                    icon: PhosphorBold.bell,
+                    tone: TactileTone.recall,
+                    onPressed: onYes,
+                  ),
+                  const SizedBox(height: DaylightSpace.s8),
+                  TactileButton(
                     label: notNow,
-                    primary: false,
+                    tone: TactileTone.quiet,
                     onPressed: onNotNow,
-                    expand: true,
                   ),
                 ],
               ),

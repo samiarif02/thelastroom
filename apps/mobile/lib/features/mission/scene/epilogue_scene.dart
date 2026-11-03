@@ -3,14 +3,16 @@ import 'package:content/content.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../core/audio/game_sounds.dart';
-import '../../../ui/film_kit.dart';
+import '../../../ui/daylight/daylight_kit.dart';
+import '../../../ui/subtitle/typewriter_subtitle.dart';
 import '../mission_lookup.dart';
 import '../widgets/next_control.dart';
 
 /// The chapter's cliffhanger (FR-30): after Mission 7's debrief and before the Chapter 1 report,
-/// [lines] play as a short film beat. The bars come in, the cliffhanger sting plays, and each
-/// line types out like the scene's subtitles. A tap on the scene shows the rest of a line;
-/// "Next" moves on; after the last line [doneLabel] leads to [onDone].
+/// [lines] play as a short scene. Daylight (brief 48): the corridor in the floor's tint, the
+/// speaker in the room's stage, talking, and each line typing out in the speech bubble under
+/// them; the cliffhanger sting plays. A tap on the scene shows the rest of a line; "Next" moves
+/// on; after the last line [doneLabel] (honey) leads to [onDone].
 class EpilogueScene extends StatefulWidget {
   const EpilogueScene({
     super.key,
@@ -28,13 +30,13 @@ class EpilogueScene extends StatefulWidget {
   final String doneLabel;
   final VoidCallback onDone;
 
-  static const String kicker = 'LATER, IN THE CORRIDOR';
+  static const String kicker = 'Later, in the corridor';
 
   /// What a screen reader hears for a tap on the scene.
   static const String showLine = 'Show the whole line';
 
-  /// The share of the screen each letterbox bar covers.
-  static const double _bar = 0.11;
+  /// The stage's share of the screen's height (the bubble and the dock take the rest).
+  static const double _stage = 0.36;
 
   @override
   State<EpilogueScene> createState() => _EpilogueSceneState();
@@ -71,87 +73,106 @@ class _EpilogueSceneState extends State<EpilogueScene> {
   @override
   Widget build(BuildContext context) {
     final line = widget.lines[_line];
+    final f = widget.grade.floor;
+    final speaker = interviewerById(line.speakerId);
     final height = MediaQuery.sizeOf(context).height;
-    final insets = MediaQuery.paddingOf(context);
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        VividBackdrop(grade: widget.grade),
-        ColoredBox(color: BrandVivid.night.withValues(alpha: 0.55)),
-        Semantics(
-          button: true,
-          label: EpilogueScene.showLine,
-          excludeSemantics: true,
-          onTap: _tapScene,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
+    final large =
+        MediaQuery.textScalerOf(context).scale(DaylightSpace.s16) >
+        DaylightSpace.s16 * _largeAt;
+    return DaylightGround(
+      color: f.tint,
+      floor: f,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Semantics(
+            button: true,
+            label: EpilogueScene.showLine,
+            excludeSemantics: true,
             onTap: _tapScene,
-          ),
-        ),
-        // The film's bars: this is a cut, not the interview.
-        Align(
-          alignment: Alignment.topCenter,
-          child: IgnorePointer(
-            child: SizedBox(
-              height: height * EpilogueScene._bar,
-              width: double.infinity,
-              child: ColoredBox(color: BrandVivid.night),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _tapScene,
             ),
           ),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: IgnorePointer(
-            child: SizedBox(
-              height: height * EpilogueScene._bar,
-              width: double.infinity,
-              child: ColoredBox(color: BrandVivid.night),
+          SafeArea(
+            minimum: const EdgeInsets.fromLTRB(
+              DaylightSpace.s16,
+              DaylightSpace.s16,
+              DaylightSpace.s16,
+              DaylightSpace.s24,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      PhosphorBold.door,
+                      size: DaylightSpace.s16,
+                      color: f.deep,
+                    ),
+                    const SizedBox(width: DaylightSpace.s8),
+                    Expanded(
+                      child: Text(
+                        EpilogueScene.kicker,
+                        style: DaylightType.caption3.copyWith(color: f.deep),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: DaylightSpace.s12),
+                IgnorePointer(
+                  child: RoomStage(
+                    person: CastPeople.byId(speaker.id),
+                    expression: _typed
+                        ? CastExpression.neutral
+                        : CastExpression.talk,
+                    height: large
+                        ? RoomStage.compactHeight
+                        : (height * EpilogueScene._stage).clamp(
+                            RoomStage.compactHeight,
+                            _stageMax,
+                          ),
+                    semanticLabel: speaker.name,
+                  ),
+                ),
+                const SizedBox(height: DaylightSpace.s16),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: TypewriterSubtitle(
+                      key: ValueKey(_line),
+                      speaker: speaker.name,
+                      line: line.text,
+                      grade: widget.grade,
+                      daylight: true,
+                      floor: f,
+                      controller: _typer,
+                      onCharacter: (c, _) =>
+                          widget.sounds.subtitleCharacter(line.speakerId, c),
+                      onComplete: () => setState(() => _typed = true),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: DaylightSpace.s16),
+                if (_typed && _last)
+                  TactileButton(
+                    label: widget.doneLabel,
+                    icon: PhosphorBold.arrowRight,
+                    onPressed: widget.onDone,
+                  )
+                else if (_typed)
+                  NextControl(grade: widget.grade, onPressed: _next)
+                else
+                  const SizedBox(height: NextControl.height),
+              ],
             ),
           ),
-        ),
-        Positioned(
-          top: height * EpilogueScene._bar + insets.top + BrandSpace.md,
-          left: 0,
-          right: 0,
-          child: Text(
-            EpilogueScene.kicker,
-            textAlign: TextAlign.center,
-            style: BrandVividType.kicker.copyWith(color: widget.grade.glow),
-          ),
-        ),
-        Positioned(
-          left: insets.left + BrandSpace.lg,
-          right: insets.right + BrandSpace.lg,
-          bottom: height * EpilogueScene._bar + insets.bottom + BrandSpace.md,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TypewriterSubtitle(
-                key: ValueKey(_line),
-                speaker: interviewerById(line.speakerId).name,
-                line: line.text,
-                grade: widget.grade,
-                controller: _typer,
-                onCharacter: (c, _) =>
-                    widget.sounds.subtitleCharacter(line.speakerId, c),
-                onComplete: () => setState(() => _typed = true),
-              ),
-              const SizedBox(height: BrandSpace.md),
-              if (_typed && _last)
-                VividButton(
-                  label: widget.doneLabel,
-                  expand: true,
-                  onPressed: widget.onDone,
-                )
-              else if (_typed)
-                NextControl(grade: widget.grade, onPressed: _next)
-              else
-                const SizedBox(height: NextControl.height),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
+
+  static const double _stageMax = 240;
+  static const double _largeAt = 1.3;
 }

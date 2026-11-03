@@ -3,9 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/app.dart';
+import 'package:the_last_room/features/title/daylight_title.dart';
 import 'package:the_last_room/features/title/title_screen.dart';
-import 'package:the_last_room/features/title/vivid_title.dart';
-import 'package:the_last_room/ui/film_kit.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart';
 
 void main() {
   Future<void> boot(
@@ -25,31 +25,33 @@ void main() {
         child: const ProviderScope(child: TheLastRoomApp()),
       ),
     );
-    // The sky never settles (its lights drift), so pump through the title.
-    for (var e = Duration.zero; e < VividTitle.length * 2; e += _step) {
+    // The cast breathes, so the frame never settles: pump through the title.
+    for (var e = Duration.zero; e < DaylightTitle.length * 2; e += _step) {
       await tester.pump(_step);
       expect(tester.takeException(), isNull);
     }
   }
 
-  testWidgets('a first launch opens on the vivid title, the tower lit', (
+  testWidgets('a first launch opens on the Daylight title, the tower lit', (
     tester,
   ) async {
     await boot(tester);
     expect(find.byType(TitleScreen), findsOneWidget);
-    expect(find.byType(VividBackdrop), findsWidgets);
+    expect(find.byType(DaylightGround), findsWidgets);
+    // The four interviewers arrive in their arches.
+    expect(find.byType(ArchPortrait), findsNWidgets(CastPeople.all.length));
     expect(find.text(TitleScreen.title), findsOneWidget);
     expect(find.text(TitleScreen.tagline), findsOneWidget);
     final tower = tester
         .widgetList<CustomPaint>(find.byType(CustomPaint))
         .map((p) => p.painter)
-        .whereType<TowerPainter>()
+        .whereType<TitleTowerPainter>()
         .single;
     expect(tower.lit, 1);
   });
 
   testWidgets('the title lasts about a second and a half', (tester) async {
-    expect(VividTitle.length, lessThanOrEqualTo(const Duration(seconds: 2)));
+    expect(DaylightTitle.length, lessThanOrEqualTo(const Duration(seconds: 2)));
   });
 
   testWidgets('under reduced motion it shows its last frame at once', (
@@ -59,7 +61,7 @@ void main() {
     final tower = tester
         .widgetList<CustomPaint>(find.byType(CustomPaint))
         .map((p) => p.painter)
-        .whereType<TowerPainter>()
+        .whereType<TitleTowerPainter>()
         .single;
     expect(tower.lit, 1);
   });
@@ -73,7 +75,7 @@ void main() {
       tester.element(find.text(TitleScreen.tagline)),
     ).style;
     expect(style.decoration, isNot(TextDecoration.underline));
-    expect(style.fontFamily, BrandType.body.fontFamily);
+    expect(style.fontFamily, DaylightType.body3.fontFamily);
   });
 
   testWidgets('the title survives 2x text without overflow', (tester) async {

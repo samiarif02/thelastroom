@@ -5,17 +5,20 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/audio/audio_settings.dart';
+import '../../ui/daylight/daylight_kit.dart' show DaylightPanel;
 import '../../ui/film_kit.dart';
+import '../onboarding/onboarding_screen.dart';
 import '../recall/recall_card_view.dart';
 import '../recall/recall_controller.dart';
 import '../recall/recall_deck.dart';
 import '../settings/audio/audio_settings_section.dart';
-import '../tower/tower_chapter_card.dart';
+import '../tower/northstar_tower.dart';
 import '../tower/tower_extras.dart';
 import '../tower/tower_hero.dart';
 import '../tower/tower_rooms.dart';
 import 'catalog_backdrops.dart';
 import 'catalog_entry.dart';
+import 'daylight_backdrop.dart';
 
 /// The vivid layer (brief 17) in the catalog: the kit on the sky, and the tower's cards with
 /// sample rooms (two done, one current, the rest locked).
@@ -60,7 +63,7 @@ abstract final class VividEntries {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                for (final (i, id) in ChapterCard.hostIds.indexed)
+                for (final (i, id) in OnboardingScreen.floorHosts.indexed)
                   InterviewerBadge(
                     figure: FriendlyFigure.of(id),
                     ring: ChapterGrade.values[i].glow,
@@ -105,16 +108,16 @@ abstract final class VividEntries {
     id: 'tower-cards',
     name: 'Tower cards',
     note:
-        'TowerHero (one Play), ChapterCard with MissionRow (done with stars, current, locked), '
-        'a locked chapter\'s teaser, LastRoomCard and RecallRoomCard.',
+        'Daylight home (brief 46): the up-next card (one button, the window breaking out), '
+        'the Recall card, and Northstar tower mid-floor and on day one.',
     shots: [
       CatalogShot(
         id: 'hero',
         label: 'Hero',
-        build: (_) => CatalogSky(
+        build: (_) => CatalogPaper(
           children: [
             TowerHero(room: _rooms[2], onPlay: () {}),
-            const SizedBox(height: BrandSpace.md),
+            const SizedBox(height: DaylightSpace.s16),
             const RecallRoomCardView(due: 3),
           ],
         ),
@@ -122,35 +125,27 @@ abstract final class VividEntries {
       CatalogShot(
         id: 'chapter',
         label: 'Chapter',
-        build: (_) => CatalogSky(
-          children: [
-            ChapterCard(
-              chapter: chapters.first,
-              rooms: _rooms.take(4).toList(),
-              onTapRoom: (_) {},
-            ),
-          ],
+        build: (_) => CatalogPaper(
+          children: [NorthstarTower(rooms: _rooms, onTapRoom: (_) {})],
         ),
       ),
       CatalogShot(
         id: 'locked',
         label: 'Locked',
-        build: (_) => CatalogSky(
+        build: (_) => CatalogPaper(
           children: [
-            // Every chapter is open since brief 39; the locked state is shown on a copy of
-            // Chapter 2 as it looked before, so the catalog keeps the teaser design.
-            ChapterCard(
-              chapter: Chapter(
-                number: chapters[1].number,
-                title: chapters[1].title,
-                missionTitles: chapters[1].missionTitles,
-                playable: false,
-              ),
-              rooms: const [],
+            NorthstarTower(
+              rooms: [
+                for (final (i, m) in missions.indexed)
+                  TowerRoom(
+                    mission: m,
+                    state: i == 0 ? RoomState.current : RoomState.locked,
+                  ),
+              ],
               onTapRoom: (_) {},
             ),
-            const SizedBox(height: BrandSpace.md),
-            const LastRoomCard(),
+            const SizedBox(height: DaylightSpace.s16),
+            const RecallRoomCardView(due: 0),
           ],
         ),
       ),
@@ -200,16 +195,16 @@ abstract final class VividEntries {
     id: 'vivid-screens',
     name: 'Settings and Recall',
     note:
-        'The Settings audio section on a VividPanel, and a Recall Room card with the mission\'s '
-        'answer cards, before and after an answer (brief 23).',
+        'The Settings audio section on a Daylight card, and a Recall Room note with its pick '
+        'cards, before and after an answer (Daylight, brief 46).',
     shots: [
       CatalogShot(
         id: 'settings',
         label: 'Settings',
         build: (_) => ProviderScope(
           overrides: [audioSettingsProvider.overrideWith(_CatalogAudio.new)],
-          child: const CatalogSky(
-            children: [VividPanel(child: AudioSettingsSection())],
+          child: const CatalogPaper(
+            children: [DaylightPanel(child: AudioSettingsSection())],
           ),
         ),
       ),
@@ -220,7 +215,8 @@ abstract final class VividEntries {
         CatalogShot(
           id: id,
           label: label,
-          build: (_) => CatalogSky(
+          build: (_) => CatalogPaper(
+            ground: DaylightColors.recallTint,
             children: [
               RecallCardView(
                 playing: RecallPlaying(
@@ -243,8 +239,9 @@ abstract final class VividEntries {
   static const RecallQuestion _recallCard = RecallQuestion(
     cardId: 'catalog-trap',
     kind: RecallCardKind.trap,
-    kicker: 'YOU FELL FOR',
+    kicker: 'You fell for',
     prompt: 'Saying "we" sounds like a team player.',
+    caughtBy: 'marcus',
     ask: 'What holds up better?',
     quote: 'We shipped it in two weeks.',
     choices: [

@@ -64,7 +64,7 @@ void main() {
       expect(jsonEncode(sent), isNot(contains('Sami')));
 
       // The debrief: the AI's label, transcript, points made and missed, basis and lesson.
-      expect(find.text(ScoreSourceLabel.aiLabel.toUpperCase()), findsOneWidget);
+      expect(find.text(ScoreSourceLabel.aiLabel), findsOneWidget);
       expect(find.text(VoiceDebrief.contentOnly), findsOneWidget);
       await rig.settleDebrief();
       expect(
@@ -129,7 +129,7 @@ void main() {
       await rig.tap(find.text('Names what changed and when'));
       await rig.tap(find.text('Says what you did, not what the team did'));
       await rig.tap(find.text(SelfCheckPanel.score));
-      await rig.until(find.text(VoiceDebrief.selfCheckLabel.toUpperCase()));
+      await rig.until(find.text(VoiceDebrief.selfCheckLabel));
 
       final stored = (await rig.progress.attempts()).single;
       expect(stored.voice!.source, VoiceScoreSource.selfCheck);
@@ -173,7 +173,7 @@ void main() {
     );
     expect(find.text(SelfCheckPanel.listenAnswer), findsNothing);
     await rig.tap(find.text(SelfCheckPanel.score));
-    await rig.until(find.text(VoiceDebrief.selfCheckLabel.toUpperCase()));
+    await rig.until(find.text(VoiceDebrief.selfCheckLabel));
     expect(rig.analytics.count(AnalyticsEvent.voiceAnswerRecorded), 0);
     expect((await rig.progress.attempts()).single.score.total, 0);
   });
@@ -260,7 +260,7 @@ void main() {
         await rig.answerBoth();
         await rig.until(find.text(SelfCheckPanel.title));
         await rig.tap(find.text(SelfCheckPanel.score));
-        await rig.until(find.text(VoiceDebrief.selfCheckLabel.toUpperCase()));
+        await rig.until(find.text(VoiceDebrief.selfCheckLabel));
         expect(tester.takeException(), isNull);
       },
     );

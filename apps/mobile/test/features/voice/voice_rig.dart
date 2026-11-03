@@ -14,6 +14,7 @@ import 'package:the_last_room/features/debrief/ai_score_store.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/scene/mission_card.dart';
 import 'package:the_last_room/features/recall/recall_store.dart';
+import 'package:the_last_room/features/tips/tips.dart';
 import 'package:the_last_room/features/voice/audio/take_playback.dart';
 import 'package:the_last_room/features/voice/recorder/recorder_panel.dart';
 import 'package:the_last_room/features/voice/voice_controller.dart';
@@ -43,6 +44,9 @@ class VoiceRig {
   final RecordingVoice voice = RecordingVoice();
   final SilentTakePlayback playback = SilentTakePlayback();
   final FakeBackend backend = FakeBackend();
+
+  /// The first-time tips: all seen, unless a test clears them (`rig.tips.flags.clear()`).
+  final InMemoryTipStore tips = InMemoryTipStore.allSeen();
 
   /// Every microphone the player opened, one per take.
   final List<FakeMicrophone> mics = [];
@@ -77,6 +81,7 @@ class VoiceRig {
         aiScoreStoreProvider.overrideWithValue(aiScores),
         recallStoreProvider.overrideWithValue(InMemoryRecallStore()),
         routerProvider.overrideWithValue(router),
+        tipStoreProvider.overrideWithValue(tips),
         missionCatalogProvider.overrideWithValue(const [voiceFixture]),
         microphoneFactoryProvider.overrideWithValue(() {
           final m = newMic();

@@ -14,7 +14,7 @@ const missionTheFinalInterview = Mission(
   id: 'm20_the_final_interview',
   chapter: 3,
   number: 20,
-  title: 'The Final Interview',
+  title: 'The final interview',
   practises: 'Making your whole case out loud: what the job needs, your proof, why you want it.',
   answerMode: AnswerMode.voice,
   hinted: false,

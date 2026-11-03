@@ -13,7 +13,7 @@ const missionIDontKnow = Mission(
   id: 'm17_i_dont_know',
   chapter: 3,
   number: 17,
-  title: '"I Don\'t Know"',
+  title: '"I don\'t know"',
   practises: "Saying 'I don't know' well: name the gap, reason it out, say how you'd find out.",
   answerMode: AnswerMode.voice,
   hinted: false,

@@ -25,7 +25,10 @@ import 'package:the_last_room/features/mission/widgets/build_panel.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
+import 'package:the_last_room/features/progression/floor_cleared_screen.dart';
 import 'package:the_last_room/features/recall/recall_store.dart';
+import 'package:the_last_room/features/tips/tips.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart' show TactileButton;
 import 'package:the_last_room/ui/film_kit.dart';
 
 /// How long the harness "reads" the cards before picking: well past `guessThreshold`.
@@ -189,6 +192,10 @@ class MissionRig {
 
   static const Size phone = Size(375, 667);
 
+  /// The first-time tips' flags: all seen by default, so a test's taps are never under a tip.
+  /// A test of the tips clears them first (`rig.tips.flags.clear()`).
+  final InMemoryTipStore tips = InMemoryTipStore.allSeen();
+
   Future<void> boot(
     String location, {
     Size size = phone,
@@ -211,6 +218,7 @@ class MissionRig {
         aiScoreStoreProvider.overrideWithValue(aiScores),
         recallStoreProvider.overrideWithValue(recall),
         routerProvider.overrideWithValue(router),
+        tipStoreProvider.overrideWithValue(tips),
         if (scorer case final s?) aiScorerProvider.overrideWithValue(s),
         ...overrides,
       ],
@@ -511,6 +519,41 @@ class MissionRig {
     await until(find.byType(Dossier));
   }
 
+  /// Floor cleared (brief 46), after a floor's last room is first finished: lets the moment
+  /// play, then takes its honey button (floor 1: the report; otherwise the lift).
+  Future<void> throughFloorCleared() async {
+    await until(find.byType(FloorClearedScreen));
+    await run(FloorClearedScreen.length);
+    final go = find.descendant(
+      of: find.byType(FloorClearedScreen),
+      matching: find.byType(TactileButton),
+    );
+    await tester.ensureVisible(go.first);
+    await tester.pump();
+    await tester.tap(go.first);
+    await tester.pump();
+  }
+
   /// Plays the whole dossier through (stamps, seal, pen) and the slip arriving.
   Future<void> settleDossier() => run(BrandMotion.dossier + BrandMotion.pen);
+}
+
+/// The first-time tips' flags in memory.
+class InMemoryTipStore implements TipStore {
+  InMemoryTipStore([Set<Tip>? seen]) : flags = {...?seen};
+
+  /// Every tip seen: automated playthroughs never meet one.
+  InMemoryTipStore.allSeen() : flags = Tip.values.toSet();
+
+  /// The tips seen so far.
+  final Set<Tip> flags;
+
+  @override
+  Future<Set<Tip>> seen() async => {...flags};
+
+  @override
+  Future<void> markSeen(Tip tip) async => flags.add(tip);
+
+  @override
+  Future<void> reset() async => flags.clear();
 }

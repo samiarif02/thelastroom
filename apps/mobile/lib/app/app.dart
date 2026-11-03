@@ -5,54 +5,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../features/settings/theme/theme_controller.dart';
 import '../ui/film_kit.dart';
 import 'router.dart';
 
 class TheLastRoomApp extends ConsumerWidget {
   const TheLastRoomApp({super.key});
 
-  /// Marks every element below [context] to rebuild. Keys (go_router's navigator has a global
-  /// one) and const widgets would otherwise keep their old colours after a theme change.
-  static void _rebuildAll(BuildContext context) {
-    void mark(Element e) {
-      e
-        ..markNeedsBuild()
-        ..visitChildren(mark);
-    }
-
-    (context as Element).visitChildren(mark);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Every vivid token reads the current theme (brief 28): set it before the tree builds, and
-    // on a change rebuild every screen, so a pick in Settings re-colours the app at once.
-    final theme = ref.watch(themeProvider);
-    BrandVivid.current = theme;
-    ref.listen(themeProvider, (previous, next) {
-      if (previous != next) _rebuildAll(context);
-    });
+    // The look is Daylight (brief 46); there is no theme to pick.
     return MaterialApp.router(
       title: 'The Last Room',
       debugShowCheckedModeBanner: false,
-      theme: BrandTheme.light(),
+      theme: DaylightTheme.light(),
       themeMode: ThemeMode.light,
       color: BrandColors.void_,
       routerConfig: ref.watch(routerProvider),
-      // Screens are built without Scaffold/Material (no stock look), so the brand body style
+      // Screens are built without Scaffold/Material (no stock look), so a brand body style
       // must be the root default; otherwise Flutter's yellow-underline debug style shows.
-      // Every frame is shot on the same film stock: one ambient clock and its grain. The
-      // vignette is each scene's, laid under its text (see FilmOverlay).
+      // Daylight screens set their own (`DaylightGround`). One ambient clock drives the film
+      // grain the screens Daylight leaves alone still wear (`FilmGrain`).
       builder: (context, child) => EdgeToEdge(
         child: DefaultTextStyle(
           style: BrandType.body,
-          child: AmbientClock(
-            child: FilmOverlay(
-              vignette: 0,
-              child: child ?? const SizedBox.shrink(),
-            ),
-          ),
+          child: AmbientClock(child: child ?? const SizedBox.shrink()),
         ),
       ),
     );
@@ -60,8 +36,8 @@ class TheLastRoomApp extends ConsumerWidget {
 }
 
 /// Every frame is shot full-bleed: the scene draws under the status and navigation bars, which
-/// are transparent (owner's phone review, 2026-10-30: no flat bands), with light icons: every
-/// screen is a dark sky now (lead's decision, 2026-11-01).
+/// are transparent (owner's phone review, 2026-10-30: no flat bands), with light icons over the
+/// screens still on the dark sky. Daylight's light grounds turn them dark (`DaylightGround`).
 /// Screens keep their content clear of the bars with the view padding (`SafeArea`).
 class EdgeToEdge extends StatefulWidget {
   const EdgeToEdge({super.key, required this.child});

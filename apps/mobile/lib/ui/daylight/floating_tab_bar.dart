@@ -8,10 +8,18 @@ import '../haptics.dart';
 /// One tab: a Phosphor glyph, its label, and an optional count badge.
 @immutable
 class TabItem {
-  const TabItem({required this.icon, required this.label, this.badge});
+  const TabItem({
+    required this.icon,
+    required this.label,
+    this.badge,
+    this.anchor,
+  });
 
   final IconData icon;
   final String label;
+
+  /// On the tab, so a first-time tip can find it on screen.
+  final Key? anchor;
 
   /// A count in a recall-coloured badge (Recall notes due); null or 0 shows none.
   final int? badge;
@@ -56,7 +64,9 @@ class FloatingTabBar extends StatelessWidget {
             children: [
               for (final (i, item) in items.indexed) ...[
                 if (i > 0) const SizedBox(width: DaylightSpace.s4),
-                Expanded(child: _tab(i, item)),
+                Expanded(
+                  child: KeyedSubtree(key: item.anchor, child: _tab(i, item)),
+                ),
               ],
             ],
           ),

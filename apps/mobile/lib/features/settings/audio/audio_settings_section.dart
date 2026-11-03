@@ -3,18 +3,18 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/audio/audio_settings.dart';
-import '../../../ui/film_kit.dart';
+import '../../../ui/daylight/daylight_kit.dart';
 
-/// The Sound section of the Settings screen: the master switch and the two volumes, in the
-/// vivid look (brief 23: white on colour, sunflower for what's on). Embedded by the Settings
-/// screen and by the `/dev/sound` board; it sits on a vivid panel or the sky.
+/// The Sound section of the Settings screen: the master switch and the two volumes, in
+/// Daylight (brief 46: ink on white, the floor's colour for what's on). Embedded by the
+/// Settings screen and by the `/dev/sound` board, on a white card.
 class AudioSettingsSection extends ConsumerWidget {
   const AudioSettingsSection({super.key, this.grade = ChapterGrade.lobby});
 
   final ChapterGrade grade;
 
-  static const String heading = 'SOUND';
-  static const String masterLabel = 'Sound';
+  static const String heading = 'Sound';
+  static const String masterLabel = 'Play sounds';
   static const String ambienceLabel = 'Ambience & music';
   static const String effectsLabel = 'Effects';
 
@@ -28,13 +28,10 @@ class AudioSettingsSection extends ConsumerWidget {
       children: [
         Semantics(
           header: true,
-          child: Text(
-            heading,
-            style: BrandVividType.kicker.copyWith(color: BrandVivid.accent),
-          ),
+          child: Text(heading, style: DaylightType.heading6),
         ),
-        const SizedBox(height: BrandSpace.sm),
-        VividToggle(
+        const SizedBox(height: DaylightSpace.s8),
+        SwitchRow(
           label: masterLabel,
           value: settings.enabled,
           onChanged: controller.setEnabled,
@@ -77,7 +74,6 @@ class _VolumeRow extends StatelessWidget {
   static const double step = 0.1;
   static const double _track = 4;
   static const double _thumb = 22;
-  static const double _trackAlpha = 0.25;
   static const double _disabledOpacity = 0.45;
 
   void _setFrom(Offset local, double width) =>
@@ -99,20 +95,17 @@ class _VolumeRow extends StatelessWidget {
         child: Opacity(
           opacity: enabled ? 1 : _disabledOpacity,
           child: Padding(
-            padding: const EdgeInsets.only(top: BrandSpace.sm),
+            padding: const EdgeInsets.only(top: DaylightSpace.s8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   children: [
-                    Expanded(child: Text(label, style: BrandVividType.row)),
+                    Expanded(child: Text(label, style: DaylightType.title3)),
                     Text(
                       percent,
-                      style: BrandVividType.row.copyWith(
-                        color: BrandVivid.accent,
-                        fontWeight: FontWeight.w800,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
+                      style: DaylightType.tabular(DaylightType.body4)
+                          .copyWith(color: ChapterTint.floorOf(context).deep),
                     ),
                   ],
                 ),
@@ -128,12 +121,12 @@ class _VolumeRow extends StatelessWidget {
                           ? (d) => _setFrom(d.localPosition, width)
                           : null,
                       child: SizedBox(
-                        height: BrandSpace.minTarget,
+                        height: DaylightSize.hit,
                         child: CustomPaint(
                           painter: _VolumePainter(
                             value: value,
-                            key: BrandVivid.accent,
-                            track: BrandVivid.hairline(_trackAlpha),
+                            key: ChapterTint.floorOf(context).base,
+                            track: DaylightColors.sand2,
                             thumb: _thumb,
                             trackHeight: _track,
                           ),
@@ -176,7 +169,11 @@ class _VolumePainter extends CustomPainter {
     canvas
       ..drawLine(Offset(0, y), Offset(size.width, y), line..color = track)
       ..drawLine(Offset(0, y), Offset(x, y), line..color = key)
-      ..drawCircle(Offset(x, y), thumb / 2, Paint()..color = BrandVivid.onDeep)
+      ..drawCircle(
+        Offset(x, y),
+        thumb / 2,
+        Paint()..color = DaylightColors.raised,
+      )
       ..drawCircle(
         Offset(x, y),
         thumb / 2,

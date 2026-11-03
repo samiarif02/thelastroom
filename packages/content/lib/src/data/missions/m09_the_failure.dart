@@ -14,7 +14,7 @@ const missionTheFailure = Mission(
   id: 'm09_the_failure',
   chapter: 2,
   number: 9,
-  title: 'The Failure',
+  title: 'The failure',
   practises: 'Talking about a real failure: owning your part, and what you do differently now.',
   answerMode: AnswerMode.voice,
   hinted: false,

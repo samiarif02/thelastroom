@@ -4,8 +4,8 @@ import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../ui/film_kit.dart';
-import '../../debrief/red_pen_slip.dart';
+import '../../../ui/daylight/daylight_kit.dart';
+import '../../../ui/haptics.dart';
 import '../recorder/take_recorder.dart';
 import '../voice_scoring.dart';
 import 'point_mark.dart';
@@ -39,10 +39,10 @@ class SelfCheckPanel extends StatefulWidget {
   final ValueChanged<Set<String>> onScore;
   final ChapterGrade grade;
 
-  static const String kicker = 'SELF-CHECK';
+  static const String kicker = 'Self-check';
   static const String title = 'Tick what you said';
-  static const String answerHeading = 'YOUR ANSWER';
-  static const String replyHeading = 'YOUR REPLY TO THE FOLLOW-UP';
+  static const String answerHeading = 'Your answer';
+  static const String replyHeading = 'Your reply to the follow-up';
   static const String listenAnswer = 'Listen to your answer';
   static const String listenReply = 'Listen to your reply';
   static const String score = 'Score my answer';
@@ -76,32 +76,26 @@ class _SelfCheckPanelState extends State<SelfCheckPanel> {
   Widget build(BuildContext context) {
     final answer = widget.answer;
     final reply = widget.reply;
+    final f = widget.grade.floor;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           SelfCheckPanel.kicker,
-          textAlign: TextAlign.center,
-          style: BrandVividType.kicker.copyWith(color: widget.grade.glow),
+          style: DaylightType.caption3.copyWith(color: f.deep),
         ),
-        const SizedBox(height: BrandSpace.xs),
+        const SizedBox(height: DaylightSpace.s4),
         Semantics(
           header: true,
-          child: Text(
-            SelfCheckPanel.title,
-            textAlign: TextAlign.center,
-            style: BrandVividType.title,
-          ),
+          child: Text(SelfCheckPanel.title, style: DaylightType.heading4),
         ),
-        const SizedBox(height: BrandSpace.sm),
+        const SizedBox(height: DaylightSpace.s8),
         Text(
           SelfCheckPanel.reasonLine(widget.reason),
-          textAlign: TextAlign.center,
-          style: BrandVividType.body,
+          style: DaylightType.body6.copyWith(color: DaylightColors.ink2),
         ),
-        const SizedBox(height: BrandSpace.md),
-        PaperSlip(
-          grade: widget.grade,
+        const SizedBox(height: DaylightSpace.s16),
+        DaylightPanel(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -118,7 +112,7 @@ class _SelfCheckPanelState extends State<SelfCheckPanel> {
                   grade: widget.grade,
                   onTap: () => _flip(p),
                 ),
-              const SizedBox(height: BrandSpace.md),
+              const SizedBox(height: DaylightSpace.s16),
               const _Heading(SelfCheckPanel.replyHeading),
               if (reply != null)
                 _Listen(
@@ -135,17 +129,31 @@ class _SelfCheckPanelState extends State<SelfCheckPanel> {
             ],
           ),
         ),
-        const SizedBox(height: BrandSpace.md),
-        VividButton(
+        const SizedBox(height: DaylightSpace.s16),
+        TactileButton(
           label: SelfCheckPanel.score,
-          expand: true,
+          icon: PhosphorBold.check,
           onPressed: () => widget.onScore(Set.of(_ticked)),
         ),
-        const SizedBox(height: BrandSpace.sm),
-        Text(
-          SelfCheckPanel.contentOnly,
-          textAlign: TextAlign.center,
-          style: BrandVividType.kicker,
+        const SizedBox(height: DaylightSpace.s12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              PhosphorBold.lockSimple,
+              size: DaylightSpace.s16,
+              color: DaylightColors.ink2,
+            ),
+            const SizedBox(width: DaylightSpace.s8),
+            Expanded(
+              child: Text(
+                SelfCheckPanel.contentOnly,
+                style: DaylightType.caption4.copyWith(
+                  color: DaylightColors.ink2,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -158,10 +166,8 @@ class _Heading extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    header: true,
-    child: Text(text, style: BrandType.label.copyWith(color: SlipInk.soft)),
-  );
+  Widget build(BuildContext context) =>
+      Semantics(header: true, child: Text(text, style: DaylightType.body1));
 }
 
 class _Listen extends StatelessWidget {
@@ -172,11 +178,12 @@ class _Listen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: BrandSpace.sm),
-    child: VividButton(
+    padding: const EdgeInsets.only(top: DaylightSpace.s8),
+    child: TactileButton(
       label: label,
-      primary: false,
-      expand: true,
+      icon: PhosphorFill.play,
+      tone: TactileTone.quiet,
+      compact: true,
       onPressed: () => unawaited(Future.sync(onPressed)),
     ),
   );
@@ -201,47 +208,53 @@ class TickRow extends StatelessWidget {
   static const double _border = 2;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: BrandSpace.sm),
-    child: Semantics(
-      checked: ticked,
-      label: text,
-      excludeSemantics: true,
-      child: Pressable(
+  Widget build(BuildContext context) {
+    final f = grade.floor;
+    return Padding(
+      padding: const EdgeInsets.only(top: DaylightSpace.s8),
+      child: Semantics(
+        checked: ticked,
         label: text,
+        excludeSemantics: true,
         onTap: onTap,
-        selected: ticked,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: BrandSpace.minTarget),
-          child: Row(
-            children: [
-              Container(
-                width: _box,
-                height: _box,
-                decoration: BoxDecoration(
-                  color: ticked ? BrandVivid.accent : null,
-                  borderRadius: BorderRadius.circular(BrandRadius.md),
-                  border: Border.all(
-                    color: ticked ? BrandVivid.accent : SlipInk.soft,
-                    width: _border,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            choiceTick();
+            onTap();
+          },
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: DaylightSize.hit),
+            child: Row(
+              children: [
+                AnimatedContainer(
+                  duration: DaylightMotion.press,
+                  curve: DaylightMotion.ease,
+                  width: _box,
+                  height: _box,
+                  decoration: BoxDecoration(
+                    color: ticked ? f.base : DaylightColors.raised,
+                    borderRadius: BorderRadius.circular(DaylightRadius.tag),
+                    border: Border.all(
+                      color: ticked ? f.base : DaylightColors.sand2,
+                      width: _border,
+                    ),
                   ),
+                  alignment: Alignment.center,
+                  child: ticked
+                      ? const PointMark(
+                          made: true,
+                          color: DaylightColors.raised,
+                        )
+                      : null,
                 ),
-                alignment: Alignment.center,
-                child: ticked
-                    ? PointMark(made: true, color: BrandVivid.onAccent)
-                    : null,
-              ),
-              const SizedBox(width: BrandSpace.md),
-              Expanded(
-                child: Text(
-                  text,
-                  style: BrandType.body.copyWith(color: SlipInk.text),
-                ),
-              ),
-            ],
+                const SizedBox(width: DaylightSpace.s12),
+                Expanded(child: Text(text, style: DaylightType.body5)),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

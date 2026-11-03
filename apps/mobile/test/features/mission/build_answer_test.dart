@@ -130,7 +130,7 @@ void main() {
       await rig.settleDossier();
 
       final note = ReasoningSlip.buildNote(scoreBuild(build.spec, placed));
-      expect(note, '1 PIECE OUT OF ORDER  ·  THE DECOY WENT IN');
+      expect(note, '1 piece out of order · the decoy went in');
       final noteText = find.text(note);
       await tester.ensureVisible(noteText);
       expect(noteText, findsOneWidget);

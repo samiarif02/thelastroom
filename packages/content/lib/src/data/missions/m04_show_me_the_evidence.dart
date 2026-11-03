@@ -13,7 +13,7 @@ const missionShowMeTheEvidence = Mission(
   id: 'm04_show_me_the_evidence',
   chapter: 1,
   number: 4,
-  title: 'Show Me the Evidence',
+  title: 'Show me the evidence',
   practises:
       'Backing a claim with a specific result: what you did, and what changed.',
   hinted: true,

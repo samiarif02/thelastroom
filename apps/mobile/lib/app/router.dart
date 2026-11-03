@@ -10,7 +10,9 @@ import '../features/mission/mission_screen.dart';
 import '../features/onboarding/home_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/progress/chapter_report_screen.dart';
+import '../features/progress/past_result_screen.dart';
 import '../features/progress/progress_screen.dart';
+import '../features/progression/floor_cleared_screen.dart';
 import '../features/recall/recall_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/title/wrong_floor_screen.dart';
@@ -38,21 +40,29 @@ abstract final class Routes {
 
   /// The Chapter 1 report (brief 24): after Mission 7, or from "Your file".
   static const String report = '$_towerPath/$_progress/$_report';
+
+  /// A played room's last result (brief 48), from Your file: `/tower/progress/room/4`.
+  static String result(int number) => '$_towerPath/$_progress/$_room/$number';
   static const String settings = '$_towerPath/$_settings';
   static const String character = '$_towerPath/$_character';
 
   /// The Recall Room (brief 21).
   static const String recall = '$_towerPath/$_recall';
 
+  /// Floor cleared (brief 46): the reward, the first time a floor's last room is finished.
+  static String floorCleared(int floor) => '$_towerPath/$_floor/$floor';
+
   /// A mission by campaign number: `/tower/mission/1`.
   static String mission(int number) => '$_towerPath/$_mission/$number';
 
   static const String _progress = 'progress';
   static const String _report = 'report';
+  static const String _room = 'room';
   static const String _settings = 'settings';
   static const String _character = 'character';
   static const String _mission = 'mission';
   static const String _recall = 'recall';
+  static const String _floor = 'floor';
 }
 
 /// Dev tools (`/dev/...`) exist in debug and profile builds only. In a release build this is a
@@ -83,6 +93,13 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
             path: Routes._report,
             builder: (context, state) => const ChapterReportScreen(),
           ),
+          GoRoute(
+            path: '${Routes._room}/:number',
+            builder: (context, state) => PastResultScreen(
+              // A bad number reaches the result's "not played" state, not a crash.
+              number: int.tryParse(state.pathParameters['number'] ?? '') ?? 0,
+            ),
+          ),
         ],
       ),
       GoRoute(
@@ -103,6 +120,12 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
       GoRoute(
         path: Routes._recall,
         builder: (context, state) => const RecallScreen(),
+      ),
+      GoRoute(
+        path: '${Routes._floor}/:floor',
+        builder: (context, state) => FloorClearedScreen(
+          floor: int.tryParse(state.pathParameters['floor'] ?? '') ?? 1,
+        ),
       ),
     ],
   ),

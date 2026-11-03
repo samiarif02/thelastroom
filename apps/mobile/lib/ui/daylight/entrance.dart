@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
@@ -38,6 +40,9 @@ class _EntranceState extends State<Entrance>
   );
   bool _started = false;
 
+  /// The stagger before this one starts; a timer, so leaving the screen first cancels it.
+  Timer? _wait;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -48,13 +53,14 @@ class _EntranceState extends State<Entrance>
       _c.forward();
       return;
     }
-    Future<void>.delayed(Entrance.delayOf(widget.index), () {
+    _wait = Timer(Entrance.delayOf(widget.index), () {
       if (mounted) _c.forward();
     });
   }
 
   @override
   void dispose() {
+    _wait?.cancel();
     _c.dispose();
     super.dispose();
   }

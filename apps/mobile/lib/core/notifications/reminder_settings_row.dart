@@ -2,7 +2,7 @@ import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
 import 'reminder_outlook.dart';
 import 'reminder_primer.dart';
 import 'reminder_settings.dart';
@@ -14,8 +14,8 @@ import 'reminders.dart';
 class ReminderSettingsRow extends ConsumerStatefulWidget {
   const ReminderSettingsRow({super.key});
 
-  static const String heading = 'REMINDERS';
-  static const String label = 'Reminders';
+  static const String heading = 'Reminders';
+  static const String label = 'Send me reminders';
   static const String line = 'At most once a day, never after 9 pm.';
   static const String denied =
       'Your phone is blocking them. Allow notifications for The Last Room in its settings.';
@@ -104,45 +104,51 @@ class _ReminderSettingsRowState extends ConsumerState<ReminderSettingsRow> {
           header: true,
           child: Text(
             ReminderSettingsRow.heading,
-            style: BrandVividType.kicker,
+            style: DaylightType.heading6,
           ),
         ),
-        const SizedBox(height: BrandSpace.sm),
+        const SizedBox(height: DaylightSpace.s8),
         if (supported) ...[
-          VividToggle(
+          SwitchRow(
             label: ReminderSettingsRow.label,
             value: settings.enabled,
             onChanged: _change,
           ),
-          const SizedBox(height: BrandSpace.xs),
+          const SizedBox(height: DaylightSpace.s4),
         ],
         // Empty for the moment it takes to plan; the line keeps its place so nothing jumps.
         Semantics(
           liveRegion: true,
           child: Text(
             outlook == null ? '' : nextReminderLine(outlook, now),
-            style: BrandVividType.row,
+            style: DaylightType.body2,
           ),
         ),
         if (supported) ...[
-          const SizedBox(height: BrandSpace.xs),
+          const SizedBox(height: DaylightSpace.s4),
           Text(
             _denied ? ReminderSettingsRow.denied : ReminderSettingsRow.line,
-            style: BrandVividType.body,
+            style: DaylightType.body6.copyWith(
+              color: _denied ? DaylightColors.trap : DaylightColors.ink2,
+            ),
           ),
         ],
-        const SizedBox(height: BrandSpace.md),
-        VividButton(
+        const SizedBox(height: DaylightSpace.s16),
+        TactileButton(
           label: ReminderSettingsRow.test,
-          primary: false,
-          expand: true,
+          icon: PhosphorBold.bell,
+          tone: TactileTone.quiet,
+          compact: true,
           onPressed: _sending ? null : _sendTest,
         ),
         if (note != null) ...[
-          const SizedBox(height: BrandSpace.sm),
+          const SizedBox(height: DaylightSpace.s12),
           Semantics(
             liveRegion: true,
-            child: Text(note, style: BrandVividType.body),
+            child: Text(
+              note,
+              style: DaylightType.body6.copyWith(color: DaylightColors.ink2),
+            ),
           ),
         ],
       ],

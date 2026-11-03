@@ -7,7 +7,6 @@ import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
 import 'package:the_last_room/features/debrief/ai_score.dart';
 import 'package:the_last_room/features/debrief/ai_score_store.dart';
-import 'package:the_last_room/features/debrief/ai_verdict_cards.dart';
 import 'package:the_last_room/features/debrief/debrief_view.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/scene/epilogue_scene.dart';
@@ -17,8 +16,11 @@ import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
 import 'package:the_last_room/features/progress/chapter_report.dart';
 import 'package:the_last_room/features/progress/chapter_report_screen.dart';
 import 'package:the_last_room/features/progress/file_trouble.dart';
+import 'package:the_last_room/features/progress/progress_screen.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
 import 'package:the_last_room/features/voice/voice_player.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart' show TactileButton;
+import 'package:the_last_room/ui/daylight/daylight_radar.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
 import '../mission/mission_harness.dart';
@@ -95,16 +97,22 @@ void main() {
         );
         await rig.boot(Routes.progress, size: const Size(411, 914));
         await rig.run(const Duration(seconds: 2));
-        final aiLabel = find.text(ScoreSourceLabel.aiLabel.toUpperCase());
-        final offline = find.text(ScoreSourceLabel.offlineLabel.toUpperCase());
+        final aiLabel = find.text(ProgressScreen.aiScored);
+        final offline = find.text(ProgressScreen.offline);
         await tester.ensureVisible(aiLabel);
         expect(aiLabel, findsOneWidget);
+        expect(find.text('77'), findsOneWidget);
+        await tester.ensureVisible(offline);
+        expect(offline, findsOneWidget);
+        // The room's last result says who scored it, with the AI's reason.
+        await tester.ensureVisible(aiLabel);
+        await tester.pump();
+        await tester.tap(aiLabel);
+        await rig.until(find.byType(Dossier));
         expect(
           find.text('A clear answer with one concrete project.'),
           findsOneWidget,
         );
-        await tester.ensureVisible(offline);
-        expect(offline, findsOneWidget);
       },
     );
 
@@ -125,8 +133,8 @@ void main() {
       );
       await rig.boot(Routes.progress, size: const Size(411, 914));
       await rig.run(const Duration(seconds: 2));
-      expect(find.text(ScoreSourceLabel.aiLabel.toUpperCase()), findsNothing);
-      final offline = find.text(ScoreSourceLabel.offlineLabel.toUpperCase());
+      expect(find.text(ProgressScreen.aiScored), findsNothing);
+      final offline = find.text(ProgressScreen.offline);
       await tester.ensureVisible(offline);
       expect(offline, findsOneWidget);
     });
@@ -174,7 +182,8 @@ void main() {
           ),
         );
         expect(find.text(words), findsWidgets);
-        expect(find.byType(SkillRadar), findsNWidgets(2));
+        // One radar, the first try drawn under the review.
+        expect(find.byType(DaylightRadar), findsOneWidget);
         for (final d in Dimension.values) {
           expect(
             find.text('${then.dimensions[d]} → ${now.dimensions[d]}'),
@@ -245,7 +254,7 @@ void main() {
       (tester) async {
         final rig = MissionRig(tester);
         await rig.boot(Routes.mission(3));
-        await rig.until(find.text('THIS ROOM IS STILL LOCKED'));
+        await rig.until(find.text('This room is still locked'));
         expect(
           find.text('Finish “${missions[1].title}” to open this room.'),
           findsOneWidget,
@@ -300,12 +309,13 @@ void main() {
         );
         await rig.until(done);
         await tester.tap(done);
+        await rig.throughFloorCleared();
         await rig.until(find.text(ChapterReportScreen.honest));
       },
     );
 
     testWidgets(
-      'the leave sheet is in the vivid look, and Android\'s back opens it',
+      'the leave sheet is in the Daylight look, and Android\'s back opens it',
       (tester) async {
         final rig = MissionRig(tester);
         await rig.boot(Routes.mission(1));
@@ -313,7 +323,13 @@ void main() {
         await tester.binding.handlePopRoute();
         await tester.pump();
         expect(find.byType(LeaveSheet), findsOneWidget);
-        expect(find.byType(VividButton), findsNWidgets(2));
+        expect(
+          find.descendant(
+            of: find.byType(LeaveSheet),
+            matching: find.byType(TactileButton),
+          ),
+          findsNWidgets(2),
+        );
         await tester.tap(find.text(LeaveSheet.resume));
         await tester.pump();
         expect(find.byType(LeaveSheet), findsNothing);

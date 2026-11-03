@@ -11,10 +11,11 @@ import 'package:the_last_room/features/onboarding/onboarding_copy.dart';
 import 'package:the_last_room/features/onboarding/onboarding_screen.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
 import 'package:the_last_room/features/settings/settings_screen.dart';
-import 'package:the_last_room/features/tower/settings_gear.dart';
 import 'package:the_last_room/features/tower/tower_hero.dart';
 import 'package:the_last_room/features/tower/tower_rooms.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart'
+    show FloatingTabBar;
 
 import '../features/mission/mission_harness.dart';
 
@@ -68,7 +69,12 @@ void main() {
 
   testWidgets('back from your file lands on the tower', (tester) async {
     final rig = await atTower(tester);
-    await tester.tap(find.text(TowerScreen.progress));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(FloatingTabBar),
+        matching: find.text(TowerScreen.progress),
+      ),
+    );
     await rig.until(find.byType(ProgressScreen));
     await back(rig);
     expect(find.byType(ProgressScreen), findsNothing);
@@ -76,11 +82,11 @@ void main() {
     expect(exits, 0);
   });
 
-  testWidgets('the gear opens settings, and back lands on the tower', (
+  testWidgets('"You" opens settings, and back lands on the tower', (
     tester,
   ) async {
     final rig = await atTower(tester);
-    await tester.tap(find.bySemanticsLabel(SettingsGear.label));
+    await tester.tap(find.text(TowerScreen.settingsTab));
     await rig.until(find.byType(SettingsScreen));
     await back(rig);
     expect(find.byType(SettingsScreen), findsNothing);

@@ -173,3 +173,15 @@ class _NoiseTiles extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+/// The film stock (grain only, its vignette left to each scene) on a screen Daylight leaves
+/// alone: the debrief behind the kept Candidate assessment, the file, the report, the title
+/// and onboarding look exactly as they did when the grain lay over the whole app.
+class FilmGrain extends StatelessWidget {
+  const FilmGrain({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => FilmOverlay(vignette: 0, child: child);
+}

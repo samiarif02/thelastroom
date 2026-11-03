@@ -1,97 +1,104 @@
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../ui/film_kit.dart';
-import '../../debrief/red_pen_slip.dart';
+import '../../../ui/daylight/daylight_kit.dart';
 
-/// The voice toggle in the corner of a voice mission: the interviewers' lines are spoken, or
-/// only subtitled (subtitles are always on). One labelled 48 pt target.
+/// The voice toggle in the top bar of a voice mission: the interviewers' lines are spoken, or
+/// only subtitled (the bubble is always on). A raised tag-sized button in a 48 target.
 class MuteControl extends StatelessWidget {
   const MuteControl({super.key, required this.muted, required this.onPressed});
 
   final bool muted;
   final VoidCallback onPressed;
 
-  static const String on = 'VOICE ON';
-  static const String off = 'VOICE OFF';
+  static const String on = 'Voice on';
+  static const String off = 'Voice off';
   static const String muteLabel = 'Mute the interviewer';
   static const String unmuteLabel = 'Let the interviewer speak';
-  static const double _alpha = 0.7;
+  static const double _icon = 16;
 
   @override
-  Widget build(BuildContext context) => Pressable(
-    label: muted ? unmuteLabel : muteLabel,
-    onTap: onPressed,
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: BrandSpace.minTarget),
-      child: Center(
-        widthFactor: 1,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: BrandVivid.night.withValues(alpha: _alpha),
-            borderRadius: BorderRadius.circular(BrandRadius.pill),
-            border: Border.all(
-              color: muted ? BrandVivid.hairline() : BrandVivid.accent,
+  Widget build(BuildContext context) {
+    final f = ChapterTint.floorOf(context);
+    return Tactile(
+      label: muted ? unmuteLabel : muteLabel,
+      onTap: onPressed,
+      style: TactileStyle(
+        face: DaylightColors.raised,
+        edge: DaylightColors.sand2,
+        radius: BorderRadius.circular(DaylightRadius.inner),
+        depth: DaylightSize.edgeSmall,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: DaylightSpace.s12,
+          vertical: DaylightSpace.s8,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              muted ? PhosphorBold.ear : PhosphorBold.speakerHigh,
+              size: _icon,
+              color: muted ? DaylightColors.ink2 : f.deep,
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: BrandSpace.md,
-              vertical: BrandSpace.sm,
-            ),
-            child: Text(
+            const SizedBox(width: DaylightSpace.s4),
+            Text(
               muted ? off : on,
-              style: BrandVividType.kicker.copyWith(
-                color: muted ? BrandVivid.onDeepSoft : BrandVivid.accent,
+              style: DaylightType.caption3.copyWith(
+                color: muted ? DaylightColors.ink2 : f.deep,
               ),
             ),
-          ),
+          ],
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
-/// While the recruiter listens to the recording (at most `VoiceScorer.timeout`).
+/// While the recruiter listens to the recording (at most `VoiceScorer.timeout`): the
+/// interviewer in an arch, thinking (the delay reads as thought, never a spinner).
 class ListeningCard extends StatelessWidget {
-  const ListeningCard({super.key, this.grade = ChapterGrade.lobby});
+  const ListeningCard({
+    super.key,
+    this.grade = ChapterGrade.lobby,
+    this.person = CastPeople.marcus,
+  });
 
   final ChapterGrade grade;
+  final CastPerson person;
 
   static const String title = 'The recruiter is listening…';
   static const String line =
       'Your answer is being transcribed and scored on what you said. If it takes too long, '
       "you'll tick your own points instead.";
 
+  static const double _arch = 120;
+  static const double _archHeight = 148;
+
   @override
   Widget build(BuildContext context) => Semantics(
     liveRegion: true,
     label: title,
-    child: PaperSlip(
-      grade: grade,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            width: BrandSpace.xxl,
-            child: ExcludeSemantics(child: BankersLamp()),
-          ),
-          const SizedBox(height: BrandSpace.md),
-          ExcludeSemantics(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: BrandVividType.title,
-            ),
-          ),
-          const SizedBox(height: BrandSpace.sm),
-          Text(
-            line,
-            textAlign: TextAlign.center,
-            style: BrandType.body.copyWith(color: SlipInk.text),
-          ),
-        ],
-      ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ArchPortrait(
+          person: person,
+          expression: CastExpression.thinking,
+          width: _arch,
+          height: _archHeight,
+          ground: grade.floor.soft,
+        ),
+        const SizedBox(height: DaylightSpace.s24),
+        ExcludeSemantics(child: Text(title, style: DaylightType.heading5)),
+        const SizedBox(height: DaylightSpace.s8),
+        Text(
+          line,
+          style: DaylightType.body6.copyWith(color: DaylightColors.ink2),
+        ),
+      ],
     ),
   );
 }
@@ -112,18 +119,24 @@ class SpokenAloudPanel extends StatelessWidget {
   static const String done = 'Done';
 
   @override
-  Widget build(BuildContext context) => PaperSlip(
-    grade: grade,
+  Widget build(BuildContext context) => DaylightPanel(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          line,
-          textAlign: TextAlign.center,
-          style: BrandType.body.copyWith(color: SlipInk.text),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              PhosphorBold.microphoneSlash,
+              size: DaylightSpace.s24,
+              color: grade.floor.deep,
+            ),
+            const SizedBox(width: DaylightSpace.s12),
+            Expanded(child: Text(line, style: DaylightType.body5)),
+          ],
         ),
-        const SizedBox(height: BrandSpace.md),
-        VividButton(label: done, expand: true, onPressed: onDone),
+        const SizedBox(height: DaylightSpace.s16),
+        TactileButton(label: done, icon: PhosphorBold.check, onPressed: onDone),
       ],
     ),
   );

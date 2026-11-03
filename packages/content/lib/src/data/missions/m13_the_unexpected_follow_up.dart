@@ -14,7 +14,7 @@ const missionTheUnexpectedFollowUp = Mission(
   id: 'm13_the_unexpected_follow_up',
   chapter: 2,
   number: 13,
-  title: 'The Unexpected Follow-Up',
+  title: 'The unexpected follow-up',
   practises: "Staying clear when a follow-up comes from an angle you didn't prepare for.",
   answerMode: AnswerMode.voice,
   hinted: false,

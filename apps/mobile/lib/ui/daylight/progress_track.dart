@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
@@ -66,16 +68,19 @@ class _GrowState extends State<_Grow> with SingleTickerProviderStateMixin {
     duration: DaylightMotion.move,
   );
 
+  Timer? _wait;
+
   @override
   void initState() {
     super.initState();
-    Future<void>.delayed(widget.delay, () {
+    _wait = Timer(widget.delay, () {
       if (mounted) _c.forward();
     });
   }
 
   @override
   void dispose() {
+    _wait?.cancel();
     _c.dispose();
     super.dispose();
   }

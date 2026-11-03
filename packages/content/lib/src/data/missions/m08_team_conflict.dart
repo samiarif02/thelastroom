@@ -15,7 +15,7 @@ const missionTeamConflict = Mission(
   id: 'm08_team_conflict',
   chapter: 2,
   number: 8,
-  title: 'Team Conflict',
+  title: 'Team conflict',
   practises: 'Describing a disagreement fairly: their view, your view, and how it was settled.',
   answerMode: AnswerMode.voice,
   hinted: false,

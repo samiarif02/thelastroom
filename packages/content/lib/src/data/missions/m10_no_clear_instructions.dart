@@ -13,7 +13,7 @@ const missionNoClearInstructions = Mission(
   id: 'm10_no_clear_instructions',
   chapter: 2,
   number: 10,
-  title: 'No Clear Instructions',
+  title: 'No clear instructions',
   practises: 'Explaining how you get started when the brief is vague: ask, assume, then check.',
   answerMode: AnswerMode.voice,
   hinted: false,

@@ -76,7 +76,27 @@ enum AnalyticsEvent {
   welcomeBackShown('welcome_back_shown'),
 
   /// The welcome-back card goes away: its button was followed, or it was dismissed.
-  welcomeBackClosed('welcome_back_closed');
+  welcomeBackClosed('welcome_back_closed'),
+
+  /// A session closes the player's weekly goal (the ring on the tower fills): how many sessions
+  /// the week now has, and the goal.
+  weeklyGoalClosed('weekly_goal_closed'),
+
+  /// A Recall Room note is shown (the taped note of the trap that caught the player): its kind
+  /// and its Leitner box. Never the note's text.
+  recallNoteOpened('recall_note_opened'),
+
+  /// A floor of the tower is opened as a sheet (its rooms, its interviewers, how it's
+  /// answered), open or still locked: the player looking ahead.
+  floorPreviewed('floor_previewed'),
+
+  /// A first-time tip is shown (one short line from the cast, once, the first time the player
+  /// reaches that moment): which tip, and whether "Show tips again" brought it back.
+  tipShown('tip_shown'),
+
+  /// A first-time tip is put away: its target was tapped (and did its normal action), or it
+  /// was dismissed ("Got it", or a tap anywhere else).
+  tipDone('tip_done');
 
   const AnalyticsEvent(this.wireName);
 

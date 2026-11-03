@@ -11,6 +11,7 @@ import 'package:the_last_room/core/audio/cue.dart';
 import 'package:the_last_room/core/audio/dev/sound_board_screen.dart';
 import 'package:the_last_room/core/logging/log.dart';
 import 'package:the_last_room/features/settings/audio/audio_settings_section.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart' show SwitchRow;
 
 import '../../../core/audio/fake_audio_engine.dart';
 
@@ -60,12 +61,12 @@ void main() {
     await pump(tester, const AudioSettingsSection());
     expect(find.text('50%'), findsOneWidget);
     expect(find.text('80%'), findsOneWidget);
-    expect(find.text('ON'), findsOneWidget);
+    expect(find.text(SwitchRow.on), findsOneWidget);
 
     await tester.tap(find.text(AudioSettingsSection.masterLabel));
     await tester.pump();
     expect(container.read(audioSettingsProvider).enabled, isFalse);
-    expect(find.text('OFF'), findsOneWidget);
+    expect(find.text(SwitchRow.off), findsOneWidget);
   });
 
   testWidgets('dragging a volume to the end sets it to 100%', (tester) async {

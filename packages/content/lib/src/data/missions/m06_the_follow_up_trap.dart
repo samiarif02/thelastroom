@@ -15,7 +15,7 @@ const missionTheFollowUpTrap = Mission(
   id: 'm06_the_follow_up_trap',
   chapter: 1,
   number: 6,
-  title: 'The Follow-Up Trap',
+  title: 'The follow-up trap',
   practises:
       'Holding your ground when the interviewer challenges something you said.',
   hinted: true,

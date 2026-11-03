@@ -25,12 +25,16 @@ bool welcomesBack(int? away) => away != null && away >= 1;
 /// Where the card's one button goes.
 enum WelcomeBackTarget { recall, mission, progress }
 
+/// What a "waiting" line is about, so the card can give it its icon.
+enum WaitingKind { recall, room, week }
+
 /// What the card says and where its button goes, in the voice of the next room's interviewer.
 class WelcomeBack {
   const WelcomeBack({
     required this.interviewerId,
     required this.waiting,
     required this.target,
+    this.kinds = const [],
     this.missionNumber,
   });
 
@@ -38,6 +42,9 @@ class WelcomeBack {
 
   /// What's waiting, one line each: cards due, the next room, the week so far.
   final List<String> waiting;
+
+  /// What each of [waiting] is about, line for line.
+  final List<WaitingKind> kinds;
   final WelcomeBackTarget target;
 
   /// The room the button starts, when [target] is a mission.
@@ -46,7 +53,7 @@ class WelcomeBack {
   String get speaker =>
       ReminderCopy.name(interviewerId) ?? ReminderCopy.company;
 
-  String get kicker => 'WELCOME BACK · ${speaker.toUpperCase()}';
+  String get kicker => 'Welcome back · $speaker';
 
   /// Glad to see them; never a count of the days they were gone, never a guilt trip.
   String get greeting => switch (interviewerId) {
@@ -58,7 +65,7 @@ class WelcomeBack {
 
   String get action => switch (target) {
     WelcomeBackTarget.recall => 'Open the Recall Room',
-    WelcomeBackTarget.mission => 'Start Room $missionNumber',
+    WelcomeBackTarget.mission => 'Start room $missionNumber',
     WelcomeBackTarget.progress => 'See your file',
   };
 }
@@ -81,6 +88,11 @@ WelcomeBack welcomeBackFor({
             : 'Every room is open. Room ${mission.number}, “${mission.title}”, '
                   'is your best one to beat.',
       ProgressionCard.weekLine(progress.sessionsThisWeek, progress.weeklyGoal),
+    ],
+    kinds: [
+      if (recallDue > 0) WaitingKind.recall,
+      if (next != null && mission != null) WaitingKind.room,
+      WaitingKind.week,
     ],
     target: recallDue > 0
         ? WelcomeBackTarget.recall

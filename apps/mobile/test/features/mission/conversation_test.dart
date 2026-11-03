@@ -1,3 +1,4 @@
+import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
@@ -10,9 +11,11 @@ import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
+import 'package:the_last_room/features/mission/scene/mission_card.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
-import 'package:the_last_room/features/mission/widgets/trust_meter.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart'
+    show CastFigure, FeedbackSheet, TrustPips;
 import 'package:the_last_room/ui/film_kit.dart';
 
 import 'mission_harness.dart';
@@ -50,9 +53,8 @@ void main() {
     return rig;
   }
 
-  InterviewerExpression face(MissionRig rig) => rig.tester
-      .widget<FriendlyInterviewer>(find.byType(FriendlyInterviewer))
-      .expression;
+  CastExpression face(MissionRig rig) =>
+      rig.tester.widget<CastFigure>(find.byType(CastFigure).first).expression;
 
   group('one tap, no scrolling', () {
     testWidgets('a single tap says the line once the change window passes', (
@@ -120,18 +122,28 @@ void main() {
         final before = rig.state(1).trust;
         await rig.pick(strongest, guess: true);
         expect(rig.state(1).plays.single.pick(openBeat).guessed, isTrue);
-        expect(find.text(GuessCue.text.toUpperCase()), findsOneWidget);
+        expect(find.text(GuessCue.text), findsOneWidget);
         expect(rig.state(1).trust, lessThan(before));
         final line = openBeat.reaction!.guessed.addressedTo(
           rig.state(1).playerName,
         );
         await rig.until(find.text(line.text));
-        expect(face(rig), InterviewerExpression.hmm);
-        // She still asks why.
+        expect(face(rig), CastExpression.hmm);
+        // She still asks why, and the reasons come: the why step never sticks after a guess
+        // (the owner's "Why that example?" on the realme: her line typed under the feedback
+        // sheet, finished unheard, and the reasons never came).
         await rig.until(
           find.text(
             openBeat.why!.line.addressedTo(rig.state(1).playerName).text,
           ),
+        );
+        // Past the sheet's hold, the step is waiting on the player: the reasons are there.
+        await rig.run(MissionPlayer.reactionHold + const Duration(seconds: 2));
+        expect(find.byType(FeedbackSheet), findsNothing);
+        expect(find.text(reasonLabel), findsOneWidget);
+        expect(
+          find.widgetWithText(ChoiceCard, openBeat.why!.reasons.first.text),
+          findsOneWidget,
         );
       },
     );
@@ -163,7 +175,7 @@ void main() {
         expect(find.byType(CleanRunSlip), findsNothing);
         expect(find.byType(ReasoningSlip), findsOneWidget);
         expect(
-          find.textContaining('GUESSED IN', findRichText: true),
+          find.textContaining('Guessed in', findRichText: true),
           findsNWidgets(mission.beats.length),
         );
       },
@@ -196,7 +208,7 @@ void main() {
       await rig.until(
         find.text(openBeat.reaction!.strong.addressedTo(name).text),
       );
-      expect(face(rig), InterviewerExpression.smile);
+      expect(face(rig), CastExpression.smile);
     });
 
     testWidgets('the right line for the wrong reason lands as weak', (
@@ -209,8 +221,8 @@ void main() {
         find.text(openBeat.reaction!.weak.addressedTo(name).text),
       );
       expect(rig.state(1).plays.single.pick(openBeat).reason!.sound, isFalse);
-      expect(face(rig), InterviewerExpression.thinking);
-      expect(find.byType(TrustMeter), findsOneWidget);
+      expect(face(rig), CastExpression.hmm);
+      expect(find.byType(TrustPips), findsOneWidget);
     });
   });
 
@@ -271,7 +283,7 @@ void main() {
       await rig.boot(Routes.mission(1), size: realme8);
       await rig.until(find.text(ResumeSheet.title));
       await tester.tap(find.text(ResumeSheet.restart));
-      await rig.until(find.byType(ChapterTitleCard));
+      await rig.until(find.byType(MissionCard));
       expect(await rig.resume.load(mission.id), isNull);
       expect(rig.state(1).plays, isEmpty);
     });
