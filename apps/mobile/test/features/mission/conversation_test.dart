@@ -175,7 +175,7 @@ void main() {
         expect(find.byType(CleanRunSlip), findsNothing);
         expect(find.byType(ReasoningSlip), findsOneWidget);
         expect(
-          find.textContaining('GUESSED IN', findRichText: true),
+          find.textContaining('Guessed in', findRichText: true),
           findsNWidgets(mission.beats.length),
         );
       },

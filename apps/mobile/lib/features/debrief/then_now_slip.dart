@@ -24,36 +24,33 @@ class ThenNowSlip extends StatelessWidget {
   /// The review's number, for the heading.
   final int nowMission;
 
-  static const String heading = 'THEN / NOW';
-  static const String thenHeading = 'THEN · MISSION 1, IN YOUR OWN WORDS';
+  static const String heading = 'Then / now';
+  static const String thenHeading = 'Then · room 1, in your own words';
   static String nowHeading(int mission) => 'NOW · MISSION $mission';
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: SlipInk.soft);
-    final quote = BrandType.choice.copyWith(
-      color: SlipInk.text,
-      fontStyle: FontStyle.italic,
-    );
+    final soft = SlipType.label.copyWith(color: SlipInk.soft);
+    final quote = SlipType.quote.copyWith(color: SlipInk.text);
     return PaperSlip(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Semantics(header: true, child: Text(heading, style: soft)),
-          const SizedBox(height: BrandSpace.md),
+          const SizedBox(height: DaylightSpace.s16),
           Text(thenHeading, style: soft),
-          const SizedBox(height: BrandSpace.xs),
+          const SizedBox(height: DaylightSpace.s4),
           Text('“$then”', style: quote),
-          const SizedBox(height: BrandSpace.md),
-          DecoratedBox(
+          const SizedBox(height: DaylightSpace.s16),
+          const DecoratedBox(
             decoration: BoxDecoration(
               border: Border(top: BorderSide(color: SlipInk.soft)),
             ),
-            child: const SizedBox(width: double.infinity),
+            child: SizedBox(width: double.infinity),
           ),
-          const SizedBox(height: BrandSpace.md),
+          const SizedBox(height: DaylightSpace.s16),
           Text(nowHeading(nowMission), style: soft),
-          const SizedBox(height: BrandSpace.xs),
+          const SizedBox(height: DaylightSpace.s4),
           Text('“$now”', style: quote),
         ],
       ),

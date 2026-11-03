@@ -611,27 +611,24 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     final grade = mission.grade;
 
     if (_stage == SceneStage.debrief && game.score != null) {
-      // The Candidate assessment, exactly as it was (the owner's rule): its own ground and
-      // the film grain it always wore.
-      return FilmGrain(
-        child: DebriefView(
-          mission: mission,
-          score: game.score!,
-          trust: game.trust,
-          firstTry: game.firstTry,
-          reasoning: reasoningOf(mission, game.plays),
-          baselineDraft: game.baselineDraft,
-          // The answer for the AI recruiter (brief 22); the dossier falls back by itself.
-          scoreRequest: game.followUp != null && game.reply != null
-              ? ScoreRequest(
-                  mission: mission,
-                  plays: game.plays,
-                  followUp: game.followUp!,
-                  reply: game.reply!,
-                )
-              : null,
-          onContinue: _afterDebrief,
-        ),
+      // The Candidate assessment, exactly as it was (the owner's rule), on Daylight's ground.
+      return DebriefView(
+        mission: mission,
+        score: game.score!,
+        trust: game.trust,
+        firstTry: game.firstTry,
+        reasoning: reasoningOf(mission, game.plays),
+        baselineDraft: game.baselineDraft,
+        // The answer for the AI recruiter (brief 22); the dossier falls back by itself.
+        scoreRequest: game.followUp != null && game.reply != null
+            ? ScoreRequest(
+                mission: mission,
+                plays: game.plays,
+                followUp: game.followUp!,
+                reply: game.reply!,
+              )
+            : null,
+        onContinue: _afterDebrief,
       );
     }
     if (_stage == SceneStage.epilogue) {

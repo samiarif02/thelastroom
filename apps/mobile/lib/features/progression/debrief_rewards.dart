@@ -10,9 +10,9 @@ import '../../app/providers.dart';
 import '../../core/analytics/analytics_event.dart';
 import '../../core/analytics/event_value.dart';
 import '../../core/audio/game_sounds.dart';
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
 import 'progression.dart';
-import 'skill_badges.dart';
+import 'skill_badges.dart' show SkillCopy;
 
 /// The debrief's reward moment (brief 32): "+N XP" for the attempt, and, the first time a skill
 /// is demonstrated, a "Skill unlocked" card with its sound and `skill_unlocked`. Each skill is
@@ -35,7 +35,7 @@ class DebriefRewards extends ConsumerStatefulWidget {
   final bool ready;
 
   static String xpGained(int xp) => '+$xp XP';
-  static const String unlockedKicker = 'SKILL UNLOCKED';
+  static const String unlockedKicker = 'Skill unlocked';
 
   @override
   ConsumerState<DebriefRewards> createState() => _DebriefRewardsState();
@@ -70,58 +70,61 @@ class _DebriefRewardsState extends ConsumerState<DebriefRewards> {
         if (mounted && _celebrating == null) setState(() => _celebrate(fresh));
       });
     }
-    final grade = widget.grade;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
         Align(
           alignment: Alignment.centerLeft,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: BrandVivid.accent,
-              borderRadius: BorderRadius.circular(BrandRadius.card),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: BrandSpace.md,
-                vertical: BrandSpace.xs,
-              ),
-              child: Text(
-                DebriefRewards.xpGained(p.lastXp),
-                style: BrandVividType.row.copyWith(color: BrandVivid.onAccent),
-              ),
-            ),
+          child: Tag(
+            label: DebriefRewards.xpGained(p.lastXp),
+            icon: PhosphorFill.lightning,
+            tone: TagTone.honeySolid,
           ),
         ),
         for (final s in _celebrating ?? const <Skill>{}) ...[
-          const SizedBox(height: BrandSpace.md),
-          StaggeredEntrance(
-            index: 0,
+          const SizedBox(height: DaylightSpace.s16),
+          Entrance(
             child: Semantics(
               liveRegion: true,
-              child: VividPanel(
-                colors: grade.cardGradient,
-                glow: BrandVivid.accent,
+              child: DaylightPanel(
+                color: DaylightColors.honeyTint,
+                edge: DaylightColors.honey,
                 child: Row(
                   children: [
-                    SkillBadge(skill: s, earned: true, size: _badge),
-                    const SizedBox(width: BrandSpace.md),
+                    // The skill's enamel arch, as on the tower's shelf.
+                    SizedBox(
+                      width: _badge,
+                      height: _badge * _aspect,
+                      child: ArchFrame(
+                        ground: widget.grade.floor.deep,
+                        border: _rim,
+                        borderColor: DaylightColors.honey,
+                        child: Icon(
+                          SkillCopy.icon(s),
+                          size: _badge * _glyph,
+                          color: DaylightColors.honey,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: DaylightSpace.s12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             DebriefRewards.unlockedKicker,
-                            style: BrandVividType.kicker.copyWith(
-                              color: BrandVivid.accent,
+                            style: DaylightType.caption3.copyWith(
+                              color: DaylightColors.honeyInk,
                             ),
                           ),
-                          const SizedBox(height: BrandSpace.xs),
-                          Text(SkillCopy.name(s), style: BrandVividType.title),
+                          const SizedBox(height: DaylightSpace.s4),
+                          Text(SkillCopy.name(s), style: DaylightType.heading6),
                           Text(
                             SkillCopy.meaning(s),
-                            style: BrandVividType.body,
+                            style: DaylightType.body5.copyWith(
+                              color: DaylightColors.ink2,
+                            ),
                           ),
                         ],
                       ),
@@ -136,5 +139,8 @@ class _DebriefRewardsState extends ConsumerState<DebriefRewards> {
     );
   }
 
-  static const double _badge = 56;
+  static const double _badge = 48;
+  static const double _aspect = 76 / 64;
+  static const double _rim = 3;
+  static const double _glyph = 0.44;
 }

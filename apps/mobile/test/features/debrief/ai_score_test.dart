@@ -291,10 +291,7 @@ void main() {
         await rig.until(find.byType(DeliberatingCard));
         expect(find.byType(Dossier), findsNothing);
         await rig.until(find.byType(Dossier));
-        expect(
-          find.text(ScoreSourceLabel.aiLabel.toUpperCase()),
-          findsOneWidget,
-        );
+        expect(find.text(ScoreSourceLabel.aiLabel), findsOneWidget);
         final dossier = tester.widget<Dossier>(find.byType(Dossier));
         expect(dossier.total, 74);
         expect(dossier.scores.map((s) => s.value), [85, 70, 60, 80]);
@@ -323,10 +320,7 @@ void main() {
           find.byType(Dossier),
           timeout: AiScorer.timeout + const Duration(seconds: 3),
         );
-        expect(
-          find.text(ScoreSourceLabel.offlineLabel.toUpperCase()),
-          findsOneWidget,
-        );
+        expect(find.text(ScoreSourceLabel.offlineLabel), findsOneWidget);
         final dossier = tester.widget<Dossier>(find.byType(Dossier));
         expect(dossier.total, rig.state(1).score!.total);
         expect(
@@ -347,11 +341,11 @@ void main() {
           );
         final rig = await playToDebrief(tester, _scorer(backend));
         await rig.until(
-          find.text(ScoreSourceLabel.offlineLabel.toUpperCase()),
+          find.text(ScoreSourceLabel.offlineLabel),
           timeout: AiScorer.timeout + const Duration(seconds: 3),
         );
         await rig.until(
-          find.text(ScoreSourceLabel.aiLabel.toUpperCase()),
+          find.text(ScoreSourceLabel.aiLabel),
           timeout: const Duration(seconds: 10),
         );
         expect(tester.widget<Dossier>(find.byType(Dossier)).total, 74);
@@ -369,10 +363,7 @@ void main() {
         final rig = await playToDebrief(tester, null);
         await rig.until(find.byType(Dossier));
         expect(find.byType(DeliberatingCard), findsNothing);
-        expect(
-          find.text(ScoreSourceLabel.offlineLabel.toUpperCase()),
-          findsOneWidget,
-        );
+        expect(find.text(ScoreSourceLabel.offlineLabel), findsOneWidget);
         expect(rig.analytics.count(AnalyticsEvent.aiScoreRequested), 0);
         expect(
           rig.analytics.only(AnalyticsEvent.aiScoreFallback).wire['reason'],
@@ -383,7 +374,7 @@ void main() {
     );
 
     Future<void> openBasis(MissionRig rig) async {
-      final open = find.text(ScoringBasisSheet.open.toUpperCase());
+      final open = find.text(ScoringBasisSheet.open);
       final button = open.evaluate().isEmpty
           ? find.text(ScoringBasisSheet.open)
           : open;

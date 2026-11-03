@@ -18,33 +18,30 @@ class FirstTrySlip extends StatelessWidget {
   /// The opening line that scores best in this mission.
   final String stronger;
 
-  static const String yours = 'YOUR FIRST TRY';
-  static const String strongerHeading = 'A STRONGER VERSION';
+  static const String yours = 'Your first try';
+  static const String strongerHeading = 'A stronger version';
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: SlipInk.soft);
-    final quote = BrandType.choice.copyWith(
-      color: SlipInk.text,
-      fontStyle: FontStyle.italic,
-    );
+    final soft = SlipType.label.copyWith(color: SlipInk.soft);
+    final quote = SlipType.quote.copyWith(color: SlipInk.text);
     return PaperSlip(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Semantics(header: true, child: Text(yours, style: soft)),
-          const SizedBox(height: BrandSpace.xs),
+          const SizedBox(height: DaylightSpace.s4),
           Text('“$firstTry”', style: quote),
-          const SizedBox(height: BrandSpace.md),
-          DecoratedBox(
+          const SizedBox(height: DaylightSpace.s16),
+          const DecoratedBox(
             decoration: BoxDecoration(
               border: Border(top: BorderSide(color: SlipInk.soft)),
             ),
-            child: const SizedBox(width: double.infinity),
+            child: SizedBox(width: double.infinity),
           ),
-          const SizedBox(height: BrandSpace.md),
+          const SizedBox(height: DaylightSpace.s16),
           Semantics(header: true, child: Text(strongerHeading, style: soft)),
-          const SizedBox(height: BrandSpace.xs),
+          const SizedBox(height: DaylightSpace.s4),
           Text('“$stronger”', style: quote),
         ],
       ),

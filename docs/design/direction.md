@@ -448,12 +448,16 @@ quote that names the strongest and weakest moment. The **score card** (white, r2
 lesson** card, and below it "Say it your way" (the AI coach, online only) and the full reasoning
 replay. CTA: "Light room 4" (moment 5).
 
-**Kept by the owner's decision (2026-11-03).** The debrief's Candidate assessment dossier stays
+**Kept by the owner's decision (2026-11-03).** The debrief's Candidate assessment *sheet* stays
 exactly as it is, look and animations both: the paper sheet, letterhead, "/100" stamps, red-pen
 underline, lesson note, wax seal and their timeline. The owner: "the assessment complete in the
-current design is okay… the reviewer liked it, so don't change this and its animations." This
-section's score card is therefore not built; only the controls after the sheet may take Daylight
-styling. See `docs/memory/feedback-keep-candidate-assessment.md`.
+current design is okay… the reviewer liked it, so don't change this and its animations." The
+ground and everything around the sheet are Daylight (owner, later the same day: "this view
+background is still the previous colours"): the paper ground, the room named at the top, the
+score's source and "How we scored this", then under the sheet the trust pips, the XP tag, "The
+line that cost the most" on the trap tint, the lesson, the reasoning and then/now cards, and the
+honey CTA. This section's white score card is not built: the sheet is the score. See
+`docs/memory/feedback-keep-candidate-assessment.md`.
 
 ### 6 · Reward, floor cleared (`features/progression/`, `06-reward`)
 

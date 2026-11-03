@@ -14,50 +14,51 @@ class ReasoningSlip extends StatelessWidget {
 
   final List<BeatReasoning> beats;
 
-  static const String heading = 'YOUR REASONING';
+  static const String heading = 'Your reasoning';
   static const String yourReason = 'You said';
   static const String principle = 'What holds';
   static const String fellFor = 'You fell for';
-  static const String sound = 'SOUND';
-  static const String unsound = 'NOT WHY IT WORKS';
+  static const String sound = 'Sound';
+  static const String unsound = 'Not why it works';
 
   /// Above the strong answer, beside a built one that wasn't it (brief 27).
   static const String strongBuild = 'Built strong';
 
   /// What a built answer lost, piece by piece, or that it lost nothing.
   static String buildNote(BuildResult built) {
-    if (built.perfect) return 'BUILT IN ORDER, NOTHING MISSING';
-    String pieces(int n) => n == 1 ? '1 PIECE' : '$n PIECES';
-    return [
-      if (built.outOfOrder > 0) '${pieces(built.outOfOrder)} OUT OF ORDER',
-      if (built.missing > 0) '${pieces(built.missing)} LEFT OUT',
-      if (built.decoysUsed.isNotEmpty) 'THE DECOY WENT IN',
-    ].join('  ·  ');
+    if (built.perfect) return 'Built in order, nothing missing';
+    String pieces(int n) => n == 1 ? '1 piece' : '$n pieces';
+    final notes = [
+      if (built.outOfOrder > 0) '${pieces(built.outOfOrder)} out of order',
+      if (built.missing > 0) '${pieces(built.missing)} left out',
+      if (built.decoysUsed.isNotEmpty) 'the decoy went in',
+    ].join(' · ');
+    return notes[0].toUpperCase() + notes.substring(1);
   }
 
   static String guessedNote(Duration? decidedIn) {
     final ms = decidedIn?.inMilliseconds ?? 0;
-    return 'GUESSED IN ${(ms / _msPerSecond).toStringAsFixed(1)} SECONDS';
+    return 'Guessed in ${(ms / _msPerSecond).toStringAsFixed(1)} seconds';
   }
 
   static const int _msPerSecond = 1000;
 
   static const Map<BeatKind, String> _names = {
-    BeatKind.open: 'OPEN',
-    BeatKind.evidence: 'EVIDENCE',
-    BeatKind.land: 'LAND',
+    BeatKind.open: 'Open',
+    BeatKind.evidence: 'Evidence',
+    BeatKind.land: 'Land',
   };
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: SlipInk.soft);
+    final soft = SlipType.label.copyWith(color: SlipInk.soft);
     return PaperSlip(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Semantics(header: true, child: Text(heading, style: soft)),
           for (final beat in beats) ...[
-            const SizedBox(height: BrandSpace.md),
+            const SizedBox(height: DaylightSpace.s16),
             _BeatRow(beat: beat, name: _names[beat.kind]!),
           ],
         ],
@@ -72,92 +73,78 @@ class _BeatRow extends StatelessWidget {
   final BeatReasoning beat;
   final String name;
 
-  static const double _bar = 2;
-
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: SlipInk.soft);
-    final ink = BrandType.body.copyWith(color: SlipInk.text);
+    final soft = SlipType.label.copyWith(color: SlipInk.soft);
+    final ink = SlipType.body.copyWith(color: SlipInk.text);
     final given = beat.given;
     final principle = beat.principle;
     final fellFor = beat.fellFor;
     final sound = beat.sound;
+    // Each beat on the sand well, the trap's tint where it cost (no one-sided bars).
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color: beat.guessed || sound == false || !beat.strongest
-                ? SlipInk.mark
-                : SlipInk.soft.withValues(alpha: 0.4),
-            width: _bar,
-          ),
-        ),
+        color: beat.guessed || sound == false || !beat.strongest
+            ? DaylightColors.trapTint
+            : DaylightColors.paper,
+        borderRadius: BorderRadius.circular(DaylightRadius.tile),
       ),
       child: Padding(
-        padding: const EdgeInsets.only(left: BrandSpace.sm),
+        padding: const EdgeInsets.all(DaylightSpace.s12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(name, style: soft),
-            const SizedBox(height: BrandSpace.xs),
+            const SizedBox(height: DaylightSpace.s4),
             Text(
               '“${beat.line.text}”',
-              style: BrandType.choice.copyWith(
-                color: SlipInk.text,
-                fontStyle: FontStyle.italic,
-              ),
+              style: SlipType.quote.copyWith(color: SlipInk.text),
             ),
             if (beat.built case final built?) ...[
-              const SizedBox(height: BrandSpace.xs),
+              const SizedBox(height: DaylightSpace.s4),
               Text(
                 ReasoningSlip.buildNote(built),
-                style: BrandType.label.copyWith(
+                style: SlipType.label.copyWith(
                   color: built.perfect ? SlipInk.soft : SlipInk.mark,
                 ),
               ),
             ],
             if (beat.strongBuild case final strong?) ...[
-              const SizedBox(height: BrandSpace.sm),
+              const SizedBox(height: DaylightSpace.s8),
               Text('${ReasoningSlip.strongBuild}:', style: soft),
               Text(
                 '“${strong.text}”',
-                style: BrandType.choice.copyWith(
-                  color: SlipInk.text,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: SlipType.quote.copyWith(color: SlipInk.text),
               ),
             ],
             if (beat.guessed) ...[
-              const SizedBox(height: BrandSpace.xs),
+              const SizedBox(height: DaylightSpace.s4),
               Text(
                 ReasoningSlip.guessedNote(beat.decidedIn),
-                style: BrandType.label.copyWith(color: SlipInk.mark),
+                style: SlipType.label.copyWith(color: SlipInk.mark),
               ),
             ],
             // The misconception the line fell for says it all when it's what the player said.
             if (given != null && given != fellFor) ...[
-              const SizedBox(height: BrandSpace.sm),
+              const SizedBox(height: DaylightSpace.s8),
               Text('${ReasoningSlip.yourReason}: ${given.text}', style: ink),
               Text(
                 sound! ? ReasoningSlip.sound : ReasoningSlip.unsound,
-                style: BrandType.label.copyWith(
+                style: SlipType.label.copyWith(
                   color: sound ? SlipInk.soft : SlipInk.mark,
                 ),
               ),
             ],
             if (fellFor != null) ...[
-              const SizedBox(height: BrandSpace.xs),
+              const SizedBox(height: DaylightSpace.s4),
               Text(
                 '${ReasoningSlip.fellFor}: ${fellFor.text}',
                 style: ink.copyWith(color: SlipInk.mark),
               ),
             ],
             if (principle != null && sound != true) ...[
-              const SizedBox(height: BrandSpace.xs),
-              Text(
-                '${ReasoningSlip.principle}: ${principle.text}',
-                style: ink.copyWith(fontStyle: FontStyle.italic),
-              ),
+              const SizedBox(height: DaylightSpace.s4),
+              Text('${ReasoningSlip.principle}: ${principle.text}', style: ink),
             ],
           ],
         ),
@@ -175,7 +162,7 @@ class CostSlip extends StatelessWidget {
   /// Every beat, in order; only the ones that lost points are named.
   final List<BeatReasoning> beats;
 
-  static const String heading = 'WHAT COST YOU';
+  static const String heading = 'What cost you';
   static const String rightLineWrongReason = 'the right line, not why it works';
   static const String notStrongest = 'not the strongest line';
   static const String takeaway =
@@ -206,15 +193,16 @@ class CostSlip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PaperSlip(
+    trap: true,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(heading, style: BrandType.label.copyWith(color: SlipInk.soft)),
-        const SizedBox(height: BrandSpace.sm),
+        Text(heading, style: SlipType.label.copyWith(color: SlipInk.mark)),
+        const SizedBox(height: DaylightSpace.s8),
         for (final beat in beats.where(lost))
-          Text(line(beat), style: BrandType.body.copyWith(color: SlipInk.mark)),
-        const SizedBox(height: BrandSpace.sm),
-        Text(takeaway, style: BrandType.body.copyWith(color: SlipInk.text)),
+          Text(line(beat), style: SlipType.body.copyWith(color: SlipInk.mark)),
+        const SizedBox(height: DaylightSpace.s8),
+        Text(takeaway, style: SlipType.body.copyWith(color: SlipInk.text)),
       ],
     ),
   );

@@ -26,6 +26,7 @@ import 'package:the_last_room/features/voice/voice_player.dart';
 import 'package:the_last_room/features/voice/voice_providers.dart';
 import 'package:the_last_room/features/voice/voice_scoring.dart';
 import 'package:the_last_room/features/voice/widgets/self_check_panel.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart' show TactileButton;
 import 'package:the_last_room/ui/film_kit.dart';
 
 import '../../core/backend/fakes.dart' show FakeBackend, keyedEnv;
@@ -295,9 +296,7 @@ Future<void> _playVoice(MissionRig rig, Mission m, _VoiceFakes fakes) async {
   // The debrief: the score's source, a total, and the mission's lesson.
   expect(
     find.text(
-      fakes.online
-          ? ScoreSourceLabel.aiLabel.toUpperCase()
-          : VoiceDebrief.selfCheckLabel.toUpperCase(),
+      fakes.online ? ScoreSourceLabel.aiLabel : VoiceDebrief.selfCheckLabel,
     ),
     findsOneWidget,
   );
@@ -409,8 +408,16 @@ Future<void> _playEpilogue(MissionRig rig, Mission m) async {
   }
 }
 
-Future<void> _tapButton(MissionRig rig, String label) =>
-    _tap(rig, find.widgetWithText(VividButton, label));
+/// A button by its label: Daylight's, or the vivid one on the screens still to restyle.
+Future<void> _tapButton(MissionRig rig, String label) => _tap(
+  rig,
+  find.ancestor(
+    of: find.text(label),
+    matching: find.byWidgetPredicate(
+      (w) => w is TactileButton || w is VividButton,
+    ),
+  ),
+);
 
 Future<void> _tap(MissionRig rig, Finder finder) async {
   await rig.until(finder);
