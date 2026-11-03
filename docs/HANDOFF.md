@@ -46,9 +46,9 @@ This worker: `docs/53-wave-6-final` in `../thelastroom-w18`, from `origin/main` 
    transcript and committed (the #45 method), one PR, green CI.
 3. **The APK release only when the owner asks:** run the Release APK workflow (or tag `v*`),
    which makes a draft release; the owner publishes it.
-4. Known small leftovers (not blocking): the NFR-3 device run (harness built in #63, separate
-   app id `com.thelastroom.app.perf`; command in `docs/status/56.md`), run when the owner's phone is
-   free. XP per reason (#61), the floor card (#62) and BUG-2's cause (#63: a tip's tap picked a
+4. Known small leftovers (not blocking): NFR-3 ran on the realme on 3 Nov (status 56: 1.2% of
+   frames over budget; the door → room transition is the soft spot). Re-run with the command in
+   `docs/status/56.md` (it needs `--no-dds`). XP per reason (#61), the floor card (#62) and BUG-2's cause (#63: a tip's tap picked a
    card) are done.
 
 ## Open decisions
