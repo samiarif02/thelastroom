@@ -56,3 +56,4 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `welcome_back_closed` | The welcome-back card goes: its button was followed, or it was dismissed | `action` (`followed`, `dismissed`), `target` (`recall`, `mission`, `progress`) |
 | `weekly_goal_closed` | A finished mission or Recall Room round brings the week's sessions up to the weekly goal, so the tower's ring closes (Daylight, moment 6). Once per week | `sessions`, `weekly_goal` |
 | `recall_note_opened` | A Recall Room note (the taped card of a trap or a lesson) is shown, once per card per session | `card_kind` (`trap`, `lesson`), `box` (`one`, `three`, `seven`) |
+| `floor_previewed` | A floor of the tower is opened as a sheet from Home (tapping the floor or one of its locked windows): its rooms, interviewers and how it's answered | `chapter`, `open` |
