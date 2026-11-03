@@ -18,6 +18,10 @@ NAMES = sorted({
     'handshake', 'hash', 'lightbulb-filament', 'lightning', 'lock-simple', 'lock-simple-open',
     'magnifying-glass', 'medal', 'microphone', 'pause', 'play', 'push-pin', 'share-network',
     'stack', 'stop', 'timer', 'trend-up', 'user-circle', 'users-three', 'x',
+    # WS2's screens (brief 46).
+    'arrow-left', 'arrow-up', 'bell', 'book-open', 'caret-right', 'chat-circle', 'clock',
+    'flag', 'gear-six', 'hourglass', 'microphone-slash', 'moon', 'notebook', 'sparkle',
+    'speaker-high', 'target', 'trophy', 'warning-circle', 'waveform', 'wifi-slash',
 })
 
 
