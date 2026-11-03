@@ -50,8 +50,11 @@ class DaylightRadar extends StatelessWidget {
   static const double defaultSize = 264;
 
   /// Room outside the grid for each label and its number.
-  static const double _labelRoom = 56;
+  static const double _labelRoom = 64;
   static const double _labelWidth = 104;
+
+  /// How far off vertical a spoke is before its label sits beside the tip.
+  static const double _sideFrom = 0.5;
 
   @override
   Widget build(BuildContext context) {
@@ -98,27 +101,56 @@ class DaylightRadar extends StatelessWidget {
                       builder: (context, t, _) => painted(t),
                     ),
             ),
-            for (var i = 0; i < n; i++)
-              _label(i, n, radius + _labelRoom / 2, front?.values[i]),
+            for (var i = 0; i < n; i++) _label(i, n, radius, front?.values[i]),
           ],
         ),
       ),
     );
   }
 
+  /// A spoke's label and score, just outside its tip: centred above or below the top and
+  /// bottom tips, and set off to the side (aligned away from the grid) for the side ones, so a
+  /// long name never runs into the grid.
   Widget _label(int i, int n, double r, int? value) {
     final a = -math.pi / 2 + 2 * math.pi * i / n;
-    final c = Offset(size / 2, size / 2) + Offset.fromDirection(a, r);
+    final tip = Offset(size / 2, size / 2) + Offset.fromDirection(a, r);
+    final dx = math.cos(a);
+    final side = dx.abs() > _sideFrom;
+    final align = !side
+        ? TextAlign.center
+        : dx < 0
+        ? TextAlign.right
+        : TextAlign.left;
+    final height = value == null ? DaylightSpace.s16 : DaylightSpace.s32;
+    final double left;
+    final double top;
+    if (!side) {
+      left = tip.dx - _labelWidth / 2;
+      top = math.sin(a) < 0
+          ? tip.dy - DaylightSpace.s8 - height
+          : tip.dy + DaylightSpace.s8;
+    } else {
+      left = dx < 0
+          ? tip.dx - DaylightSpace.s8 - _labelWidth
+          : tip.dx + DaylightSpace.s8;
+      top = tip.dy - height / 2;
+    }
+    final cross = switch (align) {
+      TextAlign.right => CrossAxisAlignment.end,
+      TextAlign.left => CrossAxisAlignment.start,
+      _ => CrossAxisAlignment.center,
+    };
     return Positioned(
-      left: c.dx - _labelWidth / 2,
-      top: c.dy - (value == null ? DaylightSpace.s8 : DaylightSpace.s16),
+      left: left,
+      top: top,
       width: _labelWidth,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: cross,
         children: [
           Text(
             labels[i],
-            textAlign: TextAlign.center,
+            textAlign: align,
             maxLines: 1,
             softWrap: false,
             overflow: TextOverflow.visible,
@@ -127,7 +159,7 @@ class DaylightRadar extends StatelessWidget {
           if (value != null)
             Text(
               '$value',
-              textAlign: TextAlign.center,
+              textAlign: align,
               style: DaylightType.tabular(DaylightType.body4),
             ),
         ],
