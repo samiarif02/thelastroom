@@ -62,7 +62,7 @@ void main() {
         await rig.boot(Routes.tower());
         await rig.run(const Duration(seconds: 3));
         expect(
-          find.bySemanticsLabel(RegExp('^Room 7, .*up next')),
+          find.bySemanticsLabel(RegExp(r'^Room 7, .*\. Play\.$')),
           findsOneWidget,
         );
         expect(find.text(RecallRoomCardView.caughtUp), findsOneWidget);
@@ -109,7 +109,7 @@ void main() {
       await rig.boot(Routes.tower());
       await rig.run(const Duration(seconds: 3));
       expect(find.textContaining(TowerHero.continueLabel), findsOneWidget);
-      expect(find.bySemanticsLabel(RegExp('in progress')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp(r'\. Continue\.$')), findsOneWidget);
     });
   });
 

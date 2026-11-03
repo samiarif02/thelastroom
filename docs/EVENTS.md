@@ -57,3 +57,5 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `weekly_goal_closed` | A finished mission or Recall Room round brings the week's sessions up to the weekly goal, so the tower's ring closes (Daylight, moment 6). Once per week | `sessions`, `weekly_goal` |
 | `recall_note_opened` | A Recall Room note (the taped card of a trap or a lesson) is shown, once per card per session | `card_kind` (`trap`, `lesson`), `box` (`one`, `three`, `seven`) |
 | `floor_previewed` | A floor of the tower is opened as a sheet from Home (tapping the floor or one of its locked windows): its rooms, interviewers and how it's answered | `chapter`, `open` |
+| `tower_tour_shown` | The first-run tower tour (a spotlight on the room to play and Priya's bubble) is shown: the first tower visit, or after "Show the tower tour again" in Settings | `replay` |
+| `tower_tour_done` | The tower tour ends | `action` (`started`, `dismissed`) |

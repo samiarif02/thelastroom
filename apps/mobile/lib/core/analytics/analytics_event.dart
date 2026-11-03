@@ -88,7 +88,14 @@ enum AnalyticsEvent {
 
   /// A floor of the tower is opened as a sheet (its rooms, its interviewers, how it's
   /// answered), open or still locked: the player looking ahead.
-  floorPreviewed('floor_previewed');
+  floorPreviewed('floor_previewed'),
+
+  /// The tower tour's coach mark is shown: the spotlight on the room to play, the first time
+  /// (or again, from Settings).
+  towerTourShown('tower_tour_shown'),
+
+  /// The tower tour ends: the player tapped the door (and went in) or dismissed it.
+  towerTourDone('tower_tour_done');
 
   const AnalyticsEvent(this.wireName);
 
