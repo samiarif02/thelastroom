@@ -71,7 +71,7 @@ missing**.
 | FR-13 | Soft 60 s timer on timed missions; calm mode | Built | #12, #15 (calm mode in Your file) | |
 | FR-14 | Follow-up at the weakest part, scored for adaptability | Built | #5, #12, #18 (a guess is the weakest) | |
 | FR-15 | Dossier: four scores, one lesson, red pen; "Say it your way" | Partly | #12, #19, #25 | "Say it your way": **deliberate cut** (cut line #1, ADR 0006) |
-| FR-16 | Progress: XP, skills unlocked, Recall Room cards | Built | #23 (cards from every trap), brief 32 (XP from missions and recall rounds, "+N XP" and the "Skill unlocked" card on the debrief, `skill_unlocked` fired) | |
+| FR-16 | Progress: XP, skills unlocked, Recall Room cards | Built | #23 (cards from every trap), brief 32 (XP from missions and recall rounds, "+N XP" and the "Skill unlocked" card on the debrief, `skill_unlocked` fired), brief 55 (XP per explained reason: sound +10, close +5, guess 0; +5 per voice point; the feedback sheet's "+10 XP" and the debrief's room/reasons breakdown) | |
 | FR-17 | Sound: ticks, cues, ambience, settings | Built | #13, #14 | |
 | FR-20 | Deterministic weighted scoring | Built | #5 | |
 | FR-21 | Flags lower dimensions, drive the follow-up | Built | #5 | |

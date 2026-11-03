@@ -421,7 +421,8 @@ makes it work?" (Heading 6) with "Pick the principle. It is the part you keep." 
 reason cards with a Phosphor icon tile per principle. On a pick, the **FeedbackSheet** rises. A
 sound pick gets the interviewer's `nod` in a small arch, "That's the principle." (Heading 6,
 ch-deep), "+10 XP" and the one-line lesson on ch-tint. A tempting pick gets `hmm`, "Close, but
-not quite." and the reason it tempts. A guess (under 1.5 s) gets `hmm` and "You barely looked at
+not quite." and the reason it tempts, and "+5 XP" (brief 55: the engine's `ReasonVerdict`; the
+tag counts up over `countUp` and is static under reduced motion). A guess (under 1.5 s) gets `hmm` and "You barely looked at
 those." Then "Next: land the answer". No red anywhere; the trap colour is only for the debrief.
 
 ### 4 · Voice recording (`features/voice/`, `04-voice`)
@@ -454,7 +455,8 @@ underline, lesson note, wax seal and their timeline. The owner: "the assessment 
 current design is okay… the reviewer liked it, so don't change this and its animations." The
 ground and everything around the sheet are Daylight (owner, later the same day: "this view
 background is still the previous colours"): the paper ground, the room named at the top, the
-score's source and "How we scored this", then under the sheet the trust pips, the XP tag, "The
+score's source and "How we scored this", then under the sheet the trust pips, the XP tag (with
+its breakdown, "40 for the room, 22 for your reasons", brief 55), "The
 line that cost the most" on the trap tint, the lesson, the reasoning and then/now cards, and the
 honey CTA. This section's white score card is not built: the sheet is the score. See
 `docs/memory/feedback-keep-candidate-assessment.md`.

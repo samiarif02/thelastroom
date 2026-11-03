@@ -70,9 +70,12 @@ void main() {
     });
 
     test("the debrief's +N is the last attempt's XP", () {
-      expect(lastAttemptXp([]), 0);
-      expect(lastAttemptXp([played('m1', 40)]), 20 + 20 + 30);
-      expect(lastAttemptXp([played('m1', 40), played('m1', 60)]), 20 + 30);
+      expect(lastAttemptXp([]), AttemptXp.none);
+      expect(lastAttemptXp([played('m1', 40)]).total, 20 + 20 + 30);
+      expect(
+        lastAttemptXp([played('m1', 40), played('m1', 60)]),
+        const AttemptXp(room: 20 + 30, reasons: 0),
+      );
     });
   });
 

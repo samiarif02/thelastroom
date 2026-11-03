@@ -35,6 +35,15 @@ class DebriefRewards extends ConsumerStatefulWidget {
   final bool ready;
 
   static String xpGained(int xp) => '+$xp XP';
+
+  /// The breakdown beside it (brief 55): "40 for the room, 22 for your reasons". A voice room's
+  /// reasons are the points said out loud.
+  static String xpBreakdown({
+    required int room,
+    required int reasons,
+    required bool spoken,
+  }) =>
+      '$room for the room, $reasons for your ${spoken ? 'points' : 'reasons'}';
   static const String unlockedKicker = 'Skill unlocked';
 
   @override
@@ -74,14 +83,7 @@ class _DebriefRewardsState extends ConsumerState<DebriefRewards> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Tag(
-            label: DebriefRewards.xpGained(p.lastXp),
-            icon: PhosphorFill.lightning,
-            tone: TagTone.honeySolid,
-          ),
-        ),
+        _XpLine(progression: p, spoken: widget.mission.voice != null),
         for (final s in _celebrating ?? const <Skill>{}) ...[
           const SizedBox(height: DaylightSpace.s16),
           Entrance(
@@ -143,4 +145,49 @@ class _DebriefRewardsState extends ConsumerState<DebriefRewards> {
   static const double _aspect = 76 / 64;
   static const double _rim = 3;
   static const double _glyph = 0.44;
+}
+
+/// "+62 XP · 40 for the room, 22 for your reasons": the attempt's XP and where it came from,
+/// one line under the dossier (never on it). Just the tag when the reasons earned nothing.
+class _XpLine extends StatelessWidget {
+  const _XpLine({required this.progression, required this.spoken});
+
+  final Progression progression;
+  final bool spoken;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = progression;
+    final tag = Tag(
+      label: DebriefRewards.xpGained(p.lastXp),
+      icon: PhosphorFill.lightning,
+      tone: TagTone.honeySolid,
+    );
+    if (p.lastReasonXp <= 0) {
+      return Align(alignment: Alignment.centerLeft, child: tag);
+    }
+    final breakdown = DebriefRewards.xpBreakdown(
+      room: p.lastRoomXp,
+      reasons: p.lastReasonXp,
+      spoken: spoken,
+    );
+    return Semantics(
+      label: '${DebriefRewards.xpGained(p.lastXp)}: $breakdown',
+      excludeSemantics: true,
+      // A wrap, so at large text the breakdown drops under the tag rather than squeezing it.
+      child: Wrap(
+        spacing: DaylightSpace.s8,
+        runSpacing: DaylightSpace.s4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          tag,
+          Text(
+            breakdown,
+            style: DaylightType.tabular(DaylightType.body6)
+                .copyWith(color: DaylightColors.ink2),
+          ),
+        ],
+      ),
+    );
+  }
 }

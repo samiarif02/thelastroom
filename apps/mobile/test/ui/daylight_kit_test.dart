@@ -298,5 +298,52 @@ void main() {
       await pumpThrough(tester, DaylightMotion.move);
       expect(find.text("That's the principle."), findsOneWidget);
     });
+
+    group('the XP tag (brief 55)', () {
+      Widget sheet(int? xp) => Align(
+        alignment: Alignment.bottomCenter,
+        child: FeedbackSheet(
+          person: CastPeople.marcus,
+          tone: FeedbackTone.sound,
+          title: "That's the principle.",
+          xp: xp,
+          actionLabel: 'Next: land the answer',
+          onAction: () {},
+        ),
+      );
+
+      testWidgets('counts up to the reason\'s XP', (tester) async {
+        final handle = tester.ensureSemantics();
+        await pumpKit(tester, sheet(10));
+        await tester.pump(DaylightMotion.countUp ~/ 4);
+        // Partway: a number on its way, not yet the total.
+        expect(find.text('+10 XP'), findsNothing);
+        expect(find.textContaining(' XP'), findsOneWidget);
+        await pumpThrough(tester, DaylightMotion.countUp);
+        expect(find.text('+10 XP'), findsOneWidget);
+        // Read once, as the total, never as each number it counts through.
+        expect(
+          tester.getSemantics(find.text('+10 XP')).label,
+          contains('+10 XP'),
+        );
+        handle.dispose();
+      });
+
+      testWidgets('reduced motion: the total at once, no count', (
+        tester,
+      ) async {
+        await pumpKit(tester, sheet(5), reduceMotion: true);
+        await tester.pump();
+        expect(find.text('+5 XP'), findsOneWidget);
+      });
+
+      testWidgets('no XP (a guess, a built beat): no tag', (tester) async {
+        for (final xp in [null, 0]) {
+          await pumpKit(tester, sheet(xp));
+          await pumpThrough(tester, DaylightMotion.countUp);
+          expect(find.textContaining(' XP'), findsNothing);
+        }
+      });
+    });
   });
 }

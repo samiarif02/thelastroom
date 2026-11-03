@@ -1291,6 +1291,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
       title: title,
       // Her words, as she says them (the arch shows who).
       note: reaction.text,
+      // What the reason earned; nothing on a guess or a built beat (no why step).
+      xp: guessedFirst ? null : game.reasonVerdictOf(_beatShown)?.xp,
       actionLabel: next,
       onAction: _reactionDone,
     );

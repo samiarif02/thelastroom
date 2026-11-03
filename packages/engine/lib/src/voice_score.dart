@@ -133,6 +133,7 @@ VoiceScore scoreVoiceAnswer({
         for (final p in [...missed, ...kept]) p.id,
       ]),
       flags: const {},
+      pointsMade: all.made,
     ),
     tallies: Map.unmodifiable(tallies),
   );

@@ -101,6 +101,106 @@ void main() {
     expect(store.record.celebrated, {Skill.evidenceBuilder});
   });
 
+  group('the XP line: the room and the reasons (brief 55)', () {
+    testWidgets('a choice room: "+N XP" and what the reasons earned', (
+      tester,
+    ) async {
+      await progress.recordAttempt(
+        attempt(
+          m7,
+          100,
+          at: now,
+          reasons: const [ReasonVerdict.sound, ReasonVerdict.close],
+        ),
+      );
+      await pump(
+        tester,
+        DebriefRewards(mission: m7, grade: ChapterGrade.lobby),
+      );
+      final room = missionXp(total: 100, firstClear: true);
+      expect(find.text(DebriefRewards.xpGained(room + 15)), findsOneWidget);
+      expect(
+        find.text(
+          DebriefRewards.xpBreakdown(room: room, reasons: 15, spoken: false),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.text('$room for the room, 15 for your reasons'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a voice room counts its points', (tester) async {
+      final voice = missions.firstWhere((m) => m.voice != null);
+      await progress.recordAttempt(attempt(voice, 50, at: now, pointsMade: 3));
+      await pump(
+        tester,
+        DebriefRewards(mission: voice, grade: ChapterGrade.lobby),
+      );
+      final room = missionXp(total: 50, firstClear: true);
+      expect(find.text(DebriefRewards.xpGained(room + 15)), findsOneWidget);
+      expect(
+        find.text('$room for the room, 15 for your points'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets(
+      'no reason XP (all guessed, or an old attempt): the tag alone',
+      (tester) async {
+        await progress.recordAttempt(
+          attempt(
+            m7,
+            40,
+            at: now,
+            reasons: const [ReasonVerdict.guessed, ReasonVerdict.guessed],
+          ),
+        );
+        await pump(
+          tester,
+          DebriefRewards(mission: m7, grade: ChapterGrade.lobby),
+        );
+        expect(
+          find.text(
+            DebriefRewards.xpGained(missionXp(total: 40, firstClear: true)),
+          ),
+          findsOneWidget,
+        );
+        expect(find.textContaining('for the room'), findsNothing);
+      },
+    );
+
+    testWidgets('at 2x text the breakdown wraps under the tag, unclipped', (
+      tester,
+    ) async {
+      await progress.recordAttempt(
+        attempt(
+          m7,
+          100,
+          at: now,
+          reasons: const [ReasonVerdict.sound, ReasonVerdict.sound],
+        ),
+      );
+      await pump(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(
+            size: Size(320, 1200),
+            textScaler: TextScaler.linear(2),
+            disableAnimations: true,
+          ),
+          child: SizedBox(
+            width: 320,
+            child: DebriefRewards(mission: m7, grade: ChapterGrade.lobby),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('20 for your reasons'), findsOneWidget);
+    });
+  });
+
   testWidgets('a skill already celebrated is not celebrated again', (
     tester,
   ) async {
