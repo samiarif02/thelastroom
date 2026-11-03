@@ -13,13 +13,55 @@ scores what you said, never how you sound. **Chapter 3** mixes both. Every missi
 it practises before it starts.
 
 Built in Flutter for Android, iOS and the web, for a product assessment by
-[8x](https://github.com/8xsocial). **▶ Demo video:** _coming soon_ · **Android APK:** see
-[Releases](https://github.com/samiarif02/thelastroom/releases) · **Submission notes:**
-[`docs/SUBMISSION.md`](docs/SUBMISSION.md)
+[8x](https://github.com/8xsocial).
+
+**Landing page:** [thelastroom-ten.vercel.app](https://thelastroom-ten.vercel.app) ·
+**Android APK:** see [Releases](https://github.com/samiarif02/thelastroom/releases) ·
+**Submission notes:** [`docs/SUBMISSION.md`](docs/SUBMISSION.md) ·
+**What's built and what isn't:** [`docs/completion.md`](docs/completion.md)
 
 | The tower | Build the answer | Say why | The debrief | Recall Room |
 | :---: | :---: | :---: | :---: | :---: |
-| ![The tower: up next, the chapter and its missions](docs/screenshots/1-tower.jpg) | ![Mission 1: four plausible answers to "what made you apply?"](docs/screenshots/2-mission-answers.jpg) | ![The why step: pick the principle behind your line](docs/screenshots/3-why-step.jpg) | ![The debrief: what you said, what you fell for, what holds](docs/screenshots/4-debrief.jpg) | ![A Recall Room card](docs/screenshots/5-recall-room.jpg) |
+| ![The tower: good afternoon, the weekly ring, XP and the interview countdown, Recall notes waiting, and room 5 up next](docs/screenshots/1-tower.jpg) | ![Room 1: Priya asks what made you apply, four plausible opening lines](docs/screenshots/2-mission-answers.jpg) | ![The why step: your line, then pick the principle that makes it work](docs/screenshots/3-why-step.jpg) | ![The debrief: the Candidate assessment sheet, scored by the AI recruiter, with a wax seal](docs/screenshots/4-debrief.jpg) | ![A Recall Room note: which evidence is easiest to believe?](docs/screenshots/5-recall-room.jpg) |
+
+| Doors to every room | A floor's sheet | Answer out loud | Your file | A past result |
+| :---: | :---: | :---: | :---: | :---: |
+| ![The Northstar tower: played rooms checked, the next door ajar with its interviewer, floors 2 and 3 locked](docs/screenshots/1b-tower-doors.jpg) | ![Floor 2, Under pressure: who you meet, what you practise, how you answer, its seven rooms](docs/screenshots/6-floor-sheet.jpg) | ![Room 8, Team conflict: Lena asks, the points to cover, the recorder at 0:14](docs/screenshots/7-voice-recorder.jpg) | ![Your file: XP, the weekly ring, rooms lit, the skills shelf](docs/screenshots/8-your-file.jpg) | ![Room 3's last result, the Candidate assessment with the AI's score and basis](docs/screenshots/9-past-result.jpg) |
+
+| Why these scores | Floor cleared | The title | Onboarding | First-time tip |
+| :---: | :---: | :---: | :---: | :---: |
+| ![Why these scores: one sentence of basis from the AI recruiter per dimension](docs/screenshots/4b-debrief-basis.jpg) | ![Floor 1 cleared: the Evidence Builder skill, the cast, totals, floor 2 open](docs/screenshots/10-floor-cleared.jpg) | ![The title: the Northstar tower lit floor by floor, the four interviewers, Step inside](docs/screenshots/11-title.jpg) | ![Onboarding: meet your interviewers, Priya, Marcus, Lena and Sam](docs/screenshots/12-onboarding.jpg) | ![The first visit: Priya points at the first door](docs/screenshots/13-first-tip.jpg) |
+
+The screenshots are widget-test stills of the real screens with seeded progress, at 390 × 844
+(`apps/mobile/test/app/stills/readme_stills_test.dart`; `WRITE_STILLS=1` writes them again).
+
+## What's in the game
+
+- **Three floors, 21 rooms.** Floor 1, *Get through the door*: seven rooms answered by building
+  the answer from lines. Floor 2, *Under pressure*: seven rooms, **all answered out loud**.
+  Floor 3, *The final round*: mixed, three built from lines and four spoken, ending with Sam.
+- **Build, then say why.** Three beats (open, evidence, land), every option a realistic
+  mistake or the strong line; after each pick, "Why that line?" with principles to choose from.
+- **Voice.** The interviewer's lines are spoken; you record, recording pauses itself after
+  5 seconds of silence, Continue picks up, Start again throws the take away. The audio is sent
+  for scoring and never stored.
+- **Live AI scoring, with an offline fallback.** With the optional backend, an AI senior
+  recruiter (Gemini) scores each answer with one sentence of basis per number; without it, the
+  game's own engine scores, labelled "Offline score". How well the AI scores is
+  [published](docs/scoring-eval.md).
+- **The debrief** is the *Candidate assessment* sheet: four scores, a wax seal, the costliest
+  line in red pen, "Why these scores", "Your reasoning" and "How we scored this".
+- **Recall Room.** Every trap you fell for comes back as a note on a Leitner schedule (boxes at
+  1, 3 and 7 days) until it stops catching you.
+- **Progress you can see.** The Northstar tower with a door per room, XP, a weekly ring (never
+  a streak to lose), skills earned without hints, Your file with every past result, the
+  Chapter 1 report, and a floor-cleared reward.
+- **Coming back.** Local reminders in the interviewers' voices on days 1, 3, 5 and 8 after you
+  play (never after 21:00, at most one a day, one switch to turn them off), a welcome-back card,
+  and Settings → "Send a test reminder".
+- **First-time tips**, one at a time where you need them (the first door, the answer cards, the
+  why step, the first result, the microphone, Recall, Your file), and **route transitions**:
+  the room opens from the door you tapped, pages slide and fade, back controls answer the tap.
 
 ## Run it (3 commands)
 
@@ -100,9 +142,11 @@ engine. Re-run it after any change to the prompt or the models (`node supabase/e
 ```
 apps/mobile/        Flutter app: the tower, missions, debrief, Recall Room, sound, settings
 packages/engine/    pure Dart: scoring, guesses and reasons, follow-ups, Leitner recall
-packages/content/   7 missions, interviewers, lessons as typed Dart, validated in tests
-packages/brand/     design tokens and theme (the only place a colour is written)
-supabase/           migrations with tested owner-only RLS, the `score` Edge Function (Gemini)
+packages/content/   21 missions (3 chapters), interviewers, lessons as typed Dart, validated
+packages/brand/     Daylight Tower tokens, theme, fonts and the cast (the only place a colour is written)
+supabase/           migrations with tested owner-only RLS, the `score` and `score-voice` Edge
+                    Functions (Gemini), the scoring eval set
+web/                the landing page: a static Next.js site, hosted on Vercel (ADR 0007)
 docs/               brief, requirements, ADRs, rules, briefs, status, memory
 .claude-logs/       the Claude Code transcripts behind every change
 ```
@@ -115,10 +159,11 @@ docs/               brief, requirements, ADRs, rules, briefs, status, memory
 | Local notifications only | No push infrastructure for v1 | [0004](docs/decisions/0004-local-notifications.md) |
 | Zero setup; the backend is optional | Clone and run, no keys | [0005](docs/decisions/0005-zero-setup-offline-backend-optional.md) |
 | An AI recruiter scores online, the engine offline | A stated basis for every number | [0006](docs/decisions/0006-ai-scoring.md) |
+| A static landing page on Vercel; the game itself stays unhosted | People who never clone the repo get a page; zero setup is untouched | [0007](docs/decisions/0007-landing-page-on-vercel.md) |
 
 Every change went through a PR with green CI: secrets scan, standards checks, format, strict
 analysis, event registry, env, RLS, every package's tests (plus Linux golden images), the web
-build, and pgTAP RLS tests on a fresh database. Rules for people and agents are in
+build, the landing page's lint, typecheck and build, and pgTAP RLS tests on a fresh database. Rules for people and agents are in
 [`AGENTS.md`](AGENTS.md), ported from 8x's [template](https://github.com/8xsocial/template-web)
 standards to Flutter (the divergences are listed there).
 
@@ -127,17 +172,24 @@ standards to Flutter (the divergences are listed there).
 - **Speaking is scored on content only.** Chapters 2 and 3 score what you said from a
   transcript; pace, fillers and confidence aren't measured (by design: never accent). Offline,
   a spoken answer is scored by your own self-check against the mission's points.
-- **Typed free-text answers aren't built.** Chapter 1 is answered by building from lines.
 - **The scoring weights are a hypothesis.** They'd need human-rated answers to validate, and
   the AI's score isn't perfectly reproducible (temperature 0 narrows it but doesn't remove it).
-- **AI scoring needs a laptop.** Nothing is hosted, so the AI recruiter runs on a Mac on the
-  same Wi-Fi (below). Without it, the game uses the offline score.
-- **AI scoring is verified with a mocked Gemini** (15 Deno tests and the app's fallback tests);
-  the live run with a real key on a phone hasn't been done yet.
+- **AI scoring needs your own backend running.** There's no hosted Supabase project, by
+  design ([ADR 0005](docs/decisions/0005-zero-setup-offline-backend-optional.md)): the AI
+  recruiter runs on a laptop (below) and the phone reaches it over USB or the same Wi-Fi.
+  Without it, the game uses the offline score. Live AI scoring was checked on a release build
+  on a realme 8 over USB (rooms 2, 5, 6 and 7 scored 92, 90, 85 and 82), and with mocked
+  Gemini in 15 Deno tests and the app's fallback tests.
+- **The Gemini key is on the free tier**, so heavy use hits rate limits and the game falls back
+  to the offline score. Real use needs billing on the key.
 - **Not in stores.** The APK is signed with the debug key, which is fine for installing
-  directly, not for Google Play. The game has been played on Android (a realme 8) and in Chrome;
-  iOS hasn't been tested.
-- **Reminders are Android-first.** The local "traps waiting" and in-character nudges are built
+  directly, not for Google Play. The game has been played through Chapter 1 on Android (a
+  realme 8) and in Chrome; iOS hasn't been tested.
+- **Predictive back** (the page scrubbing with the back gesture) only exists on Android 14 and
+  later; older phones get the same reverse transition on a normal back.
+- **Not built:** XP per sound reason on the feedback sheet (XP comes from rooms and Recall
+  rounds), the shareable floor card, typed free-text answers.
+- **Reminders are Android-first.** The local "notes waiting" and in-character nudges are built
   and tested; on iOS they're wired but untested, and the web has none (FR-50–53). They come the
   day after you play, then on days 3 and 5, then day 8, never after 21:00 and at most one a
   day. To see one now on a phone: finish Mission 1, allow notifications, then Settings → "Send
@@ -156,19 +208,25 @@ cd apps/mobile && flutter run --dart-define-from-file=env/dev.json
 With no keys, or keys but no network, every backend feature is silently off
 ([ADR 0005](docs/decisions/0005-zero-setup-offline-backend-optional.md)).
 
-**AI scoring on your Mac** (a phone on the same Wi-Fi reaches it):
+**AI scoring on your laptop.** You need the Supabase CLI and Docker.
 
-1. **Key:** `cp .env.example .env` and set `GEMINI_API_KEY=`. It stays on the server; the app
-   never sees it.
-2. **Backend:** `supabase start`, then `supabase functions serve score --env-file .env`, and
+1. **Key:** `cp .env.example .env` and set `GEMINI_API_KEY=` in it. It stays on the server; the
+   app never sees it, and `.env` is gitignored.
+2. **Backend:** `supabase start` (applies the migrations), then
+   `supabase functions serve --env-file <your .env>` (serves `score` and `score-voice`), and
    leave it running. `supabase status` prints the local anon key, which is public.
-3. **App:** in `apps/mobile/env/dev.json`, set `SUPABASE_URL` to
-   `http://<your Mac's LAN IP>:54321` (`ipconfig getifaddr en0` on macOS) and
-   `SUPABASE_ANON_KEY` to that anon key. Then run with `--dart-define-from-file=env/dev.json`.
+3. **App:** in `apps/mobile/env/dev.json`, set `SUPABASE_URL` and `SUPABASE_ANON_KEY` (that
+   local anon key), then run with `--dart-define-from-file=env/dev.json`:
+   - **Chrome or a simulator on the same laptop:** `SUPABASE_URL` is `http://127.0.0.1:54321`.
+   - **An Android phone on USB:** run `adb reverse tcp:54321 tcp:54321` (again whenever the
+     cable is replugged) and use `http://127.0.0.1:54321`. This works for release builds too,
+     because the phone talks to its own loopback.
+   - **A phone on the same Wi-Fi:** `http://<the laptop's LAN IP>:54321` (`ipconfig getifaddr
+     en0` on macOS). Plain HTTP on the LAN is allowed in debug and profile builds only.
 
-Debug and profile builds may use plain HTTP on the LAN; release builds are HTTPS-only. If the
-Mac is off, the Wi-Fi drops, or the panel takes more than 8 seconds, the debrief shows the
-offline score.
+If the backend is off, the cable or Wi-Fi drops, or the panel takes more than 8 seconds, the
+debrief shows the offline score (a late verdict still replaces it within 30 s). A spoken answer
+falls back to a self-check against the mission's points.
 
 ## Develop
 
@@ -185,9 +243,13 @@ run by hand or by a `v*` tag), which attaches it to a **draft** GitHub release. 
 
 ## Credits
 
-- Fonts: [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant) and
-  [Manrope](https://github.com/sharanda/manrope), SIL Open Font License (bundled with their
-  `OFL.txt` in `packages/brand/fonts/`).
+- Fonts: [Bricolage Grotesque](https://github.com/ateliertriay/bricolage),
+  [Geist](https://github.com/vercel/geist-font),
+  [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant) (the Candidate assessment
+  sheet) and [Manrope](https://github.com/sharanda/manrope), SIL Open Font License, bundled
+  with their `OFL.txt` in `packages/brand/fonts/`. Icons: [Phosphor](https://phosphoricons.com),
+  MIT.
 - Sounds: all synthesised in this repo, CC0; every file is listed in
   [`docs/audio-credits.md`](docs/audio-credits.md).
-- Interviewers and scenes: drawn in code (`apps/mobile/lib/ui/figure/`), no image assets.
+- Interviewers, the tower and the scenes: drawn in code from shapes in
+  `packages/brand/assets/cast/`, no image assets.

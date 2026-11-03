@@ -4,7 +4,7 @@ The one file every coding agent reads (Claude Code, Codex, Cursor, Gemini). Per-
 (`CLAUDE.md`) only import it. Rules live here and in `docs/rules/`, nowhere else.
 
 **What this repo is:** a cinematic interview-practice game in Flutter (Android, iOS, plus a web
-build run locally; nothing is hosted). The full design is `docs/product-brief.md`; the testable version is
+build run locally; the game isn't hosted, only the landing page in `web/` is, ADR 0007). The full design is `docs/product-brief.md`; the testable version is
 `docs/requirements.md`; the visual direction is `DESIGN.md`.
 
 ## Start of every session (both Claude profiles, any agent)
@@ -59,7 +59,7 @@ Read the rule file for every area a change touches, before writing the change.
 - [Code quality](docs/rules/code-quality.md): strict analysis, no `dynamic`, no god files, named constants.
 - [Commits](docs/rules/commits.md): Conventional Commits, curated scopes, don't over-commit, `Changelog:` line.
 - [Pull requests](docs/rules/pull-requests.md): branch → finished → real description → green CI. Never merge on your own.
-- [Deployment](docs/rules/deployment.md): zero setup, APK, store builds, Edge Functions, what ships how (the web isn't hosted).
+- [Deployment](docs/rules/deployment.md): zero setup, APK, store builds, Edge Functions, what ships how (the game isn't hosted; the landing page is, on Vercel).
 - [Logging](docs/rules/logging.md): the structured `log` wrapper, never `print`.
 - [Error handling](docs/rules/error-handling.md): typed failures, Sentry for the unexpected, cinematic error states.
 - [Migrations](docs/rules/migrations.md): Supabase SQL migrations, RLS in the same migration, never edit a merged one.
@@ -95,7 +95,7 @@ conventions are replaced.
 | Pino logger | `lib/core/logging` wrapper over `dart:developer` with redaction, plus Sentry later | Same contract (structured, levelled, redacted, one wrapper), Dart runtime. |
 | Client never touches tables; Prisma is the only data path; RLS with **no** policies | The app reads/writes its **own rows** through `supabase_flutter`, guarded by **owner-only RLS policies** (tested) | Offline-first with an outbox needs the device to sync directly. There's no server of ours in the middle, so RLS policies *are* the authorization layer. |
 | Prisma-generated migrations, CI drift check | Hand-written SQL in `supabase/migrations/` via `supabase migration new` | Supabase CLI is the migration tool. A local `supabase db reset` replays them. |
-| Expo OTA-first releases, EAS | Store builds (Flutter has no first-party OTA); the web is not hosted (CI compile check only); APK on a GitHub Release | Stack difference. |
+| Expo OTA-first releases, EAS | Store builds (Flutter has no first-party OTA); the game's web build is not hosted (CI compile check only); the static landing page in `web/` is, on Vercel (ADR 0007); APK on a GitHub Release | Stack difference. |
 | npm workspaces | Dart pub workspace (root `pubspec.yaml` with `workspace:`); root `package.json` only for gates and `prepare` | Dart's own monorepo tool. |
 | `check:events` against `/api/track` | `check:events`: the Dart enum is the registry (unregistered names don't compile), the check bans string event names and keeps the enum and `docs/EVENTS.md` in step | The compiler already does half the job. |
 | `check:store`, `check:rls`, `check:template` | `check:rls` is ported (`scripts/check-rls.mjs`, run in CI's `check` job; CI's `db` job runs the pgTAP RLS tests with `supabase test db`). `check:store` and `check:template` are not ported yet | Store readiness lands with the store build. |
