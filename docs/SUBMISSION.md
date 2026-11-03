@@ -257,8 +257,7 @@ waitlist measures the same thing: demand for what comes next.
 - More reminder types from FR-50 (the cliffhanger, the weekly win), and reminders tested on iOS.
 - A hosted backend, so AI scoring works away from the laptop.
 - Validating the scoring weights against human-rated answers.
-- The rest of the Daylight design: XP for a sound reason on the feedback sheet and a shareable
-  floor card (designed in [direction.md](design/direction.md), not built).
+- A recorded frame-timing pass on a real phone (NFR-3): the harness is built ([#63](https://github.com/samiarif02/thelastroom/pull/63)) and installs as its own app; only the device run is left.
 - A store build: a release signing key, then Play Store and TestFlight.
 - Metrics: a PostHog sink for the events (cut for v1 by the owner, 1 Nov; every event is already
   defined, registered and logged on the device).

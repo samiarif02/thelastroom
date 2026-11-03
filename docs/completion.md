@@ -27,8 +27,9 @@ missing**.
 | First-time tips instead of a tour | Built | #57 (seven tips, `tip_shown` / `tip_done`, Settings → "Show tips again") | |
 | Transitions and animated back controls | Built | #58 (shared axis, fade-through, the room opening from its door, sheets that settle, 150 ms fades under reduced motion) | **Predictive back only on Android 14+**; the owner's realme (Android 13) gets the normal reverse transition |
 | On-device QA of the release build | Built | Status 51, #59 (the P0 missing `INTERNET` permission in release builds, now guarded by `check:standards`; Your file's latest vs best; resume hardening; copy fixes) | Only the realme 8 was tested; iOS never ran on a device |
-| XP for each sound reason on the feedback sheet | Not built | The sheet supports "+10 XP" (`FeedbackSheet.xp`, catalog only) | **Still missing:** the mission player never passes it; XP comes from rooms and Recall rounds (direction §Motion 3) |
-| A shareable floor card ("Share your floor card") | Not built | | **Still missing** (direction §6) |
+| XP for each sound reason on the feedback sheet | Built | [#61](https://github.com/samiarif02/thelastroom/pull/61): sound +10, close +5, guess 0; +5 per voice point; derived from stored picks, so a resume can't award twice | |
+| A shareable floor card ("Share your floor card") | Built | [#62](https://github.com/samiarif02/thelastroom/pull/62): a 1080 × 1350 card through the system share sheet, on the floor-cleared screen and the Chapter 1 report; `floor_card_shared` | |
+| The resume bug from the phone check (BUG-2) | Fixed | [#63](https://github.com/samiarif02/thelastroom/pull/63): a tip's spotlight passed the tap to the reason card underneath; card tips now only close | |
 | The APK release | Partly | The Release APK workflow and a draft release (#29) | Published only when the owner asks |
 
 ## Summary (2026-11-01, updated for wave 6)
@@ -43,8 +44,8 @@ missing**.
     superseded by ADR 0006's AI scoring.
   - FR-50's extra reminder types: brief 26. iOS reminders: cut line #5.
 - **Still missing:**
-  - a recorded frame-timing pass on a device (NFR-3; #37 measured a profile web build only);
-  - from wave 6's design: XP per sound reason, the shareable floor card (table above).
+  - a recorded frame-timing pass on a device (NFR-3). #63 built the harness (8 paths, its own app
+    id) and cut idle repaints (the tower at rest 394 → 11 objects a frame); the realme run is left.
 
 ## Closing the gaps (the lead's plan, 2026-11-01; briefs 30–32 landed as #37, #38, #39)
 
@@ -103,7 +104,7 @@ missing**.
 | --- | --- | --- | --- | --- |
 | NFR-1 | Cinematic design, no stock Material, tokens only | Built | #6, #10, #11, #16, #20, #21, #32, #35 | |
 | NFR-2 | Accessibility: AA, 44 pt, 2x text, reduced motion, labels | Built | #11 (contrast tests), widget tests at 2x text and reduced motion across features | |
-| NFR-3 | 60 fps mid-range Android; web first frame < 3 s | Partly | Branded web loader (#11, #24); #37 (a profile web bundle measured in Chrome, idle faces stilled) | **Still missing:** no recorded frame-timing pass on a device |
+| NFR-3 | 60 fps mid-range Android; web first frame < 3 s | Partly | Branded web loader (#11, #24); #37 (a profile web bundle measured in Chrome, idle faces stilled); #63 (the device harness, idle repaint cuts, every p90 build time under 16.6 ms on the test runner) | **Still missing:** the run on a device |
 | NFR-4 | Chapter 1 offline; designed offline states | Built | #12, #17, #30 (every store failure has a designed card) | |
 | NFR-5 | No secret in the app | Built | #1, #17, #25; `check:secrets` in CI | |
 | NFR-6 | Honesty | Built | #29 (README "Honest limits") | |
