@@ -36,7 +36,7 @@ void main() {
     await firstLineTyped(tester);
     final size = tester.getSize(find.byType(NextControl));
     expect(size.height, greaterThanOrEqualTo(48));
-    expect(find.textContaining('NEXT'), findsOneWidget);
+    expect(find.textContaining(NextControl.label), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('^Next')), findsOneWidget);
   });
 
@@ -82,10 +82,7 @@ void main() {
     final first = lineOnScreen(tester);
     await rig.run(const Duration(seconds: 2));
     await rig.tapScene();
-    expect(
-      find.textContaining(NextControl.pausedLabel.toUpperCase()),
-      findsOne,
-    );
+    expect(find.textContaining(NextControl.pausedLabel), findsOne);
     await rig.run(const Duration(seconds: 10));
     expect(lineOnScreen(tester), first, reason: 'paused, it waits');
     await rig.tapNext();

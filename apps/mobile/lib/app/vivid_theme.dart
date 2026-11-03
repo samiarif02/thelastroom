@@ -4,7 +4,7 @@ import 'package:brand/brand.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../app/providers.dart';
+import 'providers.dart';
 
 /// Where the player's theme pick lives on the device.
 abstract interface class ThemeStore {
@@ -30,9 +30,11 @@ final themeStoreProvider = Provider<ThemeStore>(
   (ref) => const SharedPreferencesThemeStore(),
 );
 
-/// The vivid theme (brief 28): the default at first, then the saved pick as soon as it loads,
-/// unless the player already picked (their pick wins and is saved). The app sets
-/// `BrandVivid.current` from it and rebuilds, so every screen follows.
+/// The vivid theme (brief 28). Settings' theme picker went with Daylight (brief 46: one
+/// considered look), but a player's earlier pick still colours the screens Daylight leaves
+/// alone (the debrief behind the kept Candidate assessment, the file, the report), so they look
+/// exactly as they did. The default at first, then the saved pick as soon as it loads. The app
+/// sets `BrandVivid.current` from it. [ThemeController.pick] is the dev catalog's only.
 final themeProvider = NotifierProvider<ThemeController, VividPalette>(
   ThemeController.new,
 );

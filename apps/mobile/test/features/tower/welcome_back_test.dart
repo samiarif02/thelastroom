@@ -78,7 +78,7 @@ void main() {
       expect(w.target, WelcomeBackTarget.recall);
       expect(w.action, 'Open the Recall Room');
       expect(w.speaker, 'Priya');
-      expect(w.kicker, 'WELCOME BACK · PRIYA');
+      expect(w.kicker, 'Welcome back · Priya');
     });
 
     test('nothing due: the next room, in its interviewer\'s voice', () {
@@ -87,7 +87,7 @@ void main() {
       final w = welcomeBackFor(recallDue: 0, next: next, progress: week);
       expect(w.target, WelcomeBackTarget.mission);
       expect(w.missionNumber, next.mission.number);
-      expect(w.action, 'Start Room ${next.mission.number}');
+      expect(w.action, 'Start room ${next.mission.number}');
       expect(w.interviewerId, next.mission.question.speakerId);
       expect(w.waiting, hasLength(2));
     });
@@ -242,21 +242,21 @@ void main() {
       tester,
     ) async {
       await pump(tester);
-      expect(find.text('WELCOME BACK · PRIYA'), findsNothing);
+      expect(find.text('Welcome back · Priya'), findsNothing);
       expect(visits.saved, now);
       expect(fired(), isEmpty);
     });
 
     testWidgets('earlier today: no card', (tester) async {
       await pump(tester, lastVisit: DateTime(2026, 11, 4, 7));
-      expect(find.text('WELCOME BACK · PRIYA'), findsNothing);
+      expect(find.text('Welcome back · Priya'), findsNothing);
     });
 
     testWidgets('back from a mission (quiet): no card, even a day later', (
       tester,
     ) async {
       await pump(tester, lastVisit: DateTime(2026, 11, 3, 20), quiet: true);
-      expect(find.text('WELCOME BACK · PRIYA'), findsNothing);
+      expect(find.text('Welcome back · Priya'), findsNothing);
       expect(visits.saved, now);
     });
 
@@ -271,7 +271,7 @@ void main() {
           textScale: scale,
           reduceMotion: reduced,
         );
-        expect(find.text('WELCOME BACK · PRIYA'), findsOneWidget);
+        expect(find.text('Welcome back · Priya'), findsOneWidget);
         expect(
           find.text('2 traps are waiting in the Recall Room.'),
           findsOneWidget,
@@ -300,10 +300,10 @@ void main() {
           textScale: scale,
           reduceMotion: reduced,
         );
-        expect(find.text('Start Room 1'), findsOneWidget);
+        expect(find.text('Start room 1'), findsOneWidget);
         await tester.tap(find.bySemanticsLabel(WelcomeBackCard.dismiss));
         await pumpThrough(tester, const Duration(seconds: 1));
-        expect(find.text('WELCOME BACK · PRIYA'), findsNothing);
+        expect(find.text('Welcome back · Priya'), findsNothing);
         expect(analytics.events.last.$2, {
           'action': 'dismissed',
           'target': 'mission',
@@ -316,7 +316,7 @@ void main() {
 
     testWidgets('nothing due: its button starts the next room', (tester) async {
       await pump(tester, lastVisit: DateTime(2026, 11, 2), due: 0);
-      await tester.tap(find.text('Start Room 1'));
+      await tester.tap(find.text('Start room 1'));
       await pumpThrough(tester, const Duration(seconds: 1));
       expect(find.text('mission 1'), findsOneWidget);
     });

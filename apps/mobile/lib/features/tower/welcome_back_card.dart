@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
 import '../progression/progression.dart';
 import '../recall/recall_controller.dart';
 import 'tower_rooms.dart';
@@ -91,9 +91,9 @@ class _WelcomeBackCardState extends ConsumerState<WelcomeBackCard> {
     }
     final reduced = MediaQuery.disableAnimationsOf(context);
     return AnimatedSwitcher(
-      duration: reduced ? BrandMotion.reducedMotionFade : BrandMotion.standard,
-      switchInCurve: BrandMotion.enter,
-      switchOutCurve: BrandMotion.exit,
+      duration: reduced ? DaylightMotion.colour : DaylightMotion.move,
+      switchInCurve: DaylightMotion.ease,
+      switchOutCurve: DaylightMotion.ease,
       layoutBuilder: (current, previous) => Stack(
         alignment: Alignment.topCenter,
         children: [...previous, ?current],
@@ -113,7 +113,7 @@ class _WelcomeBackCardState extends ConsumerState<WelcomeBackCard> {
           ? const SizedBox(width: double.infinity)
           : Padding(
               key: const ValueKey('welcome'),
-              padding: const EdgeInsets.only(bottom: BrandSpace.md),
+              padding: const EdgeInsets.only(bottom: DaylightSpace.s16),
               child: _Card(
                 welcome: welcome,
                 onFollow: () => _follow(welcome),
@@ -136,8 +136,18 @@ class _Card extends StatelessWidget {
   final VoidCallback onFollow;
   final VoidCallback onDismiss;
 
+  static const double _face = 56;
+  static const double _faceHeight = 64;
+  static const double _icon = 18;
+
+  static IconData _iconOf(WaitingKind kind) => switch (kind) {
+    WaitingKind.recall => PhosphorFill.cards,
+    WaitingKind.room => PhosphorFill.door,
+    WaitingKind.week => PhosphorFill.circleHalf,
+  };
+
   @override
-  Widget build(BuildContext context) => VividPanel(
+  Widget build(BuildContext context) => DaylightPanel(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -145,71 +155,79 @@ class _Card extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            ArchPortrait(
+              person: CastPeople.byId(welcome.interviewerId),
+              expression: CastExpression.smile,
+              width: _face,
+              height: _faceHeight,
+              ground: DaylightColors.recallSoft,
+              semanticLabel: welcome.speaker,
+            ),
+            const SizedBox(width: DaylightSpace.s12),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: BrandSpace.sm),
-                child: Text(welcome.kicker, style: BrandVividType.kicker),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    welcome.kicker,
+                    style: DaylightType.caption3.copyWith(
+                      color: DaylightColors.recall,
+                    ),
+                  ),
+                  const SizedBox(height: DaylightSpace.s2),
+                  Semantics(
+                    header: true,
+                    child: Text(welcome.greeting, style: DaylightType.heading6),
+                  ),
+                ],
               ),
             ),
-            Pressable(
-              label: WelcomeBackCard.dismiss,
-              onTap: onDismiss,
-              child: SizedBox.square(
-                dimension: BrandSpace.minTarget,
-                child: Center(
-                  child: CustomPaint(
-                    size: const Size.square(_cross),
-                    painter: _Cross(BrandVivid.onDeepSoft),
-                  ),
-                ),
-              ),
+            const SizedBox(width: DaylightSpace.s8),
+            IconTile.quiet(
+              icon: PhosphorBold.x,
+              semanticLabel: WelcomeBackCard.dismiss,
+              onPressed: onDismiss,
             ),
           ],
         ),
-        Semantics(
-          header: true,
-          child: Text(welcome.greeting, style: BrandVividType.row),
-        ),
-        const SizedBox(height: BrandSpace.sm),
-        for (final line in welcome.waiting)
+        const SizedBox(height: DaylightSpace.s12),
+        for (final (i, line) in welcome.waiting.indexed)
           Padding(
-            padding: const EdgeInsets.only(bottom: BrandSpace.xs),
-            child: Text(line, style: BrandVividType.body),
+            padding: const EdgeInsets.only(bottom: DaylightSpace.s4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 1),
+                  child: Icon(
+                    _iconOf(
+                      i < welcome.kinds.length
+                          ? welcome.kinds[i]
+                          : WaitingKind.week,
+                    ),
+                    size: _icon,
+                    color: DaylightColors.recall,
+                  ),
+                ),
+                const SizedBox(width: DaylightSpace.s8),
+                Expanded(child: Text(line, style: DaylightType.body5)),
+              ],
+            ),
           ),
-        const SizedBox(height: BrandSpace.sm),
-        VividButton(
+        const SizedBox(height: DaylightSpace.s8),
+        TactileButton(
           label: welcome.action,
-          // The tower's one amber button stays the hero's "Play".
-          primary: false,
-          expand: true,
+          icon: switch (welcome.target) {
+            WelcomeBackTarget.recall => PhosphorBold.cards,
+            WelcomeBackTarget.mission => PhosphorFill.play,
+            WelcomeBackTarget.progress => PhosphorBold.userCircle,
+          },
+          // Recall's colour: the tower's one honey button stays the up-next card's.
+          tone: TactileTone.recall,
+          compact: true,
           onPressed: onFollow,
         ),
       ],
     ),
   );
-
-  static const double _cross = 14;
-}
-
-/// The dismiss mark: two thin strokes.
-class _Cross extends CustomPainter {
-  const _Cross(this.color);
-
-  final Color color;
-
-  static const double _stroke = 1.6;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = _stroke
-      ..strokeCap = StrokeCap.round;
-    canvas
-      ..drawLine(Offset.zero, Offset(size.width, size.height), paint)
-      ..drawLine(Offset(size.width, 0), Offset(0, size.height), paint);
-  }
-
-  @override
-  bool shouldRepaint(_Cross old) => old.color != color;
 }

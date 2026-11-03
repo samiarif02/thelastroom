@@ -1,6 +1,7 @@
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
+import 'chapter_tint.dart';
 import 'tactile.dart';
 
 /// What a [TactileButton] is for.
@@ -10,6 +11,14 @@ enum TactileTone {
 
   /// The welcome-back card's button, so it never competes with the honey up-next button.
   recall,
+
+  /// A second action beside or below the honey one ("Send a test reminder", "Not now"): sand
+  /// with the sand-2 edge, ink text, on paper or inside a white card. Never the main action.
+  quiet,
+
+  /// The honey button on a saturated floor (the reward), the same face with the floor's deep
+  /// edge read from [ChapterTint].
+  floor,
 }
 
 /// The primary action (direction.md, "Shared kit"): honey, 56 tall, a hard edge below, and it
@@ -59,6 +68,16 @@ class TactileButton extends StatelessWidget {
               DaylightColors.recall,
               DaylightColors.recallDeep,
               DaylightColors.raised,
+            ),
+            TactileTone.quiet => (
+              DaylightColors.sand,
+              DaylightColors.sand2,
+              DaylightColors.ink,
+            ),
+            TactileTone.floor => (
+              DaylightColors.honey,
+              ChapterTint.floorOf(context).deep,
+              DaylightColors.onHoney,
             ),
           };
     final text = compact ? DaylightType.buttonMedium : DaylightType.buttonLarge;

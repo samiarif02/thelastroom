@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
 import '../../app/router.dart';
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
 import '../voice/voice_controller.dart';
 import '../voice/voice_player.dart';
 import 'mission_controller.dart';
@@ -44,7 +44,7 @@ class MissionScreen extends ConsumerWidget {
           key: ValueKey(number),
           number: number,
           onExit: () => context.go(
-            mission!.leadsToReport ? Routes.report : Routes.tower(lit: number),
+            _afterRoom(mission!, firstClear: _firstClear(ref, number)),
           ),
           onLeave: () => context.go(Routes.tower()),
         ),
@@ -68,7 +68,7 @@ class MissionScreen extends ConsumerWidget {
       AsyncData(:final value) when value.saved != null => Stack(
         fit: StackFit.expand,
         children: [
-          const _DarkRoom(),
+          _DarkRoom(grade: value.mission.grade),
           ResumeSheet(
             grade: value.mission.grade,
             onContinue: ref
@@ -86,9 +86,7 @@ class MissionScreen extends ConsumerWidget {
         // The Tower lights this room and shows the next one glowing (brief 13); Chapter 1's
         // review opens its report instead (brief 24).
         onExit: () => context.go(
-          value.mission.leadsToReport
-              ? Routes.report
-              : Routes.tower(lit: number),
+          _afterRoom(value.mission, firstClear: value.attemptNumber == 1),
         ),
         onLeave: () => context.go(Routes.tower()),
       ),
@@ -108,26 +106,80 @@ class MissionScreen extends ConsumerWidget {
   }
 }
 
-/// Loading: the room before the lamp is fully on.
-class _DarkRoom extends StatelessWidget {
-  const _DarkRoom();
-
-  static const double _lampWidth = 96;
-
-  @override
-  Widget build(BuildContext context) => ColoredBox(
-    color: BrandVivid.night,
-    child: Center(
-      child: Semantics(
-        label: 'The room is being prepared',
-        child: const SizedBox(width: _lampWidth, child: BankersLamp()),
-      ),
-    ),
-  );
+/// Where a finished room goes: the first clear of a floor's last room is celebrated (floor
+/// cleared, brief 46, which leads on to Chapter 1's report); otherwise the tower, lighting the
+/// room. A replay of the last room goes where it always did.
+String _afterRoom(Mission mission, {required bool firstClear}) {
+  if (mission.closesChapter && firstClear) {
+    return Routes.floorCleared(mission.chapter);
+  }
+  return mission.leadsToReport
+      ? Routes.report
+      : Routes.tower(lit: mission.number);
 }
 
-/// The error state: a door that won't open, in the film's language. Never the exception's
-/// text; that goes to the log.
+/// Whether the voice attempt being played is the room's first.
+bool _firstClear(WidgetRef ref, int number) =>
+    ref.read(voiceControllerProvider(number)).value?.attemptNumber == 1;
+
+/// Loading: the room's shape in the floor's colours before it fills in (a skeleton shaped
+/// like the screen, never a spinner).
+class _DarkRoom extends StatelessWidget {
+  const _DarkRoom({this.grade = ChapterGrade.lobby});
+
+  final ChapterGrade grade;
+
+  static const double _bubble = 88;
+  static const double _card = 72;
+
+  @override
+  Widget build(BuildContext context) {
+    final f = grade.floor;
+    Widget block(double height, Color color, double radius) => SizedBox(
+      height: height,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+      ),
+    );
+    return DaylightGround(
+      color: f.tint,
+      floor: f,
+      child: Semantics(
+        label: 'The room is being prepared',
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+              DaylightSpace.s16,
+              DaylightSpace.s64,
+              DaylightSpace.s16,
+              DaylightSpace.s16,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                block(RoomStage.defaultHeight, f.soft, DaylightRadius.panel),
+                const SizedBox(height: DaylightSpace.s16),
+                block(_bubble, DaylightColors.raised, DaylightRadius.card),
+                const SizedBox(height: DaylightSpace.s24),
+                for (var i = 0; i < 3; i++) ...[
+                  block(_card, DaylightColors.raised, DaylightRadius.card),
+                  const SizedBox(height: DaylightSpace.s8),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The error state: a door that won't open, said calmly. Never the exception's text; that goes
+/// to the log.
 class _LockedDoor extends StatefulWidget {
   const _LockedDoor({required this.title, required this.line, this.onLog});
 
@@ -137,10 +189,10 @@ class _LockedDoor extends StatefulWidget {
   /// Logs the error behind a broken room; null for a room that's simply not open yet.
   final VoidCallback? onLog;
 
-  static const String brokenTitle = 'THIS ROOM IS LOCKED';
+  static const String brokenTitle = 'This room is locked';
   static const String broken =
       'Something went wrong setting the scene. Your progress is safe on this device.';
-  static const String notYetTitle = 'THIS ROOM IS STILL LOCKED';
+  static const String notYetTitle = 'This room is still locked';
   static String notYet(Mission before) =>
       'Finish “${before.title}” to open this room.';
   static const String back = 'Back to the tower';
@@ -150,6 +202,9 @@ class _LockedDoor extends StatefulWidget {
 }
 
 class _LockedDoorState extends State<_LockedDoor> {
+  static const double _tile = 56;
+  static const double _glyph = 28;
+
   @override
   void initState() {
     super.initState();
@@ -157,44 +212,50 @@ class _LockedDoorState extends State<_LockedDoor> {
   }
 
   @override
-  Widget build(BuildContext context) => Stack(
-    fit: StackFit.expand,
-    children: [
-      const VividBackdrop(),
-      SafeArea(
-        minimum: const EdgeInsets.all(BrandSpace.lg),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Semantics(
-                  header: true,
-                  child: Text(
-                    widget.title,
-                    textAlign: TextAlign.center,
-                    style: BrandVividType.kicker.copyWith(
-                      color: ChapterGrade.lobby.glow,
-                    ),
-                  ),
+  Widget build(BuildContext context) => DaylightGround(
+    child: SafeArea(
+      minimum: const EdgeInsets.all(DaylightSpace.s24),
+      child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: _tile,
+                height: _tile,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: DaylightColors.sand,
+                  borderRadius: BorderRadius.circular(DaylightRadius.card),
                 ),
-                const SizedBox(height: BrandSpace.md),
-                Text(
-                  widget.line,
-                  textAlign: TextAlign.center,
-                  style: BrandVividType.title,
+                child: const Icon(
+                  PhosphorBold.lockSimple,
+                  size: _glyph,
+                  color: DaylightColors.ink2,
                 ),
-                const SizedBox(height: BrandSpace.lg),
-                VividButton(
-                  label: _LockedDoor.back,
-                  onPressed: () => context.go(Routes.tower()),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: DaylightSpace.s16),
+              Semantics(
+                header: true,
+                child: Text(widget.title, style: DaylightType.heading5),
+              ),
+              const SizedBox(height: DaylightSpace.s8),
+              Text(
+                widget.line,
+                style: DaylightType.body3.copyWith(color: DaylightColors.ink2),
+              ),
+              const SizedBox(height: DaylightSpace.s24),
+              TactileButton(
+                label: _LockedDoor.back,
+                icon: PhosphorBold.buildings,
+                onPressed: () => context.go(Routes.tower()),
+              ),
+            ],
           ),
         ),
       ),
-    ],
+    ),
   );
 }
 

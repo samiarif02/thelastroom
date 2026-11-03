@@ -68,7 +68,11 @@ class SkillBadge extends StatelessWidget {
               ),
             ),
             const SizedBox(height: DaylightSpace.s8),
-            Text(name, style: DaylightType.body5, textAlign: TextAlign.center),
+            Text(
+              name,
+              style: DaylightType.caption3,
+              textAlign: TextAlign.center,
+            ),
             if (hint case final hint?)
               Text(
                 hint,

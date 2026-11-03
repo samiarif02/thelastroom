@@ -9,7 +9,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/audio/game_sounds.dart';
 import '../../core/profile/profile_repository.dart';
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
+import '../../ui/film/film_overlay.dart';
+import '../../ui/haptics.dart';
+import '../../ui/subtitle/typewriter_subtitle.dart';
 import '../debrief/ai_score.dart';
 import '../debrief/debrief_facts.dart';
 import '../debrief/debrief_view.dart';
@@ -18,15 +21,14 @@ import 'mission_lookup.dart';
 import 'scene/epilogue_scene.dart';
 import 'scene/lower_third.dart';
 import 'scene/mission_card.dart';
-import 'scene/mission_set.dart';
-import 'scene/scene_scrim.dart';
+import 'scene/room_layout.dart';
 import 'widgets/beat_timer.dart';
 import 'widgets/build_panel.dart';
+import 'widgets/choice_card.dart';
 import 'widgets/draft_panel.dart';
 import 'widgets/leave_control.dart';
 import 'widgets/next_control.dart';
 import 'widgets/scene_notes.dart';
-import 'widgets/trust_meter.dart';
 
 /// Where the scene is. The order matters: later stages never go back.
 enum SceneStage {
@@ -72,12 +74,15 @@ final decisionClockProvider = Provider<Duration Function()>(
       () => SchedulerBinding.instance.currentSystemFrameTimeStamp,
 );
 
-/// One mission, played as a film scene (FR-10–FR-15): title card, letterbox, the interviewer's
-/// lines and question, the push in, draft first, three beats on answer cards with the trust
-/// meter beating, the follow-up on a hard cut, the reply, then the dossier.
+/// One mission, played in its room (FR-10–FR-15; Daylight in brief 46, direction.md §2–3): the
+/// title card, the interviewer's lines and question typing out in the speech bubble over the
+/// room, draft first, three beats on pick cards with "Lock in line B", "why that line?" with
+/// the feedback sheet, the follow-up, the reply, then the dossier (kept as it is, owner's
+/// rule). Whoever is speaking is the one in the room: a panel's second interviewer takes the
+/// lead's place while they talk, never over their face (the playthrough's note).
 ///
 /// The game state (picks, the follow-up, the score) is [MissionController]'s; this widget only
-/// runs the camera, the subtitles and the timing, and says what happened to [GameSounds].
+/// runs the scene, the bubble and the timing, and says what happened to [GameSounds].
 class MissionPlayer extends ConsumerStatefulWidget {
   const MissionPlayer({
     super.key,
@@ -104,8 +109,28 @@ class MissionPlayer extends ConsumerStatefulWidget {
   /// How long "Too fast" stays up after a guess.
   static const Duration guessCueFor = Duration(milliseconds: 2600);
 
-  /// A reaction holds this long once typed before the next beat's cards come up.
-  static const Duration reactionHold = Duration(milliseconds: 1400);
+  /// The feedback sheet holds this long before the next beat's cards come up, unless its
+  /// "Next" is tapped first.
+  static const Duration reactionHold = Duration(milliseconds: 3200);
+
+  /// "Lock in line B", or before a pick.
+  static String lockLabel(String? letter) =>
+      letter == null ? 'Lock in a line' : 'Lock in line $letter';
+
+  /// The feedback sheet's verdicts (direction.md §3).
+  static const String soundTitle = "That's the principle.";
+  static const String closeTitle = 'Close, but not quite.';
+  static const String guessTitle = 'You barely looked at those.';
+
+  /// The sheet's next step.
+  static String nextStep(BeatKind? next) => switch (next) {
+    null => 'Next: the follow-up',
+    BeatKind.open => 'Next: open the answer',
+    BeatKind.evidence => 'Next: back it up',
+    BeatKind.land => 'Next: land the answer',
+  };
+  static const String sayWhy = 'Next: say why';
+  static const String yourLine = 'Your line';
 
   /// A typed interviewer line moves on by itself after this (owner, 2026-10-30), unless the
   /// player has paused it or switched auto-advance off. Never applies to choosing an answer.
@@ -122,6 +147,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   static const Duration _afterLock = Duration(milliseconds: 900);
   static const Duration _beforeFollowUp = Duration(milliseconds: 700);
   static const Duration _beforeDebrief = Duration(milliseconds: 1100);
+  static const Duration _questionRest = Duration(milliseconds: 700);
 
   final TypewriterController _typer = TypewriterController();
   late final AppLifecycleListener _lifecycle;
@@ -140,9 +166,6 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   /// The beat on screen. It trails the controller's by the rest after a lock, so the locked
   /// line stays lit before the next beat's cards arrive.
   int _beatShown = 0;
-  bool _bars = false;
-  bool _closeUp = false;
-  bool _tight = false;
   bool _lineTyped = false;
   BeatPhase _phase = BeatPhase.cards;
 
@@ -191,6 +214,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   @override
   void initState() {
     super.initState();
+    // Resolved now, not lazily: `dispose` stops the sound, and `ref` can't be read by then.
+    _sounds;
     if (_game.resumed) _resumeScene();
     _lifecycle = AppLifecycleListener(
       onPause: () => _sounds.stopAll(),
@@ -203,11 +228,9 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   /// Picks up a left attempt: straight to the close-up, at the beat (or the why) it stopped at.
   void _resumeScene() {
     final game = _game;
-    _closeUp = true;
     _lineTyped = true;
     if (game.beatsDone) {
       _stage = SceneStage.followUp;
-      _tight = true;
       _lineTyped = false;
     } else if (game.plays.isEmpty &&
         game.mission.offersDraft &&
@@ -226,6 +249,10 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   @override
   void dispose() {
     _changeTimer?.cancel();
+    _reactionTimer?.cancel();
+    for (final t in _rests) {
+      t.cancel();
+    }
     _lifecycle.dispose();
     _countdown.dispose();
     _typer.dispose();
@@ -238,10 +265,20 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     setState(() => _stage = stage);
   }
 
+  /// The scene's rests, as timers: leaving the room cancels the ones still to run.
+  final Set<Timer> _rests = {};
+
   Future<void> _after(Duration rest, VoidCallback then) async {
     final still = MediaQuery.disableAnimationsOf(context);
-    await Future<void>.delayed(still ? Duration.zero : rest);
-    if (mounted) then();
+    final done = Completer<void>();
+    late final Timer timer;
+    timer = Timer(still ? Duration.zero : rest, () {
+      _rests.remove(timer);
+      if (mounted) then();
+      done.complete();
+    });
+    _rests.add(timer);
+    return done.future;
   }
 
   // The scene's beats, in order.
@@ -250,13 +287,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     if (_stage != SceneStage.card) return;
     _sounds.ambience(_game.mission.chapter);
     _go(SceneStage.opening);
-    setState(() => _bars = true);
-  }
-
-  void _barsSettled() {
-    if (_bars && _stage == SceneStage.opening) {
-      unawaited(_after(_beforeLines, _startLines));
-    }
+    // No letterbox in the daylit room: the lines start after a breath.
+    unawaited(_after(_beforeLines, _startLines));
   }
 
   void _startLines() {
@@ -271,7 +303,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     if (_onQuestion) {
       _sounds.questionLands();
       _go(SceneStage.push);
-      setState(() => _closeUp = true);
+      // The question has landed: a beat to read it, then the draft or the cards.
+      unawaited(_after(_questionRest, _pushDone));
     } else if (_profile.autoAdvance) {
       _paused = false;
       unawaited(_countdown.forward(from: 0));
@@ -311,7 +344,6 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
 
   void _pushDone() {
     if (_stage != SceneStage.push) return;
-    setState(() => _bars = false);
     final game = _game;
     _go(
       game.mission.offersDraft && !game.draftDone
@@ -333,6 +365,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
         _cardDone();
       case SceneStage.opening:
         _startLines();
+      case SceneStage.push:
+        _pushDone();
       case SceneStage.lines || SceneStage.followUp when !_typer.isComplete:
         _completeLine();
       case SceneStage.beats
@@ -493,24 +527,27 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
       then();
       return;
     }
+    if (quality == PickQuality.strong) successTap();
     setState(() {
       _phase = BeatPhase.reaction;
       _reaction = line.addressedTo(_game.playerName);
       _quality = quality;
       _afterReaction = then;
-      _lineTyped = false;
+    });
+    // Reading time, kept under reduced motion too: only movement goes, never the time to read.
+    _reactionTimer?.cancel();
+    _reactionTimer = Timer(MissionPlayer.reactionHold, () {
+      if (mounted) _reactionDone();
     });
   }
 
-  void _reactionTyped() {
-    setState(() => _lineTyped = true);
-    unawaited(_after(MissionPlayer.reactionHold, _reactionDone));
-  }
+  Timer? _reactionTimer;
 
   /// On from the reaction (its hold ran out, or a tap).
   void _reactionDone() {
     final then = _afterReaction;
     if (_phase != BeatPhase.reaction || then == null) return;
+    _reactionTimer?.cancel();
     _afterReaction = null;
     then();
   }
@@ -538,8 +575,9 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
 
   void _cutToFollowUp() {
     _go(SceneStage.followUp);
+    final line = _game.followUpLine;
+    if (line != null) _sounds.followUpChallenge(line.speakerId);
     setState(() {
-      _tight = true;
       _lineTyped = false;
       _selected = null;
       _decidedIn = null;
@@ -570,154 +608,190 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
         .watch(missionControllerProvider(widget.number))
         .requireValue;
     final mission = game.mission;
-    final lead = mission.lead;
     final grade = mission.grade;
-    final size = MediaQuery.sizeOf(context);
-    final regionTop =
-        MissionSet.faceBottom(size, _shotsFor(_stage)) + BrandSpace.sm;
 
     if (_stage == SceneStage.debrief && game.score != null) {
-      return DebriefView(
-        mission: mission,
-        score: game.score!,
-        trust: game.trust,
-        firstTry: game.firstTry,
-        reasoning: reasoningOf(mission, game.plays),
-        baselineDraft: game.baselineDraft,
-        // The answer for the AI recruiter (brief 22); the dossier falls back by itself.
-        scoreRequest: game.followUp != null && game.reply != null
-            ? ScoreRequest(
-                mission: mission,
-                plays: game.plays,
-                followUp: game.followUp!,
-                reply: game.reply!,
-              )
-            : null,
-        onContinue: _afterDebrief,
+      // The Candidate assessment, exactly as it was (the owner's rule): its own ground and
+      // the film grain it always wore.
+      return FilmGrain(
+        child: DebriefView(
+          mission: mission,
+          score: game.score!,
+          trust: game.trust,
+          firstTry: game.firstTry,
+          reasoning: reasoningOf(mission, game.plays),
+          baselineDraft: game.baselineDraft,
+          // The answer for the AI recruiter (brief 22); the dossier falls back by itself.
+          scoreRequest: game.followUp != null && game.reply != null
+              ? ScoreRequest(
+                  mission: mission,
+                  plays: game.plays,
+                  followUp: game.followUp!,
+                  reply: game.reply!,
+                )
+              : null,
+          onContinue: _afterDebrief,
+        ),
       );
     }
     if (_stage == SceneStage.epilogue) {
-      return EpilogueScene(
-        lines: [
-          for (final line in mission.epilogue)
-            line.addressedTo(game.playerName),
-        ],
-        grade: grade,
-        sounds: _sounds,
-        doneLabel: mission.leadsToReport
-            ? DebriefView.reportLabel
-            : DebriefView.continueLabel,
-        onDone: widget.onExit,
+      return FilmGrain(
+        child: EpilogueScene(
+          lines: [
+            for (final line in mission.epilogue)
+              line.addressedTo(game.playerName),
+          ],
+          grade: grade,
+          sounds: _sounds,
+          doneLabel: mission.leadsToReport
+              ? DebriefView.reportLabel
+              : DebriefView.continueLabel,
+          onDone: widget.onExit,
+        ),
       );
     }
 
+    final f = grade.floor;
+    final insets = MediaQuery.paddingOf(context);
+    // At large text the room shrinks to a strip, so all the cards still fit above the dock.
+    final compact =
+        MediaQuery.textScalerOf(context).scale(DaylightSpace.s16) >
+        DaylightSpace.s16 * _compactAt;
+    final dock = _dock(game);
+    // Four lines to pick from: the room steps back to a strip, so every card fits above the
+    // dock without scrolling (brief 18: one tap per choice).
+    final fits = MediaQuery.sizeOf(context).height >= _roomFitsFrom
+        ? _cardsThatFit
+        : _cardsThatFit - 1;
+    final many =
+        (_stage == SceneStage.beats &&
+            _phase == BeatPhase.cards &&
+            game.optionsForBeat(_beatShown).length > fits) ||
+        (_stage == SceneStage.replies && game.replyOptions.length > fits);
     return PopScope<Object?>(
       // Back mid-mission never just closes the scene: it asks first, and keeps the attempt.
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && !_leaving) setState(() => _leaving = true);
       },
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ColoredBox(color: BrandVivid.night),
-          FilmOverlay(
-            grain: 0,
-            vignetteColor: grade.shadow,
-            child: HardCut(
-              shot: _tight,
-              onCut: () =>
-                  _sounds.followUpChallenge(game.followUp!.line.speakerId),
-              child: DollyCamera(
-                closeUp: _closeUp,
-                onPushEnd: _pushDone,
-                layers: MissionSet.layers(
-                  figure:
-                      SilhouetteFigure.byId[lead.id] ?? SilhouetteFigure.priya,
-                  grade: grade,
-                  figureLabel: '${lead.name}, the ${lead.role.toLowerCase()}',
-                  tight: _tight,
-                  expression: _expression,
+      child: DaylightGround(
+        color: f.tint,
+        floor: f,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Taps on the room itself (anywhere the cards, the draft and the dock aren't).
+            Positioned.fill(
+              child: Semantics(
+                button: true,
+                label: MissionPlayer.continueLabel,
+                onTap: _tap,
+                // One labelled node: the detector adds no second, unlabelled tap.
+                excludeSemantics: true,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _tap,
                 ),
               ),
             ),
-          ),
-          if (mission.timed &&
-              !_profile.calmMode &&
-              _stage == SceneStage.beats &&
-              _phase == BeatPhase.cards)
-            BeatTimer(
-              key: ValueKey(_beatShown),
-              running: _locked == null,
-              onExpired: _controller.timerExpired,
-              onPulse: _sounds.timerPulse,
-              builder: (context, dim, left) =>
-                  _TimerShade(dim: dim, left: left),
-            ),
-          SceneScrim(from: regionTop / size.height, grade: grade),
-          // Taps on the scene itself (anywhere the cards and the draft aren't).
-          Semantics(
-            button: true,
-            label: MissionPlayer.continueLabel,
-            onTap: _tap,
-            // One labelled node: the detector adds no second, unlabelled tap (1e's audit).
-            excludeSemantics: true,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _tap,
-            ),
-          ),
-          AnimatedLetterbox(
-            shown: _bars,
-            color: BrandVivid.night,
-            onSettled: _barsSettled,
-          ),
-          _Overlay(
-            regionTop: regionTop,
-            trust: _stage.index >= SceneStage.beats.index ? game.trust : null,
-            grade: grade,
-            onTapLowerThird:
-                _stage.index <= SceneStage.push.index ||
-                    _stage == SceneStage.followUp ||
-                    (_stage == SceneStage.beats &&
-                        (_phase == BeatPhase.why ||
-                            _phase == BeatPhase.reaction))
-                ? _tapLowerThird
-                : null,
-            guessCue: _guessCue,
-            children: _lowerThird(game, lead, grade),
-          ),
-          if (_stage == SceneStage.card)
-            // The card's title stays readable; the tap on it is one labelled button.
-            Semantics(
-              button: true,
-              label: MissionPlayer.cardContinueLabel,
-              onTap: _cardDone,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                excludeFromSemantics: true,
-                onTap: _cardDone,
-                child: MissionCard(mission: mission, onFinished: _cardDone),
+            SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _topBar(game),
+                  if (mission.timed &&
+                      !_profile.calmMode &&
+                      _stage == SceneStage.beats &&
+                      _phase == BeatPhase.cards &&
+                      mission.beats[_beatShown].build == null)
+                    BeatTimer(
+                      key: ValueKey(_beatShown),
+                      running: _locked == null,
+                      onExpired: _controller.timerExpired,
+                      onPulse: _sounds.timerPulse,
+                      builder: (context, dim, left) => TimerLine(
+                        elapsed: dim / BeatTimer.maxDim,
+                        secondsLeft: left,
+                      ),
+                    ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      hitTestBehavior: HitTestBehavior.deferToChild,
+                      padding: EdgeInsets.fromLTRB(
+                        DaylightSpace.s16,
+                        DaylightSpace.s12,
+                        DaylightSpace.s16,
+                        dock == null
+                            ? insets.bottom + DaylightSpace.s24
+                            : DaylightSpace.s16,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: _room(game, compact: compact, many: many),
+                      ),
+                    ),
+                  ),
+                  if (dock != null)
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        DaylightSpace.s16,
+                        DaylightSpace.s8,
+                        DaylightSpace.s16,
+                        insets.bottom + DaylightSpace.s16,
+                      ),
+                      child: dock,
+                    ),
+                ],
               ),
             ),
-          if (_stage != SceneStage.card && !_leaving)
             Positioned(
-              top: MediaQuery.paddingOf(context).top + BrandSpace.xs,
-              right: MediaQuery.paddingOf(context).right + BrandSpace.sm,
-              child: LeaveControl(
-                onPressed: () => setState(() => _leaving = true),
+              top: insets.top + DaylightSize.hit + DaylightSpace.s16,
+              left: DaylightSpace.s16,
+              right: DaylightSpace.s16,
+              child: Center(child: GuessCue(shown: _guessCue)),
+            ),
+            if (_stage == SceneStage.beats &&
+                _phase == BeatPhase.reaction &&
+                _reaction != null)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _feedback(game, _reaction!),
               ),
-            ),
-          if (_leaving)
-            LeaveSheet(
-              grade: grade,
-              onResume: () => setState(() => _leaving = false),
-              onLeave: _leave,
-            ),
-        ],
+            if (_stage == SceneStage.card)
+              // The card's title stays readable; the tap on it is one labelled button.
+              Semantics(
+                button: true,
+                label: MissionPlayer.cardContinueLabel,
+                onTap: _cardDone,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  excludeFromSemantics: true,
+                  onTap: _cardDone,
+                  child: MissionCard(mission: mission, onFinished: _cardDone),
+                ),
+              ),
+            if (_leaving)
+              LeaveSheet(
+                grade: grade,
+                onResume: () => setState(() => _leaving = false),
+                onLeave: _leave,
+              ),
+          ],
+        ),
       ),
     );
   }
+
+  /// Text this much larger than default shrinks the room to a strip.
+  static const double _compactAt = 1.3;
+
+  /// Cards that fit under the full room (direction.md §2: three at 390 × 844), and the
+  /// height from which they do; on a shorter phone, two.
+  static const int _cardsThatFit = 3;
+  static const double _roomFitsFrom = 840;
 
   Future<void> _leave() async {
     _changeTimer?.cancel();
@@ -726,131 +800,278 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     if (mounted) widget.onLeave();
   }
 
-  /// What sits in the lower third, under the face, at this stage.
-  List<Widget> _lowerThird(
-    MissionState game,
-    Interviewer lead,
-    ChapterGrade grade,
-  ) {
-    final sounds = _sounds;
-    Widget subtitle(SceneLine line, {required VoidCallback onComplete}) =>
-        IgnorePointer(
-          child: TypewriterSubtitle(
-            speaker: interviewerById(line.speakerId).name,
-            line: line.text,
-            grade: grade,
-            controller: _typer,
-            onCharacter: (c, _) => sounds.subtitleCharacter(line.speakerId, c),
-            onComplete: onComplete,
-          ),
-        );
+  /// The top bar: the way out, then where the answer stands (the beats once they start; the
+  /// floor and the room before), then trust.
+  Widget _topBar(MissionState game) {
+    final mission = game.mission;
+    final inBeats = _stage.index >= SceneStage.beats.index;
+    final beats = [for (final b in mission.beats) beatName(b.kind)];
+    final current = _stage.index > SceneStage.beats.index
+        ? beats.length
+        : _beatShown;
+    final within = switch (_phase) {
+      BeatPhase.cards => _locked == null ? 0.2 : 0.5,
+      BeatPhase.why || BeatPhase.reasons => 0.6,
+      BeatPhase.reaction => 0.9,
+    };
+    return DaylightTopBar(
+      leadingLabel: LeaveControl.label,
+      onLeading: _stage == SceneStage.card || _leaving
+          ? null
+          : () => setState(() => _leaving = true),
+      kicker: inBeats ? null : MissionCard.kicker(mission),
+      title: inBeats ? null : mission.title,
+      middle: inBeats
+          ? BeatProgress(
+              beats: beats,
+              current: current,
+              progress: _stage == SceneStage.beats ? within : 0,
+            )
+          : null,
+      trailing: inBeats
+          ? TrustPips(trust: _pips(game.trust), icon: PhosphorFill.handshake)
+          : null,
+    );
+  }
 
+  /// Trust (0–100) as the five pips.
+  static int _pips(int trust) => (trust / _perPip).round().clamp(0, _maxPips);
+  static const int _perPip = 20;
+  static const int _maxPips = 5;
+
+  /// Who's speaking now: the one the room shows (a panel's second interviewer takes the
+  /// lead's place while they talk).
+  Interviewer _speaker(MissionState game) {
+    final mission = game.mission;
+    final id = switch (_stage) {
+      SceneStage.lines || SceneStage.push => _lines[_line].speakerId,
+      SceneStage.followUp || SceneStage.replies => game.followUpLine?.speakerId,
+      SceneStage.beats when _phase == BeatPhase.reaction =>
+        _reaction?.speakerId,
+      SceneStage.beats when _phase != BeatPhase.cards =>
+        mission.beats[_beatShown].why?.line.speakerId,
+      _ => null,
+    };
+    return id == null ? mission.lead : interviewerById(id);
+  }
+
+  /// The bubble: the line typing out ([onComplete] when it's whole), or [line] already said.
+  Widget _bubble(
+    SceneLine line, {
+    VoidCallback? onComplete,
+    bool typed = false,
+    bool side = false,
+    TextStyle? style,
+  }) {
+    final who = interviewerById(line.speakerId);
+    final sounds = _sounds;
+    // The room around it takes the tap (complete the line, or move on): one region, so the
+    // first tap never misses (brief 18).
+    return IgnorePointer(
+      child: TypewriterSubtitle(
+        // A line already said and the same line typing are different bubbles: each starts fresh.
+        key: ValueKey('${line.speakerId}-${line.text}-$typed'),
+        daylight: true,
+        tailLeft: side,
+        floor: _game.mission.grade.floor,
+        lineStyle: style,
+        speaker: side ? who.name : '${who.name} · ${who.role.toLowerCase()}',
+        line: line.text,
+        play: !typed,
+        controller: typed ? null : _typer,
+        onCharacter: typed
+            ? null
+            : (c, _) => sounds.subtitleCharacter(line.speakerId, c),
+        onComplete: onComplete,
+      ),
+    );
+  }
+
+  /// What's in the room at this point, top to bottom.
+  List<Widget> _room(
+    MissionState game, {
+    required bool compact,
+    bool many = false,
+  }) {
+    final mission = game.mission;
+    final who = _speaker(game);
+    final person = CastPeople.byId(who.id);
+    final label = '${who.name}, the ${who.role.toLowerCase()}';
+    final tapRoom =
+        _stage.index <= SceneStage.push.index ||
+            _stage == SceneStage.followUp ||
+            (_stage == SceneStage.beats &&
+                (_phase == BeatPhase.why || _phase == BeatPhase.reaction))
+        ? _tapLowerThird
+        : _tap;
+    Widget room(Widget bubble) => GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      excludeFromSemantics: true,
+      onTap: tapRoom,
+      child: RoomWithBubble(
+        person: person,
+        expression: _expression,
+        bubble: bubble,
+        semanticLabel: label,
+        compact: compact,
+      ),
+    );
+    // Four cards to fit: the interviewer steps out of the room into a small arch beside her
+    // question, so every card is on screen at once.
+    Widget asked(
+      SceneLine line, {
+      VoidCallback? onComplete,
+      bool typed = true,
+    }) => many
+        ? GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            excludeFromSemantics: true,
+            onTap: tapRoom,
+            child: WhyHeader(
+              person: person,
+              expression: _expression,
+              semanticLabel: label,
+              compact: true,
+              bubble: _bubble(
+                line,
+                typed: typed,
+                onComplete: onComplete,
+                side: true,
+                style: DaylightType.body1,
+              ),
+            ),
+          )
+        : room(_bubble(line, typed: typed, onComplete: onComplete));
+    final question = game.question;
     switch (_stage) {
-      case SceneStage.card ||
-          SceneStage.opening ||
-          SceneStage.debrief ||
-          SceneStage.epilogue:
+      case SceneStage.card || SceneStage.opening:
+        // The room, before anyone speaks.
+        return [room(const SizedBox(height: RoomWithBubble.overlap))];
+      case SceneStage.debrief || SceneStage.epilogue:
         return const [];
       case SceneStage.lines || SceneStage.push:
-        return [
-          subtitle(_lines[_line], onComplete: _lineDone),
-          if (_lineTyped && !_onQuestion)
-            AnimatedBuilder(
-              animation: _countdown,
-              builder: (context, _) {
-                final counting = _profile.autoAdvance;
-                final left = 1 - _countdown.value;
-                return NextControl(
-                  grade: grade,
-                  onPressed: () {
-                    _sounds.uiTap();
-                    _nextLine();
-                  },
-                  remaining: counting ? left : null,
-                  secondsLeft: counting
-                      ? (left * MissionPlayer.autoAdvanceAfter.inSeconds).ceil()
-                      : null,
-                  paused: _paused,
-                );
-              },
-            ),
-        ];
+        return [room(_bubble(_lines[_line], onComplete: _lineDone))];
       case SceneStage.draft:
         return [
-          QuestionReminder(text: game.question.text, grade: grade),
-          const SizedBox(height: BrandSpace.sm),
-          DraftPanel(grade: grade, onDone: _draftDone),
+          room(_bubble(question, typed: true)),
+          const SizedBox(height: DaylightSpace.s16),
+          DraftPanel(grade: mission.grade, onDone: _draftDone),
         ];
       case SceneStage.beats:
-        final beat = game.mission.beats[_beatShown];
+        final beat = mission.beats[_beatShown];
         final build = beat.build;
-        return switch (_phase) {
-          BeatPhase.cards when build != null => [
-            QuestionReminder(text: game.question.text, grade: grade),
-            BuildPanel(
-              key: ValueKey('build-$_beatShown'),
-              label: buildLabel(_beatShown, game.mission.beats.length),
-              fragments: game.fragmentsForBeat(_beatShown),
-              placed: _placed,
-              grade: grade,
-              locked: _locked != null,
-              onArrived: _cardsArrived,
-              onToggle: _toggleFragment,
-              onLockIn: _lockBuilt,
-            ),
-          ],
-          BeatPhase.cards => [
-            QuestionReminder(text: game.question.text, grade: grade),
-            AnswerCards<AnswerOption>(
-              key: ValueKey('beat-$_beatShown'),
-              label: _selected != null && _locked == null
-                  ? changeHint
-                  : beatLabel(beat.kind, _beatShown, game.mission.beats.length),
-              items: game.optionsForBeat(_beatShown),
-              textOf: (o) => o.text,
-              grade: grade,
-              selected: _selected,
-              locked: _locked,
-              onArrived: _cardsArrived,
-              onPick: (o) => _pick(o, reply: false),
-            ),
-          ],
-          BeatPhase.why || BeatPhase.reasons => [
-            subtitle(
-              beat.why!.line.addressedTo(game.playerName),
-              onComplete: _whyTyped,
-            ),
-            if (_phase == BeatPhase.reasons) ...[
-              const SizedBox(height: BrandSpace.md),
-              AnswerCards<Reason>(
-                key: ValueKey('why-$_beatShown'),
-                label: reasonLabel,
-                items: game.reasonsForBeat(_beatShown),
-                textOf: (r) => r.text,
-                grade: grade,
-                selected: _reason,
-                locked: _reason,
-                onPick: _giveReason,
-              ),
+        final before = _beatShown == 0 ? null : game.plays[_beatShown - 1];
+        final soFar = before == null
+            ? null
+            : QuestionReminder(
+                label: beatName(mission.beats[_beatShown - 1].kind),
+                text: before.option.text,
+                grade: mission.grade,
+              );
+        if (_phase == BeatPhase.cards) {
+          return [
+            asked(question),
+            if (soFar != null && !many) ...[
+              const SizedBox(height: DaylightSpace.s12),
+              soFar,
             ],
-          ],
-          BeatPhase.reaction => [
-            subtitle(_reaction!, onComplete: _reactionTyped),
-          ],
-        };
-      case SceneStage.followUp || SceneStage.replies:
+            const SizedBox(height: DaylightSpace.s16),
+            if (build != null)
+              BuildPanel(
+                key: ValueKey('build-$_beatShown'),
+                label: buildLabel(_beatShown, mission.beats.length),
+                fragments: game.fragmentsForBeat(_beatShown),
+                placed: _placed,
+                grade: mission.grade,
+                locked: _locked != null,
+                onArrived: _cardsArrived,
+                onToggle: _toggleFragment,
+                onLockIn: _lockBuilt,
+              )
+            else
+              AnswerCards<AnswerOption>(
+                key: ValueKey('beat-$_beatShown'),
+                label: beatLabel(beat.kind, _beatShown, mission.beats.length),
+                helper: _selected != null && _locked == null
+                    ? changeHint
+                    : pickHelper,
+                items: game.optionsForBeat(_beatShown),
+                textOf: (o) => o.text,
+                grade: mission.grade,
+                selected: _selected,
+                locked: _locked,
+                onArrived: _cardsArrived,
+                onPick: (o) => _pick(o, reply: false),
+              ),
+          ];
+        }
+        // "Why that line?": the interviewer beside the question, the line said, the reasons.
+        final why = beat.why;
+        final said = game.plays.length > _beatShown
+            ? game.plays[_beatShown].option.text
+            : _locked?.text;
         return [
-          subtitle(game.followUpLine!, onComplete: _followUpTyped),
+          if (why != null)
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              excludeFromSemantics: true,
+              onTap: tapRoom,
+              child: WhyHeader(
+                person: person,
+                expression: _expression,
+                semanticLabel: label,
+                compact: compact,
+                bubble: _bubble(
+                  why.line.addressedTo(game.playerName),
+                  onComplete: _whyTyped,
+                  side: true,
+                  style: DaylightType.heading5,
+                ),
+              ),
+            )
+          else
+            room(_bubble(question, typed: true)),
+          if (said != null) ...[
+            const SizedBox(height: DaylightSpace.s16),
+            YourLine(label: MissionPlayer.yourLine, text: said),
+          ],
+          if (_phase != BeatPhase.why && why != null) ...[
+            const SizedBox(height: DaylightSpace.s24),
+            AnswerCards<Reason>(
+              key: ValueKey('why-$_beatShown'),
+              label: reasonLabel,
+              helper: reasonHelper,
+              items: game.reasonsForBeat(_beatShown),
+              textOf: (r) => r.text,
+              iconOf: (r) => principleIcon(r.text),
+              grade: mission.grade,
+              selected: _reason,
+              locked: _reason,
+              onPick: _giveReason,
+            ),
+          ],
+          // Room under the cards for the sheet that rises over them.
+          if (_phase == BeatPhase.reaction)
+            const SizedBox(height: DaylightSpace.s96 * 2),
+        ];
+      case SceneStage.followUp || SceneStage.replies:
+        final line = game.followUpLine!;
+        return [
+          if (_stage == SceneStage.replies)
+            asked(line)
+          else
+            room(_bubble(line, onComplete: _followUpTyped)),
           if (_stage == SceneStage.replies) ...[
-            const SizedBox(height: BrandSpace.md),
+            const SizedBox(height: DaylightSpace.s16),
             AnswerCards<AnswerOption>(
               key: const ValueKey('replies'),
-              label: _selected != null && _locked == null
+              label: replyLabel,
+              helper: _selected != null && _locked == null
                   ? changeHint
-                  : replyLabel,
+                  : pickHelper,
               items: game.replyOptions,
               textOf: (o) => o.text,
-              grade: grade,
+              grade: mission.grade,
               selected: _selected,
               locked: _locked,
               onArrived: _cardsArrived,
@@ -861,148 +1082,102 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     }
   }
 
-  /// The interviewer's face at this point of the scene (brief 16): a smile while she talks,
-  /// listening while you draft, thinking while you read the cards, a nod when you lock one in,
-  /// "hmm" on the follow-up, and a smile again at the dossier.
-  InterviewerExpression get _expression => switch (_stage) {
-    SceneStage.card ||
-    SceneStage.opening ||
-    SceneStage.lines ||
-    SceneStage.push ||
-    SceneStage.debrief ||
-    SceneStage.epilogue => InterviewerExpression.smile,
-    SceneStage.draft => InterviewerExpression.neutral,
-    // Her reaction: warm on a strong line, cooler on a weak one, sceptical of a guess.
+  /// The dock under the room: "Next" under a typed setup line, "Lock in line B" under the
+  /// cards (disabled until a pick). Null when there's nothing to press there.
+  Widget? _dock(MissionState game) {
+    final mission = game.mission;
+    final onCards =
+        (_stage == SceneStage.beats &&
+            _phase == BeatPhase.cards &&
+            mission.beats[_beatShown].build == null) ||
+        _stage == SceneStage.replies;
+    if (onCards) {
+      final items = _stage == SceneStage.replies
+          ? game.replyOptions
+          : game.optionsForBeat(_beatShown);
+      final picked = _selected;
+      final i = picked == null ? -1 : items.indexOf(picked);
+      return TactileButton(
+        label: MissionPlayer.lockLabel(i < 0 ? null : ChoiceCard.letterFor(i)),
+        icon: PhosphorBold.lockSimple,
+        onPressed: picked == null || _locked != null
+            ? null
+            : () => _say(reply: _stage == SceneStage.replies),
+      );
+    }
+    if (_stage == SceneStage.lines && _lineTyped && !_onQuestion) {
+      return AnimatedBuilder(
+        animation: _countdown,
+        builder: (context, _) {
+          final counting = _profile.autoAdvance;
+          final left = 1 - _countdown.value;
+          return NextControl(
+            grade: mission.grade,
+            onPressed: () {
+              _sounds.uiTap();
+              _nextLine();
+            },
+            remaining: counting ? left : null,
+            secondsLeft: counting
+                ? (left * MissionPlayer.autoAdvanceAfter.inSeconds).ceil()
+                : null,
+            paused: _paused,
+          );
+        },
+      );
+    }
+    return null;
+  }
+
+  /// The sheet after a beat (motion 3): her reaction, how it landed, and the next step.
+  Widget _feedback(MissionState game, SceneLine reaction) {
+    final mission = game.mission;
+    final who = interviewerById(reaction.speakerId);
+    final guessedFirst = _calledOut && _game.awaitingWhy;
+    final (tone, title) = switch (_quality) {
+      PickQuality.strong => (FeedbackTone.sound, MissionPlayer.soundTitle),
+      PickQuality.weak => (FeedbackTone.close, MissionPlayer.closeTitle),
+      PickQuality.guessed ||
+      null => (FeedbackTone.guess, MissionPlayer.guessTitle),
+    };
+    final nextIndex = _beatShown + 1;
+    final next = guessedFirst
+        ? MissionPlayer.sayWhy
+        : MissionPlayer.nextStep(
+            nextIndex < mission.beats.length
+                ? mission.beats[nextIndex].kind
+                : null,
+          );
+    return FeedbackSheet(
+      key: ValueKey('feedback-$_beatShown-${reaction.text}'),
+      person: CastPeople.byId(who.id),
+      tone: tone,
+      title: title,
+      // Her words, as she says them (the arch shows who).
+      note: reaction.text,
+      actionLabel: next,
+      onAction: _reactionDone,
+    );
+  }
+
+  /// The interviewer's face at this point (direction.md, the cast's states): talking while a
+  /// line types, listening while the player chooses or drafts, a nod when a line is locked in,
+  /// thinking on "why?", and the reaction's face after: a smile on a strong line, "hmm" on a
+  /// weak one or a guess.
+  CastExpression get _expression => switch (_stage) {
+    SceneStage.card || SceneStage.opening => CastExpression.smile,
+    SceneStage.lines || SceneStage.push || SceneStage.followUp =>
+      _lineTyped ? CastExpression.neutral : CastExpression.talk,
+    SceneStage.debrief || SceneStage.epilogue => CastExpression.smile,
+    SceneStage.draft => CastExpression.listening,
     SceneStage.beats when _phase == BeatPhase.reaction => switch (_quality) {
-      PickQuality.strong => InterviewerExpression.smile,
-      PickQuality.weak => InterviewerExpression.thinking,
-      PickQuality.guessed || null => InterviewerExpression.hmm,
+      PickQuality.strong => CastExpression.smile,
+      PickQuality.weak || PickQuality.guessed || null => CastExpression.hmm,
     },
     SceneStage.beats when _phase != BeatPhase.cards =>
-      InterviewerExpression.hmm,
+      _reason == null ? CastExpression.thinking : CastExpression.nod,
     SceneStage.beats ||
-    SceneStage.replies when _locked != null => InterviewerExpression.nod,
-    SceneStage.beats => InterviewerExpression.thinking,
-    SceneStage.followUp || SceneStage.replies => InterviewerExpression.hmm,
+    SceneStage.replies when _locked != null => CastExpression.nod,
+    SceneStage.beats || SceneStage.replies => CastExpression.listening,
   };
-
-  /// The framings the camera moves through at [stage]: the subtitles start below the lowest
-  /// the face gets in any of them.
-  static List<SceneShot> _shotsFor(SceneStage stage) => switch (stage) {
-    SceneStage.card ||
-    SceneStage.opening ||
-    SceneStage.lines ||
-    SceneStage.push => const [SceneShot.wide, SceneShot.close],
-    SceneStage.draft || SceneStage.beats => const [SceneShot.close],
-    SceneStage.followUp ||
-    SceneStage.replies ||
-    SceneStage.debrief ||
-    SceneStage.epilogue => const [SceneShot.tight],
-  };
-}
-
-/// The overlay: the trust meter at the top, clear of the status bar, and the lower third,
-/// starting at [regionTop] (below the face) and clear of the navigation bar.
-class _Overlay extends StatelessWidget {
-  const _Overlay({
-    required this.regionTop,
-    required this.trust,
-    required this.grade,
-    required this.children,
-    this.onTapLowerThird,
-    this.guessCue = false,
-  });
-
-  /// "Too fast": shown under the trust meter after a guess.
-  final bool guessCue;
-
-  final double regionTop;
-  final int? trust;
-  final ChapterGrade grade;
-  final List<Widget> children;
-
-  /// Taps anywhere in the lower third, while it holds only a line (no cards, no draft).
-  final VoidCallback? onTapLowerThird;
-
-  static const double _meterWidth = 0.55;
-
-  @override
-  Widget build(BuildContext context) {
-    final insets = MediaQuery.paddingOf(context);
-    final trust = this.trust;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        if (trust != null)
-          Positioned(
-            top: insets.top + BrandSpace.sm,
-            left: BrandSpace.lg,
-            width: MediaQuery.sizeOf(context).width * _meterWidth,
-            child: TrustMeter(trust: trust, grade: grade),
-          ),
-        Positioned(
-          top: insets.top + BrandSpace.sm + TrustMeter.height + BrandSpace.sm,
-          left: insets.left + BrandSpace.lg,
-          right: insets.right + BrandSpace.lg,
-          child: Center(child: GuessCue(shown: guessCue)),
-        ),
-        // A narrower margin than the meter's: the cards' lines are long, and one line fewer per
-        // card is what lets a whole beat fit without scrolling (brief 18).
-        Positioned(
-          top: regionTop,
-          left: insets.left + BrandSpace.md,
-          right: insets.right + BrandSpace.md,
-          bottom: insets.bottom + BrandSpace.sm,
-          child: onTapLowerThird == null
-              ? LowerThird(children: children)
-              : GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  // A touch shortcut: the scene's labelled "Continue" serves screen readers.
-                  excludeFromSemantics: true,
-                  onTap: onTapLowerThird,
-                  child: LowerThird(children: children),
-                ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The timer's dimming of the room, and its number in the last seconds.
-class _TimerShade extends StatelessWidget {
-  const _TimerShade({required this.dim, required this.left});
-
-  final double dim;
-  final int? left;
-
-  @override
-  Widget build(BuildContext context) {
-    final left = this.left;
-    return IgnorePointer(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ColoredBox(color: BrandVivid.night.withValues(alpha: dim)),
-          if (left != null)
-            Positioned(
-              // Under the leave control.
-              top:
-                  MediaQuery.paddingOf(context).top +
-                  BrandSpace.xs +
-                  LeaveControl.size,
-              right: BrandSpace.lg,
-              child: Semantics(
-                liveRegion: true,
-                label: '$left seconds',
-                excludeSemantics: true,
-                child: Text(
-                  '$left',
-                  style: BrandType.score.copyWith(color: BrandVivid.onDeep),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 }

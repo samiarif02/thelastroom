@@ -27,6 +27,28 @@ abstract final class SkillCopy {
     Skill.thinkUnderPressure => 'Chapter 3',
   };
 
+  /// Where it's earned, as the tower names its rooms and floors ("Room 7", "Floor 2").
+  static String where(Skill skill) =>
+      earnedIn(skill)
+          .replaceFirst('Mission', 'Room')
+          .replaceFirst('Chapter', 'Floor');
+
+  /// The skill's glyph on its Daylight badge.
+  static IconData icon(Skill skill) => switch (skill) {
+    Skill.clearIntroductions => PhosphorBold.hand,
+    Skill.evidenceBuilder => PhosphorFill.chartBar,
+    Skill.conflictNavigator => PhosphorBold.handshake,
+    Skill.thinkUnderPressure => PhosphorBold.lightning,
+  };
+
+  /// The order they're earned in, as the campaign runs.
+  static const List<Skill> order = [
+    Skill.clearIntroductions,
+    Skill.evidenceBuilder,
+    Skill.conflictNavigator,
+    Skill.thinkUnderPressure,
+  ];
+
   static String initials(Skill skill) =>
       name(skill).split(' ').map((w) => w[0]).join();
 }

@@ -15,12 +15,12 @@ import '../debrief/ai_verdict_cards.dart';
 import '../debrief/debrief_facts.dart';
 import '../mission/mission_lookup.dart';
 import '../progression/progression_card.dart';
-import '../tower/tower_hero.dart';
 import '../tower/tower_rooms.dart';
 import 'chapter_report.dart';
 import 'chapter_report_screen.dart';
 import 'file_trouble.dart';
 import 'progress_facts.dart';
+import 'star_row.dart';
 
 /// Where the progress file was opened from (`progress_report_viewed`'s `source`): "Your file"
 /// from the tower, or the Chapter 1 report (brief 24).

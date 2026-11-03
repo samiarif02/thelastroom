@@ -1,12 +1,14 @@
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
+import '../../ui/film/cue.dart';
+import '../../ui/film/timeline.dart';
 
-/// The ride from the Tower to a room (brief 13, vivid in brief 17): doors in the chapter's
-/// colour close from both sides while the floor indicator climbs to the mission's number in
-/// sunflower, about [BrandMotion.elevator] long. A tap skips it. Under reduced motion it's a
-/// plain cross-fade.
+/// The ride from the Tower to a room (brief 13; Daylight in brief 46): two doors in the
+/// floor's colours slide shut from both sides, each with its deep edge, while the floor
+/// indicator in a honey arch above climbs to the room's number. About [BrandMotion.elevator]
+/// long; a tap skips it. Under reduced motion it's a plain fade to the floor's tint.
 class Elevator extends StatelessWidget {
   const Elevator({
     super.key,
@@ -15,7 +17,7 @@ class Elevator extends StatelessWidget {
     required this.onArrived,
   });
 
-  /// The mission number the indicator climbs to.
+  /// The room number the indicator climbs to.
   final int floor;
   final ChapterGrade grade;
   final VoidCallback onArrived;
@@ -26,11 +28,14 @@ class Elevator extends StatelessWidget {
   static const double _doorsShut = 0.55;
   static const double _climbFrom = 0.1;
   static const double _climbTo = 0.8;
-  static const double _floorSize = 72;
+  static const double _arch = 96;
+  static const double _archHeight = 112;
+  static const double _seam = 4;
 
   @override
   Widget build(BuildContext context) {
     final still = MediaQuery.disableAnimationsOf(context);
+    final f = grade.floor;
     return Semantics(
       button: true,
       label: skipLabel,
@@ -40,33 +45,36 @@ class Elevator extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onArrived,
         child: Timeline(
-          duration: still
-              ? BrandMotion.reducedMotionFade
-              : BrandMotion.elevator,
+          duration: still ? DaylightMotion.colour : BrandMotion.elevator,
           onFinished: onArrived,
           builder: (context, t, _) {
             if (still) {
               return Opacity(
                 opacity: t,
-                child: ColoredBox(color: BrandVivid.night),
+                child: ColoredBox(color: f.tint),
               );
             }
-            final close = cue(t, 0, _doorsShut, BrandMotion.camera);
+            final close = cue(t, 0, _doorsShut, DaylightMotion.ease);
             final shown =
                 1 + ((floor - 1) * cue(t, _climbFrom, _climbTo)).round();
             return LayoutBuilder(
               builder: (context, box) {
                 final half = box.maxWidth / 2;
-                Widget door(Alignment side) => Align(
+                Widget door(Alignment side, Color face) => Align(
                   alignment: side,
                   child: SizedBox(
                     width: half * close,
                     height: box.maxHeight,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: grade.cardGradient),
-                        border: Border.symmetric(
-                          vertical: BorderSide(color: BrandVivid.hairline(0.4)),
+                        color: face,
+                        border: Border(
+                          left: side == Alignment.centerRight
+                              ? BorderSide(color: f.deep, width: _seam)
+                              : BorderSide.none,
+                          right: side == Alignment.centerLeft
+                              ? BorderSide(color: f.deep, width: _seam)
+                              : BorderSide.none,
                         ),
                       ),
                     ),
@@ -75,18 +83,29 @@ class Elevator extends StatelessWidget {
                 return Stack(
                   fit: StackFit.expand,
                   children: [
-                    ColoredBox(
-                      color: BrandVivid.night.withValues(alpha: 0.6 * close),
-                    ),
-                    door(Alignment.centerLeft),
-                    door(Alignment.centerRight),
+                    ColoredBox(color: f.tint.withValues(alpha: close)),
+                    door(Alignment.centerLeft, f.base),
+                    door(Alignment.centerRight, f.base),
                     Align(
-                      alignment: const Alignment(0, -0.6),
-                      child: Text(
-                        '$shown',
-                        style: BrandVividType.numeral.copyWith(
-                          color: BrandVivid.accent,
-                          fontSize: _floorSize,
+                      alignment: const Alignment(0, -0.55),
+                      child: Opacity(
+                        opacity: close,
+                        child: SizedBox(
+                          width: _arch,
+                          height: _archHeight,
+                          child: ArchFrame(
+                            ground: DaylightColors.honey,
+                            border: DaylightSpace.s4,
+                            borderColor: DaylightColors.honeyTint,
+                            child: Center(
+                              child: Text(
+                                '$shown',
+                                style: DaylightType.tabular(
+                                  DaylightType.heading2,
+                                ).copyWith(color: DaylightColors.onHoney),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),

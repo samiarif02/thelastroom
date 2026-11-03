@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/back_to_exit.dart';
 import '../../core/profile/profile_repository.dart';
+import '../../ui/film/film_overlay.dart';
 import '../intro/title_gate.dart';
 import '../title/start_title.dart';
 import '../tower/tower_screen.dart';
@@ -20,7 +21,8 @@ class HomeGate extends ConsumerWidget {
         AsyncData(:final value) when value.onboarded => const StartTitle(
           child: TowerScreen(),
         ),
-        AsyncData() || AsyncError() => const BackToExit(child: TitleGate()),
+        AsyncData() ||
+        AsyncError() => const BackToExit(child: FilmGrain(child: TitleGate())),
         _ => ColoredBox(color: BrandVivid.skyTop),
       };
 }

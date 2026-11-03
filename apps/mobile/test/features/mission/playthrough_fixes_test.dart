@@ -14,6 +14,7 @@ import 'package:the_last_room/features/mission/widgets/leave_control.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
 import 'package:the_last_room/features/progress/chapter_report_screen.dart';
+import 'package:the_last_room/features/tower/northstar_tower.dart';
 import 'package:the_last_room/features/tower/tower_extras.dart';
 import 'package:the_last_room/features/tower/tower_hero.dart';
 import 'package:the_last_room/ui/film_kit.dart';
@@ -61,13 +62,10 @@ void main() {
         await rig.boot(Routes.tower());
         await rig.run(const Duration(seconds: 3));
         expect(
-          find.bySemanticsLabel(RegExp('^Mission 7, .*Play')),
+          find.bySemanticsLabel(RegExp('^Room 7, .*up next')),
           findsOneWidget,
         );
-        expect(
-          find.text(RecallRoomCardView.caughtUp.toUpperCase()),
-          findsOneWidget,
-        );
+        expect(find.text(RecallRoomCardView.caughtUp), findsOneWidget);
 
         // Mission 7 is played and a weak attempt leaves a card, while the player is elsewhere
         // (the report, the file): coming back must show both.
@@ -78,19 +76,17 @@ void main() {
         rig.container.read(routerProvider).go(Routes.report);
         await rig.until(find.byType(ChapterReportScreen));
         rig.container.read(routerProvider).go(Routes.tower());
-        await rig.until(find.textContaining(RegExp(r'^\d+ CARDS? DUE$')));
-        expect(
-          find.bySemanticsLabel(RegExp('^Mission 7, .*Done')),
-          findsOneWidget,
+        await rig.until(
+          find.textContaining(RegExp(r'^\d+ notes? (is|are) waiting$')),
         );
+        expect(find.bySemanticsLabel(RegExp('^Room 7, .*lit')), findsOneWidget);
         // Chapter 2 is open now, so the hero moves on to its first room.
-        expect(
-          find.textContaining('${TowerHero.upNext} · MISSION 8'),
-          findsOneWidget,
-        );
+        expect(find.text(TowerHero.upNext(8)), findsOneWidget);
         // Cards due: the Recall Room sits under the hero, above the chapters.
         final recall = tester.getTopLeft(find.byType(RecallRoomCard)).dy;
-        final chapter = tester.getTopLeft(find.text('Get Through the Door')).dy;
+        final chapter = tester
+            .getTopLeft(find.text(NorthstarTower.floorLine(chapters.first)))
+            .dy;
         expect(recall, lessThan(chapter));
       },
     );
@@ -112,11 +108,8 @@ void main() {
       );
       await rig.boot(Routes.tower());
       await rig.run(const Duration(seconds: 3));
-      expect(find.text(TowerHero.continueLabel), findsOneWidget);
-      expect(
-        find.bySemanticsLabel(RegExp('Left part-way: continue')),
-        findsOneWidget,
-      );
+      expect(find.textContaining(TowerHero.continueLabel), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('in progress')), findsOneWidget);
     });
   });
 
@@ -201,6 +194,7 @@ void main() {
       );
       await rig.until(done);
       await tester.tap(done);
+      await rig.throughFloorCleared();
       await rig.until(find.text(ChapterReportScreen.honest));
       final inReport = find.text('“$draft”');
       await tester.ensureVisible(inReport);

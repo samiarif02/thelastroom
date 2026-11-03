@@ -18,7 +18,6 @@ import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/features/progress/chapter_report_screen.dart';
 import 'package:the_last_room/features/progression/debrief_rewards.dart';
 import 'package:the_last_room/features/progression/progression_store.dart';
-import 'package:the_last_room/features/tower/tower_extras.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
 import 'package:the_last_room/features/voice/audio/take_playback.dart';
 import 'package:the_last_room/features/voice/recorder/recorder_panel.dart';
@@ -115,6 +114,7 @@ void main() {
       await rig.until(done);
       await tester.tap(done);
       await tester.pump();
+      await rig.throughFloorCleared();
       await rig.until(find.text(ChapterReportScreen.honest));
       final second = chapters.firstWhere((c) => c.number == 2);
       await _tapButton(rig, ChapterReportScreen.start(second));
@@ -358,6 +358,8 @@ Future<void> _afterDebrief(
     await rig.tester.tap(done);
     await rig.tester.pump();
   }
+  // A floor's last room, first time through: floor cleared (brief 46), then on.
+  if (m.closesChapter) await rig.throughFloorCleared();
   if (m.number == _reviewNumber) {
     await rig.until(find.text(ChapterReportScreen.honest));
     return;
@@ -369,18 +371,21 @@ Future<void> _afterDebrief(
   );
   await rig.run(const Duration(seconds: 3));
   expect(
-    find.bySemanticsLabel(RegExp('^Mission ${m.number}, .*Done, best score')),
+    find.bySemanticsLabel(RegExp('^Room ${m.number}, .*lit, best')),
     findsOneWidget,
   );
   if (m.next case final next?) {
     expect(
-      find.bySemanticsLabel('Mission ${next.number}, ${next.title}. Play.'),
+      find.bySemanticsLabel('Room ${next.number}, ${next.title}, up next'),
       findsOneWidget,
     );
   } else {
-    // The last room: every room is done, and the top floor says so.
-    expect(find.bySemanticsLabel(RegExp(r'\. Locked\.$')), findsNothing);
-    expect(find.text(LastRoomCard.doneLine), findsOneWidget);
+    // The last room: every room is done, none is locked, the top floor is lit.
+    expect(find.bySemanticsLabel(RegExp(r', locked$')), findsNothing);
+    expect(
+      find.bySemanticsLabel(RegExp('^Floor 3 · .* 7 of 7 rooms lit')),
+      findsOneWidget,
+    );
   }
 }
 

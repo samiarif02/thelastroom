@@ -2,7 +2,7 @@ import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../settings/theme/theme_controller.dart';
+import '../../app/vivid_theme.dart';
 import 'catalog_controller.dart';
 
 /// One control in the catalog's pill: a tracked caps label in a 44 pt target.

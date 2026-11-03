@@ -11,10 +11,12 @@ import '../features/onboarding/home_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/progress/chapter_report_screen.dart';
 import '../features/progress/progress_screen.dart';
+import '../features/progression/floor_cleared_screen.dart';
 import '../features/recall/recall_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/title/wrong_floor_screen.dart';
 import '../features/tower/tower_screen.dart';
+import '../ui/film/film_overlay.dart';
 
 /// Route paths. Notification deep links (brief §8) resolve to these.
 ///
@@ -44,6 +46,9 @@ abstract final class Routes {
   /// The Recall Room (brief 21).
   static const String recall = '$_towerPath/$_recall';
 
+  /// Floor cleared (brief 46): the reward, the first time a floor's last room is finished.
+  static String floorCleared(int floor) => '$_towerPath/$_floor/$floor';
+
   /// A mission by campaign number: `/tower/mission/1`.
   static String mission(int number) => '$_towerPath/$_mission/$number';
 
@@ -53,6 +58,7 @@ abstract final class Routes {
   static const String _character = 'character';
   static const String _mission = 'mission';
   static const String _recall = 'recall';
+  static const String _floor = 'floor';
 }
 
 /// Dev tools (`/dev/...`) exist in debug and profile builds only. In a release build this is a
@@ -67,7 +73,7 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
   GoRoute(path: Routes.intro, redirect: (context, state) => Routes.onboarding),
   GoRoute(
     path: Routes.onboarding,
-    builder: (context, state) => const OnboardingScreen(),
+    builder: (context, state) => const FilmGrain(child: OnboardingScreen()),
   ),
   GoRoute(
     path: Routes._towerPath,
@@ -77,11 +83,12 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
     routes: [
       GoRoute(
         path: Routes._progress,
-        builder: (context, state) => const ProgressScreen(),
+        builder: (context, state) => const FilmGrain(child: ProgressScreen()),
         routes: [
           GoRoute(
             path: Routes._report,
-            builder: (context, state) => const ChapterReportScreen(),
+            builder: (context, state) =>
+                const FilmGrain(child: ChapterReportScreen()),
           ),
         ],
       ),
@@ -91,7 +98,7 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
       ),
       GoRoute(
         path: Routes._character,
-        builder: (context, state) => const CharacterScreen(),
+        builder: (context, state) => const FilmGrain(child: CharacterScreen()),
       ),
       GoRoute(
         path: '${Routes._mission}/:number',
@@ -103,6 +110,12 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
       GoRoute(
         path: Routes._recall,
         builder: (context, state) => const RecallScreen(),
+      ),
+      GoRoute(
+        path: '${Routes._floor}/:floor',
+        builder: (context, state) => FloorClearedScreen(
+          floor: int.tryParse(state.pathParameters['floor'] ?? '') ?? 1,
+        ),
       ),
     ],
   ),
@@ -123,7 +136,7 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
 
 /// What an unknown address shows: the cinematic error state, never the stock page.
 Widget routeErrorBuilder(BuildContext context, GoRouterState state) =>
-    const WrongFloorScreen();
+    const FilmGrain(child: WrongFloorScreen());
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(

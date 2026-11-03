@@ -161,11 +161,12 @@ class _FeedbackSheetState extends State<FeedbackSheet>
     ];
     final sheet = Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(
+      // Clear of the navigation bar: the sheet's white runs under it.
+      padding: EdgeInsets.fromLTRB(
         DaylightSpace.s16,
         DaylightSpace.s24,
         DaylightSpace.s16,
-        DaylightSpace.s24,
+        DaylightSpace.s24 + MediaQuery.paddingOf(context).bottom,
       ),
       decoration: const BoxDecoration(
         color: DaylightColors.raised,

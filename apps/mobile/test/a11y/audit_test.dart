@@ -3,8 +3,8 @@ import 'package:content/content.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:the_last_room/app/router.dart';
+import 'package:the_last_room/app/vivid_theme.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
-import 'package:the_last_room/features/settings/theme/theme_controller.dart';
 
 import '../features/mission/mission_harness.dart';
 import '../features/tower/played_attempt.dart';

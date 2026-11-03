@@ -7,14 +7,28 @@ import 'package:the_last_room/features/debrief/debrief_view.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
 import 'package:the_last_room/features/tower/elevator.dart';
-import 'package:the_last_room/features/tower/tower_chapter_card.dart';
+import 'package:the_last_room/features/tower/northstar_tower.dart';
 import 'package:the_last_room/features/tower/tower_extras.dart';
 import 'package:the_last_room/features/tower/tower_hero.dart';
 import 'package:the_last_room/features/tower/tower_rooms.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart'
+    show FloatingTabBar;
 
 import '../mission/mission_harness.dart';
 import 'played_attempt.dart';
+
+/// Scrolls the home to its end, where the whole tower is on screen (rooms off screen have no
+/// semantics to find).
+Future<void> toTheTower(WidgetTester tester) async {
+  await tester.drag(
+    find.byType(SingleChildScrollView).first,
+    const Offset(0, -3000),
+  );
+  for (var i = 0; i < 5; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
 
 void main() {
   group('rooms (pure)', () {
@@ -68,10 +82,9 @@ void main() {
   });
 
   String roomLabel(Mission m, RoomState state, [int? best]) => switch (state) {
-    RoomState.done =>
-      'Mission ${m.number}, ${m.title}. Done, best score $best. Tap to play again.',
-    RoomState.current => 'Mission ${m.number}, ${m.title}. Play.',
-    RoomState.locked => 'Mission ${m.number}, ${m.title}. Locked.',
+    RoomState.done => 'Room ${m.number}, ${m.title}, lit, best $best',
+    RoomState.current => 'Room ${m.number}, ${m.title}, up next',
+    RoomState.locked => 'Room ${m.number}, ${m.title}, locked',
   };
 
   testWidgets('the Tower shows done, current and locked after Missions 1–2', (
@@ -85,6 +98,7 @@ void main() {
     await rig.boot(Routes.tower());
     await rig.until(find.byType(TowerScreen));
     await rig.run(const Duration(milliseconds: 300));
+    await toTheTower(tester);
     const m = missions;
     for (final (label, _) in [
       (roomLabel(m[0], RoomState.done, a1.score.total), 0),
@@ -95,15 +109,11 @@ void main() {
     ]) {
       expect(find.bySemanticsLabel(label), findsOneWidget, reason: label);
     }
-    // Chapters 2 and 3 tease their titles; the last room is always in sight.
-    expect(find.text(chapters[1].title), findsOneWidget);
-    expect(find.text(chapters[2].title), findsOneWidget);
-    expect(
-      find.textContaining(chapters[1].missionTitles.first),
-      findsOneWidget,
-    );
-    expect(find.text(LastRoomCard.title), findsOneWidget);
-    expect(find.text(RecallRoomCardView.title), findsOneWidget);
+    // Floors 2 and 3 are on the facade from day one; the top room is lit: Sam waits.
+    expect(find.text(NorthstarTower.floorLine(chapters[1])), findsOneWidget);
+    expect(find.text(NorthstarTower.floorLine(chapters[2])), findsOneWidget);
+    expect(find.text(NorthstarTower.samWaits), findsOneWidget);
+    expect(find.textContaining(RecallRoomCardView.title), findsWidgets);
     expect(rig.analytics.only(AnalyticsEvent.towerOpened).wire, {
       'missions_done': 2,
       'after_mission': false,
@@ -157,6 +167,7 @@ void main() {
     await rig.boot(Routes.tower());
     await rig.until(find.byType(TowerScreen));
     await rig.run(const Duration(milliseconds: 300));
+    await toTheTower(tester);
     final room = find.bySemanticsLabel(
       roomLabel(missions[1], RoomState.current),
     );
@@ -185,54 +196,52 @@ void main() {
     final play = find.bySemanticsLabel(
       TowerHero.playLabel(towerRooms(missions, const []).first),
     );
-    // On the first screen, no scrolling.
-    expect(tester.getRect(play).bottom, lessThan(MissionRig.phone.height));
+    // On the first screen, above the tab bar, no scrolling.
+    expect(
+      tester.getRect(play).bottom,
+      lessThan(tester.getRect(find.byType(FloatingTabBar)).top),
+    );
     await tester.tap(play);
     await rig.until(find.byType(MissionPlayer));
     expect(rig.state(1).mission, missions[0]);
   });
 
-  testWidgets('chapters read 1, 2, 3 and rooms 1 → 7, top to bottom', (
-    tester,
-  ) async {
+  testWidgets('the tower stands floor 1 at the bottom, rooms 1 → 7 left to '
+      'right', (tester) async {
     final rig = MissionRig(tester);
     await rig.boot(Routes.tower(), reduceMotion: true);
     await rig.until(find.byType(TowerScreen));
     await rig.run(const Duration(milliseconds: 300));
-    final chapterTops = [
-      for (final c in chapters) tester.getTopLeft(find.text(c.title)).dy,
+    await toTheTower(tester);
+    final floorTops = <double>[
+      for (final c in chapters)
+        tester.getTopLeft(find.text(NorthstarTower.floorLine(c))).dy,
     ];
-    expect(chapterTops, orderedEquals([...chapterTops]..sort()));
+    final byHeight = <double>[...floorTops]..sort((a, b) => b.compareTo(a));
+    expect(floorTops, orderedEquals(byHeight));
     final rooms = towerRooms(missions, const []);
-    final rowTops = [
-      for (final r in rooms)
+    final firstFloor = [
+      for (final r in rooms.where((r) => r.mission.chapter == 1))
         tester
-            .getTopLeft(
-              find.descendant(
-                of: find.byType(MissionRow),
-                matching: find.text(r.mission.title),
-              ),
-            )
-            .dy,
+            .getTopLeft(find.bySemanticsLabel(roomLabel(r.mission, r.state)))
+            .dx,
     ];
-    expect(rowTops, orderedEquals([...rowTops]..sort()));
-    expect(find.byType(ChapterCard), findsNWidgets(chapters.length));
+    expect(firstFloor, orderedEquals([...firstFloor]..sort()));
   });
 
-  testWidgets('the header is never scrolled through', (tester) async {
+  testWidgets('the tab bar stays over the tower as it scrolls', (tester) async {
     final rig = MissionRig(tester);
     await rig.boot(Routes.tower(), reduceMotion: true);
     await rig.until(find.byType(TowerScreen));
     await rig.run(const Duration(milliseconds: 300));
-    final greeting = find.textContaining('$testName.');
-    final scroll = find.byType(SingleChildScrollView);
-    await tester.drag(scroll, const Offset(0, -600));
-    await rig.run(const Duration(milliseconds: 300));
-    // The scroll area starts below the greeting band, so no card ever passes behind its words.
-    expect(
-      tester.getRect(scroll).top,
-      greaterThanOrEqualTo(tester.getRect(greeting).bottom),
+    final tabs = find.byType(FloatingTabBar);
+    final before = tester.getRect(tabs);
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -600),
     );
+    await rig.run(const Duration(milliseconds: 300));
+    expect(tester.getRect(tabs), before);
   });
 
   testWidgets('a locked room says what opens it, and plays its sound', (
@@ -242,6 +251,7 @@ void main() {
     await rig.boot(Routes.tower());
     await rig.until(find.byType(TowerScreen));
     await rig.run(const Duration(milliseconds: 300));
+    await toTheTower(tester);
     final locked = find.bySemanticsLabel(
       roomLabel(missions[2], RoomState.locked),
     );
@@ -259,7 +269,12 @@ void main() {
     final rig = MissionRig(tester);
     await rig.boot(Routes.tower());
     await rig.until(find.byType(TowerScreen));
-    await tester.tap(find.text(TowerScreen.progress));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(FloatingTabBar),
+        matching: find.text(TowerScreen.progress),
+      ),
+    );
     await rig.until(find.byType(ProgressScreen));
     expect(rig.analytics.only(AnalyticsEvent.progressReportViewed).wire, {
       'source': 'tower',
@@ -279,6 +294,7 @@ void main() {
       );
       await rig.until(find.byType(TowerScreen));
       await rig.run(const Duration(seconds: 2));
+      await toTheTower(tester);
       final room = find.bySemanticsLabel(
         roomLabel(missions[1], RoomState.current),
       );
@@ -294,10 +310,12 @@ void main() {
     await rig.boot(Routes.tower());
     await rig.until(find.byType(TowerScreen));
     await rig.run(const Duration(milliseconds: 300));
+    await toTheTower(tester);
     final room = find.bySemanticsLabel(
       roomLabel(missions[0], RoomState.current),
     );
+    // A window is a column of the facade: as tall as a thumb, as wide as a seventh of it.
     expect(tester.getSize(room).height, greaterThanOrEqualTo(44));
-    expect(tester.getSize(room).width, greaterThan(200));
+    expect(tester.getSize(room).width, greaterThanOrEqualTo(40));
   });
 }

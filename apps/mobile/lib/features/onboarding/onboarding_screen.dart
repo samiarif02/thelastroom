@@ -16,7 +16,6 @@ import '../../core/profile/profile_repository.dart';
 import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
 import '../progression/interview_date_choices.dart';
-import '../tower/tower_chapter_card.dart';
 import 'name_field.dart';
 import 'onboarding_copy.dart';
 
@@ -29,6 +28,9 @@ enum OnboardingStep { game, cast, interview, name }
 /// play. Only the first name is asked; the rest of the profile keeps its defaults. Saved once,
 /// at the end, with `onboarding_completed` (never the name: it's not a property).
 class OnboardingScreen extends ConsumerStatefulWidget {
+  /// Who hosts each floor, bottom up: the three faces the panel step introduces.
+  static const List<String> floorHosts = ['priya', 'marcus', 'lena'];
+
   const OnboardingScreen({super.key});
 
   @override
@@ -354,7 +356,7 @@ class _CastStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cast = [
-      for (final id in ChapterCard.hostIds)
+      for (final id in OnboardingScreen.floorHosts)
         interviewers.firstWhere((i) => i.id == id),
     ];
     return _Heading(

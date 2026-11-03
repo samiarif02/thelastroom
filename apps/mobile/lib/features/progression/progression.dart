@@ -18,7 +18,12 @@ class Progression {
     required this.sessionsThisWeek,
     required this.weeklyGoal,
     this.interviewDate,
+    this.playedToday = false,
   });
+
+  /// Today already counts towards the week (a mission or a Recall round today), so another
+  /// session today doesn't move the ring.
+  final bool playedToday;
 
   final int xp;
 
@@ -83,6 +88,7 @@ final progressionProvider = FutureProvider.autoDispose<Progression>((
     sessionsThisWeek: sessionsThisWeek(days, today: today),
     weeklyGoal: profile?.weeklyGoal ?? defaultWeeklyGoal,
     interviewDate: record.interviewDate,
+    playedToday: days.contains(today),
   );
 });
 

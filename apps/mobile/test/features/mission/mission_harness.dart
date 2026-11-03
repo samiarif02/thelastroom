@@ -25,7 +25,9 @@ import 'package:the_last_room/features/mission/widgets/build_panel.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
+import 'package:the_last_room/features/progression/floor_cleared_screen.dart';
 import 'package:the_last_room/features/recall/recall_store.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart' show TactileButton;
 import 'package:the_last_room/ui/film_kit.dart';
 
 /// How long the harness "reads" the cards before picking: well past `guessThreshold`.
@@ -509,6 +511,21 @@ class MissionRig {
     if (typing) await tapScene();
     await say(mission.optionById(reply)!);
     await until(find.byType(Dossier));
+  }
+
+  /// Floor cleared (brief 46), after a floor's last room is first finished: lets the moment
+  /// play, then takes its honey button (floor 1: the report; otherwise the lift).
+  Future<void> throughFloorCleared() async {
+    await until(find.byType(FloorClearedScreen));
+    await run(FloorClearedScreen.length);
+    final go = find.descendant(
+      of: find.byType(FloorClearedScreen),
+      matching: find.byType(TactileButton),
+    );
+    await tester.ensureVisible(go.first);
+    await tester.pump();
+    await tester.tap(go.first);
+    await tester.pump();
   }
 
   /// Plays the whole dossier through (stamps, seal, pen) and the slip arriving.

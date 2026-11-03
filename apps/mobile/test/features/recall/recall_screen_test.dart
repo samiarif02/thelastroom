@@ -106,11 +106,8 @@ void main() {
   testWidgets('the tower card shows how many cards are due', (tester) async {
     await pump(tester, const RecallRoomCardView(due: 3));
     expect(find.text(RecallRoomCardView.dueKicker(3)), findsOneWidget);
-    expect(find.text('3'), findsOneWidget);
+    expect(find.text(RecallRoomCardView.dueTitle(3)), findsOneWidget);
     await pump(tester, const RecallRoomCardView(due: 0));
-    expect(
-      find.text(RecallRoomCardView.caughtUp.toUpperCase()),
-      findsOneWidget,
-    );
+    expect(find.text(RecallRoomCardView.caughtUp), findsOneWidget);
   });
 }

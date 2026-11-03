@@ -1,15 +1,16 @@
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../ui/film_kit.dart';
+import '../../../ui/choice/answer_card.dart' show AnswerCardState;
+import '../../../ui/daylight/daylight_kit.dart';
 
-/// A line the player can say (an answer, a reply or a reason), as a vivid card lifted off the
-/// chapter's colour (brief 17's look): the chapter's gradient, a soft deep shadow, the numeral
-/// in the chapter's glow. Picked, it lights with a sunflower ring; said, the ring holds and a
-/// sunflower bar marks it; the others fade back.
+/// A line the player can say (an answer, a reply or a reason), as Daylight's pick card
+/// (direction.md §2): white on a hard edge, a letter tile (A, B, C) or a principle's icon
+/// tile, the line in Body 3. Picked, it lifts with the floor's ring; said, its tile shows a
+/// check and the others dim.
 ///
-/// [state] reuses the kit's [AnswerCardState]; one tap ([onTap]) is all it takes. Wraps its
-/// text (2x text grows the card, never clips it).
+/// [state] reuses the kit's [AnswerCardState]; one tap ([onTap]) picks, a second says it.
+/// Wraps its text (2x text grows the card, never clips it).
 class ChoiceCard extends StatelessWidget {
   const ChoiceCard({
     super.key,
@@ -17,108 +18,44 @@ class ChoiceCard extends StatelessWidget {
     required this.text,
     required this.grade,
     this.state = AnswerCardState.idle,
+    this.icon,
     this.onTap,
   });
 
+  /// The card's letter ("A").
   final String numeral;
   final String text;
   final ChapterGrade grade;
   final AnswerCardState state;
 
+  /// A principle's glyph instead of the letter (the reason cards).
+  final IconData? icon;
+
   /// Ignored when [state] is locked or disabled.
   final VoidCallback? onTap;
 
-  static const double _radius = 18;
-  static const double _ring = 2;
-  static const double _bar = 4;
-  static const double _numeralWidth = 30;
-  static const double _disabledOpacity = 0.4;
-
-  bool get _interactive =>
-      onTap != null &&
-      state != AnswerCardState.locked &&
-      state != AnswerCardState.disabled;
+  /// "A", "B", "C" for the card at [index].
+  static String letterFor(int index) => String.fromCharCode(_a + index);
+  static const int _a = 65;
 
   @override
   Widget build(BuildContext context) {
-    final lit =
-        state == AnswerCardState.selected || state == AnswerCardState.locked;
-    final duration = MediaQuery.disableAnimationsOf(context)
-        ? BrandMotion.quick
-        : BrandMotion.standard;
-    final card = AnimatedOpacity(
-      duration: duration,
-      opacity: state == AnswerCardState.disabled ? _disabledOpacity : 1,
-      child: AnimatedContainer(
-        duration: duration,
-        curve: BrandMotion.enter,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(_radius),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: grade.cardGradient,
-          ),
-          border: Border.all(
-            color: lit ? BrandVivid.accent : BrandVivid.hairline(),
-            width: lit ? _ring : 1,
-          ),
-          boxShadow: lit
-              ? BrandVivid.glowShadow(BrandVivid.accent)
-              : BrandVivid.cardShadow,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(_radius - _ring),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AnimatedContainer(
-                  duration: duration,
-                  width: state == AnswerCardState.locked ? _bar : 0,
-                  color: BrandVivid.accent,
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: BrandSpace.md,
-                      vertical: BrandSpace.sm + BrandSpace.xs,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: _numeralWidth,
-                          child: Text(
-                            numeral,
-                            style: BrandVividType.row.copyWith(
-                              // onDeepSoft holds AA on the card in every theme; the
-                              // chapter's glow is 4.18:1 in Sunset City (1e's audit).
-                              color: lit
-                                  ? BrandVivid.accent
-                                  : BrandVivid.onDeepSoft,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ),
-                        Expanded(child: Text(text, style: BrandVividType.row)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    return Semantics(
-      selected: lit,
-      child: Pressable(
-        label: '$numeral $text',
-        onTap: _interactive ? onTap : null,
-        child: card,
-      ),
+    final pick = switch (state) {
+      AnswerCardState.idle || AnswerCardState.focused => PickState.idle,
+      AnswerCardState.selected => PickState.selected,
+      AnswerCardState.locked => PickState.locked,
+      AnswerCardState.disabled => PickState.dimmed,
+    };
+    final enabled =
+        state != AnswerCardState.locked && state != AnswerCardState.disabled;
+    return PickCard(
+      text: text,
+      letter: icon == null ? numeral : null,
+      icon: icon,
+      lockedIcon: PhosphorBold.check,
+      state: pick,
+      floor: grade.floor,
+      onTap: enabled ? onTap : null,
     );
   }
 }

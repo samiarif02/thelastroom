@@ -43,7 +43,26 @@ class TypewriterSubtitle extends StatefulWidget {
     this.onComplete,
     this.play = true,
     this.textAlign = TextAlign.center,
+    this.daylight = false,
+    this.floor,
+    this.lineStyle,
+    this.tailLeft = false,
   });
+
+  /// The bubble's tail points left, to an interviewer beside it (the "why?" step), instead of
+  /// up (Daylight only).
+  final bool tailLeft;
+
+  /// Daylight's speech bubble (brief 46, direction.md §2) instead of the film subtitle: white,
+  /// r16, lifted, a tail up to the interviewer, the speaker in Caption 3 in the floor's deep
+  /// colour and the line in Heading 6, left-aligned. The typing is the same.
+  final bool daylight;
+
+  /// The floor the bubble's speaker line is coloured from (Daylight only).
+  final FloorColours? floor;
+
+  /// The line's style in the bubble; Heading 6 by default (Daylight only).
+  final TextStyle? lineStyle;
 
   final String speaker;
   final String line;
@@ -153,9 +172,92 @@ class _TypewriterSubtitleState extends State<TypewriterSubtitle>
     super.dispose();
   }
 
+  Widget _bubble() {
+    final f = widget.floor ?? DaylightFloors.one;
+    final bubble = DecoratedBox(
+      decoration: BoxDecoration(
+        color: DaylightColors.raised,
+        borderRadius: BorderRadius.circular(DaylightRadius.card),
+        boxShadow: DaylightElevation.lift,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          DaylightSpace.s16,
+          DaylightSpace.s12,
+          DaylightSpace.s16,
+          DaylightSpace.s16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              widget.speaker,
+              style: DaylightType.caption3.copyWith(color: f.deep),
+            ),
+            const SizedBox(height: DaylightSpace.s4),
+            TypewriterText(
+              text: widget.line,
+              characters: _shown,
+              style: widget.lineStyle ?? DaylightType.heading6,
+              textAlign: TextAlign.start,
+            ),
+          ],
+        ),
+      ),
+    );
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        bubble,
+        Positioned(
+          top: widget.tailLeft ? _tailInset : -_tail / 2,
+          left: widget.tailLeft ? -_tail / 2 + 2 : 0,
+          right: widget.tailLeft ? null : 0,
+          child: Center(
+            child: Transform.rotate(
+              angle: _quarterTurn,
+              child: const SizedBox.square(
+                dimension: _tail,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: DaylightColors.raised,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(DaylightSpace.s2),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  static const double _tail = 16;
+  static const double _tailInset = 24;
+  static const double _quarterTurn = 0.7853981633974483;
+
   @override
   Widget build(BuildContext context) {
     final still = MediaQuery.disableAnimationsOf(context);
+    if (widget.daylight) {
+      final bubble = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _skip,
+        child: _bubble(),
+      );
+      if (!still) return bubble;
+      return TweenAnimationBuilder<double>(
+        key: ValueKey(widget.line),
+        tween: Tween(begin: 0, end: 1),
+        duration: DaylightMotion.colour,
+        builder: (context, opacity, child) =>
+            Opacity(opacity: opacity, child: child),
+        child: bubble,
+      );
+    }
     final align = switch (widget.textAlign) {
       TextAlign.left || TextAlign.start => CrossAxisAlignment.start,
       TextAlign.right || TextAlign.end => CrossAxisAlignment.end,

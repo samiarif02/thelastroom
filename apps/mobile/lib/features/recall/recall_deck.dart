@@ -35,12 +35,17 @@ class RecallQuestion {
     required this.correctChoiceId,
     this.quote,
     this.takeaway,
+    this.caughtBy,
   });
 
   final String cardId;
+
+  /// The interviewer whose room the trap was in ("Marcus caught you on this one"); null on a
+  /// lesson card.
+  final String? caughtBy;
   final RecallCardKind kind;
 
-  /// The small caps over the card ("YOU FELL FOR", or the lesson's title).
+  /// The kicker over the card ("You fell for", or the lesson's title).
   final String kicker;
 
   /// The misconception, or the lesson's question.
@@ -64,7 +69,10 @@ class RecallDeck {
     for (final mission in content.missions) {
       for (final beat in mission.beats) {
         for (final reason in beat.why?.reasons ?? const <Reason>[]) {
-          if (reason.tempts.isNotEmpty) _traps[reason.id] = (beat, reason);
+          if (reason.tempts.isNotEmpty) {
+            _traps[reason.id] = (beat, reason);
+            _rooms[reason.id] = mission;
+          }
         }
       }
     }
@@ -72,8 +80,9 @@ class RecallDeck {
 
   final ContentBundle content;
   final Map<String, (Beat, Reason)> _traps = {};
+  final Map<String, Mission> _rooms = {};
 
-  static const String trapKicker = 'YOU FELL FOR';
+  static const String trapKicker = 'You fell for';
   static const String trapAsk = 'Which principle beats it?';
   static const String lessonAsk = 'Pick the one that holds.';
 
@@ -152,6 +161,7 @@ class RecallDeck {
       choices: choices,
       correctChoiceId: sound.id,
       takeaway: _lessonById(tempted?.lessonId)?.takeaway ?? sound.text,
+      caughtBy: (beat.why?.line ?? _rooms[trap.id]?.question)?.speakerId,
     );
   }
 
@@ -160,7 +170,7 @@ class RecallDeck {
     return RecallQuestion(
       cardId: lesson.id,
       kind: RecallCardKind.lesson,
-      kicker: lesson.title.toUpperCase(),
+      kicker: lesson.title,
       prompt: check.prompt,
       ask: lessonAsk,
       choices: shuffled(

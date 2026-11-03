@@ -34,7 +34,7 @@ class TrustPips extends StatelessWidget {
       excludeSemantics: true,
       child: Container(
         height: DaylightSize.iconTile,
-        padding: const EdgeInsets.symmetric(horizontal: DaylightSpace.s12),
+        padding: const EdgeInsets.symmetric(horizontal: DaylightSpace.s8),
         decoration: BoxDecoration(
           color: DaylightColors.raised,
           borderRadius: BorderRadius.circular(DaylightRadius.tile),
@@ -47,7 +47,7 @@ class TrustPips extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: _iconSize, color: f.deep),
-            const SizedBox(width: DaylightSpace.s8),
+            const SizedBox(width: DaylightSpace.s4),
             for (var i = 0; i < max; i++) ...[
               if (i > 0) const SizedBox(width: DaylightSpace.s4),
               AnimatedContainer(

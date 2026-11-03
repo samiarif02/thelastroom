@@ -2,90 +2,145 @@ import 'package:brand/brand.dart';
 import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../ui/film_kit.dart';
+import '../../../ui/choice/answer_card.dart' show AnswerCardState;
+import '../../../ui/film/cue.dart';
+import '../../../ui/film/timeline.dart';
 import '../widgets/choice_card.dart';
 
-/// The lower third of the frame: subtitles and cards sit low, like film subtitles, and scroll
-/// from the top only when they don't fit (2x text on a small phone), so the first card is
-/// what's seen first.
-class LowerThird extends StatelessWidget {
-  const LowerThird({super.key, required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, box) => SingleChildScrollView(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: box.maxHeight),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
-        ),
-      ),
-    ),
-  );
-}
-
-/// The question, once it's been asked, as a small reminder above the cards: the subtitle has
-/// gone, the way a line of dialogue does, but the player can still see what they're answering.
+/// The question, once it's been asked, as the "answer so far" strip above the cards
+/// (direction.md §2: white 60%, r12): the player can still see what they're answering, or,
+/// once a beat is said, the line they gave.
 class QuestionReminder extends StatelessWidget {
-  const QuestionReminder({super.key, required this.text, required this.grade});
+  const QuestionReminder({
+    super.key,
+    required this.text,
+    required this.grade,
+    this.label,
+  });
 
   final String text;
   final ChapterGrade grade;
 
+  /// "Open": the beat already said, with a check. Null: the question, with a speech mark.
+  final String? label;
+
+  static const double _icon = 20;
+  static const double _veil = 0.6;
+
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: BrandSpace.sm),
-    // On the speech panel: it falls over the interviewer's jacket, and the panel keeps it AA
-    // over every cast colour (brief 16).
-    child: SpeechPanel(
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: BrandType.choice.copyWith(
-          color: BrandColors.textSecondary,
-          fontStyle: FontStyle.italic,
+  Widget build(BuildContext context) {
+    final f = grade.floor;
+    final said = label;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: DaylightColors.raised.withValues(alpha: _veil),
+        borderRadius: BorderRadius.circular(DaylightRadius.tile),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: DaylightSpace.s12,
+          vertical: DaylightSpace.s8,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              said == null ? PhosphorFill.chatCircle : PhosphorFill.checkCircle,
+              size: _icon,
+              color: f.base,
+            ),
+            const SizedBox(width: DaylightSpace.s8),
+            if (said != null) ...[
+              Text(said, style: DaylightType.body4),
+              const SizedBox(width: DaylightSpace.s4),
+            ],
+            Expanded(
+              child: Text(
+                '“$text”',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: DaylightType.body6.copyWith(color: DaylightColors.ink2),
+              ),
+            ),
+          ],
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
-/// "OPEN · 1 OF 3": which beat of the answer the cards build.
-String beatLabel(BeatKind kind, int index, int count) =>
-    '${_beatNames[kind]}  ·  ${index + 1} OF $count';
+/// The beat's name in the top bar's progress ("Open", "Evidence", "Land").
+String beatName(BeatKind kind) => _beatNames[kind]!;
 
 const Map<BeatKind, String> _beatNames = {
-  BeatKind.open: 'OPEN',
-  BeatKind.evidence: 'EVIDENCE',
-  BeatKind.land: 'LAND',
+  BeatKind.open: 'Open',
+  BeatKind.evidence: 'Evidence',
+  BeatKind.land: 'Land',
 };
 
-/// "BUILD YOUR ANSWER · 2 OF 3": above a built beat's fragments (brief 27).
-String buildLabel(int index, int count) =>
-    '$buildKicker  ·  ${index + 1} OF $count';
+/// "Pick your evidence": the heading over a beat's cards. [index] and [count] are kept for
+/// screen readers ("2 of 3").
+String beatLabel(BeatKind kind, int index, int count) =>
+    'Pick your ${_pickNouns[kind]}';
 
-const String buildKicker = 'BUILD YOUR ANSWER';
+const Map<BeatKind, String> _pickNouns = {
+  BeatKind.open: 'opening',
+  BeatKind.evidence: 'evidence',
+  BeatKind.land: 'close',
+};
+
+/// "Build your answer": above a built beat's fragments (brief 27).
+String buildLabel(int index, int count) => buildKicker;
+
+const String buildKicker = 'Build your answer';
 
 /// Above the follow-up's replies.
-const String replyLabel = 'YOUR REPLY';
+const String replyLabel = 'Your reply';
 
 /// Above the reasons, when the interviewer asks why.
-const String reasonLabel = 'YOUR REASON';
+const String reasonLabel = 'What makes it work?';
 
-/// Replaces the label while a pick can still be changed.
-const String changeHint = 'TAP ANOTHER LINE TO CHANGE';
+/// Under [reasonLabel].
+const String reasonHelper = 'Pick the principle. It is the part you keep.';
 
-/// Lines as engraved plaques, arriving one after another: a beat's answers, a follow-up's
-/// replies or the reasons for "why that line?". **One tap picks** ([onPick]); the picked card
-/// lights ([selected]) and, once [locked], the others go dark. [onArrived] fires when the last
-/// card has arrived: the moment the player can read them all, when the stopwatch starts.
-///
-/// No instruction text sits under the cards to be scrolled to: the [label] above them says
-/// what the cards are, and the screen swaps it for a short hint while a pick can be changed.
+/// Beside a beat's heading.
+const String pickHelper = 'Tap a line, then lock it in';
+
+/// Replaces the helper while a pick can still be changed.
+const String changeHint = 'Tap another line to change';
+
+/// A principle's glyph on its reason card, from what the principle is about. Cosmetic: the
+/// content names no icons.
+IconData principleIcon(String text) {
+  final t = text.toLowerCase();
+  if (RegExp(r'number|data|figure|percent|\d').hasMatch(t)) {
+    return PhosphorBold.hash;
+  }
+  if (RegExp(r'\bwe\b|team|credit|together').hasMatch(t)) {
+    return PhosphorBold.usersThree;
+  }
+  if (RegExp(r'ask|question|asked').hasMatch(t)) return PhosphorBold.chatCircle;
+  if (RegExp(r'story|example').hasMatch(t)) return PhosphorBold.bookOpen;
+  if (RegExp(r'role|job|company|hiring').hasMatch(t)) {
+    return PhosphorBold.target;
+  }
+  if (RegExp(r'honest|confiden|passion|modest').hasMatch(t)) {
+    return PhosphorBold.handshake;
+  }
+  return _fallback[t.length % _fallback.length];
+}
+
+const List<IconData> _fallback = [
+  PhosphorBold.lightbulbFilament,
+  PhosphorBold.target,
+  PhosphorBold.sparkle,
+  PhosphorBold.flag,
+];
+
+/// The lines to pick from, arriving one after another (60 ms apart): a beat's answers, a
+/// follow-up's replies or the reasons for "why that line?". **One tap picks** ([onPick]); the
+/// picked card lifts ([selected]) and, once [locked], the others dim. [onArrived] fires when
+/// the last card has arrived: the moment the player can read them all, when the stopwatch
+/// starts. The [label] heads them (Title 3) with a [helper] beside or under it.
 class AnswerCards<T extends Object> extends StatelessWidget {
   const AnswerCards({
     super.key,
@@ -94,77 +149,105 @@ class AnswerCards<T extends Object> extends StatelessWidget {
     required this.textOf,
     required this.grade,
     required this.onPick,
+    this.helper,
+    this.iconOf,
     this.selected,
     this.locked,
     this.onArrived,
   });
 
   final String label;
+  final String? helper;
 
   /// In the attempt's shuffled order.
   final List<T> items;
   final String Function(T) textOf;
+
+  /// A glyph per card instead of its letter (the reasons).
+  final IconData Function(T)? iconOf;
   final ChapterGrade grade;
   final T? selected;
   final T? locked;
   final ValueChanged<T> onPick;
   final VoidCallback? onArrived;
 
-  static const double _stagger = 0.16;
-  static const double _arriveFrom = 0.97;
-
   AnswerCardState _stateOf(T item) {
     if (locked != null) {
       return item == locked ? AnswerCardState.locked : AnswerCardState.disabled;
     }
-    return item == selected ? AnswerCardState.selected : AnswerCardState.idle;
+    if (selected != null) {
+      return item == selected ? AnswerCardState.selected : AnswerCardState.idle;
+    }
+    return AnswerCardState.idle;
   }
 
   @override
   Widget build(BuildContext context) {
+    final help = helper;
+    final icons = iconOf;
+    final arrive =
+        DaylightMotion.move + DaylightMotion.stagger * (items.length - 1);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          header: true,
-          liveRegion: true,
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: BrandVividType.kicker.copyWith(color: grade.glow),
-          ),
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.end,
+          spacing: DaylightSpace.s12,
+          runSpacing: DaylightSpace.s2,
+          children: [
+            Semantics(
+              header: true,
+              liveRegion: true,
+              child: Text(
+                label,
+                style: DaylightType.title3.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontVariations: const [FontVariation.weight(600)],
+                ),
+              ),
+            ),
+            if (help != null)
+              Text(
+                help,
+                style: DaylightType.caption4.copyWith(
+                  color: DaylightColors.ink2,
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: BrandSpace.sm),
+        const SizedBox(height: DaylightSpace.s8),
         Timeline(
-          duration: BrandMotion.cinematic,
+          duration: arrive,
           onFinished: onArrived,
-          builder: (context, t, _) {
-            final last = items.length - 1;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var i = 0; i < items.length; i++)
-                  Padding(
-                    padding: EdgeInsets.only(top: i == 0 ? 0 : BrandSpace.xs),
-                    child: _arrive(
-                      cue(
-                        t,
-                        _stagger * i,
-                        1 - _stagger * (last - i),
-                        BrandMotion.enter,
-                      ),
-                      ChoiceCard(
-                        numeral: AnswerCard.numeralFor(i),
-                        text: textOf(items[i]),
-                        grade: grade,
-                        state: _stateOf(items[i]),
-                        onTap: () => onPick(items[i]),
-                      ),
+          builder: (context, t, _) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < items.length; i++)
+                Padding(
+                  padding: EdgeInsets.only(top: i == 0 ? 0 : DaylightSpace.s8),
+                  child: _arrive(
+                    cue(
+                      t,
+                      (DaylightMotion.stagger * i).inMicroseconds /
+                          arrive.inMicroseconds,
+                      ((DaylightMotion.stagger * i) + DaylightMotion.move)
+                              .inMicroseconds /
+                          arrive.inMicroseconds,
+                      DaylightMotion.ease,
+                    ),
+                    ChoiceCard(
+                      numeral: ChoiceCard.letterFor(i),
+                      text: textOf(items[i]),
+                      icon: icons?.call(items[i]),
+                      grade: grade,
+                      state: _stateOf(items[i]),
+                      onTap: () => onPick(items[i]),
                     ),
                   ),
-              ],
-            );
-          },
+                ),
+            ],
+          ),
         ),
       ],
     );
@@ -172,6 +255,9 @@ class AnswerCards<T extends Object> extends StatelessWidget {
 
   Widget _arrive(double t, Widget card) => Opacity(
     opacity: t,
-    child: Transform.scale(scale: mix(_arriveFrom, 1, t), child: card),
+    child: Transform.translate(
+      offset: Offset(0, (1 - t) * DaylightSpace.s8),
+      child: card,
+    ),
   );
 }

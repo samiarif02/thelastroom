@@ -72,17 +72,14 @@ class _VoiceDebriefState extends ConsumerState<VoiceDebrief> {
     _sounds.result(strong: _total >= DebriefFacts.strongFrom);
   }
 
-  /// The dimension the costliest missed point earns, marked in red pen; null when none missed.
-  int? get _marked {
-    final voice = widget.mission.voice!;
-    for (final id in widget.score.score.optionIdsByCost) {
-      if (widget.made.contains(id)) return null;
-      for (final p in [...voice.listenFor, ...voice.followUpListenFor]) {
-        if (p.id == id) return Dimension.values.indexOf(p.dimension);
-      }
-    }
-    return null;
-  }
+  late final ({int? marked, String? note}) _pen = voiceRedPen(
+    mission: widget.mission,
+    byCost: widget.score.score.optionIdsByCost,
+    made: widget.made,
+  );
+
+  int? get _marked => _pen.marked;
+  String? get _note => _pen.note;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +122,7 @@ class _VoiceDebriefState extends ConsumerState<VoiceDebrief> {
                       ),
                   ],
                   total: _total,
-                  note: lesson?.title,
+                  note: _note,
                   markedIndex: _marked,
                   onStamp: (_) => _sounds.scoreStamped(),
                   onSeal: _result,
@@ -479,4 +476,39 @@ class VoiceLessonSlip extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// The red pen on a voice mission's dossier: which dimension it underlines and the margin note
+/// beside it. The underline is the costliest missed point's dimension, unless a point on the
+/// mission's lesson dimension was missed too: then it marks that one, so the note and the line
+/// say the same thing (brief 44's playthrough: they pointed at different dimensions). The note
+/// is the lesson's title, only beside its own dimension, and never on a run with nothing
+/// missed. The lesson itself is always on the slip under the sheet. Pure, so it's tested.
+({int? marked, String? note}) voiceRedPen({
+  required Mission mission,
+  required List<String> byCost,
+  required Set<String> made,
+}) {
+  final voice = mission.voice!;
+  final points = [...voice.listenFor, ...voice.followUpListenFor];
+  int? costliest;
+  for (final id in byCost) {
+    if (made.contains(id)) break;
+    final p = points.where((p) => p.id == id).firstOrNull;
+    if (p != null) {
+      costliest = Dimension.values.indexOf(p.dimension);
+      break;
+    }
+  }
+  if (costliest == null) return (marked: null, note: null);
+  final lesson = lessonById(voice.lessonId);
+  final lessonDim = lesson?.flag.lowers;
+  if (lesson == null || lessonDim == null) {
+    return (marked: costliest, note: null);
+  }
+  final missedOnLesson = points.any(
+    (p) => !made.contains(p.id) && p.dimension == lessonDim,
+  );
+  if (!missedOnLesson) return (marked: costliest, note: null);
+  return (marked: Dimension.values.indexOf(lessonDim), note: lesson.title);
 }
