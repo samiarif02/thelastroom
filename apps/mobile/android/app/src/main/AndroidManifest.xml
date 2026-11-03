@@ -8,10 +8,13 @@
          one-line explainer; refused, the mission offers the self-check instead. The audio is sent
          for scoring and never stored. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Predictive back (brief 50): on Android 14+ the back swipe previews the screen behind
+         with the app's own reverse transition; older Androids get the normal back. -->
     <application
         android:label="The Last Room"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"

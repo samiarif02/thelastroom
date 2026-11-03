@@ -40,8 +40,48 @@ void main() {
       DaylightMotion.nod,
       DaylightMotion.countUp,
       DaylightMotion.ringClose,
+      DaylightMotion.page,
+      DaylightMotion.door,
+      DaylightMotion.ground,
     ]) {
       expect(d, greaterThanOrEqualTo(const Duration(milliseconds: 200)));
+    }
+  });
+
+  test(
+    'routes: the door stays under 450 ms, reduced motion is a short fade',
+    () {
+      expect(
+        DaylightMotion.door,
+        lessThanOrEqualTo(const Duration(milliseconds: 450)),
+      );
+      expect(
+        DaylightMotion.ground,
+        lessThanOrEqualTo(const Duration(milliseconds: 200)),
+      );
+      expect(DaylightMotion.reducedPage, const Duration(milliseconds: 150));
+      expect(DaylightMotion.nudge, DaylightMotion.blink);
+    },
+  );
+
+  test('the settle curve overshoots a touch, then rests', () {
+    var peak = 0.0;
+    for (var i = 0; i <= 100; i++) {
+      final v = DaylightMotion.settle.transform(i / 100);
+      if (v > peak) peak = v;
+    }
+    expect(peak, greaterThan(1));
+    expect(peak, lessThan(1.05));
+    expect(DaylightMotion.settle.transform(1), 1);
+  });
+
+  test('the door swing is symmetric: closing is opening backwards', () {
+    for (var i = 0; i <= 10; i++) {
+      final t = i / 10;
+      expect(
+        DaylightMotion.swing.transform(t),
+        closeTo(1 - DaylightMotion.swing.transform(1 - t), 1e-3),
+      );
     }
   });
 

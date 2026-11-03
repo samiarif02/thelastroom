@@ -4,6 +4,7 @@ import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../ui/daylight/daylight_route.dart';
 import 'tower_door.dart';
 import 'tower_rooms.dart';
 
@@ -515,11 +516,24 @@ class _Room extends StatelessWidget {
       height + PlayCue.size + DaylightSpace.s8,
       DaylightSize.hit,
     );
+    // The door's own context, so a tap can say where the room grows from (brief 50).
+    BuildContext? doorAt;
     return SizedBox(
       height: tall,
       child: LayoutBuilder(
         builder: (context, box) {
           final target = math.max(box.maxWidth, DaylightSize.hit);
+          void tap() {
+            // Only a door that opens: a locked one shows its floor instead.
+            if (doorAt case final c?
+                when c.mounted && room.state != RoomState.locked) {
+              if (DoorOrigin.of(c) case final origin?) {
+                DoorTapped(origin).dispatch(context);
+              }
+            }
+            onTap();
+          }
+
           return OverflowBox(
             minWidth: target,
             maxWidth: target,
@@ -529,10 +543,10 @@ class _Room extends StatelessWidget {
               button: true,
               label: semantics,
               excludeSemantics: true,
-              onTap: onTap,
+              onTap: tap,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: onTap,
+                onTap: tap,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -540,7 +554,12 @@ class _Room extends StatelessWidget {
                       const PlayCue(),
                       const SizedBox(height: DaylightSpace.s4),
                     ],
-                    door,
+                    Builder(
+                      builder: (c) {
+                        doorAt = c;
+                        return door;
+                      },
+                    ),
                   ],
                 ),
               ),

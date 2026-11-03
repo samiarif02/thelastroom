@@ -257,6 +257,8 @@ void main() {
         // Back in: continue where you left off, at the evidence beat, same order.
         rig.container.read(routerProvider).go(Routes.mission(1));
         await rig.until(find.text(ResumeSheet.title));
+        // The room is still opening through its door (brief 50): tap once it's open.
+        await rig.run(DaylightMotion.door);
         await tester.tap(find.text(ResumeSheet.resume));
         await rig.until(find.byType(ChoiceCard));
         expect(rig.state(1).resumed, isTrue);

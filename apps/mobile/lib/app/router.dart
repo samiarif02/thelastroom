@@ -17,6 +17,7 @@ import '../features/recall/recall_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/title/wrong_floor_screen.dart';
 import '../features/tower/tower_screen.dart';
+import '../ui/daylight/daylight_route.dart';
 
 /// Route paths. Notification deep links (brief §8) resolve to these.
 ///
@@ -72,59 +73,103 @@ const bool devRoutesEnabled = !kReleaseMode;
 /// The app's routes. [devRoutes] is a parameter so a test can prove the release set. Dev
 /// tools are one line each.
 List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
-  GoRoute(path: Routes.home, builder: (context, state) => const HomeGate()),
+  GoRoute(
+    path: Routes.home,
+    pageBuilder: (context, state) =>
+        daylightPage(state, const HomeGate(), DaylightTransition.through),
+  ),
   // The welcome cards went in brief 20 (onboarding explains the game); old links land there.
   GoRoute(path: Routes.intro, redirect: (context, state) => Routes.onboarding),
   GoRoute(
     path: Routes.onboarding,
-    builder: (context, state) => const OnboardingScreen(),
+    pageBuilder: (context, state) => daylightPage(
+      state,
+      const OnboardingScreen(),
+      DaylightTransition.through,
+    ),
   ),
   GoRoute(
     path: Routes._towerPath,
-    builder: (context, state) => TowerScreen(
-      lit: int.tryParse(state.uri.queryParameters[Routes._litParam] ?? ''),
+    pageBuilder: (context, state) => daylightPage(
+      state,
+      TowerScreen(
+        lit: int.tryParse(state.uri.queryParameters[Routes._litParam] ?? ''),
+      ),
+      DaylightTransition.through,
     ),
     routes: [
       GoRoute(
         path: Routes._progress,
-        builder: (context, state) => const ProgressScreen(),
+        // A tab (Skills): fade-through.
+        pageBuilder: (context, state) => daylightPage(
+          state,
+          const ProgressScreen(),
+          DaylightTransition.through,
+        ),
         routes: [
           GoRoute(
             path: Routes._report,
-            builder: (context, state) => const ChapterReportScreen(),
+            pageBuilder: (context, state) =>
+                daylightPage(state, const ChapterReportScreen()),
           ),
           GoRoute(
             path: '${Routes._room}/:number',
-            builder: (context, state) => PastResultScreen(
-              // A bad number reaches the result's "not played" state, not a crash.
-              number: int.tryParse(state.pathParameters['number'] ?? '') ?? 0,
+            // The Candidate assessment plays its own entrance: only the ground fades in.
+            pageBuilder: (context, state) => daylightPage(
+              state,
+              PastResultScreen(
+                // A bad number reaches the result's "not played" state, not a crash.
+                number: int.tryParse(state.pathParameters['number'] ?? '') ?? 0,
+              ),
+              DaylightTransition.ground,
             ),
           ),
         ],
       ),
       GoRoute(
         path: Routes._settings,
-        builder: (context, state) => const SettingsScreen(),
+        // A tab (You): fade-through.
+        pageBuilder: (context, state) => daylightPage(
+          state,
+          const SettingsScreen(),
+          DaylightTransition.through,
+        ),
       ),
       GoRoute(
         path: Routes._character,
-        builder: (context, state) => const CharacterScreen(),
+        pageBuilder: (context, state) =>
+            daylightPage(state, const CharacterScreen()),
       ),
       GoRoute(
         path: '${Routes._mission}/:number',
-        builder: (context, state) => MissionScreen(
-          // A bad number reaches the mission screen's locked-door state, not a crash.
-          number: int.tryParse(state.pathParameters['number'] ?? '') ?? 0,
+        // Through the door: the room grows out of the door it was opened from.
+        pageBuilder: (context, state) => daylightPage(
+          state,
+          MissionScreen(
+            // A bad number reaches the mission screen's locked-door state, not a crash.
+            number: int.tryParse(state.pathParameters['number'] ?? '') ?? 0,
+          ),
+          DaylightTransition.door,
         ),
       ),
       GoRoute(
         path: Routes._recall,
-        builder: (context, state) => const RecallScreen(),
+        // A tab (Recall): fade-through.
+        pageBuilder: (context, state) => daylightPage(
+          state,
+          const RecallScreen(),
+          DaylightTransition.through,
+        ),
       ),
       GoRoute(
         path: '${Routes._floor}/:floor',
-        builder: (context, state) => FloorClearedScreen(
-          floor: int.tryParse(state.pathParameters['floor'] ?? '') ?? 1,
+        // The reward choreographs its own 2.4 s: only the ground fades in.
+        pageBuilder: (context, state) => daylightPage(
+          state,
+          FloorClearedScreen(
+            floor: int.tryParse(state.pathParameters['floor'] ?? '') ?? 1,
+          ),
+          DaylightTransition.ground,
         ),
       ),
     ],
@@ -143,6 +188,27 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
   if (devRoutes) ...DevCatalogRoutes.routes,
   if (devRoutes) ...SoundBoardRoutes.routes,
 ];
+
+/// Every screen's page: the Daylight [transition] (route transitions, brief 50). A room's
+/// door rides in `extra` ([DoorOrigin]).
+Page<void> daylightPage(
+  GoRouterState state,
+  Widget child, [
+  DaylightTransition transition = DaylightTransition.push,
+]) => DaylightPage<void>(
+  key: state.pageKey,
+  name: state.name ?? state.path,
+  arguments: <String, String>{
+    ...state.pathParameters,
+    ...state.uri.queryParameters,
+  },
+  restorationId: state.pageKey.value,
+  transition: transition,
+  door: transition == DaylightTransition.door
+      ? DoorOrigin.from(state.extra)
+      : null,
+  child: child,
+);
 
 /// What an unknown address shows: the cinematic error state, never the stock page.
 Widget routeErrorBuilder(BuildContext context, GoRouterState state) =>

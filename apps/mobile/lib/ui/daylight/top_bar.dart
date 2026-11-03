@@ -76,10 +76,12 @@ class DaylightTopBar extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: DaylightSize.hit),
         child: Row(
           children: [
+            // Back or close: the icon nudges toward the way out before the screen leaves.
             IconTile(
               icon: leadingIcon,
               semanticLabel: leadingLabel,
               onPressed: onLeading,
+              nudge: AxisDirection.left,
             ),
             SizedBox(
               width: middle == null ? DaylightSpace.s12 : DaylightSpace.s8,
