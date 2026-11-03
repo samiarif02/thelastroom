@@ -21,6 +21,7 @@ class NorthstarTower extends StatelessWidget {
     super.key,
     required this.rooms,
     required this.onTapRoom,
+    this.onFloor,
     this.lit,
     this.lighting = 1,
     this.litKey,
@@ -28,6 +29,9 @@ class NorthstarTower extends StatelessWidget {
 
   final List<TowerRoom> rooms;
   final ValueChanged<TowerRoom> onTapRoom;
+
+  /// A floor tapped (its facade, or a window on a floor not open yet): show what's on it.
+  final ValueChanged<Chapter>? onFloor;
   final int? lit;
   final double lighting;
 
@@ -37,6 +41,7 @@ class NorthstarTower extends StatelessWidget {
   static const String sign = 'NORTHSTAR LABS';
   static const String samWaits = 'Sam waits here';
   static String opensAfter(int floor) => 'Opens after floor $floor';
+  static const String showFloor = 'Show its rooms';
   static String floorLine(Chapter c) => 'Floor ${c.number} · ${c.title}';
   static String count(int done, int of) => '$done of $of';
   static String litCount(int done, int of) => '$done of $of rooms lit';
@@ -98,6 +103,7 @@ class NorthstarTower extends StatelessWidget {
                         lit: lit,
                         lighting: lighting,
                         onTapRoom: onTapRoom,
+                        onFloor: onFloor == null ? null : () => onFloor!(c),
                       ),
                     const SizedBox(
                       height: _ground,
@@ -258,9 +264,11 @@ class _Floor extends StatelessWidget {
     required this.lit,
     required this.lighting,
     required this.onTapRoom,
+    this.onFloor,
   });
 
   final Chapter chapter;
+  final VoidCallback? onFloor;
   final List<TowerRoom> rooms;
 
   /// The floor below's rooms; null for floor 1.
@@ -300,7 +308,8 @@ class _Floor extends StatelessWidget {
         ? NorthstarTower.samWaits
         : NorthstarTower.opensAfter(chapter.number - 1);
     final label = NorthstarTower.floorLine(chapter);
-    return ColoredBox(
+    final tapFloor = onFloor;
+    final facade = ColoredBox(
       color: ground,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
@@ -333,7 +342,11 @@ class _Floor extends StatelessWidget {
                           last: i == rooms.length - 1,
                           window: w,
                           lighting: r.mission.number == lit ? lighting : 1,
-                          onTap: () => onTapRoom(r),
+                          // On a floor not open yet a window shows the floor; on an open one
+                          // a locked window says what opens it.
+                          onTap: !open && onFloor != null
+                              ? onFloor!
+                              : () => onTapRoom(r),
                         ),
                       ),
                   ],
@@ -372,6 +385,18 @@ class _Floor extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+    if (tapFloor == null) return facade;
+    return Semantics(
+      button: true,
+      label:
+          '${NorthstarTower.floorLine(chapter)}. ${NorthstarTower.showFloor}',
+      onTap: tapFloor,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: tapFloor,
+        child: facade,
       ),
     );
   }
