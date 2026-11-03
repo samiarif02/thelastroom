@@ -1,17 +1,40 @@
 # Completion audit
 
 Every requirement in [`requirements.md`](requirements.md) and every phase of
-[`v1-plan.md`](v1-plan.md), checked against `main` on 2026-11-01 (brief 29). The evidence is the
+[`v1-plan.md`](v1-plan.md), checked against `main` on 2026-11-01 (brief 29), then wave 6's
+asks checked against `main` at `2233f80` on 2026-11-03 (below). The evidence is the
 code and the merged PRs (`#N` links to github.com/samiarif02/thelastroom/pull/N).
 
 **Status:** **Built**, **Partly** (some acceptance is missing; the gap says what), or **Not
 built**. Every gap is either a **deliberate cut** (with the decision behind it) or **still
 missing**.
 
-## Summary
+## Wave 6 (2–3 Nov): the reviewer's asks, one by one
 
-- **Built:** FR-1, 2, 4, 5, 10–14, 16, 17, 20–26, 31, 32, 40, 42, 51–53, 60–62, 70 and NFR-1, 2, 4–8
-  (FR-4, 16, 32 and 42 completed by brief 32).
+| Ask | Status | Evidence | Gap |
+| --- | --- | --- | --- |
+| A professional, sleek look; one app, not two | Built | The Daylight Tower: direction #52, brand/type/cast #55, every screen #56, Your file, report, onboarding, title #57 | The legacy vivid tokens stay in `packages/brand` for the kept Candidate assessment sheet (owner's rule) |
+| Keep the debrief's Candidate assessment sheet | Built | `ui/paper/**` and its goldens unchanged since #56 (status 46, 48) | |
+| A marketing landing page in `web/`, on Vercel | Built | #43, #48, #53, ADR 0007; live at https://thelastroom-ten.vercel.app | Store badges say "coming soon": the app isn't in a store |
+| Chapters 2 and 3 playable: Chapter 2 all voice, Chapter 3 mixed | Built | #41 (7 voice rooms), #42 (3 built + 4 voice), #47 (opened), #49 (report → Chapter 2), #54 (every mission played to its debrief in a test) | |
+| Answer out loud: spoken interviewer, record, pause on 5 s of silence, Continue, delete and retake | Built | #44 (`features/voice/`, `score-voice`), restyled in #56 | Offline, a spoken answer is scored by the player's self-check, not by the AI |
+| "On what basis do you score, and how do you know it scores well?" | Built | #46: the basis on every result, "How we scored this", [scoring-eval.md](scoring-eval.md) (92 % in band, r = 0.91 with the engine) | The weights are still a hypothesis: no human-rated set yet |
+| Live AI scoring on a real phone | Built | Status 51: release build on the realme over USB, rooms 2, 5, 6, 7 scored 92, 90, 85, 82 by Gemini | **Needs the backend running on a laptop:** no hosted Supabase by design (ADR 0005); without it the offline score shows. The free-tier key rate-limits heavy use |
+| What the player learns from each mission | Built | `Mission.practises` shown before every room and on the debrief (wave-6 contract, #44, #46, #56) | |
+| Bring players back on days 3 and 5 | Built | #51 (test reminder, the next reminder shown, welcome back, plan days 1/3/5/8), #56 (weekly ring, XP, skills, floor-cleared reward) | iOS reminders wired, untested; web has none (FR-53) |
+| A floor sheet and doors on the tower | Built | #56 (doors, `FloorSheet`, `floor_previewed`) | |
+| Past results | Built | #57 (`/tower/progress/room/:n` re-shows the stored sheet, latest vs best) | |
+| First-time tips instead of a tour | Built | #57 (seven tips, `tip_shown` / `tip_done`, Settings → "Show tips again") | |
+| Transitions and animated back controls | Built | #58 (shared axis, fade-through, the room opening from its door, sheets that settle, 150 ms fades under reduced motion) | **Predictive back only on Android 14+**; the owner's realme (Android 13) gets the normal reverse transition |
+| On-device QA of the release build | Built | Status 51, #59 (the P0 missing `INTERNET` permission in release builds, now guarded by `check:standards`; Your file's latest vs best; resume hardening; copy fixes) | Only the realme 8 was tested; iOS never ran on a device |
+| XP for each sound reason on the feedback sheet | Not built | The sheet supports "+10 XP" (`FeedbackSheet.xp`, catalog only) | **Still missing:** the mission player never passes it; XP comes from rooms and Recall rounds (direction §Motion 3) |
+| A shareable floor card ("Share your floor card") | Not built | | **Still missing** (direction §6) |
+| The APK release | Partly | The Release APK workflow and a draft release (#29) | Published only when the owner asks |
+
+## Summary (2026-11-01, updated for wave 6)
+
+- **Built:** FR-1, 2, 4, 5, 10–14, 16, 17, 20–26, 30–32, 40–42, 51–53, 60–62, 70 and NFR-1, 2,
+  4–8 (FR-4, 16, 32 and 42 completed by brief 32; FR-30 and 41 by #39).
 - **Deliberate cuts:**
   - FR-71, metrics: the owner, 1 Nov: events are defined and logged on the device; a PostHog sink
     is v2.
@@ -20,10 +43,10 @@ missing**.
     superseded by ADR 0006's AI scoring.
   - FR-50's extra reminder types: brief 26. iOS reminders: cut line #5.
 - **Still missing:**
-  - Mission 7's cliffhanger scene and "then vs. now" (brief 30);
-  - the device performance pass (NFR-3, brief 31).
+  - a recorded frame-timing pass on a device (NFR-3; #37 measured a profile web build only);
+  - from wave 6's design: XP per sound reason, the shareable floor card (table above).
 
-## Closing the gaps (the lead's plan, 2026-11-01)
+## Closing the gaps (the lead's plan, 2026-11-01; briefs 30–32 landed as #37, #38, #39)
 
 | Gap | Goes to |
 | --- | --- |
@@ -54,16 +77,16 @@ missing**.
 | FR-21 | Flags lower dimensions, drive the follow-up | Built | #5 | |
 | FR-22 | Structure is the weakest beat | Built | #5 | |
 | FR-23 | Weights documented as a hypothesis | Built | #29 (README "How the score works", "Honest limits") | |
-| FR-24 | AI senior recruiter scores (Gemini) | Built | #25, #26 (Deno tests in CI) | Verified with a mocked Gemini; the live run on a phone is still to do (README) |
+| FR-24 | AI senior recruiter scores (Gemini) | Built | #25, #26 (Deno tests in CI), #46 (live eval), status 51 (live on the realme) | Needs the local backend: no hosted Supabase (ADR 0005) |
 | FR-25 | A guessed beat scores 0 | Built | #18 | |
 | FR-26 | The reason counts (principles, 60 %) | Built | #18 | |
-| FR-30 | Chapter 1 as specified (baseline, M3 checkpoint, M6 continuity, M7 review, badge, cliffhanger, teaser) | Partly | #5, #9 (all seven missions, continuity, M3 unhinted), #30 (report, teaser) | The *Evidence Builder* badge: brief 32. **Still missing:** the cliffhanger (brief 30): Mission 7's epilogue lines are in content but no screen plays them |
-| FR-31 | Chapters 2–3 visible, locked, teased | Built | #15, #20, #30 ("Coming soon") | |
+| FR-30 | Chapter 1 as specified (baseline, M3 checkpoint, M6 continuity, M7 review, badge, cliffhanger, teaser) | Built | #5, #9 (all seven missions, continuity, M3 unhinted), #30 (report, teaser), #38 (the badge), #39 (the cliffhanger epilogue), #56 (floor-cleared reward) | |
+| FR-31 | Chapters 2–3 visible, locked, teased | Built | #15, #20, #30; since wave 6 both are playable (#41, #42, #47) and open floor by floor | |
 | FR-32 | Skill tree; unlock only when demonstrated unhinted | Built | #5 (engine rule, tested), #20, #30 (radar), brief 32 (badges on the tower and in Your file; a locked badge says where it's earned) | |
 | FR-40 | Recall Room, Leitner 1/3/7 | Built | #23 | Rounds are one minute (5 cards), not two (brief 21) |
-| FR-41 | Skill radar baseline vs now; "then vs. now" drafts | Partly | #30 (two radars, baseline vs review) | **Still missing:** the Mission 1 draft beside the latest |
+| FR-41 | Skill radar baseline vs now; "then vs. now" drafts | Built | #30 (two radars), #39 (then and now), #57 (in the report and room 7's debrief) | |
 | FR-42 | No lives or streak shaming; soft weekly goal | Built | No lives, no shaming; brief 32 (a "2 of 3 sessions this week" ring, reset on Monday, never punishing) | |
-| FR-50 | Local reminders in character | Partly | #33 (recall due, daily nudge, 3 wordings each) | Cliffhanger, comeback and weekly-win types: **deliberate cut** (brief 26 scope) |
+| FR-50 | Local reminders in character | Partly | #33 (recall due, daily nudge, 3 wordings each), #51 (days 1/3/5/8, test reminder, welcome back) | Cliffhanger and weekly-win types: **deliberate cut** (brief 26 scope) |
 | FR-51 | Max 1/day, never after 21:00, back-off, off switch, deep links | Built | #33 | One switch, not per type (brief 26) |
 | FR-52 | Permission after Mission 1, behind an explainer | Built | #33 | Android checked on the realme; iOS **deliberate cut** (cut line #5): wired, untested |
 | FR-53 | Web: no reminders, Settings says so | Built | #33 | |
@@ -80,7 +103,7 @@ missing**.
 | --- | --- | --- | --- | --- |
 | NFR-1 | Cinematic design, no stock Material, tokens only | Built | #6, #10, #11, #16, #20, #21, #32, #35 | |
 | NFR-2 | Accessibility: AA, 44 pt, 2x text, reduced motion, labels | Built | #11 (contrast tests), widget tests at 2x text and reduced motion across features | |
-| NFR-3 | 60 fps mid-range Android; web first frame < 3 s | Partly | Branded web loader (#11, #24); profile APKs build | **Still missing:** no profile or jank pass on a device was ever recorded (status 06: "no device connected") |
+| NFR-3 | 60 fps mid-range Android; web first frame < 3 s | Partly | Branded web loader (#11, #24); #37 (a profile web bundle measured in Chrome, idle faces stilled) | **Still missing:** no recorded frame-timing pass on a device |
 | NFR-4 | Chapter 1 offline; designed offline states | Built | #12, #17, #30 (every store failure has a designed card) | |
 | NFR-5 | No secret in the app | Built | #1, #17, #25; `check:secrets` in CI | |
 | NFR-6 | Honesty | Built | #29 (README "Honest limits") | |
@@ -103,6 +126,6 @@ missing**.
 | 10 | Mission player | Built | #12, #19, #21 | |
 | 11 | Notifications | Partly | #33 | iOS untested, extra types (FR-50): deliberate cuts |
 | 12 | AI coach | Not built | (#25 instead) | Deliberate cut, cut line #1; replaced by AI scoring (ADR 0006) |
-| 13 | Tower, elevator, Recall Room, report | Partly | #15, #20, #23, #30 | XP, skill unlocks, weekly goal, "then vs. now", the cliffhanger scene |
-| 14 | Dogfood, APK, release | Partly | #29 (release workflow, draft `v0.1.0`) | No recorded full Chapter 1 playthrough on device, no profile pass (NFR-3); metrics (FR-71) cut for v1 |
-| 15 | Submission | Partly | #29, this PR | Demo video (owner); the paywall mock and the demo script land here |
+| 13 | Tower, elevator, Recall Room, report | Built | #15, #20, #23, #30, #38, #39, then the Daylight tower #56, #57 | |
+| 14 | Dogfood, APK, release | Partly | #29 (release workflow, draft `v0.1.0`), #39 (Chapter 1 playthrough), status 51 + #59 (Chapter 1 to the end on the realme, release build) | No device frame-timing pass (NFR-3); the APK release waits for the owner; metrics (FR-71) cut for v1 |
+| 15 | Submission | Built | #29, #36, #49, the wave-6 docs PR; the demo video submitted by the owner | |
