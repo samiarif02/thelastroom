@@ -76,7 +76,15 @@ enum AnalyticsEvent {
   welcomeBackShown('welcome_back_shown'),
 
   /// The welcome-back card goes away: its button was followed, or it was dismissed.
-  welcomeBackClosed('welcome_back_closed');
+  welcomeBackClosed('welcome_back_closed'),
+
+  /// A session closes the player's weekly goal (the ring on the tower fills): how many sessions
+  /// the week now has, and the goal.
+  weeklyGoalClosed('weekly_goal_closed'),
+
+  /// A Recall Room note is shown (the taped note of the trap that caught the player): its kind
+  /// and its Leitner box. Never the note's text.
+  recallNoteOpened('recall_note_opened');
 
   const AnalyticsEvent(this.wireName);
 

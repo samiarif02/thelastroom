@@ -54,3 +54,5 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `test_reminder_sent` | The player taps "Send a test reminder" in Settings and tomorrow's planned reminder is shown now (brief 42). Never its text | `type` (`recallDue`, `nudge`) |
 | `welcome_back_shown` | The tower greets a player back after one or more calendar days away (brief 42), once per return | `days_away`, `target` (`recall`, `mission`, `progress`) |
 | `welcome_back_closed` | The welcome-back card goes: its button was followed, or it was dismissed | `action` (`followed`, `dismissed`), `target` (`recall`, `mission`, `progress`) |
+| `weekly_goal_closed` | A finished mission or Recall Room round brings the week's sessions up to the weekly goal, so the tower's ring closes (Daylight, moment 6). Once per week | `sessions`, `weekly_goal` |
+| `recall_note_opened` | A Recall Room note (the taped card of a trap or a lesson) is shown, once per card per session | `card_kind` (`trap`, `lesson`), `box` (`one`, `three`, `seven`) |
