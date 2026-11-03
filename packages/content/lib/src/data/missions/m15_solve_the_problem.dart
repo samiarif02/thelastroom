@@ -16,7 +16,7 @@ const missionSolveTheProblem = Mission(
   id: 'm15_solve_the_problem',
   chapter: 3,
   number: 15,
-  title: 'Solve the Problem',
+  title: 'Solve the problem',
   practises: 'Working a problem out loud: check it, find the cause, then change one thing.',
   hinted: true,
   scene: [

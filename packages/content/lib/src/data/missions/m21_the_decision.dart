@@ -13,7 +13,7 @@ const missionTheDecision = Mission(
   id: 'm21_the_decision',
   chapter: 3,
   number: 21,
-  title: 'The Decision',
+  title: 'The decision',
   practises: 'Closing well when the offer comes: thank them, get it in writing, agree a date.',
   answerMode: AnswerMode.voice,
   hinted: false,

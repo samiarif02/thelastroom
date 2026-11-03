@@ -17,7 +17,7 @@ const missionTheSalaryQuestion = Mission(
   id: 'm18_the_salary_question',
   chapter: 3,
   number: 18,
-  title: 'The Salary Question',
+  title: 'The salary question',
   practises: 'Answering the salary question with a range you can explain, not a guess.',
   hinted: true,
   scene: [

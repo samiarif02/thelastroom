@@ -13,7 +13,7 @@ const missionTheUncomfortableRequest = Mission(
   id: 'm12_the_uncomfortable_request',
   chapter: 2,
   number: 12,
-  title: 'The Uncomfortable Request',
+  title: 'The uncomfortable request',
   practises: "Saying no to a request you're not comfortable with, and offering another way.",
   answerMode: AnswerMode.voice,
   hinted: false,

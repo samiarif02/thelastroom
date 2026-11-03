@@ -13,7 +13,7 @@ const missionTheInterruption = Mission(
   id: 'm16_the_interruption',
   chapter: 3,
   number: 16,
-  title: 'The Interruption',
+  title: 'The interruption',
   practises:
       "Getting back on track when you're cut off, without losing your point.",
   answerMode: AnswerMode.voice,

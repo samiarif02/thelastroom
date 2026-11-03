@@ -13,7 +13,7 @@ const missionTightDeadline = Mission(
   id: 'm11_tight_deadline',
   chapter: 2,
   number: 11,
-  title: 'Tight Deadline',
+  title: 'Tight deadline',
   practises: 'Showing how you prioritise when time runs out: what came first, what you cut, who you told.',
   answerMode: AnswerMode.voice,
   hinted: false,

@@ -13,7 +13,7 @@ const missionTheExperienceGap = Mission(
   id: 'm03_the_experience_gap',
   chapter: 1,
   number: 3,
-  title: 'The Experience Gap',
+  title: 'The experience gap',
   practises: "Owning a gap in your experience and showing how you'd close it.",
   hinted: false,
   skillRequirements: [

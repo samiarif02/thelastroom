@@ -13,7 +13,7 @@ const missionSomethingWentWrong = Mission(
   id: 'm05_something_went_wrong',
   chapter: 1,
   number: 5,
-  title: 'Something Went Wrong',
+  title: 'Something went wrong',
   practises: 'Telling a mistake story honestly: what happened, what you did, what you learned.',
   hinted: true,
   scene: [

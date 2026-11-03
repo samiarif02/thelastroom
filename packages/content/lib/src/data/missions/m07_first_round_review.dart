@@ -15,7 +15,7 @@ const missionFirstRoundReview = Mission(
   id: 'm07_first_round_review',
   chapter: 1,
   number: 7,
-  title: 'First Round Review',
+  title: 'First round review',
   practises: 'Putting it all together under pressure, with two interviewers in the room.',
   hinted: false,
   skillRequirements: [
