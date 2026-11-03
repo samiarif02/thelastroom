@@ -8,6 +8,10 @@
          one-line explainer; refused, the mission offers the self-check instead. The audio is sent
          for scoring and never stored. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- The optional backend (AI scoring, voice scoring, sync, sign-in): release builds need
+         INTERNET, which Flutter's template only puts in the debug/profile manifests. Offline
+         play still works without the network (ADR 0005). check:standards guards this line. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="The Last Room"
         android:name="${applicationName}"

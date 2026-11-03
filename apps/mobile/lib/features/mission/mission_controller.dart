@@ -334,10 +334,17 @@ class MissionController extends AsyncNotifier<MissionState> {
     }
   }
 
-  /// [saved] if every id in it still exists in [mission] (content can change between versions);
-  /// otherwise null, and the player starts afresh.
+  /// [saved], made safe to play on; null when an id in it no longer exists in [mission]
+  /// (content changes between versions), and the player starts afresh.
+  ///
+  /// A save from an older build (QA 51, BUG-2) can also disagree with the beats as they are
+  /// now: a reason on a beat that asks none (a built beat) is dropped, and a beat that asks why
+  /// but has no reason, with lines after it, is where the attempt resumes: at its why step, the
+  /// later lines dropped. So a resumed room never skips a why step, and never credits a reason
+  /// the player didn't give for that line.
   SavedAttempt? _validated(Mission mission, SavedAttempt saved) {
     if (saved.plays.length > mission.beats.length) return null;
+    final plays = <SavedPlay>[];
     for (var i = 0; i < saved.plays.length; i++) {
       final beat = mission.beats[i];
       final play = saved.plays[i];
@@ -347,8 +354,20 @@ class MissionController extends AsyncNotifier<MissionState> {
           !(beat.why?.reasons.any((r) => r.id == reasonId) ?? false)) {
         return null;
       }
+      final kept = beat.asksWhy || reasonId == null
+          ? play
+          : SavedPlay(optionId: play.optionId, decidedIn: play.decidedIn);
+      plays.add(kept);
+      if (beat.asksWhy && kept.reasonId == null) break;
     }
-    return saved;
+    return SavedAttempt(
+      missionId: saved.missionId,
+      seed: saved.seed,
+      attemptNumber: saved.attemptNumber,
+      plays: plays,
+      draft: saved.draft,
+      draftDone: saved.draftDone,
+    );
   }
 
   /// "Continue where you left off": the saved attempt replaces this fresh one, with its seed
@@ -481,9 +500,12 @@ class MissionController extends AsyncNotifier<MissionState> {
   /// Locks [option] in as the current beat's line, picked [decidedIn] after the cards were up.
   /// When the beat asks why, the reason comes next ([giveReason]); after the last beat the
   /// engine picks the interviewer's follow-up from the weakest line.
-  void lock(AnswerOption option, {Duration? decidedIn}) {
+  ///
+  /// False when [option] isn't one of the current beat's lines (a scene out of step with the
+  /// attempt): nothing is locked, and the screen goes back to the beat the attempt is on.
+  bool lock(AnswerOption option, {Duration? decidedIn}) {
     final now = _now;
-    if (!now.beatOptions.contains(option)) return;
+    if (!now.beatOptions.contains(option)) return false;
     final plays = [
       ...now.plays,
       BeatPlay(option: option, decidedIn: decidedIn),
@@ -491,15 +513,18 @@ class MissionController extends AsyncNotifier<MissionState> {
     state = AsyncData(
       now._copy(plays: plays, followUp: _followUpFor(now.mission, plays)),
     );
+    return true;
   }
 
   /// Locks in the answer the player built on the current beat from [placed] (fragment ids, in
   /// the order tapped), [decidedIn] after the fragments were up. It's a line like any other from
   /// here on: a built beat asks no why, so her reaction comes next.
-  void lockBuilt(List<String> placed, {Duration? decidedIn}) {
+  ///
+  /// False when the current beat isn't built (a scene out of step) or nothing is placed.
+  bool lockBuilt(List<String> placed, {Duration? decidedIn}) {
     final now = _now;
     final build = now.building;
-    if (build == null || placed.isEmpty) return;
+    if (build == null || placed.isEmpty) return false;
     final result = scoreBuild(build.spec, placed);
     final plays = [
       ...now.plays,
@@ -517,6 +542,7 @@ class MissionController extends AsyncNotifier<MissionState> {
       'decoy_used': EventValue.flag(result.decoysUsed.isNotEmpty),
       'guessed': EventValue.flag(isGuess(decidedIn)),
     });
+    return true;
   }
 
   /// The player's answer to "why that line?" for the beat just picked.

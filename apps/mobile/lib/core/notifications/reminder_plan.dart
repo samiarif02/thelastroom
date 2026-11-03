@@ -62,7 +62,7 @@ class PlannedReminder {
 ///   the game wants the player back, brief 42); if those three went unanswered the player
 ///   hasn't opened the game since (any open re-plans), so after them a three-day gap (day 8),
 ///   then silence until they come back. [planDays].
-/// - **Recall first:** a day with cards due in the Recall Room gets "N traps are waiting";
+/// - **Recall first:** a day with cards due in the Recall Room gets "N notes are waiting";
 ///   otherwise the next mission's interviewer nudges, in character. With nothing due and no
 ///   mission left, that day is quiet.
 /// - Off ([enabled] false, or no permission): nothing.

@@ -359,7 +359,9 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                       CastPeople.byId(widget.mission.lead.id),
                       grade.floor,
                     ),
-                    line: Tip.firstResult.line,
+                    line: _facts.markedDimensionIndex == null
+                        ? Tip.firstResultUnmarked
+                        : Tip.firstResult.line,
                     onGotIt: () => _endTip(TipAction.dismissed),
                   ),
                 ),

@@ -3,14 +3,15 @@
 abstract final class ReminderCopy {
   static const String recallTitle = 'Recall Room';
 
-  /// "3 traps are waiting in the Recall Room", in three ways.
+  /// "3 notes are waiting in the Recall Room", in three ways. Notes, as the Recall Room calls
+  /// them (QA 51: the reminder said "traps").
   static String recallBody(int due, int variant) {
-    final traps = due == 1 ? '1 trap' : '$due traps';
+    final notes = due == 1 ? '1 note' : '$due notes';
     final waiting = due == 1 ? 'is' : 'are';
     return switch (variant % variants) {
-      0 => '$traps $waiting waiting in the Recall Room.',
-      1 => '$traps you fell for $waiting back. One minute to beat them.',
-      _ => 'One quick round: $traps want a rematch.',
+      0 => '$notes $waiting waiting in the Recall Room.',
+      1 => '$notes from your rooms $waiting back. One minute to keep them.',
+      _ => 'One quick round: $notes to keep fresh.',
     };
   }
 
