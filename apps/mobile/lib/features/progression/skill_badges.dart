@@ -48,53 +48,62 @@ abstract final class SkillCopy {
     Skill.conflictNavigator,
     Skill.thinkUnderPressure,
   ];
-
-  static String initials(Skill skill) =>
-      name(skill).split(' ').map((w) => w[0]).join();
 }
 
-/// One skill as a round badge: lit in sunflower once earned, a quiet outline until then.
+/// One skill as a small arch medal (Daylight, brief 48): the skill's glyph on the floor's deep
+/// colour inside a honey rim once earned; a sand arch with a muted glyph until then. No
+/// initials: the glyph and, where there's room, the name beside it say which skill it is.
+/// It reads on paper, on white and on a dark panel alike (the debrief's unlock card).
 class SkillBadge extends StatelessWidget {
   const SkillBadge({
     super.key,
     required this.skill,
     required this.earned,
     this.size = defaultSize,
+    this.floor = DaylightFloors.one,
   });
 
   final Skill skill;
   final bool earned;
+
+  /// The arch's width; it stands a fifth taller.
   final double size;
+  final FloorColours floor;
 
   static const double defaultSize = 44;
-  static const double _ring = 2;
+  static const double _aspect = 1.2;
+  static const double _rimShare = 0.08;
+  static const double _iconShare = 0.46;
 
   @override
   Widget build(BuildContext context) {
     final label = earned
         ? '${SkillCopy.name(skill)}, earned'
         : '${SkillCopy.name(skill)}, earned in ${SkillCopy.earnedIn(skill)}';
+    final radius = BorderRadius.vertical(
+      top: const Radius.circular(DaylightRadius.archTop),
+      bottom: Radius.circular(size * _rimShare * 2),
+    );
     return Semantics(
       label: label,
       excludeSemantics: true,
-      child: SizedBox.square(
-        dimension: size,
+      child: SizedBox(
+        width: size,
+        height: size * _aspect,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: earned ? BrandVivid.accent : BrandVivid.night,
+            color: earned ? floor.deep : DaylightColors.sand,
+            borderRadius: radius,
             border: Border.all(
-              color: earned ? BrandVivid.accent : BrandVivid.hairline(),
-              width: _ring,
+              color: earned ? DaylightColors.honey : DaylightColors.sand2,
+              width: size * _rimShare,
             ),
-            boxShadow: earned ? BrandVivid.glowShadow(BrandVivid.accent) : null,
           ),
           child: Center(
-            child: Text(
-              SkillCopy.initials(skill),
-              style: BrandVividType.row.copyWith(
-                color: earned ? BrandVivid.onAccent : BrandVivid.onDeepSoft,
-              ),
+            child: Icon(
+              SkillCopy.icon(skill),
+              size: size * _iconShare,
+              color: earned ? DaylightColors.honey : DaylightColors.ink3,
             ),
           ),
         ),

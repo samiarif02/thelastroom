@@ -1,10 +1,11 @@
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
 
-/// Your file or the Chapter 1 report couldn't be read from the device (brief 24: every error
-/// state designed). Says so plainly, promises nothing is lost, and offers to try again.
+/// Your file, a past result or the Chapter 1 report couldn't be read from the device (brief 24:
+/// every error state designed; Daylight in brief 48). A white card on the paper: a clay
+/// warning tile, what failed, the promise that nothing is lost, and one way to try again.
 class FileTrouble extends StatelessWidget {
   const FileTrouble({super.key, required this.onRetry});
 
@@ -12,44 +13,48 @@ class FileTrouble extends StatelessWidget {
 
   static const String title = "Your file didn't open";
   static const String line =
-      'Nothing is lost: your missions are kept on this device. Try again in a moment.';
+      'Nothing is lost: your rooms are kept on this phone. Try again in a moment.';
   static const String retry = 'Try again';
-  static const double _radius = 22;
+
+  static const double _tile = 48;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: BrandSpace.md),
-    child: DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(_radius),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [BrandVivid.locked, BrandVivid.night],
+  Widget build(BuildContext context) => DaylightPanel(
+    padding: const EdgeInsets.all(DaylightSpace.s24),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: _tile,
+          height: _tile,
+          decoration: BoxDecoration(
+            color: DaylightColors.trapTint,
+            borderRadius: BorderRadius.circular(DaylightRadius.tile),
+          ),
+          child: const Icon(
+            PhosphorBold.warningCircle,
+            size: DaylightSpace.s24,
+            color: DaylightColors.trap,
+          ),
         ),
-        border: Border.all(color: BrandVivid.hairline()),
-        boxShadow: BrandVivid.cardShadow,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(BrandSpace.lg),
-        child: Column(
-          children: [
-            Semantics(
-              header: true,
-              liveRegion: true,
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: BrandVividType.title,
-              ),
-            ),
-            const SizedBox(height: BrandSpace.sm),
-            Text(line, textAlign: TextAlign.center, style: BrandVividType.body),
-            const SizedBox(height: BrandSpace.lg),
-            VividButton(label: retry, expand: true, onPressed: onRetry),
-          ],
+        const SizedBox(height: DaylightSpace.s16),
+        Semantics(
+          header: true,
+          liveRegion: true,
+          child: Text(title, style: DaylightType.heading5),
         ),
-      ),
+        const SizedBox(height: DaylightSpace.s8),
+        Text(
+          line,
+          style: DaylightType.body6.copyWith(color: DaylightColors.ink2),
+        ),
+        const SizedBox(height: DaylightSpace.s24),
+        TactileButton(
+          label: retry,
+          icon: PhosphorBold.arrowCounterClockwise,
+          onPressed: onRetry,
+        ),
+      ],
     ),
   );
 }
