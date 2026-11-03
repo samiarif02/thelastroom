@@ -21,6 +21,8 @@ import '../mission/mission_lookup.dart';
 import '../progression/progression.dart';
 import '../progression/skills_shelf.dart';
 import '../recall/recall_controller.dart';
+import '../tips/tip_overlay.dart';
+import '../tips/tips.dart';
 import 'elevator.dart';
 import 'floor_sheet.dart';
 import 'northstar_tower.dart';
@@ -29,7 +31,6 @@ import 'tower_extras.dart';
 import 'tower_header.dart';
 import 'tower_hero.dart';
 import 'tower_rooms.dart';
-import 'tower_tour.dart';
 import 'welcome_back.dart';
 import 'welcome_back_card.dart';
 
@@ -106,73 +107,119 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     });
   }
 
+  /// Kept from the start: `dispose` hands back a tip still up, when `ref` can't be read.
+  late final TipsController _tips = ref.read(tipsProvider.notifier);
+
   @override
   void initState() {
     super.initState();
+    _tips;
     ref.invalidate(towerRoomsProvider);
   }
 
-  /// The door to play, and where it is once the tour has scrolled to it.
+  /// The tips' targets: the door to play, the Recall tab, the Skills tab.
   final GlobalKey _nextDoor = GlobalKey();
-  Rect? _tourAt;
+  final GlobalKey _recallTab = GlobalKey();
+  final GlobalKey _skillsTab = GlobalKey();
+
+  /// The tip on screen and where its target is; one per visit at most, never a queue of them.
+  Tip? _tip;
+  Rect? _tipAt;
   bool _placing = false;
+  bool _tipThisVisit = false;
 
-  /// The tour is due and nothing else is: the first visit (not back from a room, so not under
-  /// the reminder explainer), no welcome-back card, no ride, the tower on top, a room to play.
-  bool _tourDue(List<TowerRoom>? rooms, {required bool welcomeUp}) =>
-      ref.read(towerTourProvider) &&
-      widget.lit == null &&
-      !welcomeUp &&
-      _riding == null &&
-      _isCurrent &&
-      rooms != null &&
-      rooms.any((r) => r.state == RoomState.current);
+  /// The reminder explainer may still come (back from room 1): no tip until it has.
+  bool _primerPending = false;
 
-  /// Scrolls the door to play into view, then measures it for the spotlight.
-  void _placeTour() {
-    if (_placing || _tourAt != null) return;
+  /// The tip due now, if nothing else is: no welcome-back card, no reminder explainer to come,
+  /// no notice over the tab bar, no ride, the tower on top. In order: the door to play (not on a
+  /// return from a room), the player's file once a room is played, then a Recall note due.
+  Tip? _tipDue(
+    List<TowerRoom>? rooms, {
+    required bool welcomeUp,
+    required int recallDue,
+  }) {
+    final tips = ref.read(tipsProvider);
+    if (!tips.loaded ||
+        rooms == null ||
+        welcomeUp ||
+        _riding != null ||
+        !_isCurrent) {
+      return null;
+    }
+    if (_tip case final up?) return up;
+    if (_tipThisVisit || _primerPending || _notice != null) return null;
+    final played = rooms.any((r) => r.state == RoomState.done);
+    if (tips.due(Tip.towerDoor) &&
+        widget.lit == null &&
+        rooms.any((r) => r.state == RoomState.current)) {
+      return Tip.towerDoor;
+    }
+    if (tips.due(Tip.yourFile) && played) return Tip.yourFile;
+    if (tips.due(Tip.recallDue) && recallDue > 0) return Tip.recallDue;
+    return null;
+  }
+
+  /// Brings [tip]'s target into view (the door scrolls; the tabs are always there), measures it
+  /// for the spotlight, and puts the tip up. A target that isn't on screen skips the tip.
+  void _placeTip(Tip tip) {
+    if (_placing || _tip != null) return;
     _placing = true;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final door = _nextDoor.currentContext;
-      if (!mounted || door == null) {
+      final key = switch (tip) {
+        Tip.recallDue => _recallTab,
+        Tip.yourFile => _skillsTab,
+        _ => _nextDoor,
+      };
+      final target = key.currentContext;
+      if (!mounted || target == null) {
         _placing = false;
         return;
       }
-      // Large text makes Priya's bubble tall: the door goes near the top so the bubble
-      // has the screen below it, "Got it" in view.
-      final large = MediaQuery.textScalerOf(context).scale(1) > _largeText;
-      await Scrollable.ensureVisible(
-        door,
-        alignment: large ? _doorHigh : _doorMiddle,
-        duration: MediaQuery.disableAnimationsOf(context)
-            ? Duration.zero
-            : DaylightMotion.move,
-        curve: DaylightMotion.ease,
-      );
-      if (!mounted) return;
-      final box = _nextDoor.currentContext?.findRenderObject() as RenderBox?;
-      final screen = context.findRenderObject() as RenderBox?;
+      if (tip == Tip.towerDoor) {
+        // Large text makes the bubble tall: the door goes near the top so the bubble has the
+        // screen below it, "Got it" in view.
+        final large = MediaQuery.textScalerOf(context).scale(1) > _largeText;
+        await Scrollable.ensureVisible(
+          target,
+          alignment: large ? _doorHigh : _doorMiddle,
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : DaylightMotion.move,
+          curve: DaylightMotion.ease,
+        );
+        if (!mounted) return;
+      }
       _placing = false;
-      if (box == null || screen == null || !box.hasSize) return;
-      final topLeft = box.localToGlobal(Offset.zero, ancestor: screen);
-      // The spotlight takes in the play cue over the door too.
-      final shape = topLeft & box.size;
-      setState(
-        () => _tourAt = Rect.fromLTRB(
-          shape.left,
-          shape.top - PlayCue.size - DaylightSpace.s4,
-          shape.right,
-          shape.bottom,
-        ),
-      );
-      ref.read(towerTourProvider.notifier).shown();
+      final at = tipTarget(key, context);
+      if (at == null || !_tips.shown(tip)) {
+        _tipThisVisit = true;
+        return;
+      }
+      setState(() {
+        _tip = tip;
+        _tipThisVisit = true;
+        // The door's spotlight takes in the play cue over it too.
+        _tipAt = tip == Tip.towerDoor
+            ? Rect.fromLTRB(
+                at.left,
+                at.top - PlayCue.size - DaylightSpace.s4,
+                at.right,
+                at.bottom,
+              )
+            : at;
+      });
     });
   }
 
-  void _endTour(TourAction action, {TowerRoom? start, List<TowerRoom>? rooms}) {
-    setState(() => _tourAt = null);
-    unawaited(ref.read(towerTourProvider.notifier).done(action));
-    if (start != null && rooms != null) _tapRoom(start, rooms);
+  void _endTip(TipAction action) {
+    final tip = _tip;
+    if (tip == null) return;
+    setState(() {
+      _tip = null;
+      _tipAt = null;
+    });
+    unawaited(_tips.done(tip, action));
   }
 
   /// Whether the tower was the route on top at the last dependency change.
@@ -187,6 +234,8 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     // the Recall Room never show what was true before (brief 30's playthrough).
     final current = _isCurrent;
     if (current && !_wasCurrent) {
+      // A new visit: it may bring a tip of its own.
+      _tipThisVisit = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ref
@@ -208,6 +257,7 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     // Back from a finished mission (`/tower?lit=N`): the same tower, now lighting room N.
     if (widget.lit != oldWidget.lit && widget.lit != null) {
       _opened = false;
+      _tipThisVisit = false;
       _loaded = null;
       if (!MediaQuery.disableAnimationsOf(context)) _lighting.value = 0;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -222,6 +272,7 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
 
   @override
   void dispose() {
+    if (_tip case final tip?) _tips.release(tip);
     _noticeTimer?.cancel();
     _lighting.dispose();
     super.dispose();
@@ -244,7 +295,15 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
       _say(TowerScreen.litNotice(lit));
       if (_lighting.value < 1) unawaited(_lighting.forward());
     }
-    if (widget.lit == 1) unawaited(offerReminders(context, ref));
+    if (widget.lit == 1) {
+      // The explainer comes after the room lights up; the tips wait for it to be answered.
+      _primerPending = true;
+      unawaited(
+        offerReminders(context, ref).whenComplete(() {
+          if (mounted) setState(() => _primerPending = false);
+        }),
+      );
+    }
   }
 
   /// The week's ring as the tower sees it: when a finished session takes it to the goal, the
@@ -338,13 +397,24 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     final recallDue = ref.watch(recallDueCountProvider).value ?? 0;
     final progression = ref.watch(progressionProvider).value;
     final welcomeUp = ref.watch(welcomeBackProvider) != null;
-    ref.watch(towerTourProvider);
-    final tourDue = _tourDue(rooms, welcomeUp: welcomeUp);
-    if (tourDue) _placeTour();
-    final tourAt = _tourAt;
-    final tourRoom = rooms
-        ?.where((r) => r.state == RoomState.current)
-        .firstOrNull;
+    ref.watch(tipsProvider);
+    final due = _tipDue(rooms, welcomeUp: welcomeUp, recallDue: recallDue);
+    if (due != null) _placeTip(due);
+    final tip = due == null ? null : _tip;
+    if (due == null && _tip != null) {
+      // Something else came first (a ride, a card, another screen): the tip goes, unseen, and
+      // comes back on a later visit.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final up = _tip;
+        if (!mounted || up == null) return;
+        _tips.release(up);
+        setState(() {
+          _tip = null;
+          _tipAt = null;
+        });
+      });
+    }
+    final tipAt = _tipAt;
     final name =
         ref.watch(profileProvider).value?.displayName ??
         PlayerProfile.fallbackName;
@@ -393,10 +463,12 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
                     icon: PhosphorRegular.cards,
                     label: TowerScreen.recallTab,
                     badge: recallDue,
+                    anchor: _recallTab,
                   ),
-                  const TabItem(
+                  TabItem(
                     icon: PhosphorRegular.medal,
                     label: TowerScreen.progress,
+                    anchor: _skillsTab,
                   ),
                   const TabItem(
                     icon: PhosphorRegular.userCircle,
@@ -407,12 +479,19 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
             ),
             if (_notice case final notice?)
               _Notice(key: ValueKey(notice), text: notice),
-            if (tourDue && tourAt != null && tourRoom != null && rooms != null)
-              TowerTour(
-                target: tourAt,
-                onDoor: () =>
-                    _endTour(TourAction.started, start: tourRoom, rooms: rooms),
-                onDismiss: () => _endTour(TourAction.dismissed),
+            if ((tip, tipAt) case (final tip?, final at?))
+              TipOverlay(
+                key: ValueKey(tip),
+                voice: TipVoice.priya,
+                line:
+                    tip == Tip.towerDoor &&
+                        rooms!.any((r) => r.state == RoomState.done)
+                    ? Tip.nextDoorLine
+                    : tip.line,
+                target: at,
+                shape: tip == Tip.towerDoor ? TipShape.arch : TipShape.card,
+                onTarget: () => _endTip(TipAction.followed),
+                onDismiss: () => _endTip(TipAction.dismissed),
               ),
             if (_riding case final room?)
               Elevator(
@@ -446,7 +525,7 @@ class _Tower extends StatefulWidget {
 
   final ValueChanged<Chapter> onFloor;
 
-  /// On the door to play, for the tower tour.
+  /// On the door to play, for its first-time tip.
   final Key? nextDoorKey;
   final List<TowerRoom> rooms;
   final String name;

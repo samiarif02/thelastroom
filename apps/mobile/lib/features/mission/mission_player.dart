@@ -10,12 +10,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/audio/game_sounds.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
-import '../../ui/film/film_overlay.dart';
 import '../../ui/haptics.dart';
 import '../../ui/subtitle/typewriter_subtitle.dart';
 import '../debrief/ai_score.dart';
 import '../debrief/debrief_facts.dart';
 import '../debrief/debrief_view.dart';
+import '../tips/tip_overlay.dart';
+import '../tips/tips.dart';
 import 'mission_controller.dart';
 import 'mission_lookup.dart';
 import 'scene/epilogue_scene.dart';
@@ -202,6 +203,17 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   // Kept from the start: `dispose` stops the sound, when `ref` can no longer be read.
   late final GameSounds _sounds = ref.read(gameSoundsProvider);
 
+  /// Kept from the start: `dispose` hands back a tip still up, when `ref` can't be read.
+  late final TipsController _tips = ref.read(tipsProvider.notifier);
+
+  /// The first-time tip over the cards or the reasons, and where its target is.
+  Tip? _tip;
+  Rect? _tipAt;
+  final GlobalKey _scene = GlobalKey();
+  final GlobalKey _cardsKey = GlobalKey();
+  final GlobalKey _dockKey = GlobalKey();
+  final GlobalKey _reasonsKey = GlobalKey();
+
   PlayerProfile get _profile =>
       ref.read(profileProvider).value ?? const PlayerProfile();
 
@@ -216,6 +228,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     super.initState();
     // Resolved now, not lazily: `dispose` stops the sound, and `ref` can't be read by then.
     _sounds;
+    _tips;
     if (_game.resumed) _resumeScene();
     _lifecycle = AppLifecycleListener(
       onPause: () => _sounds.stopAll(),
@@ -248,6 +261,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
 
   @override
   void dispose() {
+    if (_tip case final tip?) _tips.release(tip);
     _changeTimer?.cancel();
     _reactionTimer?.cancel();
     for (final t in _rests) {
@@ -385,8 +399,59 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     }
   }
 
-  /// The last card arrived: the player can read them all, and the stopwatch starts.
-  void _cardsArrived() => _shownAt ??= _now();
+  /// The last card arrived: the player can read them all, and the stopwatch starts. The first
+  /// time, a tip says what to do with them.
+  void _cardsArrived() {
+    _shownAt ??= _now();
+    _offerTip(Tip.answerCards);
+  }
+
+  /// Whether [tip] still belongs on screen: the first beat's cards, nothing picked yet (never a
+  /// built answer or the follow-up's replies), or the reasons, none given yet.
+  bool _tipFits(Tip tip) {
+    if (_stage != SceneStage.beats || _leaving) return false;
+    return switch (tip) {
+      Tip.answerCards =>
+        _phase == BeatPhase.cards &&
+            _selected == null &&
+            _locked == null &&
+            _game.mission.beats[_beatShown].build == null,
+      Tip.whyStep => _phase == BeatPhase.reasons && _reason == null,
+      _ => false,
+    };
+  }
+
+  /// Puts [tip] up over its target, once it has arrived, when it's due and nothing else is up.
+  /// A target that isn't on screen skips it this time.
+  void _offerTip(Tip tip) {
+    if (_tip != null || !_tips.canShow(tip) || !_tipFits(tip)) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final scene = _scene.currentContext;
+      if (!mounted || scene == null || _tip != null || !_tipFits(tip)) return;
+      var at = tipTarget(
+        tip == Tip.answerCards ? _cardsKey : _reasonsKey,
+        scene,
+      );
+      // The cards and the "Lock in" under them: the line, then locking it in.
+      final dock = tip == Tip.answerCards ? tipTarget(_dockKey, scene) : null;
+      if (at != null && dock != null) at = at.expandToInclude(dock);
+      if (at == null || !_tips.shown(tip)) return;
+      setState(() {
+        _tip = tip;
+        _tipAt = at;
+      });
+    });
+  }
+
+  void _endTip(TipAction action) {
+    final tip = _tip;
+    if (tip == null) return;
+    setState(() {
+      _tip = null;
+      _tipAt = null;
+    });
+    unawaited(_tips.done(tip, action));
+  }
 
   /// One tap picks a line. For [MissionPlayer.changeWindow] a tap on another card changes it;
   /// a tap on the same card says it now.
@@ -632,19 +697,18 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
       );
     }
     if (_stage == SceneStage.epilogue) {
-      return FilmGrain(
-        child: EpilogueScene(
-          lines: [
-            for (final line in mission.epilogue)
-              line.addressedTo(game.playerName),
-          ],
-          grade: grade,
-          sounds: _sounds,
-          doneLabel: mission.leadsToReport
-              ? DebriefView.reportLabel
-              : DebriefView.continueLabel,
-          onDone: widget.onExit,
-        ),
+      // Daylight (brief 48): the epilogue draws its own ground, no film grain over it.
+      return EpilogueScene(
+        lines: [
+          for (final line in mission.epilogue)
+            line.addressedTo(game.playerName),
+        ],
+        grade: grade,
+        sounds: _sounds,
+        doneLabel: mission.leadsToReport
+            ? DebriefView.reportLabel
+            : DebriefView.continueLabel,
+        onDone: widget.onExit,
       );
     }
 
@@ -675,6 +739,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
         color: f.tint,
         floor: f,
         child: Stack(
+          key: _scene,
           fit: StackFit.expand,
           children: [
             // Taps on the room itself (anywhere the cards, the draft and the dock aren't).
@@ -704,7 +769,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                       mission.beats[_beatShown].build == null)
                     BeatTimer(
                       key: ValueKey(_beatShown),
-                      running: _locked == null,
+                      // Paused under a tip: never a countdown while the player reads one.
+                      running: _locked == null && _tip == null,
                       onExpired: _controller.timerExpired,
                       onPulse: _sounds.timerPulse,
                       builder: (context, dim, left) => TimerLine(
@@ -731,6 +797,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                   ),
                   if (dock != null)
                     Padding(
+                      key: _dockKey,
                       padding: EdgeInsets.fromLTRB(
                         DaylightSpace.s16,
                         DaylightSpace.s8,
@@ -756,6 +823,18 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                 right: 0,
                 bottom: 0,
                 child: _feedback(game, _reaction!),
+              ),
+            if ((_tip, _tipAt) case (final tip?, final at?) when !_leaving)
+              TipOverlay(
+                key: ValueKey(tip),
+                voice: TipVoice.inRoom(
+                  CastPeople.byId(_speaker(game).id),
+                  grade.floor,
+                ),
+                line: tip.line,
+                target: at,
+                onTarget: () => _endTip(TipAction.followed),
+                onDismiss: () => _endTip(TipAction.dismissed),
               ),
             if (_stage == SceneStage.card)
               // The card's title stays readable; the tap on it is one labelled button.
@@ -987,19 +1066,22 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                 onLockIn: _lockBuilt,
               )
             else
-              AnswerCards<AnswerOption>(
-                key: ValueKey('beat-$_beatShown'),
-                label: beatLabel(beat.kind, _beatShown, mission.beats.length),
-                helper: _selected != null && _locked == null
-                    ? changeHint
-                    : pickHelper,
-                items: game.optionsForBeat(_beatShown),
-                textOf: (o) => o.text,
-                grade: mission.grade,
-                selected: _selected,
-                locked: _locked,
-                onArrived: _cardsArrived,
-                onPick: (o) => _pick(o, reply: false),
+              KeyedSubtree(
+                key: _cardsKey,
+                child: AnswerCards<AnswerOption>(
+                  key: ValueKey('beat-$_beatShown'),
+                  label: beatLabel(beat.kind, _beatShown, mission.beats.length),
+                  helper: _selected != null && _locked == null
+                      ? changeHint
+                      : pickHelper,
+                  items: game.optionsForBeat(_beatShown),
+                  textOf: (o) => o.text,
+                  grade: mission.grade,
+                  selected: _selected,
+                  locked: _locked,
+                  onArrived: _cardsArrived,
+                  onPick: (o) => _pick(o, reply: false),
+                ),
               ),
           ];
         }
@@ -1038,17 +1120,21 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
           ],
           if (_phase != BeatPhase.why && why != null) ...[
             const SizedBox(height: DaylightSpace.s24),
-            AnswerCards<Reason>(
-              key: ValueKey('why-$_beatShown'),
-              label: reasonLabel,
-              helper: reasonHelper,
-              items: game.reasonsForBeat(_beatShown),
-              textOf: (r) => r.text,
-              iconOf: (r) => principleIcon(r.text),
-              grade: mission.grade,
-              selected: _reason,
-              locked: _reason,
-              onPick: _giveReason,
+            KeyedSubtree(
+              key: _reasonsKey,
+              child: AnswerCards<Reason>(
+                key: ValueKey('why-$_beatShown'),
+                label: reasonLabel,
+                helper: reasonHelper,
+                items: game.reasonsForBeat(_beatShown),
+                textOf: (r) => r.text,
+                iconOf: (r) => principleIcon(r.text),
+                grade: mission.grade,
+                selected: _reason,
+                locked: _reason,
+                onArrived: () => _offerTip(Tip.whyStep),
+                onPick: _giveReason,
+              ),
             ),
           ],
           // Room under the cards for the sheet that rises over them.

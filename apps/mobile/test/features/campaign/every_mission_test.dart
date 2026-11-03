@@ -351,7 +351,7 @@ Future<void> _afterDebrief(
     await _playEpilogue(rig, m);
     final done = find.descendant(
       of: find.byType(EpilogueScene),
-      matching: find.byType(VividButton),
+      matching: find.byType(TactileButton),
     );
     await rig.until(done);
     await rig.tester.tap(done);

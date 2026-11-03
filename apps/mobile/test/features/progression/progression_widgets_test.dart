@@ -112,7 +112,7 @@ void main() {
     expect(analytics.events, isEmpty);
   });
 
-  testWidgets('the progress card: XP, the week so far, badges, the countdown', (
+  testWidgets('the progress card: XP, the week so far, the countdown', (
     tester,
   ) async {
     await progress.recordAttempt(attempt(m7, 100, at: now));
@@ -120,6 +120,25 @@ void main() {
     await pump(tester, const ProgressionCard());
     expect(find.text(ProgressionCard.weekLine(1, 3)), findsOneWidget);
     expect(find.text(ProgressionCard.countdown(5)), findsOneWidget);
+    final xp = missionXp(total: 100, firstClear: true);
+    expect(
+      find.bySemanticsLabel('$xp ${ProgressionCard.xpLabel}'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the debrief\'s skill medal names its skill, earned or where', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      const Row(
+        children: [
+          SkillBadge(skill: Skill.evidenceBuilder, earned: true),
+          SkillBadge(skill: Skill.clearIntroductions, earned: false),
+        ],
+      ),
+    );
     expect(find.bySemanticsLabel('Evidence Builder, earned'), findsOneWidget);
     expect(
       find.bySemanticsLabel('Clear Introductions, earned in Mission 3'),
@@ -165,6 +184,9 @@ void main() {
       ) async {
         final handle = tester.ensureSemantics();
         await pump(tester, const InterviewDateChoices());
+        await audit(tester);
+        await tester.tap(find.text('In a month'));
+        await tester.pumpAndSettle();
         await audit(tester);
         handle.dispose();
       });

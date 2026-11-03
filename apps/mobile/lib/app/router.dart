@@ -10,13 +10,13 @@ import '../features/mission/mission_screen.dart';
 import '../features/onboarding/home_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/progress/chapter_report_screen.dart';
+import '../features/progress/past_result_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/progression/floor_cleared_screen.dart';
 import '../features/recall/recall_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/title/wrong_floor_screen.dart';
 import '../features/tower/tower_screen.dart';
-import '../ui/film/film_overlay.dart';
 
 /// Route paths. Notification deep links (brief §8) resolve to these.
 ///
@@ -40,6 +40,9 @@ abstract final class Routes {
 
   /// The Chapter 1 report (brief 24): after Mission 7, or from "Your file".
   static const String report = '$_towerPath/$_progress/$_report';
+
+  /// A played room's last result (brief 48), from Your file: `/tower/progress/room/4`.
+  static String result(int number) => '$_towerPath/$_progress/$_room/$number';
   static const String settings = '$_towerPath/$_settings';
   static const String character = '$_towerPath/$_character';
 
@@ -54,6 +57,7 @@ abstract final class Routes {
 
   static const String _progress = 'progress';
   static const String _report = 'report';
+  static const String _room = 'room';
   static const String _settings = 'settings';
   static const String _character = 'character';
   static const String _mission = 'mission';
@@ -73,7 +77,7 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
   GoRoute(path: Routes.intro, redirect: (context, state) => Routes.onboarding),
   GoRoute(
     path: Routes.onboarding,
-    builder: (context, state) => const FilmGrain(child: OnboardingScreen()),
+    builder: (context, state) => const OnboardingScreen(),
   ),
   GoRoute(
     path: Routes._towerPath,
@@ -83,12 +87,18 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
     routes: [
       GoRoute(
         path: Routes._progress,
-        builder: (context, state) => const FilmGrain(child: ProgressScreen()),
+        builder: (context, state) => const ProgressScreen(),
         routes: [
           GoRoute(
             path: Routes._report,
-            builder: (context, state) =>
-                const FilmGrain(child: ChapterReportScreen()),
+            builder: (context, state) => const ChapterReportScreen(),
+          ),
+          GoRoute(
+            path: '${Routes._room}/:number',
+            builder: (context, state) => PastResultScreen(
+              // A bad number reaches the result's "not played" state, not a crash.
+              number: int.tryParse(state.pathParameters['number'] ?? '') ?? 0,
+            ),
           ),
         ],
       ),
@@ -98,7 +108,7 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
       ),
       GoRoute(
         path: Routes._character,
-        builder: (context, state) => const FilmGrain(child: CharacterScreen()),
+        builder: (context, state) => const CharacterScreen(),
       ),
       GoRoute(
         path: '${Routes._mission}/:number',
@@ -136,7 +146,7 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
 
 /// What an unknown address shows: the cinematic error state, never the stock page.
 Widget routeErrorBuilder(BuildContext context, GoRouterState state) =>
-    const FilmGrain(child: WrongFloorScreen());
+    const WrongFloorScreen();
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(

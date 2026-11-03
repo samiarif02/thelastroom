@@ -90,12 +90,13 @@ enum AnalyticsEvent {
   /// answered), open or still locked: the player looking ahead.
   floorPreviewed('floor_previewed'),
 
-  /// The tower tour's coach mark is shown: the spotlight on the room to play, the first time
-  /// (or again, from Settings).
-  towerTourShown('tower_tour_shown'),
+  /// A first-time tip is shown (one short line from the cast, once, the first time the player
+  /// reaches that moment): which tip, and whether "Show tips again" brought it back.
+  tipShown('tip_shown'),
 
-  /// The tower tour ends: the player tapped the door (and went in) or dismissed it.
-  towerTourDone('tower_tour_done');
+  /// A first-time tip is put away: its target was tapped (and did its normal action), or it
+  /// was dismissed ("Got it", or a tap anywhere else).
+  tipDone('tip_done');
 
   const AnalyticsEvent(this.wireName);
 
