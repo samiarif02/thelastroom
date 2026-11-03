@@ -216,6 +216,9 @@ class _Recording extends StatelessWidget {
 
   static const double _rule = 0.18;
 
+  /// The time's column: "0:47 / of 2:00" at its size; at large text it shrinks to fit.
+  static const double _timeWidth = 96;
+
   @override
   Widget build(BuildContext context) {
     final f = grade.floor;
@@ -268,7 +271,8 @@ class _Recording extends StatelessWidget {
             const SizedBox(height: DaylightSpace.s12),
             Row(
               children: [
-                Flexible(
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: _timeWidth),
                   child: Semantics(
                     label:
                         '${RecorderPanel.clock(elapsed)} of '
@@ -510,49 +514,62 @@ class _WaveformState extends State<Waveform> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final said = (widget.share * Waveform.bars).ceil().clamp(0, Waveform.bars);
-    final heard = _history.length;
-    return ExcludeSemantics(
-      child: RepaintBoundary(
-        child: SizedBox(
-          height: Waveform.height,
-          child: Row(
-            children: [
-              for (var i = 0; i < Waveform.bars; i++) ...[
-                if (i > 0) const SizedBox(width: 2),
-                Expanded(
-                  child: Center(
-                    child: FractionallySizedBox(
-                      heightFactor: i < said
-                          ? math.max(
-                              _floor,
-                              heard == 0
-                                  ? _floor
-                                  : _history[(heard - said + i).clamp(
-                                      0,
-                                      heard - 1,
-                                    )],
-                            )
-                          : _floor,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: DaylightColors.raised.withValues(
-                            alpha: i < said ? 1 : _future,
-                          ),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ],
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: RepaintBoundary(
+      child: SizedBox(
+        height: Waveform.height,
+        width: double.infinity,
+        child: CustomPaint(
+          painter: _WavePainter(
+            history: List.of(_history),
+            share: widget.share,
           ),
         ),
       ),
-    );
+    ),
+  );
+}
+
+class _WavePainter extends CustomPainter {
+  _WavePainter({required this.history, required this.share});
+
+  final List<double> history;
+  final double share;
+
+  static const double _gap = 2;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const bars = Waveform.bars;
+    final w = (size.width - _gap * (bars - 1)) / bars;
+    if (w <= 0) return;
+    final said = (share * bars).ceil().clamp(0, bars);
+    final heard = history.length;
+    final paint = Paint();
+    for (var i = 0; i < bars; i++) {
+      final level = i < said && heard > 0
+          ? history[(heard - said + i).clamp(0, heard - 1)]
+          : 0.0;
+      final h = size.height * math.max(_WaveformState._floor, level);
+      paint.color = DaylightColors.raised.withValues(
+        alpha: i < said ? 1 : _WaveformState._future,
+      );
+      final x = i * (w + _gap);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(x, (size.height - h) / 2, w, h),
+          Radius.circular(math.min(w / 2, 2)),
+        ),
+        paint,
+      );
+    }
   }
+
+  @override
+  bool shouldRepaint(_WavePainter old) =>
+      old.share != share ||
+      old.history.length != history.length ||
+      (history.isNotEmpty && old.history.last != history.last);
 }
 
 /// "Delete this take?": shown over the scene while [TakeRecorder.confirmingDelete].

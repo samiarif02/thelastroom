@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/audio/audio_settings.dart';
+import '../../ui/daylight/daylight_kit.dart' show DaylightPanel;
 import '../../ui/film_kit.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../recall/recall_card_view.dart';
@@ -194,16 +195,16 @@ abstract final class VividEntries {
     id: 'vivid-screens',
     name: 'Settings and Recall',
     note:
-        'The Settings audio section on a VividPanel, and a Recall Room card with the mission\'s '
-        'answer cards, before and after an answer (brief 23).',
+        'The Settings audio section on a Daylight card, and a Recall Room note with its pick '
+        'cards, before and after an answer (Daylight, brief 46).',
     shots: [
       CatalogShot(
         id: 'settings',
         label: 'Settings',
         build: (_) => ProviderScope(
           overrides: [audioSettingsProvider.overrideWith(_CatalogAudio.new)],
-          child: const CatalogSky(
-            children: [VividPanel(child: AudioSettingsSection())],
+          child: const CatalogPaper(
+            children: [DaylightPanel(child: AudioSettingsSection())],
           ),
         ),
       ),
@@ -214,7 +215,8 @@ abstract final class VividEntries {
         CatalogShot(
           id: id,
           label: label,
-          build: (_) => CatalogSky(
+          build: (_) => CatalogPaper(
+            ground: DaylightColors.recallTint,
             children: [
               RecallCardView(
                 playing: RecallPlaying(
@@ -237,8 +239,9 @@ abstract final class VividEntries {
   static const RecallQuestion _recallCard = RecallQuestion(
     cardId: 'catalog-trap',
     kind: RecallCardKind.trap,
-    kicker: 'YOU FELL FOR',
+    kicker: 'You fell for',
     prompt: 'Saying "we" sounds like a team player.',
+    caughtBy: 'marcus',
     ask: 'What holds up better?',
     quote: 'We shipped it in two weeks.',
     choices: [

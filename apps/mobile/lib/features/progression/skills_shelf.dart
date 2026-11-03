@@ -27,6 +27,8 @@ class SkillsShelf extends StatelessWidget {
   }
 
   static const double _badge = 64;
+  static const double _unit = 16;
+  static const double _largeAt = 1.3;
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +43,13 @@ class SkillsShelf extends StatelessWidget {
         const SizedBox(height: DaylightSpace.s12),
         LayoutBuilder(
           builder: (context, box) {
-            // Four across while they fit; at large text they wrap two by two.
-            final width = (box.maxWidth / 4 - DaylightSpace.s16).clamp(
+            // Four across; at large text two by two, so a name never breaks inside a word.
+            final large =
+                MediaQuery.textScalerOf(context).scale(_unit) >
+                _unit * _largeAt;
+            final across = large ? 2 : 4;
+            final column = box.maxWidth / across;
+            final width = (column - DaylightSpace.s16).clamp(
               DaylightSpace.s48,
               _badge,
             );
@@ -56,6 +63,7 @@ class SkillsShelf extends StatelessWidget {
                     name: SkillCopy.name(s),
                     hint: unlocked.contains(s) ? null : SkillCopy.where(s),
                     width: width,
+                    labelWidth: large ? column - DaylightSpace.s8 : null,
                     state: unlocked.contains(s)
                         ? SkillState.earned
                         : s == upcoming

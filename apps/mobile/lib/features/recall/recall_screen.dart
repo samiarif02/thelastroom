@@ -36,6 +36,7 @@ class RecallScreen extends ConsumerWidget {
   static const String tryAgain = 'Try again';
   static const String doneTitle = 'Round done';
   static const String streakLabel = 'streak';
+  static const String lessonNote = 'A lesson to keep';
 
   static String doneLine(RecallFinished f) =>
       '${f.known} of ${f.verdicts.length} known. Best streak: ${f.bestStreak}.';
@@ -128,7 +129,7 @@ class RecallScreen extends ConsumerWidget {
                       : noteOf(playing.index + 1, playing.round.length),
                   title: playing == null
                       ? title
-                      : _source(playing) ?? RecallScreen.title,
+                      : _source(playing) ?? lessonNote,
                   trailing: playing == null ? null : _Boxes(box: playing.box),
                 ),
                 Expanded(

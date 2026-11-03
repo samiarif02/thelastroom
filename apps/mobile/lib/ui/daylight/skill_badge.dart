@@ -19,6 +19,7 @@ class SkillBadge extends StatelessWidget {
     this.state = SkillState.locked,
     this.floor,
     this.width = 64,
+    this.labelWidth,
   });
 
   final IconData icon;
@@ -27,6 +28,10 @@ class SkillBadge extends StatelessWidget {
   final SkillState state;
   final FloorColours? floor;
   final double width;
+
+  /// The name's column; the arch plus 16 by default (wider at large text, so a name never
+  /// breaks inside a word).
+  final double? labelWidth;
 
   static const double _aspect = 76 / 64;
   static const double _iconShare = 0.44;
@@ -53,7 +58,7 @@ class SkillBadge extends StatelessWidget {
       label: '$name, $status${hint == null ? '' : ', $hint'}',
       excludeSemantics: true,
       child: SizedBox(
-        width: width + DaylightSpace.s16,
+        width: labelWidth ?? width + DaylightSpace.s16,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

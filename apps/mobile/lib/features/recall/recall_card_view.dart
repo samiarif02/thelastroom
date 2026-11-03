@@ -252,22 +252,25 @@ class _Note extends StatelessWidget {
             const SizedBox(height: DaylightSpace.s12),
             const _Dashes(),
             const SizedBox(height: DaylightSpace.s12),
-            Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              spacing: DaylightSpace.s8,
-              children: [
-                Text(
-                  RecallCardView.day(box),
-                  style: DaylightType.tabular(DaylightType.caption4)
-                      .copyWith(color: DaylightColors.ink2),
-                ),
-                Text(
-                  RecallCardView.noHints,
-                  style: DaylightType.caption4.copyWith(
-                    color: DaylightColors.ink2,
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                spacing: DaylightSpace.s8,
+                children: [
+                  Text(
+                    RecallCardView.day(box),
+                    style: DaylightType.tabular(DaylightType.caption4)
+                        .copyWith(color: DaylightColors.ink2),
                   ),
-                ),
-              ],
+                  Text(
+                    RecallCardView.noHints,
+                    style: DaylightType.caption4.copyWith(
+                      color: DaylightColors.ink2,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
