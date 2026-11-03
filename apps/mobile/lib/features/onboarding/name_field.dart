@@ -2,10 +2,11 @@ import 'package:brand/brand.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
 
-/// The first-name question (brief 17): a big glassy field on colour, "Let's go" in sunflower,
-/// and "Skip, call me Candidate". [onDone] gets the trimmed name, or null for the skip.
+/// The first-name question (brief 17; Daylight in brief 48): a big white field on its edge (the
+/// floor's ring when focused), "Let's go" in honey, and "Skip, call me Candidate" as the quiet
+/// second action. [onDone] gets the trimmed name, or null for the skip.
 class NameField extends StatefulWidget {
   const NameField({super.key, required this.onDone});
 
@@ -27,8 +28,7 @@ class _NameFieldState extends State<NameField> {
   final FocusNode _focus = FocusNode();
   bool _done = false;
 
-  static const double _fieldAlpha = 0.14;
-  static const double _fontSize = 22;
+  static const double _ring = 2;
 
   @override
   void initState() {
@@ -62,25 +62,31 @@ class _NameFieldState extends State<NameField> {
   Widget build(BuildContext context) {
     final name = _name;
     final focused = _focus.hasFocus;
-    final style = BrandVividType.title.copyWith(fontSize: _fontSize);
+    final f = ChapterTint.floorOf(context);
+    final still = MediaQuery.disableAnimationsOf(context);
+    final style = DaylightType.heading5;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         GestureDetector(
           onTap: _focus.requestFocus,
           child: AnimatedContainer(
-            duration: BrandMotion.quick,
-            constraints: const BoxConstraints(minHeight: BrandSpace.xxl),
+            duration: still ? Duration.zero : DaylightMotion.colour,
+            curve: DaylightMotion.ease,
+            constraints: const BoxConstraints(minHeight: DaylightSpace.s64),
             padding: const EdgeInsets.symmetric(
-              horizontal: BrandSpace.md,
-              vertical: BrandSpace.md,
+              horizontal: DaylightSpace.s16,
+              vertical: DaylightSpace.s16,
             ),
             decoration: BoxDecoration(
-              color: BrandVivid.onDeep.withValues(alpha: _fieldAlpha),
-              borderRadius: BorderRadius.circular(BrandRadius.lg),
+              color: DaylightColors.raised,
+              borderRadius: BorderRadius.circular(DaylightRadius.card),
               border: Border.all(
-                color: focused ? BrandVivid.accent : BrandVivid.hairline(0.3),
-                width: focused ? 2 : 1,
+                color: focused ? f.base : DaylightColors.raised,
+                width: _ring,
+              ),
+              boxShadow: DaylightElevation.edgeOf(
+                focused ? f.deep : DaylightColors.sand2,
               ),
             ),
             child: Stack(
@@ -91,10 +97,7 @@ class _NameFieldState extends State<NameField> {
                     child: Text(
                       NameField.label,
                       textAlign: TextAlign.center,
-                      style: style.copyWith(
-                        color: BrandVivid.onDeepSoft,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: style.copyWith(color: DaylightColors.ink3),
                     ),
                   ),
                 // One node for screen readers: the label merged into EditableText's own text
@@ -111,10 +114,9 @@ class _NameFieldState extends State<NameField> {
                       autofocus: true,
                       textAlign: TextAlign.center,
                       style: style,
-                      cursorColor: BrandVivid.accent,
-                      backgroundCursorColor: BrandVivid.onDeepSoft,
-                      selectionColor: BrandVivid.accent.withValues(alpha: 0.4),
-                      keyboardAppearance: Brightness.dark,
+                      cursorColor: f.base,
+                      backgroundCursorColor: DaylightColors.sand2,
+                      selectionColor: f.soft,
                       textCapitalization: TextCapitalization.words,
                       autofillHints: const [AutofillHints.givenName],
                       textInputAction: TextInputAction.done,
@@ -132,19 +134,18 @@ class _NameFieldState extends State<NameField> {
             ),
           ),
         ),
-        const SizedBox(height: BrandSpace.lg),
-        VividButton(
+        const SizedBox(height: DaylightSpace.s24),
+        TactileButton(
           label: NameField.confirm,
-          expand: true,
+          icon: PhosphorBold.arrowRight,
           onPressed: name == null ? null : () => _finish(name),
         ),
-        const SizedBox(height: BrandSpace.sm),
-        Center(
-          child: VividButton(
-            label: NameField.skip,
-            primary: false,
-            onPressed: () => _finish(null),
-          ),
+        const SizedBox(height: DaylightSpace.s12),
+        TactileButton(
+          label: NameField.skip,
+          tone: TactileTone.quiet,
+          compact: true,
+          onPressed: () => _finish(null),
         ),
       ],
     );

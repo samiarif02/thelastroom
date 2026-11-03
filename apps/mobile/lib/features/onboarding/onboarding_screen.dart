@@ -13,7 +13,8 @@ import '../../core/analytics/analytics_event.dart';
 import '../../core/analytics/event_value.dart';
 import '../../core/audio/game_sounds.dart';
 import '../../core/profile/profile_repository.dart';
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
+import '../../ui/film/anchored_scroll.dart';
 import '../mission/mission_lookup.dart';
 import '../progression/interview_date_choices.dart';
 import 'name_field.dart';
@@ -23,10 +24,11 @@ import 'onboarding_copy.dart';
 /// interview is (optional, brief 32), your name.
 enum OnboardingStep { game, cast, interview, name }
 
-/// First launch only (brief 17): four short, colourful steps, each on a chapter's colour,
-/// with a dot row, one obvious button and Skip. It ends on the Tower with Mission 1 ready to
-/// play. Only the first name is asked; the rest of the profile keeps its defaults. Saved once,
-/// at the end, with `onboarding_completed` (never the name: it's not a property).
+/// First launch only (brief 17; Daylight in brief 48): four short steps, each on a floor's tint
+/// (the ground eases from one to the next), with a step bar, one honey button and Skip. It ends
+/// on the Tower with room 1 ready to play. Only the first name is asked; the rest of the profile
+/// keeps its defaults. Saved once, at the end, with `onboarding_completed` (never the name:
+/// it's not a property).
 class OnboardingScreen extends ConsumerStatefulWidget {
   /// Who hosts each floor, bottom up: the three faces the panel step introduces.
   static const List<String> floorHosts = ['priya', 'marcus', 'lena'];
@@ -47,8 +49,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   GameSounds get _sounds => ref.read(gameSoundsProvider);
 
-  ChapterGrade get _grade =>
-      ChapterGrade.values[_step.index % ChapterGrade.values.length];
+  /// The step's floor: the game on floor 1, the cast on floor 2, the date on floor 3, the
+  /// name back on floor 1, where room 1 waits.
+  FloorColours get _floor => switch (_step) {
+    OnboardingStep.game || OnboardingStep.name => DaylightFloors.one,
+    OnboardingStep.cast => DaylightFloors.two,
+    OnboardingStep.interview => DaylightFloors.three,
+  };
 
   void _go(OnboardingStep step) {
     if (!mounted || step == _step) return;
@@ -102,38 +109,40 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _screen(BuildContext context) {
     final still = MediaQuery.disableAnimationsOf(context);
-    final fade = still ? BrandMotion.reducedMotionFade : BrandMotion.standard;
     final last = _step == OnboardingStep.name;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        AnimatedSwitcher(
-          duration: fade,
-          child: VividBackdrop(key: ValueKey(_grade), grade: _grade),
-        ),
-        SafeArea(
+    final f = _floor;
+    return DaylightGround(
+      floor: f,
+      child: AnimatedContainer(
+        duration: DaylightMotion.colour,
+        curve: DaylightMotion.ease,
+        color: f.tint,
+        child: SafeArea(
           minimum: const EdgeInsets.fromLTRB(
-            BrandSpace.lg,
-            BrandSpace.sm,
-            BrandSpace.lg,
-            BrandSpace.lg,
+            DaylightSpace.s16,
+            DaylightSpace.s8,
+            DaylightSpace.s16,
+            DaylightSpace.s24,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: [
-                  Expanded(child: _Dots(at: _step.index)),
-                  // Holds its place on the last step, so the dots don't jump.
+                  Expanded(child: _StepBar(at: _step.index)),
+                  const SizedBox(width: DaylightSpace.s16),
+                  // Holds its place on the last step, so the bar doesn't jump.
                   Opacity(
                     opacity: last ? 0 : 1,
                     child: IgnorePointer(
                       ignoring: last,
                       child: ExcludeSemantics(
                         excluding: last,
-                        child: VividButton(
+                        child: TactileButton(
                           label: OnboardingCopy.skip,
-                          primary: false,
+                          tone: TactileTone.quiet,
+                          compact: true,
+                          expand: false,
                           onPressed: _skip,
                         ),
                       ),
@@ -143,9 +152,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
               Expanded(
                 child: AnimatedSwitcher(
-                  duration: fade,
-                  switchInCurve: BrandMotion.enter,
-                  switchOutCurve: BrandMotion.exit,
+                  duration: still ? DaylightMotion.colour : DaylightMotion.move,
+                  switchInCurve: DaylightMotion.ease,
+                  switchOutCurve: DaylightMotion.ease,
                   transitionBuilder: (child, t) {
                     if (still) return FadeTransition(opacity: t, child: child);
                     final incoming = child.key == ValueKey(_step);
@@ -166,7 +175,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: AnchoredScroll(
                       alignment: MainAxisAlignment.center,
                       padding: const EdgeInsets.symmetric(
-                        vertical: BrandSpace.lg,
+                        vertical: DaylightSpace.s24,
                       ),
                       children: [_body()],
                     ),
@@ -174,15 +183,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
               if (!last)
-                VividButton(
+                TactileButton(
                   label: OnboardingCopy.next,
-                  expand: true,
+                  icon: PhosphorBold.arrowRight,
                   onPressed: _next,
                 ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -223,39 +232,52 @@ class _Heading extends StatelessWidget {
   final Widget below;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      StaggeredEntrance(
-        index: 0,
-        child: Text(
-          kicker,
-          style: BrandVividType.kicker.copyWith(color: BrandVivid.accent),
+  Widget build(BuildContext context) {
+    final f = ChapterTint.floorOf(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Entrance(
+          child: Text(
+            kicker,
+            style: DaylightType.caption3.copyWith(color: f.deep),
+          ),
         ),
-      ),
-      const SizedBox(height: BrandSpace.sm),
-      StaggeredEntrance(
-        index: 1,
-        child: Semantics(
-          header: true,
-          child: Text(title, style: BrandVividType.hero),
+        const SizedBox(height: DaylightSpace.s8),
+        Entrance(
+          index: 1,
+          child: Semantics(
+            header: true,
+            child: Text(title, style: DaylightType.heading3),
+          ),
         ),
-      ),
-      if (line case final l?) ...[
-        const SizedBox(height: BrandSpace.sm),
-        StaggeredEntrance(index: 2, child: Text(l, style: BrandVividType.body)),
+        if (line case final l?) ...[
+          const SizedBox(height: DaylightSpace.s8),
+          Entrance(
+            index: 2,
+            child: Text(
+              l,
+              style: DaylightType.body3.copyWith(color: DaylightColors.ink2),
+            ),
+          ),
+        ],
+        const SizedBox(height: DaylightSpace.s24),
+        below,
       ],
-      const SizedBox(height: BrandSpace.lg),
-      below,
-    ],
-  );
+    );
+  }
 }
 
-/// Step 1: the game in three cards, dealt like a hand, each in a chapter's colour.
+/// Step 1: the game in three cards, dealt like a hand, each with its floor's glyph tile.
 class _GameStep extends StatelessWidget {
   const _GameStep();
 
-  static const List<double> _tilts = [-0.025, 0.02, -0.012];
+  static const List<double> _tilts = [-0.02, 0.016, -0.01];
+  static const List<IconData> _icons = [
+    PhosphorBold.stack,
+    PhosphorBold.chatCircle,
+    PhosphorFill.chartBar,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -267,14 +289,14 @@ class _GameStep extends StatelessWidget {
         children: [
           for (var i = 0; i < ideas.length; i++)
             Padding(
-              padding: const EdgeInsets.only(bottom: BrandSpace.sm + 4),
-              child: StaggeredEntrance(
+              padding: const EdgeInsets.only(bottom: DaylightSpace.s12),
+              child: Entrance(
                 index: 3 + i,
                 child: _IdeaCard(
-                  number: i + 1,
                   title: ideas[i].title,
                   line: ideas[i].line,
-                  grade: ChapterGrade.values[i],
+                  icon: _icons[i],
+                  floor: DaylightFloors.all[i],
                   tilt: _tilts[i],
                 ),
               ),
@@ -287,52 +309,57 @@ class _GameStep extends StatelessWidget {
 
 class _IdeaCard extends StatelessWidget {
   const _IdeaCard({
-    required this.number,
     required this.title,
     required this.line,
-    required this.grade,
+    required this.icon,
+    required this.floor,
     required this.tilt,
   });
 
-  final int number;
   final String title;
   final String line;
-  final ChapterGrade grade;
+  final IconData icon;
+  final FloorColours floor;
 
   /// A slight hand-dealt angle, in radians. Level under reduced motion.
   final double tilt;
 
-  static const double _disc = 44;
+  static const double _tile = 44;
 
   @override
   Widget build(BuildContext context) {
     final still = MediaQuery.disableAnimationsOf(context);
     return Transform.rotate(
       angle: still ? 0 : tilt,
-      child: _ColourCard(
-        grade: grade,
+      child: DaylightPanel(
+        radius: DaylightRadius.card,
         child: Row(
           children: [
             Container(
-              width: _disc,
-              height: _disc,
-              alignment: Alignment.center,
+              width: _tile,
+              height: _tile,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: grade.glow,
+                color: floor.base,
+                borderRadius: BorderRadius.circular(DaylightRadius.inner),
               ),
-              child: Text(
-                '$number',
-                style: BrandVividType.title.copyWith(color: grade.deeper),
+              child: Icon(
+                icon,
+                size: DaylightSpace.s24,
+                color: DaylightColors.raised,
               ),
             ),
-            const SizedBox(width: BrandSpace.md),
+            const SizedBox(width: DaylightSpace.s16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: BrandVividType.row),
-                  Text(line, style: BrandVividType.body),
+                  Text(title, style: DaylightType.body1),
+                  Text(
+                    line,
+                    style: DaylightType.body6.copyWith(
+                      color: DaylightColors.ink2,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -343,7 +370,8 @@ class _IdeaCard extends StatelessWidget {
   }
 }
 
-/// Step 2: Priya, Marcus and Lena, each on the colour of the chapter they run.
+/// Step 2: Priya, Marcus and Lena in their arches, each on the colour of the floor they run,
+/// and Sam at dusk, waiting on the top floor.
 class _CastStep extends StatelessWidget {
   const _CastStep();
 
@@ -351,7 +379,12 @@ class _CastStep extends StatelessWidget {
   static int _firstMet(Interviewer who) =>
       missions.firstWhere((m) => m.lead.id == who.id).number;
 
-  static const double _badge = 68;
+  /// "Hiring Manager" as the screen sets roles: sentence case.
+  static String _role(String role) =>
+      role.isEmpty ? role : role[0] + role.substring(1).toLowerCase();
+
+  static const double _arch = 56;
+  static const double _archHeight = 68;
 
   @override
   Widget build(BuildContext context) {
@@ -359,6 +392,37 @@ class _CastStep extends StatelessWidget {
       for (final id in OnboardingScreen.floorHosts)
         interviewers.firstWhere((i) => i.id == id),
     ];
+    Widget row({
+      required CastPerson person,
+      required Color arch,
+      required Widget text,
+      Color face = DaylightColors.raised,
+      Color edge = DaylightColors.sand2,
+    }) => DaylightPanel(
+      color: face,
+      edge: edge,
+      radius: DaylightRadius.card,
+      padding: const EdgeInsets.fromLTRB(
+        DaylightSpace.s12,
+        DaylightSpace.s12,
+        DaylightSpace.s16,
+        DaylightSpace.s12,
+      ),
+      child: Row(
+        children: [
+          ArchPortrait(
+            person: person,
+            expression: CastExpression.smile,
+            width: _arch,
+            height: _archHeight,
+            ground: arch,
+            idle: false,
+          ),
+          const SizedBox(width: DaylightSpace.s16),
+          Expanded(child: text),
+        ],
+      ),
+    );
     return _Heading(
       kicker: OnboardingCopy.castKicker,
       title: OnboardingCopy.castTitle,
@@ -367,37 +431,32 @@ class _CastStep extends StatelessWidget {
         children: [
           for (var i = 0; i < cast.length; i++)
             Padding(
-              padding: const EdgeInsets.only(bottom: BrandSpace.sm),
-              child: StaggeredEntrance(
+              padding: const EdgeInsets.only(bottom: DaylightSpace.s12),
+              child: Entrance(
                 index: 3 + i,
                 child: Semantics(
                   label:
-                      '${cast[i].name}, ${cast[i].role}, ${OnboardingCopy.castFirstMet(_firstMet(cast[i]))}',
+                      '${cast[i].name}, ${_role(cast[i].role)}, ${OnboardingCopy.castFirstMet(_firstMet(cast[i]))}',
                   excludeSemantics: true,
-                  child: _ColourCard(
-                    grade: ChapterGrade.values[i],
-                    child: Row(
+                  child: row(
+                    person: CastPeople.byId(cast[i].id),
+                    arch: DaylightFloors.all[i].soft,
+                    text: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        InterviewerBadge(
-                          figure: FriendlyFigure.of(cast[i].id),
-                          ring: ChapterGrade.values[i].glow,
-                          grade: ChapterGrade.values[i],
-                          size: _badge,
-                        ),
-                        const SizedBox(width: BrandSpace.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                OnboardingCopy.castFirstMet(_firstMet(cast[i]))
-                                    .toUpperCase(),
-                                style: BrandVividType.kicker,
-                              ),
-                              Text(cast[i].name, style: BrandVividType.title),
-                              Text(cast[i].role, style: BrandVividType.body),
-                            ],
+                        Text(cast[i].name, style: DaylightType.heading6),
+                        Text(
+                          _role(cast[i].role),
+                          style: DaylightType.body6.copyWith(
+                            color: DaylightColors.ink2,
                           ),
+                        ),
+                        const SizedBox(height: DaylightSpace.s4),
+                        Tag(
+                          label: OnboardingCopy.castFirstMet(
+                            _firstMet(cast[i]),
+                          ),
+                          tone: TagTone.floor(DaylightFloors.all[i]),
                         ),
                       ],
                     ),
@@ -405,69 +464,86 @@ class _CastStep extends StatelessWidget {
                 ),
               ),
             ),
+          Entrance(
+            index: 3 + cast.length,
+            child: Semantics(
+              label:
+                  '${CastPeople.sam.name}, ${OnboardingCopy.samRole}. '
+                  '${OnboardingCopy.samLine}',
+              excludeSemantics: true,
+              child: row(
+                person: CastPeople.sam,
+                arch: DaylightColors.honey,
+                face: DaylightColors.dusk,
+                edge: DaylightColors.ink,
+                text: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      CastPeople.sam.name,
+                      style: DaylightType.heading6.copyWith(
+                        color: DaylightColors.raised,
+                      ),
+                    ),
+                    Text(
+                      OnboardingCopy.samRole,
+                      style: DaylightType.body6.copyWith(
+                        color: DaylightColors.sky,
+                      ),
+                    ),
+                    const SizedBox(height: DaylightSpace.s4),
+                    Text(
+                      OnboardingCopy.samLine,
+                      style: DaylightType.caption3.copyWith(
+                        color: DaylightColors.honey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-/// A card in a chapter's colour, lifted off the sky.
-class _ColourCard extends StatelessWidget {
-  const _ColourCard({required this.grade, required this.child});
-
-  final ChapterGrade grade;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(BrandSpace.md),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(BrandRadius.card),
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: grade.cardGradient,
-      ),
-      border: Border.all(color: BrandVivid.hairline()),
-      boxShadow: BrandVivid.cardShadow,
-    ),
-    child: child,
-  );
-}
-
-/// Where you are in the steps: a dot each, the current one a wide sunflower pill.
-class _Dots extends StatelessWidget {
-  const _Dots({required this.at});
+/// Where you are in the steps: a bar each, the current one wide, in the floor's colour once
+/// reached.
+class _StepBar extends StatelessWidget {
+  const _StepBar({required this.at});
 
   final int at;
 
-  static const double _dot = 10;
-  static const double _wide = 28;
-  static const double _restAlpha = 0.35;
+  static const double _height = 8;
+  static const int _wide = 3;
 
   @override
   Widget build(BuildContext context) {
     const steps = OnboardingStep.values;
+    final f = ChapterTint.floorOf(context);
     final still = MediaQuery.disableAnimationsOf(context);
     return Semantics(
       label: 'Step ${at + 1} of ${steps.length}',
       excludeSemantics: true,
       child: Row(
         children: [
-          for (var i = 0; i < steps.length; i++)
-            AnimatedContainer(
-              duration: still ? Duration.zero : BrandMotion.standard,
-              curve: BrandMotion.enter,
-              margin: const EdgeInsets.only(right: BrandSpace.xs + 2),
-              width: i == at ? _wide : _dot,
-              height: _dot,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(BrandRadius.pill),
-                color: i == at
-                    ? BrandVivid.accent
-                    : BrandVivid.onDeep.withValues(alpha: _restAlpha),
+          for (var i = 0; i < steps.length; i++) ...[
+            if (i > 0) const SizedBox(width: DaylightSpace.s4),
+            Expanded(
+              flex: i == at ? _wide : 1,
+              child: AnimatedContainer(
+                duration: still ? Duration.zero : DaylightMotion.colour,
+                curve: DaylightMotion.ease,
+                height: _height,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(_height / 2),
+                  color: i <= at ? f.base : DaylightColors.sand2,
+                ),
               ),
             ),
+          ],
         ],
       ),
     );

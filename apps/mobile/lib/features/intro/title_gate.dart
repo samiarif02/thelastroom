@@ -5,15 +5,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
 import '../../core/audio/game_sounds.dart';
-import '../../ui/film_kit.dart';
+import '../../ui/daylight/daylight_kit.dart';
 import '../title/title_screen.dart';
 
-/// The first launch's way in (brief 20): the title, then one sunflower "Begin" straight into
-/// onboarding (which explains the game). A tap anywhere, also during the title, does the same.
+/// The first launch's way in (brief 20; Daylight in brief 48): the title, then one honey "Step
+/// inside" straight into onboarding (which explains the game). A tap anywhere, also during the
+/// title, does the same.
 class TitleGate extends ConsumerStatefulWidget {
   const TitleGate({super.key});
 
-  static const String prompt = 'Begin';
+  static const String prompt = 'Step inside';
 
   @override
   ConsumerState<TitleGate> createState() => _TitleGateState();
@@ -43,15 +44,15 @@ class _TitleGateState extends ConsumerState<TitleGate> {
       // The whole frame is the way in; the button is its accessible, obvious form.
       GestureDetector(
         behavior: HitTestBehavior.opaque,
-        // Begin is the accessible way in; the whole-frame tap is a shortcut for touch only.
+        // "Step inside" is the accessible way in; the whole-frame tap is a shortcut for touch only.
         excludeFromSemantics: true,
         onTap: _begin,
         child: TitleScreen(
           footer: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: BrandSpace.xl),
-            child: VividButton.play(
+            padding: const EdgeInsets.symmetric(horizontal: DaylightSpace.s24),
+            child: TactileButton(
               label: TitleGate.prompt,
-              expand: true,
+              icon: PhosphorFill.door,
               onPressed: _begin,
             ),
           ),

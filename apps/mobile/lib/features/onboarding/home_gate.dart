@@ -4,14 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/back_to_exit.dart';
 import '../../core/profile/profile_repository.dart';
-import '../../ui/film/film_overlay.dart';
 import '../intro/title_gate.dart';
 import '../title/start_title.dart';
 import '../tower/tower_screen.dart';
 
 /// The app's front door: a returning player sees the title for a moment, then the Tower; a new
 /// one gets the title with "Begin", then onboarding (brief 20). The profile loads from the
-/// device, so the sky shows for a moment at most. A profile that fails to load counts as new.
+/// device, so the paper shows for a moment at most. A profile that fails to load counts as new.
 class HomeGate extends ConsumerWidget {
   const HomeGate({super.key});
 
@@ -21,8 +20,7 @@ class HomeGate extends ConsumerWidget {
         AsyncData(:final value) when value.onboarded => const StartTitle(
           child: TowerScreen(),
         ),
-        AsyncData() ||
-        AsyncError() => const BackToExit(child: FilmGrain(child: TitleGate())),
-        _ => ColoredBox(color: BrandVivid.skyTop),
+        AsyncData() || AsyncError() => const BackToExit(child: TitleGate()),
+        _ => const ColoredBox(color: DaylightColors.paper),
       };
 }
