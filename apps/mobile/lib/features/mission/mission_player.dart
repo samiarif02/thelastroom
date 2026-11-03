@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/audio/game_sounds.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
+import '../../ui/daylight/daylight_route.dart' show routeSettled;
 import '../../ui/haptics.dart';
 import '../../ui/subtitle/typewriter_subtitle.dart';
 import '../debrief/ai_score.dart';
@@ -429,9 +430,18 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   /// A target that isn't on screen skips it this time.
   void _offerTip(Tip tip) {
     if (_tip != null || !_tips.canShow(tip) || !_tipFits(tip)) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Measure where the target rests, once the room has opened (brief 50's transitions).
+      if (!mounted) return;
+      await routeSettled(context);
       final scene = _scene.currentContext;
-      if (!mounted || scene == null || _tip != null || !_tipFits(tip)) return;
+      if (!mounted ||
+          scene == null ||
+          !scene.mounted ||
+          _tip != null ||
+          !_tipFits(tip)) {
+        return;
+      }
       var at = tipTarget(
         tip == Tip.answerCards ? _cardsKey : _reasonsKey,
         scene,

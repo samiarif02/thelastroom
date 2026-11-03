@@ -248,6 +248,30 @@ abstract final class DaylightMotion {
 
   /// A blink.
   static const Duration blink = Duration(milliseconds: 120);
+
+  /// A screen arriving or leaving (shared axis, fade-through), and its reverse on back.
+  static const Duration page = Duration(milliseconds: 300);
+
+  /// Through the door: a room growing out of its door on the tower, and back into it. The
+  /// signature, so a little longer than a page, never past 450 ms.
+  static const Duration door = Duration(milliseconds: 450);
+
+  /// A screen whose own entrance is the show (the Candidate assessment): only its ground
+  /// fades in, so the sheet's timeline plays untouched.
+  static const Duration ground = Duration(milliseconds: 200);
+
+  /// Every route under reduced motion: a cross-fade, nothing moves.
+  static const Duration reducedPage = Duration(milliseconds: 150);
+
+  /// A back or close icon nudging toward where it goes, before the screen leaves.
+  static const Duration nudge = blink;
+
+  /// A sheet settling: it rises a touch past its rest and comes back (about 3% of the way).
+  static const Cubic settle = Cubic(0.3, 1.18, 0.55, 1);
+
+  /// A door swinging: slow off its frame, quick through the middle, easing wide open. The
+  /// same both ways, so a room closing back into its door is the opening run backwards.
+  static const Cubic swing = Cubic(0.65, 0, 0.35, 1);
 }
 
 /// The only two shadows. Both lit from above and tinted toward the ground.

@@ -67,28 +67,30 @@ class _BackToExitState extends State<BackToExit> {
   );
 }
 
-/// The hint: an opaque night pill with a sunflower edge and a deep shadow, well above the
-/// bottom of the frame, rising in. Never faded, so nothing behind it shows through (the lead's
-/// phone review of #22).
+/// The hint (brief 50: a Daylight snack bubble, the tower's notice): an opaque ink bubble with
+/// a door glyph and white text, lifted, well above the bottom of the frame, rising in over
+/// [DaylightMotion.colour]. Never faded, so nothing behind it shows through (the lead's phone
+/// review of #22); under reduced motion it is simply there.
 class _ExitToast extends StatelessWidget {
   const _ExitToast();
 
-  /// How far above the bottom inset it sits: clear of a list's last row.
-  static const double lift = 96;
-  static const double _rise = 16;
+  /// How far above the bottom inset it sits: clear of the tab bar and a list's last row.
+  static const double lift = DaylightSpace.s96;
+  static const double _rise = DaylightSpace.s16;
+  static const double _glyph = 18;
 
   @override
   Widget build(BuildContext context) => Positioned(
-    left: BrandSpace.lg,
-    right: BrandSpace.lg,
+    left: DaylightSpace.s16,
+    right: DaylightSpace.s16,
     bottom: MediaQuery.paddingOf(context).bottom + lift,
     child: IgnorePointer(
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
         duration: MediaQuery.disableAnimationsOf(context)
             ? Duration.zero
-            : BrandMotion.quick,
-        curve: BrandMotion.enter,
+            : DaylightMotion.colour,
+        curve: DaylightMotion.ease,
         builder: (context, t, child) => Transform.translate(
           offset: Offset(0, _rise * (1 - t)),
           child: child,
@@ -98,20 +100,36 @@ class _ExitToast extends StatelessWidget {
           child: Center(
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: BrandVivid.night,
-                borderRadius: BorderRadius.circular(BrandRadius.pill),
-                border: Border.all(color: BrandVivid.accent, width: 1.5),
-                boxShadow: BrandVivid.glowShadow(BrandVivid.night),
+                color: DaylightColors.ink,
+                borderRadius: BorderRadius.circular(DaylightRadius.card),
+                boxShadow: DaylightElevation.lift,
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: BrandSpace.lg,
-                  vertical: BrandSpace.sm + 4,
+                  horizontal: DaylightSpace.s16,
+                  vertical: DaylightSpace.s12,
                 ),
-                child: Text(
-                  BackToExit.hint,
-                  textAlign: TextAlign.center,
-                  style: BrandVividType.row,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const ExcludeSemantics(
+                      child: Icon(
+                        PhosphorBold.door,
+                        size: _glyph,
+                        color: DaylightColors.honey,
+                      ),
+                    ),
+                    const SizedBox(width: DaylightSpace.s8),
+                    Flexible(
+                      child: Text(
+                        BackToExit.hint,
+                        textAlign: TextAlign.center,
+                        style: DaylightType.body5.copyWith(
+                          color: DaylightColors.raised,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -1,3 +1,4 @@
+import 'package:brand/brand.dart' show DaylightMotion;
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
@@ -209,6 +210,10 @@ void main() {
     await rig.boot(Routes.mission(1));
     await rig.playLines(1);
     await tester.tap(find.bySemanticsLabel(LeaveControl.label));
+    await tester.pump();
+    // The × nudges toward the way out first (brief 50), then asks.
+    await tester.pump(DaylightMotion.nudge);
+    await tester.pump(DaylightMotion.nudge);
     await tester.pump();
     expect(
       find.descendant(

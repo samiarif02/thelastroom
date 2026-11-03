@@ -17,6 +17,7 @@ import 'package:the_last_room/features/mission/scene/mission_card.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/features/progress/chapter_report_screen.dart';
 import 'package:the_last_room/features/progression/debrief_rewards.dart';
+import 'package:the_last_room/features/progression/floor_cleared_screen.dart';
 import 'package:the_last_room/features/progression/progression_store.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
 import 'package:the_last_room/features/voice/audio/take_playback.dart';
@@ -117,6 +118,9 @@ void main() {
       await tester.pump();
       await rig.throughFloorCleared();
       await rig.until(find.text(ChapterReportScreen.honest));
+      // The report slides in over the reward, which has its own "Take the lift" button:
+      // tap the report's once the reward has gone.
+      await _until(rig, find.byType(FloorClearedScreen), absent: true);
       final second = chapters.firstWhere((c) => c.number == 2);
       await _tapButton(rig, ChapterReportScreen.start(second));
       await rig.until(find.byType(VoicePlayer));

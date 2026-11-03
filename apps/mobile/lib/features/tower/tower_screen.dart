@@ -15,6 +15,7 @@ import '../../core/audio/game_sounds.dart';
 import '../../core/notifications/reminder_primer.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
+import '../../ui/daylight/daylight_route.dart';
 import '../../ui/daylight/daylight_sheet.dart';
 import '../../ui/haptics.dart';
 import '../mission/mission_lookup.dart';
@@ -80,6 +81,10 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
   /// The rooms once loaded, kept so the tower can open when it next becomes the visible route.
   List<TowerRoom>? _loaded;
   TowerRoom? _riding;
+
+  /// The ride has arrived and the room is opening: the lift stays shut under the room's door
+  /// transition (brief 50) until the tower is on top again.
+  bool _departed = false;
   String? _notice;
   Timer? _noticeTimer;
 
@@ -166,13 +171,16 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     if (_placing || _tip != null) return;
     _placing = true;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Measure where the target rests, once the tower has arrived (brief 50's transitions).
+      if (!mounted) return;
+      await routeSettled(context);
       final key = switch (tip) {
         Tip.recallDue => _recallTab,
         Tip.yourFile => _skillsTab,
         _ => _nextDoor,
       };
       final target = key.currentContext;
-      if (!mounted || target == null) {
+      if (!mounted || target == null || !target.mounted) {
         _placing = false;
         return;
       }
@@ -234,6 +242,11 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     // the Recall Room never show what was true before (brief 30's playthrough).
     final current = _isCurrent;
     if (current && !_wasCurrent) {
+      // Back from the room: the lift that took the player there is gone.
+      if (_departed) {
+        _riding = null;
+        _departed = false;
+      }
       // A new visit: it may bring a tip of its own.
       _tipThisVisit = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -373,10 +386,22 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
 
   void _arrived() {
     final room = _riding;
-    if (room == null || !mounted) return;
-    _riding = null;
-    // Straight into the room: one tap from the tower (brief 17).
-    context.go(Routes.mission(room.mission.number));
+    if (room == null || _departed || !mounted) return;
+    _departed = true;
+    // Straight into the room: one tap from the tower (brief 17), through its door (brief 50).
+    context.go(Routes.mission(room.mission.number), extra: _doorOf(room));
+  }
+
+  /// Where [room] grows from: the door that was tapped, else (the up-next button, the tour)
+  /// the next room's door when it's on screen; null leaves the route its default door.
+  DoorOrigin? _doorOf(TowerRoom room) {
+    if (DaylightPageRoute.takeDoor(context) case final tapped?) return tapped;
+    if (room.state != RoomState.current) return null;
+    final next = _nextDoor.currentContext;
+    final door = next == null ? null : DoorOrigin.of(next);
+    if (door == null) return null;
+    final screen = Offset.zero & MediaQuery.sizeOf(context);
+    return screen.overlaps(door.rect) ? door : null;
   }
 
   void _tab(int i) {

@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/providers.dart';
 import '../../core/audio/game_sounds.dart';
 import '../../ui/daylight/daylight_kit.dart';
+import '../../ui/daylight/daylight_route.dart' show routeSettled;
 import '../../ui/film/film_overlay.dart';
 import '../../ui/subtitle/typewriter_subtitle.dart';
 import '../debrief/debrief_view.dart';
@@ -294,10 +295,14 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
       return;
     }
     if (_micAt != null || !_tips.canShow(Tip.voiceMic)) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Measure where the mic rests, once the room has opened (brief 50's transitions).
+      if (!mounted) return;
+      await routeSettled(context);
       final scene = _scene.currentContext;
       if (!mounted ||
           scene == null ||
+          !scene.mounted ||
           _micAt != null ||
           _leaving ||
           _recorder?.phase != RecorderPhase.empty) {

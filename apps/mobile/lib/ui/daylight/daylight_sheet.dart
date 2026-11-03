@@ -4,9 +4,10 @@ import 'package:flutter/widgets.dart';
 import 'icon_tile.dart';
 
 /// Opens a Daylight sheet over the dimmed screen: white, r24 at the top, lifted, up to 85% of
-/// the screen and scrolling inside, with a close tile. It rises over [DaylightMotion.move]
-/// (fades under reduced motion); a tap on the dim or the system back closes it. [label] names
-/// it for screen readers and the barrier.
+/// the screen and scrolling inside, with a close tile. It rises over [DaylightMotion.move] with
+/// a slight settle while the scrim fades in ([daylightSheetTransition]; a fade under reduced
+/// motion); a tap on the dim or the system back closes it. [label] names it for screen readers
+/// and the barrier.
 Future<T?> showDaylightSheet<T>(
   BuildContext context, {
   required String label,
@@ -24,14 +25,48 @@ Future<T?> showDaylightSheet<T>(
       onClose: () => Navigator.of(sheetContext).pop(),
       child: Builder(builder: builder),
     ),
-    transitionBuilder: (context, animation, _, child) {
-      final t = CurvedAnimation(parent: animation, curve: DaylightMotion.ease);
-      if (still) return FadeTransition(opacity: t, child: child);
-      return SlideTransition(
-        position: Tween(begin: const Offset(0, 1), end: Offset.zero).animate(t),
+    transitionBuilder: (context, animation, _, child) =>
+        daylightSheetTransition(context, animation, child),
+  );
+}
+
+/// How every Daylight sheet comes and goes (brief 50): it rises on [DaylightMotion.settle], a
+/// touch past its rest and back, while the route's scrim fades in; it leaves on the base curve
+/// with no bounce. With no [rise] the sheet travels its full height (a bottom sheet); a [rise]
+/// is how far a centred card travels, and the card fades in as it comes. Under reduced motion,
+/// only the fade.
+Widget daylightSheetTransition(
+  BuildContext context,
+  Animation<double> animation,
+  Widget child, {
+  double? rise,
+}) {
+  final fade = CurvedAnimation(parent: animation, curve: DaylightMotion.ease);
+  if (MediaQuery.disableAnimationsOf(context)) {
+    return FadeTransition(opacity: fade, child: child);
+  }
+  final t = CurvedAnimation(
+    parent: animation,
+    curve: DaylightMotion.settle,
+    reverseCurve: DaylightMotion.ease,
+  );
+  final up = rise;
+  if (up == null) {
+    return SlideTransition(
+      position: Tween(begin: const Offset(0, 1), end: Offset.zero).animate(t),
+      child: child,
+    );
+  }
+  return FadeTransition(
+    opacity: fade,
+    child: AnimatedBuilder(
+      animation: t,
+      child: child,
+      builder: (context, child) => Transform.translate(
+        offset: Offset(0, up * (1 - t.value)),
         child: child,
-      );
-    },
+      ),
+    ),
   );
 }
 
@@ -50,6 +85,9 @@ class DaylightSheet extends StatelessWidget {
 
   static const double scrim = 0.4;
   static const double _maxShare = 0.85;
+
+  /// How far the white runs on below the sheet's foot (past any settle).
+  static const double skirt = DaylightSpace.s48;
   static const String close = 'Close';
 
   @override
@@ -76,7 +114,17 @@ class DaylightSheet extends StatelessWidget {
             child: DefaultTextStyle(
               style: DaylightType.body3,
               child: Stack(
+                clipBehavior: Clip.none,
                 children: [
+                  // White below the foot: when the sheet settles a touch past its rest, no
+                  // gap opens under it.
+                  const Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: -skirt,
+                    height: skirt,
+                    child: ColoredBox(color: DaylightColors.raised),
+                  ),
                   SingleChildScrollView(
                     padding: EdgeInsets.fromLTRB(
                       DaylightSpace.s16,
@@ -94,6 +142,7 @@ class DaylightSheet extends StatelessWidget {
                         icon: PhosphorBold.x,
                         semanticLabel: DaylightSheet.close,
                         onPressed: close,
+                        nudge: AxisDirection.down,
                       ),
                     ),
                 ],

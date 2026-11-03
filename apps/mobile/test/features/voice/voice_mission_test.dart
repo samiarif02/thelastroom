@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:brand/brand.dart' show DaylightMotion;
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -246,6 +247,11 @@ void main() {
     await rig.boot();
     await rig.playToAnswer();
     await rig.tap(find.bySemanticsLabel('Leave the interview'));
+    // The × nudges toward the way out first (brief 50), then asks.
+    expect(find.text(VoicePlayer.leaveLine), findsNothing);
+    await tester.pump(DaylightMotion.nudge);
+    await tester.pump(DaylightMotion.nudge);
+    await tester.pump();
     expect(find.text(VoicePlayer.leaveLine), findsOneWidget);
     await rig.tap(find.text(VoicePlayer.stay));
     expect(find.text(VoicePlayer.leaveLine), findsNothing);

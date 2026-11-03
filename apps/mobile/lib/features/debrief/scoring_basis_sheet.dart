@@ -4,6 +4,7 @@ import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../ui/daylight/daylight_kit.dart' show TactileButton;
+import '../../ui/daylight/daylight_sheet.dart' show daylightSheetTransition;
 import 'ai_score.dart';
 import 'debrief_facts.dart';
 import 'red_pen_slip.dart';
@@ -188,9 +189,13 @@ class ScoringBasisSheet extends StatelessWidget {
         ),
       ),
     ),
+    // Rises a short way with a slight settle as the scrim fades in (brief 50).
     transitionBuilder: (context, animation, _, child) =>
-        FadeTransition(opacity: animation, child: child),
+        daylightSheetTransition(context, animation, child, rise: _rise),
   );
+
+  /// How far the card rises into place.
+  static const double _rise = DaylightSpace.s48;
 
   static const double _scrim = 0.4;
   static const double _maxWidth = 560;
