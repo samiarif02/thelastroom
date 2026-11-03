@@ -97,6 +97,11 @@ const MACHINE_LOCAL_TRACKED =
 const COLOUR_SCAN_DIRS = ['apps/mobile/lib', 'packages/engine/lib', 'packages/content/lib']
 const RAW_COLOUR = /\bColor\(\s*0x|\bColor\.from(ARGB|RGBO)\(|\bColors\.\w+/
 
+// The manifest every Android build ships (release included). Flutter's template only puts
+// INTERNET in src/debug and src/profile, so a release APK without it here is silently offline.
+export const ANDROID_MAIN_MANIFEST = 'apps/mobile/android/app/src/main/AndroidManifest.xml'
+export const ANDROID_RELEASE_PERMISSIONS = ['android.permission.INTERNET']
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -132,6 +137,12 @@ function ctx(root) {
 // The `npm run <x>` invocations in a block of text, in order.
 export function npmRuns(text) {
 	return [...text.matchAll(/\bnpm run (?:--silent )?([a-z0-9:_-]+)/g)].map((m) => m[1])
+}
+
+// The permissions a manifest declares, ignoring any that sit inside an XML comment.
+export function manifestPermissions(xml) {
+	const live = xml.replace(/<!--[\s\S]*?-->/g, '')
+	return [...live.matchAll(/<uses-permission\b[^>]*android:name="([^"]+)"/g)].map((m) => m[1])
 }
 
 // Only the fenced command blocks of a markdown file: a mention in prose does not count.
@@ -382,6 +393,18 @@ export const CHECKS = [
 				if (/DateTime\.now\(|Random\(\)/.test(src)) f.push(`${file} reads the clock or an unseeded Random; pass them in`)
 			}
 			return f
+		}
+	},
+
+	{
+		id: 'android-release-permissions',
+		run: (c) => {
+			const xml = c.read(ANDROID_MAIN_MANIFEST)
+			if (!xml) return [`${ANDROID_MAIN_MANIFEST} is missing`]
+			const declared = manifestPermissions(xml)
+			return ANDROID_RELEASE_PERMISSIONS.filter((perm) => !declared.includes(perm)).map(
+				(perm) => `${ANDROID_MAIN_MANIFEST} doesn't declare ${perm}; release builds would silently play offline`
+			)
 		}
 	},
 
