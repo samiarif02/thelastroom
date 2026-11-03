@@ -2,6 +2,7 @@ import 'package:brand/brand.dart';
 import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
 import '../../ui/haptics.dart';
 import '../mission/mission_lookup.dart';
@@ -44,7 +45,7 @@ class RecallCardView extends StatelessWidget {
 
   /// Priya's welcome, naming who caught the player when it was a trap.
   static String hello(String name, String? caughtBy) {
-    final who = name.replaceAll(RegExp(r'[\s.!?]+$'), '');
+    final who = PlayerProfile.spokenName(name);
     if (caughtBy == null) {
       return 'Welcome back, $who. One to keep fresh. Want another go?';
     }

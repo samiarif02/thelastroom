@@ -43,9 +43,22 @@ enum Tip {
       'Your weakest skill is underlined in red. '
           'Tap “How we scored this” to see why.',
     Tip.voiceMic => "Tap to talk. I'll pause if you go quiet for 5 seconds.",
-    Tip.recallDue => 'I left you a note in Recall. Two minutes.',
+    Tip.recallDue => 'I left you a note in Recall.',
     Tip.yourFile => 'Every room you play is kept here.',
   };
+
+  /// The first result's tip when the red pen marks nothing (a clean run): it can't point at an
+  /// underline that isn't there (QA 51, BUG-3).
+  static const String firstResultUnmarked =
+      'Tap “How we scored this” to see how each score was reached.';
+
+  /// The Recall tip for [due] notes taking about [minutes] ([recallMinutes]): the same count
+  /// and time as the Recall card beside it.
+  static String recallDueLine(int due, int minutes) {
+    final notes = due == 1 ? 'a note' : '$due notes';
+    final time = minutes <= 1 ? 'About a minute.' : 'About $minutes minutes.';
+    return 'I left you $notes in Recall. $time';
+  }
 
   /// The door tip once rooms are played (after "Show tips again"): it isn't the first room.
   static const String nextDoorLine =

@@ -1,11 +1,13 @@
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/core/progress/attempt_score.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
 import 'package:the_last_room/features/debrief/reasoning_slip.dart';
+import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
 import 'package:the_last_room/features/mission/widgets/build_panel.dart';
@@ -61,6 +63,35 @@ void main() {
     await tester.tap(find.text(BuildPanel.lockIn));
     await tester.pump();
     expect(rig.state(4).plays, hasLength(1));
+  });
+
+  // QA 51: the build's "Lock it in" sat on the gesture bar, and her reaction showed the
+  // beat's reason cards and "That's the principle." though a built beat asks no why.
+  testWidgets('"Lock it in" is pinned above the gesture bar; the reaction asks '
+      'no why', (tester) async {
+    final rig = MissionRig(tester);
+    await rig.unlockThrough(4);
+    const gestureBar = 48.0;
+    await rig.boot(
+      Routes.mission(4),
+      viewPadding: const EdgeInsets.only(bottom: gestureBar),
+    );
+    await rig.playLines(4);
+    await rig.say(strongOpen);
+    await rig.until(find.byType(BuildPanel));
+    final lock = find.text(BuildPanel.lockIn);
+    expect(lock, findsOneWidget);
+    expect(
+      tester.getBottomLeft(lock).dy,
+      lessThanOrEqualTo(MissionRig.phone.height - gestureBar),
+    );
+    await rig.build(parts);
+    await rig.until(find.text(evidence.reaction!.strong.text));
+    expect(find.text(MissionPlayer.builtTitle), findsOneWidget);
+    expect(find.text(MissionPlayer.soundTitle), findsNothing);
+    expect(find.text(reasonLabel), findsNothing);
+    expect(find.text(evidence.why!.line.text), findsNothing);
+    await rig.run(const Duration(seconds: 5));
   });
 
   testWidgets(

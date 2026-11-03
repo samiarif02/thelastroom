@@ -36,9 +36,9 @@ class RecallRoomCardView extends StatelessWidget {
   static String dueTitle(int due) =>
       due == 1 ? '1 note is waiting' : '$due notes are waiting';
 
-  /// About a minute for every two notes, never "0 minutes".
+  /// About a minute for every two notes ([recallMinutes]), never "0 minutes".
   static String minutes(int due) {
-    final m = (due / 2).ceil();
+    final m = recallMinutes(due);
     return m <= 1
         ? 'About a minute, before they catch you again.'
         : 'About $m minutes, before they catch you again.';

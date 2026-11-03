@@ -41,6 +41,18 @@ void main() {
     },
   );
 
+  // QA 51: the report's kicker read "Sami." (the full stop the player typed).
+  test('the name shown everywhere drops what was typed after it', () {
+    expect(const PlayerProfile(firstName: 'Sami.').displayName, 'Sami');
+    expect(const PlayerProfile(firstName: 'Sami !').displayName, 'Sami');
+    expect(const PlayerProfile(firstName: 'Sami').displayName, 'Sami');
+    expect(
+      const PlayerProfile(firstName: '...').displayName,
+      PlayerProfile.fallbackName,
+    );
+    expect(PlayerProfile.spokenName('Ana-Maria, '), 'Ana-Maria');
+  });
+
   test('every field survives a save and a fresh load (a relaunch)', () async {
     const saved = PlayerProfile(
       firstName: 'Sami',

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
@@ -47,6 +48,12 @@ Future<RecallSchedule> syncRecallSchedule({
   if (ingested.length != schedule.ingested.length) await store.save(synced);
   return synced;
 }
+
+/// About how long [due] notes take in the Recall Room: a minute for every two, never zero. The
+/// tower's Recall card and the Recall tip both say it, so they never disagree (QA 51).
+int recallMinutes(int due) => math.max(1, (due / _notesPerMinute).ceil());
+
+const int _notesPerMinute = 2;
 
 /// How many cards are due today, for the tower's Recall Room card. A store that can't be read
 /// counts as none (the room says so when opened).

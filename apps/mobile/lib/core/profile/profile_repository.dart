@@ -50,8 +50,18 @@ class PlayerProfile {
   /// they haven't.
   final DateTime? waitlistJoinedAt;
 
-  /// What interviewers call the player.
-  String get displayName => firstName ?? fallbackName;
+  /// What interviewers call the player, and the name every screen shows: [spokenName], so a
+  /// name typed with a full stop is never "Sami." in a kicker (QA 51).
+  String get displayName {
+    final name = spokenName(firstName ?? '');
+    return name.isEmpty ? fallbackName : name;
+  }
+
+  /// [name] as it's said and shown: without the spaces and punctuation a player may type after
+  /// it ("Sami." is "Sami"), so a line that adds its own never ends "Sami.?".
+  static String spokenName(String name) => name.replaceAll(_trailing, '');
+
+  static final RegExp _trailing = RegExp(r'[\s.!?,;:]+$');
 
   static const String fallbackName = 'Candidate';
 

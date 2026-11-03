@@ -62,7 +62,7 @@ class ReminderPrimer extends StatelessWidget {
   static const String kicker = 'A friendly nudge';
   static const String title = 'Want Priya to remind you?';
   static const String line =
-      'When traps are waiting in the Recall Room, or your next interview is ready. At most once '
+      'When notes are waiting in the Recall Room, or your next interview is ready. At most once '
       'a day, never after 9 pm, and quieter if you are busy. Switch it off any time in Settings.';
   static const String yes = 'Yes, remind me';
   static const String notNow = 'Not now';

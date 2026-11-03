@@ -87,7 +87,7 @@ void main() {
   });
 
   test(
-    'cards due come first: "N traps are waiting", opening the Recall Room',
+    'cards due come first: "N notes are waiting", opening the Recall Room',
     () {
       final reminders = plan(recallDue: (day) => day.day >= 5 ? 3 : 0);
       expect(reminders.map((r) => r.kind), [
@@ -98,7 +98,7 @@ void main() {
       ]);
       final recall = reminders[1];
       expect(recall.title, ReminderCopy.recallTitle);
-      expect(recall.body, contains('3 traps'));
+      expect(recall.body, contains('3 notes'));
       expect(recall.missionNumber, isNull);
       expect(reminderRoute(recall.missionNumber), '/tower/recall');
     },
@@ -134,8 +134,15 @@ void main() {
     }
     expect(
       ReminderCopy.recallBody(1, 0),
-      '1 trap is waiting in the Recall Room.',
+      '1 note is waiting in the Recall Room.',
     );
+    // The Recall Room calls them notes; so does every reminder (QA 51).
+    for (var v = 0; v < ReminderCopy.variants; v++) {
+      for (final due in [1, 3]) {
+        expect(ReminderCopy.recallBody(due, v), contains('note'));
+        expect(ReminderCopy.recallBody(due, v), isNot(contains('trap')));
+      }
+    }
     expect(ReminderCopy.nudgeTitle('nobody'), ReminderCopy.company);
   });
 

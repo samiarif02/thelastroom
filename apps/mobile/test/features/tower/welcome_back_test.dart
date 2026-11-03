@@ -71,7 +71,7 @@ void main() {
       );
       final m1 = missions.first;
       expect(w.waiting, [
-        '3 traps are waiting in the Recall Room.',
+        '3 notes are waiting in the Recall Room.',
         'Room 1, “${m1.title}”, is ready for you.',
         ProgressionCard.weekLine(1, 3),
       ]);
@@ -273,7 +273,7 @@ void main() {
         );
         expect(find.text('Welcome back · Priya'), findsOneWidget);
         expect(
-          find.text('2 traps are waiting in the Recall Room.'),
+          find.text('2 notes are waiting in the Recall Room.'),
           findsOneWidget,
         );
         expect(analytics.events.single.$1, AnalyticsEvent.welcomeBackShown);

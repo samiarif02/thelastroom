@@ -21,7 +21,7 @@ class BuildPanel extends StatelessWidget {
     required this.placed,
     required this.grade,
     required this.onToggle,
-    required this.onLockIn,
+    this.onLockIn,
     this.locked = false,
     this.onArrived,
   });
@@ -35,7 +35,10 @@ class BuildPanel extends StatelessWidget {
   final List<String> placed;
   final ChapterGrade grade;
   final ValueChanged<Fragment> onToggle;
-  final VoidCallback onLockIn;
+
+  /// "Lock it in" under the pieces; null when the screen pins it in its own dock instead (the
+  /// mission player does, above the system's gesture bar: QA 51).
+  final VoidCallback? onLockIn;
 
   /// Said: nothing can change, the button is spent.
   final bool locked;
@@ -123,12 +126,14 @@ class BuildPanel extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: DaylightSpace.s16),
-        TactileButton(
-          label: lockIn,
-          icon: PhosphorBold.lockSimple,
-          onPressed: placed.isEmpty || locked ? null : onLockIn,
-        ),
+        if (onLockIn case final lock?) ...[
+          const SizedBox(height: DaylightSpace.s16),
+          TactileButton(
+            label: lockIn,
+            icon: PhosphorBold.lockSimple,
+            onPressed: placed.isEmpty || locked ? null : lock,
+          ),
+        ],
       ],
     );
   }

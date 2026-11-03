@@ -114,53 +114,49 @@ class RecallScreen extends ConsumerWidget {
     return DaylightGround(
       color: DaylightColors.recallTint,
       floor: _recallFloor,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
-                DaylightTopBar(
-                  leadingLabel: back,
-                  onLeading: toTower,
-                  kicker: playing == null
-                      ? title
-                      : noteOf(playing.index + 1, playing.round.length),
-                  title: playing == null
-                      ? title
-                      : _source(playing) ?? lessonNote,
-                  trailing: playing == null ? null : _Boxes(box: playing.box),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            DaylightTopBar(
+              leadingLabel: back,
+              onLeading: toTower,
+              kicker: playing == null
+                  ? title
+                  : noteOf(playing.index + 1, playing.round.length),
+              title: playing == null ? title : _source(playing) ?? lessonNote,
+              trailing: playing == null ? null : _Boxes(box: playing.box),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  DaylightSpace.s16,
+                  DaylightSpace.s12,
+                  DaylightSpace.s16,
+                  week == null ? DaylightSpace.s24 + bottom : DaylightSpace.s16,
                 ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(
-                      DaylightSpace.s16,
-                      DaylightSpace.s12,
-                      DaylightSpace.s16,
-                      DaylightSpace.s24 +
-                          bottom +
-                          (week == null ? 0 : _WeekNote.reserve),
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: _maxWidth),
-                        child: body,
-                      ),
-                    ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _maxWidth),
+                    child: body,
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-          if (week != null)
-            Positioned(
-              left: DaylightSpace.s16,
-              right: DaylightSpace.s16,
-              bottom: bottom + DaylightSpace.s16,
-              child: week,
-            ),
-        ],
+            // The week's note under the list, never over it: the picks end above it and
+            // scroll, so none hides behind it at rest (QA 51: pick C under the card).
+            if (week != null)
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  DaylightSpace.s16,
+                  0,
+                  DaylightSpace.s16,
+                  bottom + DaylightSpace.s16,
+                ),
+                child: week,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -242,8 +238,6 @@ class _WeekNote extends StatelessWidget {
 
   final Progression progression;
 
-  /// The space the scroll leaves under the cards for it.
-  static const double reserve = 88;
   static const double _ring = 44;
 
   static String line(Progression p) {

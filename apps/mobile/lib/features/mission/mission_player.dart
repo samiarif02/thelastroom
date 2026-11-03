@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:brand/brand.dart';
 import 'package:content/content.dart';
@@ -122,6 +123,9 @@ class MissionPlayer extends ConsumerStatefulWidget {
   static const String soundTitle = "That's the principle.";
   static const String closeTitle = 'Close, but not quite.';
   static const String guessTitle = 'You barely looked at those.';
+
+  /// A built answer that's every piece, in order: no principle was asked for (QA 51).
+  static const String builtTitle = 'Every piece, in order.';
 
   /// The sheet's next step.
   static String nextStep(BeatKind? next) => switch (next) {
@@ -485,7 +489,12 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
       return;
     }
     final before = _game.trust;
-    _controller.lock(option, decidedIn: _decidedIn);
+    // Nothing locked: the scene showed a beat the attempt isn't on (QA 51, BUG-2). Go to the
+    // beat (or the why step) it's really at, never react to an old beat's line and skip on.
+    if (!_controller.lock(option, decidedIn: _decidedIn)) {
+      _nextBeat();
+      return;
+    }
     _trustMoved(before);
     _beatLocked();
   }
@@ -509,7 +518,10 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     _sounds.answerLocked();
     stampThud();
     final before = _game.trust;
-    _controller.lockBuilt(_placed, decidedIn: _decidedIn);
+    if (!_controller.lockBuilt(_placed, decidedIn: _decidedIn)) {
+      _nextBeat(); // out of step, as in [_say]
+      return;
+    }
     setState(() => _locked = _game.plays.last.option);
     _trustMoved(before);
     _beatLocked();
@@ -617,14 +629,16 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     then();
   }
 
+  /// On to the beat the attempt is at: the next one's cards, or a why step still owed.
   void _nextBeat() {
-    if (_game.beatsDone) {
+    final game = _game;
+    if (game.beatsDone) {
       unawaited(_after(_beforeFollowUp, _cutToFollowUp));
       return;
     }
     setState(() {
-      _beatShown = _game.beatIndex;
-      _phase = BeatPhase.cards;
+      _beatShown = game.awaitingWhy ? game.plays.length - 1 : game.beatIndex;
+      _phase = game.awaitingWhy ? BeatPhase.why : BeatPhase.cards;
       _shownAt = null;
       _selected = null;
       _decidedIn = null;
@@ -714,6 +728,12 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
 
     final f = grade.floor;
     final insets = MediaQuery.paddingOf(context);
+    // The system's gesture bar, even where an inset has been consumed above us (QA 51: the
+    // build's "Lock it in" sat on it).
+    final bottomSafe = math.max(
+      insets.bottom,
+      MediaQuery.viewPaddingOf(context).bottom,
+    );
     // At large text the room shrinks to a strip, so all the cards still fit above the dock.
     final compact =
         MediaQuery.textScalerOf(context).scale(DaylightSpace.s16) >
@@ -786,7 +806,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                         DaylightSpace.s12,
                         DaylightSpace.s16,
                         dock == null
-                            ? insets.bottom + DaylightSpace.s24
+                            ? bottomSafe + DaylightSpace.s24
                             : DaylightSpace.s16,
                       ),
                       child: Column(
@@ -802,7 +822,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                         DaylightSpace.s16,
                         DaylightSpace.s8,
                         DaylightSpace.s16,
-                        insets.bottom + DaylightSpace.s16,
+                        bottomSafe + DaylightSpace.s16,
                       ),
                       child: dock,
                     ),
@@ -1063,7 +1083,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                 locked: _locked != null,
                 onArrived: _cardsArrived,
                 onToggle: _toggleFragment,
-                onLockIn: _lockBuilt,
+                // "Lock it in" is pinned in the dock, above the gesture bar.
               )
             else
               KeyedSubtree(
@@ -1089,7 +1109,10 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
         // A guess is called out *before* she asks why (the feedback sheet over the room): her
         // why line must not start typing under that sheet, or it finishes while nobody is
         // listening for it and the reasons never come (the owner's stuck "Why that example?").
-        final why = whyAsked ? beat.why : null;
+        // A built beat asks no why: its reasons stay in the content for the Recall Room only,
+        // never under her reaction (QA 51: reason cards and "That's the principle." with none
+        // picked).
+        final why = whyAsked && build == null ? beat.why : null;
         final said = game.plays.length > _beatShown
             ? game.plays[_beatShown].option.text
             : _locked?.text;
@@ -1178,6 +1201,17 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
             _phase == BeatPhase.cards &&
             mission.beats[_beatShown].build == null) ||
         _stage == SceneStage.replies;
+    // A built beat's "Lock it in": pinned like the cards' button, so a long build never pushes
+    // it down under the system's gesture bar (QA 51).
+    if (_stage == SceneStage.beats &&
+        _phase == BeatPhase.cards &&
+        mission.beats[_beatShown].build != null) {
+      return TactileButton(
+        label: BuildPanel.lockIn,
+        icon: PhosphorBold.lockSimple,
+        onPressed: _placed.isEmpty || _locked != null ? null : _lockBuilt,
+      );
+    }
     if (onCards) {
       final items = _stage == SceneStage.replies
           ? game.replyOptions
@@ -1222,7 +1256,12 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     final who = interviewerById(reaction.speakerId);
     final guessedFirst = _calledOut && _game.awaitingWhy;
     final (tone, title) = switch (_quality) {
-      PickQuality.strong => (FeedbackTone.sound, MissionPlayer.soundTitle),
+      PickQuality.strong => (
+        FeedbackTone.sound,
+        mission.beats[_beatShown].build == null
+            ? MissionPlayer.soundTitle
+            : MissionPlayer.builtTitle,
+      ),
       PickQuality.weak => (FeedbackTone.close, MissionPlayer.closeTitle),
       PickQuality.guessed ||
       null => (FeedbackTone.guess, MissionPlayer.guessTitle),
