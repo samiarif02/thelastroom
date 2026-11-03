@@ -15,6 +15,7 @@ export 'src/follow_up.dart';
 export 'src/line_cost.dart';
 export 'src/pick_credit.dart';
 export 'src/progression.dart';
+export 'src/reason_verdict.dart';
 export 'src/recall.dart';
 export 'src/scoring.dart';
 export 'src/shuffle.dart';

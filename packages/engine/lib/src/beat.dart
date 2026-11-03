@@ -49,6 +49,7 @@ class ReasonPick {
     required this.reasonId,
     required this.sound,
     this.counts = true,
+    this.asked = true,
   });
 
   /// The content id of the reason, for the debrief and analytics.
@@ -59,6 +60,19 @@ class ReasonPick {
   /// means the player got lucky. A weak line keeps its own (low) points whatever the reason;
   /// the debrief explains the misconception instead. Content's `Beat.reasonPick` sets it.
   final bool counts;
+
+  /// Whether the player was asked why on this beat. False only for a reason an older build
+  /// stored on a beat that asks none (a built beat, before QA 51's fix): it still scores as it
+  /// did, so a past result never changes, but it earns no reason XP (`ReasonVerdict.of`).
+  final bool asked;
+
+  /// This pick with [asked] set to false.
+  ReasonPick unasked() => ReasonPick(
+    reasonId: reasonId,
+    sound: sound,
+    counts: counts,
+    asked: false,
+  );
 }
 
 /// Picks made sooner than this after the options appear are guesses: nobody reads three

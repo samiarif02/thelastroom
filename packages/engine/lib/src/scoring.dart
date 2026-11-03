@@ -4,6 +4,7 @@ import 'dimension_scores.dart';
 import 'flag.dart';
 import 'line_cost.dart';
 import 'pick_credit.dart';
+import 'reason_verdict.dart';
 
 /// Everything one mission attempt produced, as the engine scores it.
 class AttemptInput {
@@ -39,6 +40,8 @@ class MissionScore {
       PickCredit.full,
       PickCredit.full,
     ],
+    this.reasonVerdicts = const [],
+    this.pointsMade = 0,
   });
 
   /// Each dimension normalised to 0–100.
@@ -71,6 +74,15 @@ class MissionScore {
   /// Whether any beat was a guess: the debrief's "you were guessing" flag.
   bool get guessed => beatCredits.contains(PickCredit.guessed);
 
+  /// How each "why that line?" was answered, in beat order, one per beat that asked
+  /// ([ReasonVerdict.of]): what the reasons earn in XP. Empty for a voice answer, and for an
+  /// attempt saved before wave 5.
+  final List<ReasonVerdict> reasonVerdicts;
+
+  /// How many listen-for points a spoken answer made (`scoreVoiceAnswer`); 0 for picked lines.
+  /// Each earns [voicePointXp].
+  final int pointsMade;
+
   @override
   bool operator ==(Object other) =>
       other is MissionScore &&
@@ -80,7 +92,9 @@ class MissionScore {
       _sameList(other.optionIdsByCost, optionIdsByCost) &&
       other.flags.length == flags.length &&
       other.flags.containsAll(flags) &&
-      _sameList(other.beatCredits, beatCredits);
+      _sameList(other.beatCredits, beatCredits) &&
+      _sameList(other.reasonVerdicts, reasonVerdicts) &&
+      other.pointsMade == pointsMade;
 
   @override
   int get hashCode => Object.hash(
@@ -89,13 +103,16 @@ class MissionScore {
     Object.hashAll(optionIdsByCost),
     Object.hashAllUnordered(flags),
     Object.hashAll(beatCredits),
+    Object.hashAll(reasonVerdicts),
+    pointsMade,
   );
 
   @override
   String toString() =>
       'MissionScore(total: $total, dimensions: $dimensions, '
       'optionIdsByCost: $optionIdsByCost, flags: $flags, '
-      'beatCredits: $beatCredits)';
+      'beatCredits: $beatCredits, reasonVerdicts: $reasonVerdicts, '
+      'pointsMade: $pointsMade)';
 }
 
 bool _sameList<T>(List<T> a, List<T> b) =>
@@ -186,6 +203,9 @@ MissionScore scoreAttempt(AttemptInput input) {
     ),
     flags: Set.unmodifiable({for (final c in answer) ...c.flags}),
     beatCredits: List.unmodifiable(credits),
+    reasonVerdicts: List.unmodifiable([
+      for (final p in input.picks) ?ReasonVerdict.of(p),
+    ]),
   );
 }
 
