@@ -296,9 +296,7 @@ Future<void> _playVoice(MissionRig rig, Mission m, _VoiceFakes fakes) async {
   // The debrief: the score's source, a total, and the mission's lesson.
   expect(
     find.text(
-      fakes.online
-          ? ScoreSourceLabel.aiLabel.toUpperCase()
-          : VoiceDebrief.selfCheckLabel.toUpperCase(),
+      fakes.online ? ScoreSourceLabel.aiLabel : VoiceDebrief.selfCheckLabel,
     ),
     findsOneWidget,
   );
@@ -410,13 +408,14 @@ Future<void> _playEpilogue(MissionRig rig, Mission m) async {
   }
 }
 
-/// A labelled button: the debrief's (vivid) or a Daylight one (the epilogue, the report).
+/// A button by its label: Daylight's, or the vivid one on the screens still to restyle.
 Future<void> _tapButton(MissionRig rig, String label) => _tap(
   rig,
-  find.byWidgetPredicate(
-    (w) =>
-        (w is VividButton && w.label == label) ||
-        (w is TactileButton && w.label == label),
+  find.ancestor(
+    of: find.text(label),
+    matching: find.byWidgetPredicate(
+      (w) => w is TactileButton || w is VividButton,
+    ),
   ),
 );
 

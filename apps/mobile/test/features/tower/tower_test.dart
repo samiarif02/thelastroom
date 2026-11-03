@@ -7,6 +7,7 @@ import 'package:the_last_room/features/debrief/debrief_view.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
 import 'package:the_last_room/features/tower/elevator.dart';
+import 'package:the_last_room/features/tower/floor_sheet.dart';
 import 'package:the_last_room/features/tower/northstar_tower.dart';
 import 'package:the_last_room/features/tower/tower_extras.dart';
 import 'package:the_last_room/features/tower/tower_hero.dart';
@@ -263,6 +264,60 @@ void main() {
     expect(find.byType(Elevator), findsNothing);
     await rig.run(const Duration(seconds: 4));
     expect(find.text(TowerScreen.lockedNotice(missions[1])), findsNothing);
+  });
+
+  testWidgets('a locked floor opens to show what is ahead', (tester) async {
+    final rig = MissionRig(tester);
+    await rig.boot(Routes.tower(), reduceMotion: true);
+    await rig.until(find.byType(TowerScreen));
+    await rig.run(const Duration(milliseconds: 300));
+    await toTheTower(tester);
+    final floor2 = chapters[1];
+    await tester.tap(find.text(NorthstarTower.floorLine(floor2)));
+    await rig.run(const Duration(milliseconds: 600));
+    expect(find.byType(FloorSheet), findsOneWidget);
+    expect(find.text(floor2.title), findsOneWidget);
+    final lastOfFloor1 = missions.lastWhere((m) => m.chapter == 1);
+    expect(find.text(FloorSheet.opensWhen(lastOfFloor1)), findsOneWidget);
+    for (final m in missions.where((m) => m.chapter == 2)) {
+      expect(
+        find.descendant(
+          of: find.byType(FloorSheet),
+          matching: find.bySemanticsLabel(
+            'Room ${m.number}, ${m.title}, locked',
+          ),
+        ),
+        findsOneWidget,
+      );
+    }
+    expect(rig.analytics.only(AnalyticsEvent.floorPreviewed).wire, {
+      'chapter': 2,
+      'open': false,
+    });
+  });
+
+  testWidgets('an open floor\'s sheet takes you into its next room', (
+    tester,
+  ) async {
+    final rig = MissionRig(tester);
+    await rig.boot(Routes.tower(), reduceMotion: true);
+    await rig.until(find.byType(TowerScreen));
+    await rig.run(const Duration(milliseconds: 300));
+    await toTheTower(tester);
+    await tester.tap(find.text(NorthstarTower.floorLine(chapters.first)));
+    await rig.run(const Duration(milliseconds: 600));
+    final first = missions.first;
+    final row = find.descendant(
+      of: find.byType(FloorSheet),
+      matching: find.bySemanticsLabel(
+        'Room ${first.number}, ${first.title}, up next',
+      ),
+    );
+    await tester.ensureVisible(row);
+    await rig.run(const Duration(milliseconds: 300));
+    await tester.tap(row);
+    await rig.until(find.byType(MissionPlayer));
+    expect(rig.state(1).mission, first);
   });
 
   testWidgets('the file opens from the Tower', (tester) async {

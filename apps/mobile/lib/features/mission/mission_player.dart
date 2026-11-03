@@ -611,27 +611,24 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     final grade = mission.grade;
 
     if (_stage == SceneStage.debrief && game.score != null) {
-      // The Candidate assessment, exactly as it was (the owner's rule): its own ground and
-      // the film grain it always wore.
-      return FilmGrain(
-        child: DebriefView(
-          mission: mission,
-          score: game.score!,
-          trust: game.trust,
-          firstTry: game.firstTry,
-          reasoning: reasoningOf(mission, game.plays),
-          baselineDraft: game.baselineDraft,
-          // The answer for the AI recruiter (brief 22); the dossier falls back by itself.
-          scoreRequest: game.followUp != null && game.reply != null
-              ? ScoreRequest(
-                  mission: mission,
-                  plays: game.plays,
-                  followUp: game.followUp!,
-                  reply: game.reply!,
-                )
-              : null,
-          onContinue: _afterDebrief,
-        ),
+      // The Candidate assessment, exactly as it was (the owner's rule), on Daylight's ground.
+      return DebriefView(
+        mission: mission,
+        score: game.score!,
+        trust: game.trust,
+        firstTry: game.firstTry,
+        reasoning: reasoningOf(mission, game.plays),
+        baselineDraft: game.baselineDraft,
+        // The answer for the AI recruiter (brief 22); the dossier falls back by itself.
+        scoreRequest: game.followUp != null && game.reply != null
+            ? ScoreRequest(
+                mission: mission,
+                plays: game.plays,
+                followUp: game.followUp!,
+                reply: game.reply!,
+              )
+            : null,
+        onContinue: _afterDebrief,
       );
     }
     if (_stage == SceneStage.epilogue) {
@@ -968,6 +965,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                 text: before.option.text,
                 grade: mission.grade,
               );
+        final whyAsked = _phase != BeatPhase.reaction || !game.awaitingWhy;
         if (_phase == BeatPhase.cards) {
           return [
             asked(question),
@@ -1006,7 +1004,10 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
           ];
         }
         // "Why that line?": the interviewer beside the question, the line said, the reasons.
-        final why = beat.why;
+        // A guess is called out *before* she asks why (the feedback sheet over the room): her
+        // why line must not start typing under that sheet, or it finishes while nobody is
+        // listening for it and the reasons never come (the owner's stuck "Why that example?").
+        final why = whyAsked ? beat.why : null;
         final said = game.plays.length > _beatShown
             ? game.plays[_beatShown].option.text
             : _locked?.text;

@@ -11,9 +11,10 @@ import '../../core/analytics/analytics.dart';
 import '../../core/analytics/analytics_event.dart';
 import '../../core/analytics/event_value.dart';
 import '../../core/audio/game_sounds.dart';
+import '../../ui/daylight/daylight_kit.dart'
+    show DaylightGround, TactileButton, TactileTone, TrustPips;
 import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
-import '../mission/widgets/trust_meter.dart';
 import '../progression/debrief_rewards.dart';
 import 'ai_score.dart';
 import 'ai_score_store.dart';
@@ -65,6 +66,9 @@ class DebriefView extends ConsumerStatefulWidget {
   static const String continueLabel = 'Back to the tower';
 
   /// Chapter 1's review leads to its report instead (brief 24).
+  /// "Debrief · floor 1 · room 4".
+  static String kicker(Mission m) =>
+      'Debrief · floor ${m.chapter} · room ${m.number}';
   static const String reportLabel = 'See your Chapter 1 report';
 
   /// The dossier sheet's largest text scale (the slip and buttons below take the full 2x).
@@ -168,39 +172,51 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
     final lesson = _facts.lesson;
     final verdict = _verdict;
     if (verdict == null) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          VividBackdrop(grade: grade),
-          SafeArea(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(BrandSpace.lg),
-                child: DeliberatingCard(grade: grade),
-              ),
+      return DaylightGround(
+        floor: grade.floor,
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(DaylightSpace.s24),
+              child: DeliberatingCard(grade: grade),
             ),
           ),
-        ],
+        ),
       );
     }
     final ai = verdict is AiScored ? verdict.score : null;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Walnut, and the lamp's warm pool on it.
-        // The evening sky in the chapter's colour (brief 17), the file and the slips on it.
-        VividBackdrop(grade: grade),
-        SafeArea(
-          child: AnchoredScroll(
-            alignment: MainAxisAlignment.center,
-            padding: const EdgeInsets.all(BrandSpace.lg),
-            children: [
-              ScoreSourceLabel(ai: ai != null, grade: grade),
-              // Brief 36: on what basis, and how we know it's sound (the reviewer's questions).
-              Center(
-                child: VividButton(
+    // Daylight around the kept sheet (owner, 2026-11-03): the paper ground, the room named at
+    // the top, the score's source and its basis, then the Candidate assessment exactly as it
+    // was, then the cards under it.
+    return DaylightGround(
+      floor: grade.floor,
+      child: SafeArea(
+        child: AnchoredScroll(
+          alignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.all(DaylightSpace.s16),
+          children: [
+            Text(
+              DebriefView.kicker(widget.mission),
+              style: DaylightType.caption4.copyWith(color: DaylightColors.ink2),
+            ),
+            Semantics(
+              header: true,
+              child: Text(widget.mission.title, style: DaylightType.heading5),
+            ),
+            const SizedBox(height: DaylightSpace.s12),
+            Wrap(
+              spacing: DaylightSpace.s8,
+              runSpacing: DaylightSpace.s8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                ScoreSourceLabel(ai: ai != null, grade: grade),
+                // Brief 36: on what basis, and how we know it's sound (the reviewer's questions).
+                TactileButton(
                   label: ScoringBasisSheet.open,
-                  primary: false,
+                  icon: PhosphorBold.bookOpen,
+                  tone: TactileTone.quiet,
+                  compact: true,
+                  expand: false,
                   onPressed: () {
                     _analytics.track(AnalyticsEvent.scoreBasisViewed, {
                       'mission_id': EventValue.id(widget.mission),
@@ -219,102 +235,100 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                     );
                   },
                 ),
-              ),
-              const SizedBox(height: BrandSpace.sm),
-              // The kit's ledger row has no room for a three-digit stamp at 2x text (its score
-              // doesn't shrink), so the sheet clamps its own text, as the title card does.
-              // Asked of 06b in docs/status/10.md.
-              MediaQuery.withClampedTextScaling(
-                maxScaleFactor: DebriefView.maxSheetTextScale,
-                child: Dossier(
-                  title: DebriefView.title,
-                  subtitle:
-                      '${widget.mission.title} · with ${widget.mission.lead.name}',
-                  scores: [
-                    for (final d in _facts.dimensions)
-                      DossierScore(
-                        label: dimensionLabel(d.dimension),
-                        value: ai?.dimensions[d.dimension]!.score ?? d.value,
-                      ),
-                  ],
-                  total: _shownTotal,
-                  note: lesson?.title,
-                  markedIndex: _facts.markedDimensionIndex,
-                  onStamp: (_) => _sounds.scoreStamped(),
-                  onSeal: _result,
-                  onFinished: () {
-                    _result();
-                    if (mounted) setState(() => _settled = true);
-                  },
-                ),
-              ),
-              const SizedBox(height: BrandSpace.lg),
-              _Arrive(
-                shown: _settled,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TrustMeter(trust: widget.trust, grade: grade),
-                    const SizedBox(height: BrandSpace.md),
-                    DebriefRewards(
-                      mission: widget.mission,
-                      grade: grade,
-                      ready: _settled,
+              ],
+            ),
+            const SizedBox(height: DaylightSpace.s16),
+            // The kit's ledger row has no room for a three-digit stamp at 2x text (its score
+            // doesn't shrink), so the sheet clamps its own text, as the title card does.
+            // Asked of 06b in docs/status/10.md.
+            MediaQuery.withClampedTextScaling(
+              maxScaleFactor: DebriefView.maxSheetTextScale,
+              child: Dossier(
+                title: DebriefView.title,
+                subtitle:
+                    '${widget.mission.title} · with ${widget.mission.lead.name}',
+                scores: [
+                  for (final d in _facts.dimensions)
+                    DossierScore(
+                      label: dimensionLabel(d.dimension),
+                      value: ai?.dimensions[d.dimension]!.score ?? d.value,
                     ),
-                    const SizedBox(height: BrandSpace.md),
-                    if (ai != null) ...[
-                      AiBasisSlip(score: ai, grade: grade),
-                      const SizedBox(height: BrandSpace.md),
-                    ],
-                    if (_facts.markedLine case final line?)
-                      RedPenSlip(
-                        line: line.text,
-                        lesson: lesson!,
-                        play: _settled,
-                      )
-                    else if (widget.score.guessed)
-                      GuessedSlip(beats: widget.score.guessedBeats)
-                    else if (CostSlip.applies(widget.reasoning))
-                      CostSlip(beats: widget.reasoning)
-                    else
-                      const CleanRunSlip(),
-                    if (widget.reasoning.any(
-                      (b) => b.guessed || b.given != null,
-                    )) ...[
-                      const SizedBox(height: BrandSpace.md),
-                      ReasoningSlip(beats: widget.reasoning),
-                    ],
-                    if (widget.firstTry case final words?) ...[
-                      const SizedBox(height: BrandSpace.md),
-                      FirstTrySlip(
-                        firstTry: words,
-                        stronger: strongestOpening(widget.mission).text,
-                      ),
-                    ],
-                    if (widget.baselineDraft case final then?) ...[
-                      const SizedBox(height: BrandSpace.md),
-                      ThenNowSlip(
-                        then: then,
-                        now: [for (final b in widget.reasoning) b.line.text]
-                            .join(' '),
-                        nowMission: widget.mission.number,
-                      ),
-                    ],
-                    const SizedBox(height: BrandSpace.lg),
-                    VividButton(
-                      label: widget.mission.leadsToReport
-                          ? DebriefView.reportLabel
-                          : DebriefView.continueLabel,
-                      expand: true,
-                      onPressed: _settled ? widget.onContinue : null,
+                ],
+                total: _shownTotal,
+                note: lesson?.title,
+                markedIndex: _facts.markedDimensionIndex,
+                onStamp: (_) => _sounds.scoreStamped(),
+                onSeal: _result,
+                onFinished: () {
+                  _result();
+                  if (mounted) setState(() => _settled = true);
+                },
+              ),
+            ),
+            const SizedBox(height: DaylightSpace.s24),
+            _Arrive(
+              shown: _settled,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _TrustLine(trust: widget.trust),
+                  const SizedBox(height: DaylightSpace.s16),
+                  DebriefRewards(
+                    mission: widget.mission,
+                    grade: grade,
+                    ready: _settled,
+                  ),
+                  const SizedBox(height: DaylightSpace.s16),
+                  if (ai != null) ...[
+                    AiBasisSlip(score: ai, grade: grade),
+                    const SizedBox(height: DaylightSpace.s16),
+                  ],
+                  if (_facts.markedLine case final line?)
+                    RedPenSlip(line: line.text, lesson: lesson!, play: _settled)
+                  else if (widget.score.guessed)
+                    GuessedSlip(beats: widget.score.guessedBeats)
+                  else if (CostSlip.applies(widget.reasoning))
+                    CostSlip(beats: widget.reasoning)
+                  else
+                    const CleanRunSlip(),
+                  if (widget.reasoning.any(
+                    (b) => b.guessed || b.given != null,
+                  )) ...[
+                    const SizedBox(height: DaylightSpace.s16),
+                    ReasoningSlip(beats: widget.reasoning),
+                  ],
+                  if (widget.firstTry case final words?) ...[
+                    const SizedBox(height: DaylightSpace.s16),
+                    FirstTrySlip(
+                      firstTry: words,
+                      stronger: strongestOpening(widget.mission).text,
                     ),
                   ],
-                ),
+                  if (widget.baselineDraft case final then?) ...[
+                    const SizedBox(height: DaylightSpace.s16),
+                    ThenNowSlip(
+                      then: then,
+                      now: [for (final b in widget.reasoning) b.line.text]
+                          .join(' '),
+                      nowMission: widget.mission.number,
+                    ),
+                  ],
+                  const SizedBox(height: DaylightSpace.s24),
+                  TactileButton(
+                    label: widget.mission.leadsToReport
+                        ? DebriefView.reportLabel
+                        : DebriefView.continueLabel,
+                    icon: widget.mission.leadsToReport
+                        ? PhosphorBold.bookOpen
+                        : PhosphorBold.buildings,
+                    onPressed: _settled ? widget.onContinue : null,
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -330,9 +344,36 @@ class _Arrive extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedOpacity(
     opacity: shown ? 1 : 0,
     duration: MediaQuery.disableAnimationsOf(context)
-        ? BrandMotion.reducedMotionFade
-        : BrandMotion.cinematic,
-    curve: BrandMotion.enter,
+        ? DaylightMotion.colour
+        : DaylightMotion.move,
+    curve: DaylightMotion.ease,
     child: IgnorePointer(ignoring: !shown, child: child),
+  );
+}
+
+/// Where trust ended, as the room's pips (no longer the film's heartbeat line).
+class _TrustLine extends StatelessWidget {
+  const _TrustLine({required this.trust});
+
+  final int trust;
+
+  static const String label = 'Trust at the end';
+  static const int _perPip = 20;
+  static const int _pips = 5;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: Text(
+          label,
+          style: DaylightType.caption3.copyWith(color: DaylightColors.ink2),
+        ),
+      ),
+      TrustPips(
+        trust: (trust / _perPip).round().clamp(0, _pips),
+        icon: PhosphorFill.handshake,
+      ),
+    ],
   );
 }

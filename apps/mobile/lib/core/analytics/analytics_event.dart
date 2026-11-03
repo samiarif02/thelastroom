@@ -84,7 +84,11 @@ enum AnalyticsEvent {
 
   /// A Recall Room note is shown (the taped note of the trap that caught the player): its kind
   /// and its Leitner box. Never the note's text.
-  recallNoteOpened('recall_note_opened');
+  recallNoteOpened('recall_note_opened'),
+
+  /// A floor of the tower is opened as a sheet (its rooms, its interviewers, how it's
+  /// answered), open or still locked: the player looking ahead.
+  floorPreviewed('floor_previewed');
 
   const AnalyticsEvent(this.wireName);
 

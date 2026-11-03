@@ -15,7 +15,7 @@ import 'package:the_last_room/features/mission/scene/mission_card.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
 import 'package:the_last_room/ui/daylight/daylight_kit.dart'
-    show CastFigure, TrustPips;
+    show CastFigure, FeedbackSheet, TrustPips;
 import 'package:the_last_room/ui/film_kit.dart';
 
 import 'mission_harness.dart';
@@ -129,11 +129,21 @@ void main() {
         );
         await rig.until(find.text(line.text));
         expect(face(rig), CastExpression.hmm);
-        // She still asks why.
+        // She still asks why, and the reasons come: the why step never sticks after a guess
+        // (the owner's "Why that example?" on the realme: her line typed under the feedback
+        // sheet, finished unheard, and the reasons never came).
         await rig.until(
           find.text(
             openBeat.why!.line.addressedTo(rig.state(1).playerName).text,
           ),
+        );
+        // Past the sheet's hold, the step is waiting on the player: the reasons are there.
+        await rig.run(MissionPlayer.reactionHold + const Duration(seconds: 2));
+        expect(find.byType(FeedbackSheet), findsNothing);
+        expect(find.text(reasonLabel), findsOneWidget);
+        expect(
+          find.widgetWithText(ChoiceCard, openBeat.why!.reasons.first.text),
+          findsOneWidget,
         );
       },
     );
@@ -165,7 +175,7 @@ void main() {
         expect(find.byType(CleanRunSlip), findsNothing);
         expect(find.byType(ReasoningSlip), findsOneWidget);
         expect(
-          find.textContaining('GUESSED IN', findRichText: true),
+          find.textContaining('Guessed in', findRichText: true),
           findsNWidgets(mission.beats.length),
         );
       },

@@ -3,6 +3,7 @@ import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../ui/daylight/daylight_kit.dart' show DaylightPanel;
 import '../../ui/film_kit.dart';
 
 /// The interviewer's slip clipped under the file: the line that cost the most, quoted and
@@ -22,20 +23,19 @@ class RedPenSlip extends StatelessWidget {
   /// False holds the pen still (before the slip is shown).
   final bool play;
 
-  static const String heading = 'THE LINE THAT COST YOU';
-  static const String nextTime = 'NEXT TIME';
-
-  static const double _lessonTitleSize = 24;
+  static const String heading = 'The line that cost the most';
+  static const String nextTime = 'Next time';
 
   @override
   Widget build(BuildContext context) {
-    final soft = BrandType.label.copyWith(color: SlipInk.soft);
+    final soft = SlipType.label.copyWith(color: SlipInk.soft);
     return PaperSlip(
+      trap: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(heading, style: soft),
-          const SizedBox(height: BrandSpace.sm),
+          Text(heading, style: soft.copyWith(color: SlipInk.mark)),
+          const SizedBox(height: DaylightSpace.s8),
           Timeline(
             key: ValueKey(play),
             duration: BrandMotion.pen,
@@ -55,34 +55,25 @@ class RedPenSlip extends StatelessWidget {
             ),
             child: Text(
               '“$line”',
-              style: BrandType.choice.copyWith(
-                color: SlipInk.text,
-                fontStyle: FontStyle.italic,
-              ),
+              style: SlipType.quote.copyWith(color: SlipInk.text),
             ),
           ),
-          const SizedBox(height: BrandSpace.md),
-          Text(
-            lesson.flaw,
-            style: BrandType.body.copyWith(color: SlipInk.mark),
-          ),
-          const SizedBox(height: BrandSpace.md),
+          const SizedBox(height: DaylightSpace.s16),
+          Text(lesson.flaw, style: SlipType.body.copyWith(color: SlipInk.mark)),
+          const SizedBox(height: DaylightSpace.s16),
           Text(nextTime, style: soft),
-          const SizedBox(height: BrandSpace.xs),
+          const SizedBox(height: DaylightSpace.s4),
           Semantics(
             header: true,
             child: Text(
               lesson.title,
-              style: BrandType.display.copyWith(
-                color: SlipInk.text,
-                fontSize: _lessonTitleSize,
-              ),
+              style: SlipType.title.copyWith(color: SlipInk.text),
             ),
           ),
-          const SizedBox(height: BrandSpace.xs),
+          const SizedBox(height: DaylightSpace.s4),
           Text(
             lesson.takeaway,
-            style: BrandType.body.copyWith(color: SlipInk.text),
+            style: SlipType.body.copyWith(color: SlipInk.text),
           ),
         ],
       ),
@@ -99,7 +90,7 @@ class CleanRunSlip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PaperSlip(
-    child: Text(text, style: BrandType.body.copyWith(color: SlipInk.text)),
+    child: Text(text, style: SlipType.body.copyWith(color: SlipInk.text)),
   );
 }
 
@@ -111,7 +102,7 @@ class GuessedSlip extends StatelessWidget {
   /// The guessed beats, in order ("the open", "the evidence").
   final List<BeatKind> beats;
 
-  static const String heading = 'WHAT COST YOU';
+  static const String heading = 'What cost you';
   static const String takeaway =
       'Read every line before you answer. A line picked before you could have read it earns '
       'nothing, however good it is.';
@@ -126,58 +117,60 @@ class GuessedSlip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PaperSlip(
+    trap: true,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(heading, style: BrandType.label.copyWith(color: SlipInk.soft)),
-        const SizedBox(height: BrandSpace.sm),
-        Text(line(beats), style: BrandType.body.copyWith(color: SlipInk.mark)),
-        const SizedBox(height: BrandSpace.sm),
-        Text(takeaway, style: BrandType.body.copyWith(color: SlipInk.text)),
+        Text(heading, style: SlipType.label.copyWith(color: SlipInk.mark)),
+        const SizedBox(height: DaylightSpace.s8),
+        Text(line(beats), style: SlipType.body.copyWith(color: SlipInk.mark)),
+        const SizedBox(height: DaylightSpace.s8),
+        Text(takeaway, style: SlipType.body.copyWith(color: SlipInk.text)),
       ],
     ),
   );
 }
 
-/// A slip under the file, as a vivid card (brief 17's look): the chapter's deepest colour,
-/// lifted off the sky with a soft shadow. Text on it is white; what went wrong is in sunset
-/// orange ([SlipInk]).
+/// A card under the sheet, in Daylight (brief 46, mockup `05`): white on the paper with the
+/// sand edge, r24, 16 inside. [trap] is the one card about what cost points ("the line that
+/// cost the most"): the trap's clay tint, no edge, never alarm red.
 class PaperSlip extends StatelessWidget {
   const PaperSlip({
     super.key,
     required this.child,
     this.grade = ChapterGrade.lobby,
+    this.trap = false,
   });
 
   final Widget child;
   final ChapterGrade grade;
-
-  static const double _radius = 18;
+  final bool trap;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(_radius),
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [grade.deeper, BrandVivid.night],
-      ),
-      border: Border.all(color: BrandVivid.hairline()),
-      boxShadow: BrandVivid.cardShadow,
-    ),
-    child: Padding(padding: const EdgeInsets.all(BrandSpace.md), child: child),
+  Widget build(BuildContext context) => DaylightPanel(
+    color: trap ? DaylightColors.trapTint : DaylightColors.raised,
+    edge: trap ? null : DaylightColors.sand2,
+    child: child,
   );
 }
 
-/// The slips' inks on the chapter's deepest colour (each pair AA on `deeper` and on `night`).
+/// The cards' inks: ink for what you said and what to do, ink-2 for the small headings, and
+/// the trap's clay for what went wrong (AA on white and on its tint).
 abstract final class SlipInk {
   /// Body text and quoted lines.
-  static final Color text = BrandVivid.onDeep;
+  static const Color text = DaylightColors.ink;
 
-  /// Small caps headings.
-  static final Color soft = BrandVivid.onDeepSoft;
+  /// The small headings.
+  static const Color soft = DaylightColors.ink2;
 
-  /// What went wrong: the red pen's job, in sunset orange.
-  static final Color mark = BrandVivid.horizon;
+  /// What went wrong.
+  static const Color mark = DaylightColors.trap;
+}
+
+/// The cards' type: a sentence-case kicker, the body, a quoted line, a title.
+abstract final class SlipType {
+  static final TextStyle label = DaylightType.caption3;
+  static final TextStyle body = DaylightType.body5;
+  static final TextStyle quote = DaylightType.body2;
+  static final TextStyle title = DaylightType.heading6;
 }

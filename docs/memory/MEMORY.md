@@ -17,4 +17,4 @@ week. `check:standards` (`shared-brain`) fails on a dangling or unindexed file.
 - [No chained destructive git](feedback-no-chained-destructive-git.md): delete/remove/reset only as a lone, checked step
 - [Gotcha: env deny rules](gotcha-env-deny-rules.md): deny rules have no exceptions; each real env file is denied by name
 - [Claude logs in every PR](feedback-claude-logs-every-pr.md): the session log goes in every push and merge; the pre-push hook refuses a branch without one (owner, 2026-11-02, flagged 3x)
-- [Keep the Candidate assessment](feedback-keep-candidate-assessment.md): the debrief dossier stays exactly as it is, look and animations; never edit `ui/paper/**` or what it reads (owner, 2026-11-03)
+- [Keep the Candidate assessment](feedback-keep-candidate-assessment.md): the debrief's sheet stays exactly as it is, look and animations, on a Daylight ground; never edit `ui/paper/**` or what it reads (owner, 2026-11-03)

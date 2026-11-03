@@ -339,16 +339,14 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
       );
     }
     if (game.score case final score?) {
-      // The Candidate assessment, exactly as it was (the owner's rule).
-      return FilmGrain(
-        child: VoiceDebrief(
-          mission: mission,
-          score: score,
-          source: game.source!,
-          made: game.made,
-          verdict: game.verdict,
-          onContinue: _afterDebrief,
-        ),
+      // The Candidate assessment, exactly as it was (the owner's rule), on Daylight's ground.
+      return VoiceDebrief(
+        mission: mission,
+        score: score,
+        source: game.source!,
+        made: game.made,
+        verdict: game.verdict,
+        onContinue: _afterDebrief,
       );
     }
     if (game.selfCheck case final reason?) {

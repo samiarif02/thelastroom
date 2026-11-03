@@ -15,12 +15,14 @@ import '../../core/audio/game_sounds.dart';
 import '../../core/notifications/reminder_primer.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
+import '../../ui/daylight/daylight_sheet.dart';
 import '../../ui/haptics.dart';
 import '../mission/mission_lookup.dart';
 import '../progression/progression.dart';
 import '../progression/skills_shelf.dart';
 import '../recall/recall_controller.dart';
 import 'elevator.dart';
+import 'floor_sheet.dart';
 import 'northstar_tower.dart';
 import 'tower_extras.dart';
 import 'tower_header.dart';
@@ -209,6 +211,36 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     setState(() => _riding = room);
   }
 
+  /// A floor opened from the facade: its rooms, interviewers and how it's answered, open or
+  /// not yet (the owner: "show the other chapters which are locked").
+  Future<void> _showFloor(Chapter chapter, List<TowerRoom> rooms) async {
+    if (_riding != null) return;
+    _sounds.uiTap();
+    final floor = [
+      for (final r in rooms)
+        if (r.mission.chapter == chapter.number) r,
+    ];
+    ref.read(analyticsProvider).track(AnalyticsEvent.floorPreviewed, {
+      'chapter': EventValue.count(chapter.number),
+      'open': EventValue.flag(floor.any((r) => r.state != RoomState.locked)),
+    });
+    TowerRoom? chosen;
+    await showDaylightSheet<void>(
+      context,
+      label: NorthstarTower.floorLine(chapter),
+      builder: (sheet) => FloorSheet(
+        chapter: chapter,
+        rooms: floor,
+        onRoom: (r) {
+          chosen = r;
+          Navigator.of(sheet).pop();
+        },
+      ),
+    );
+    final room = chosen;
+    if (room != null && mounted) _tapRoom(room, rooms);
+  }
+
   void _arrived() {
     final room = _riding;
     if (room == null || !mounted) return;
@@ -262,6 +294,7 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
                   _open(value);
                 },
                 onTapRoom: (r) => _tapRoom(r, value),
+                onFloor: (c) => unawaited(_showFloor(c, value)),
               )
             else
               const _TowerLoading(),
@@ -321,8 +354,10 @@ class _Tower extends StatefulWidget {
     required this.lit,
     required this.onReady,
     required this.onTapRoom,
+    required this.onFloor,
   });
 
+  final ValueChanged<Chapter> onFloor;
   final List<TowerRoom> rooms;
   final String name;
   final Progression? progression;
@@ -446,6 +481,7 @@ class _TowerState extends State<_Tower> {
                       lighting: widget.lighting.value,
                       litKey: _litFloor,
                       onTapRoom: widget.onTapRoom,
+                      onFloor: widget.onFloor,
                     ),
                   ),
                   gap: DaylightSpace.s24,

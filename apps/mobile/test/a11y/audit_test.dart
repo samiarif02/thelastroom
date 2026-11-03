@@ -1,16 +1,14 @@
 import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:the_last_room/app/router.dart';
-import 'package:the_last_room/app/vivid_theme.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
 
 import '../features/mission/mission_harness.dart';
 import '../features/tower/played_attempt.dart';
 
 /// Brief 31: every screen against Flutter's accessibility guidelines (48 dp / 44 pt targets,
-/// labelled tappables, WCAG text contrast in all four themes), and at 2x text under reduced
+/// labelled tappables, WCAG text contrast in the one Daylight look), and at 2x text under reduced
 /// motion with nothing overflowing.
 void main() {
   tearDown(() => BrandVivid.current = VividThemes.eveningForest);
@@ -73,18 +71,12 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
-      for (final theme in VividThemes.all) {
-        testWidgets('text contrast, ${theme.name}', (tester) async {
-          SharedPreferences.setMockInitialValues({
-            SharedPreferencesThemeStore.key: theme.id,
-          });
-          final handle = tester.ensureSemantics();
-          await open(tester, s.route, s.profile, reduceMotion: true);
-          expect(BrandVivid.current, theme);
-          await expectLater(tester, meetsGuideline(textContrastGuideline));
-          handle.dispose();
-        });
-      }
+      testWidgets('text contrast', (tester) async {
+        final handle = tester.ensureSemantics();
+        await open(tester, s.route, s.profile, reduceMotion: true);
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        handle.dispose();
+      });
     });
   }
 }

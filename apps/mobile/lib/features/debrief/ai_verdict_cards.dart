@@ -2,12 +2,13 @@ import 'package:brand/brand.dart';
 import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../ui/daylight/daylight_kit.dart' show Tag, TagTone;
 import '../../ui/film_kit.dart';
 import 'ai_score.dart';
 import 'debrief_facts.dart';
 import 'red_pen_slip.dart';
 
-/// While the AI recruiter grades the answer: the panel deliberating, in the vivid look. Three
+/// While the AI recruiter grades the answer: the panel deliberating, in Daylight. Three honey
 /// lights pulse in turn; under reduced motion they hold still. At most [AiScorer.timeout] long.
 class DeliberatingCard extends StatelessWidget {
   const DeliberatingCard({super.key, this.grade = ChapterGrade.lobby});
@@ -28,16 +29,16 @@ class DeliberatingCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _PulsingLights(grade: grade),
-          const SizedBox(height: BrandSpace.md),
+          const SizedBox(height: DaylightSpace.s16),
           ExcludeSemantics(
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: BrandVividType.title,
+              style: DaylightType.heading6,
             ),
           ),
-          const SizedBox(height: BrandSpace.sm),
-          Text(line, textAlign: TextAlign.center, style: BrandVividType.body),
+          const SizedBox(height: DaylightSpace.s8),
+          Text(line, textAlign: TextAlign.center, style: DaylightType.body5),
         ],
       ),
     ),
@@ -64,16 +65,15 @@ class _PulsingLights extends StatelessWidget {
         children: [
           for (var i = 0; i < _count; i++)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: BrandSpace.xs),
+              padding: const EdgeInsets.symmetric(horizontal: DaylightSpace.s4),
               child: Opacity(
                 opacity: _lit(seconds, i),
                 child: Container(
                   width: _size,
                   height: _size,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: BrandVivid.accent,
-                    boxShadow: BrandVivid.glowShadow(BrandVivid.accent),
+                    color: DaylightColors.honey,
                   ),
                 ),
               ),
@@ -107,29 +107,10 @@ class ScoreSourceLabel extends StatelessWidget {
   static const String offlineLabel = 'Offline score';
 
   @override
-  Widget build(BuildContext context) => Center(
-    child: DecoratedBox(
-      decoration: BoxDecoration(
-        color: BrandVivid.night.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(BrandSpace.md),
-        border: Border.all(
-          color: ai ? BrandVivid.accent : BrandVivid.hairline(0.4),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: BrandSpace.md,
-          vertical: BrandSpace.xs + 2,
-        ),
-        child: Text(
-          (ai ? aiLabel : offlineLabel).toUpperCase(),
-          textAlign: TextAlign.center,
-          style: BrandVividType.kicker.copyWith(
-            color: ai ? BrandVivid.accent : BrandVivid.onDeepSoft,
-          ),
-        ),
-      ),
-    ),
+  Widget build(BuildContext context) => Tag(
+    label: ai ? aiLabel : offlineLabel,
+    icon: ai ? PhosphorBold.sparkle : PhosphorBold.wifiSlash,
+    tone: ai ? TagTone.honey : TagTone.sand,
   );
 }
 
@@ -145,7 +126,7 @@ class AiBasisSlip extends StatelessWidget {
   final AiScore score;
   final ChapterGrade grade;
 
-  static const String heading = 'WHY THESE SCORES';
+  static const String heading = 'Why these scores';
   static const String overallLabel = 'Overall';
 
   @override
@@ -158,7 +139,7 @@ class AiBasisSlip extends StatelessWidget {
           header: true,
           child: Text(
             heading,
-            style: BrandType.label.copyWith(color: SlipInk.soft),
+            style: SlipType.label.copyWith(color: SlipInk.soft),
           ),
         ),
         for (final d in Dimension.values)
@@ -182,7 +163,7 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: BrandSpace.md),
+    padding: const EdgeInsets.only(top: DaylightSpace.s16),
     child: Semantics(
       label: '$label ${graded.score} out of 100. ${graded.basis}',
       excludeSemantics: true,
@@ -193,20 +174,22 @@ class _Row extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  label.toUpperCase(),
-                  style: BrandVividType.kicker.copyWith(color: grade.glow),
+                  label,
+                  style: DaylightType.caption3.copyWith(
+                    color: grade.floor.deep,
+                  ),
                 ),
               ),
               Text(
                 '${graded.score}',
-                style: BrandVividType.row.copyWith(color: SlipInk.text),
+                style: DaylightType.body2.copyWith(color: SlipInk.text),
               ),
             ],
           ),
-          const SizedBox(height: BrandSpace.xs),
+          const SizedBox(height: DaylightSpace.s4),
           Text(
             graded.basis,
-            style: BrandType.body.copyWith(color: SlipInk.text),
+            style: SlipType.body.copyWith(color: SlipInk.text),
           ),
         ],
       ),
