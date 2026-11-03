@@ -171,13 +171,16 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     if (_placing || _tip != null) return;
     _placing = true;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Measure where the target rests, once the tower has arrived (brief 50's transitions).
+      if (!mounted) return;
+      await routeSettled(context);
       final key = switch (tip) {
         Tip.recallDue => _recallTab,
         Tip.yourFile => _skillsTab,
         _ => _nextDoor,
       };
       final target = key.currentContext;
-      if (!mounted || target == null) {
+      if (!mounted || target == null || !target.mounted) {
         _placing = false;
         return;
       }

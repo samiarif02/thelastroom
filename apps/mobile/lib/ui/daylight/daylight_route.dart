@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:brand/brand.dart';
@@ -724,4 +725,29 @@ class _PredictiveBackState extends State<_PredictiveBack>
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+/// Completes once [context]'s route has finished arriving and nothing is moving over it (a
+/// screen opening or closing above it), so whatever measures a target on it (a first-time
+/// tip's spotlight) measures where the target rests, not where it is mid-transition. Already
+/// settled: completes at once.
+Future<void> routeSettled(BuildContext context) {
+  final route = ModalRoute.of(context);
+  final arriving = route?.animation;
+  final covering = route?.secondaryAnimation;
+  bool settled() =>
+      (arriving == null || arriving.isCompleted) &&
+      (covering == null || covering.isDismissed);
+  if (settled()) return Future.value();
+  final done = Completer<void>();
+  void check(AnimationStatus _) {
+    if (!settled() || done.isCompleted) return;
+    arriving?.removeStatusListener(check);
+    covering?.removeStatusListener(check);
+    done.complete();
+  }
+
+  arriving?.addStatusListener(check);
+  covering?.addStatusListener(check);
+  return done.future;
 }

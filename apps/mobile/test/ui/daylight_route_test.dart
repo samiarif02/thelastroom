@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:brand/brand.dart';
 import 'package:flutter/material.dart' show MaterialApp;
 import 'package:flutter/rendering.dart';
@@ -306,6 +308,40 @@ void main() {
       // Taken once.
       expect(DaylightPageRoute.takeDoor(ctx), isNull);
     });
+  });
+
+  testWidgets('a tip measuring its target waits for the route to settle', (
+    tester,
+  ) async {
+    final router = await boot(tester);
+    var below0 = false;
+    unawaited(
+      routeSettled(tester.element(find.byKey(below)))
+          .then((_) => below0 = true),
+    );
+    await tester.pump();
+    expect(below0, isTrue);
+    router.go('/b');
+    await arrive(tester);
+    var arrived = false;
+    var belowSettled = false;
+    unawaited(
+      routeSettled(tester.element(find.byKey(above)))
+          .then((_) => arrived = true),
+    );
+    unawaited(
+      routeSettled(tester.element(find.byKey(below, skipOffstage: false)))
+          .then((_) => belowSettled = true),
+    );
+    await tester.pump(DaylightMotion.page ~/ 2);
+    expect(arrived, isFalse);
+    await tester.pumpAndSettle();
+    expect(arrived, isTrue);
+    // The screen below stays covered: it settles only once the one above has gone.
+    expect(belowSettled, isFalse);
+    router.go('/');
+    await tester.pumpAndSettle();
+    expect(belowSettled, isTrue);
   });
 
   group('back controls', () {
