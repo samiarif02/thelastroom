@@ -2,6 +2,8 @@ import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/profile/profile_repository.dart';
+
 /// Lookups the mission player needs over the content bundle. Content is const data, so these
 /// are plain searches; a miss means a content bug, and `validateContent` already rules those
 /// out for shipped content.
@@ -75,15 +77,12 @@ extension AddressedLine on SceneLine {
   SceneLine addressedTo(String name) => SceneLine(
     speakerId: speakerId,
     // A name typed with a full stop ("Sami.") would end "Why lead with that, Sami.?".
-    text: text.replaceAll(_candidateName, name.replaceAll(_trailing, '')),
+    text: text.replaceAll(_candidateName, PlayerProfile.spokenName(name)),
   );
 }
 
 /// The one chapter with a report: Chapter 1, whose review (Mission 7) is set against Mission 1.
 const int reportedChapter = 1;
-
-/// Punctuation and spaces a player may have typed after their name.
-final RegExp _trailing = RegExp(r'[\s.!?,;:]+$');
 
 /// The practice candidate's first name as the interviewers say it, as a whole word.
 final RegExp _candidateName = RegExp(

@@ -21,6 +21,7 @@ import 'package:the_last_room/features/recall/recall_controller.dart';
 import 'package:the_last_room/features/settings/settings_screen.dart';
 import 'package:the_last_room/features/tips/tip_overlay.dart';
 import 'package:the_last_room/features/tips/tips.dart';
+import 'package:the_last_room/features/tower/tower_extras.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
 import 'package:the_last_room/features/voice/audio/silence_detector.dart';
 import 'package:the_last_room/features/voice/recorder/recorder_panel.dart';
@@ -95,6 +96,18 @@ void main() {
       for (final tip in Tip.values) {
         expect(container.read(tipsProvider.notifier).canShow(tip), isFalse);
       }
+    });
+
+    test("the Recall tip says the Recall card's count and time", () {
+      // QA 51: "Two minutes" beside the card's "About 8 minutes".
+      expect(Tip.recallDueLine(15, recallMinutes(15)), contains('15 notes'));
+      expect(Tip.recallDueLine(15, recallMinutes(15)), contains('8 minutes'));
+      expect(RecallRoomCardView.minutes(15), contains('8 minutes'));
+      expect(Tip.recallDueLine(1, recallMinutes(1)), contains('a note'));
+      expect(
+        Tip.recallDueLine(1, recallMinutes(1)),
+        contains('About a minute'),
+      );
     });
 
     test('the voice tip says the silence window the recorder uses', () {
@@ -242,7 +255,7 @@ void main() {
       await rig.run(const Duration(milliseconds: 600));
       rig.container.read(routerProvider).go(Routes.tower());
       await rig.until(_overlay);
-      expect(find.text(Tip.recallDue.line), findsOneWidget);
+      expect(find.text(Tip.recallDueLine(2, recallMinutes(2))), findsOneWidget);
       final hole = tester.widget<TipOverlay>(_overlay).target;
       expect(
         hole.contains(tester.getCenter(_tab(TowerScreen.recallTab))),
@@ -424,6 +437,26 @@ void main() {
         'tip': 'firstResult',
         'action': 'followed',
       });
+    });
+
+    // QA 51, BUG-3: a clean run draws no red pen, so the tip can't point at one.
+    testWidgets('first_result: a clean run underlines nothing, so the tip '
+        'says nothing of a red line', (tester) async {
+      final rig = await toCards(tester, Tip.firstResult);
+      const m = missionTheOpportunity;
+      for (final beat in m.beats) {
+        await rig.say(beat.options.firstWhere((o) => beat.isStrongest(o.id)));
+      }
+      await rig.until(find.text(rig.state(1).followUpLine!.text));
+      await rig.run(const Duration(milliseconds: 300));
+      if (rig.typing) await rig.tapScene();
+      await rig.say(
+        rig.state(1).followUp!.replies.firstWhere((r) => r.lessonId == null),
+      );
+      await rig.until(find.byType(Dossier));
+      await rig.until(find.byType(TipBubble));
+      expect(find.text(Tip.firstResultUnmarked), findsOneWidget);
+      expect(find.text(Tip.firstResult.line), findsNothing);
     });
   });
 

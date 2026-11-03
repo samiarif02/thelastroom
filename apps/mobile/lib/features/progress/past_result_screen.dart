@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
@@ -33,13 +35,19 @@ class PastResult {
 
   AttemptRecord? get latest => attempts.isEmpty ? null : attempts.last;
 
-  /// Each dimension's best across every attempt (the engine's numbers, like for like).
-  Map<Dimension, int> get best => {
-    for (final d in Dimension.values)
-      d: attempts
-          .map((a) => a.score.dimensions[d] ?? 0)
-          .fold(0, (a, b) => a > b ? a : b),
-  };
+  /// Each dimension's best across every attempt, as each was shown: the latest's [shown]
+  /// numbers (the AI's when it scored it), the game's own for the earlier ones (only the latest
+  /// verdict is kept). So the best is never below what the latest shows (QA 51, BUG-4).
+  Map<Dimension, int> get best {
+    final shown = this.shown;
+    final earlier = attempts.take(math.max(0, attempts.length - 1));
+    return {
+      for (final d in Dimension.values)
+        d: earlier
+            .map((a) => a.score.dimensions[d] ?? 0)
+            .fold(shown[d]!, math.max),
+    };
+  }
 
   /// What the latest attempt shows: the AI's numbers when it scored it, else the engine's.
   Map<Dimension, int> get shown => {
@@ -311,10 +319,7 @@ class _Result extends ConsumerWidget {
                     DimensionRow(
                       name: dimensionLabel(d),
                       score: shown[d]!,
-                      basis: PastResultScreen.latestBest(
-                        latest.score.dimensions[d] ?? 0,
-                        best[d]!,
-                      ),
+                      basis: PastResultScreen.latestBest(shown[d]!, best[d]!),
                       weakest: d == weakest && shown[d]! < best[d]!,
                       delay: DaylightMotion.stagger * n,
                     ),

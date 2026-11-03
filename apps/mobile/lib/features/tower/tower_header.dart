@@ -4,6 +4,7 @@ import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
 import '../progression/progression.dart';
 
@@ -30,7 +31,7 @@ class TowerHeader extends ConsumerWidget {
 
   /// "Morning, Sami." by the player's clock. A name typed with a full stop doesn't get two.
   static String greeting(String name, int hour) {
-    final who = name.replaceAll(RegExp(r'[\s.!?]+$'), '');
+    final who = PlayerProfile.spokenName(name);
     final part = hour < _noon
         ? 'Morning'
         : hour < _evening

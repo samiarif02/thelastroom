@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
@@ -653,12 +655,11 @@ class _PlayedRoom extends StatelessWidget {
   Widget build(BuildContext context) {
     final f = ChapterTint.floorOf(context);
     final m = line.mission;
-    final latest = ai?.score.overall.score ?? line.latest!.total;
+    final (:latest, :best) = shownTotals(line, ai);
     final source = ai == null
         ? ProgressScreen.offline
         : ProgressScreen.aiScored;
-    final meta =
-        'Best ${line.best} · ${ProgressScreen.tries(line.attemptCount)}';
+    final meta = 'Best $best · ${ProgressScreen.tries(line.attemptCount)}';
     return Tactile(
       label:
           'Room ${m.number}, ${m.title}. Latest $latest, $meta, $source. '
@@ -959,6 +960,15 @@ class _Skeleton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// [line]'s latest and best totals as each attempt was shown: the AI's for the latest when [ai]
+/// scored it, the game's own for the rest (only the latest verdict is kept). Both read the same
+/// scores, so the best is never below the latest (QA 51, BUG-4: "Best 85 · 1 try" beside 90).
+({int latest, int best}) shownTotals(MissionProgress line, SavedAiScore? ai) {
+  final shown = [for (final a in line.attempts) a.score.total];
+  if (ai != null) shown.last = ai.score.overall.score;
+  return (latest: shown.last, best: shown.reduce(math.max));
 }
 
 /// The AI verdict for [line]'s latest attempt, if one was given after that attempt was played.

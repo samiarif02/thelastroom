@@ -508,11 +508,16 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
               TipOverlay(
                 key: ValueKey(tip),
                 voice: TipVoice.priya,
-                line:
-                    tip == Tip.towerDoor &&
-                        rooms!.any((r) => r.state == RoomState.done)
-                    ? Tip.nextDoorLine
-                    : tip.line,
+                line: switch (tip) {
+                  Tip.towerDoor
+                      when rooms!.any((r) => r.state == RoomState.done) =>
+                    Tip.nextDoorLine,
+                  Tip.recallDue => Tip.recallDueLine(
+                    recallDue,
+                    recallMinutes(recallDue),
+                  ),
+                  _ => tip.line,
+                },
                 target: at,
                 shape: tip == Tip.towerDoor ? TipShape.arch : TipShape.card,
                 onTarget: () => _endTip(TipAction.followed),

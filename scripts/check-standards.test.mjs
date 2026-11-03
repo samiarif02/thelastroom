@@ -4,7 +4,17 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ciJob, CHECKS, fencedBlocks, npmRuns, runChecks } from './check-standards.mjs'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { dirname } from 'node:path'
+import {
+	ANDROID_MAIN_MANIFEST,
+	ciJob,
+	CHECKS,
+	fencedBlocks,
+	manifestPermissions,
+	npmRuns,
+	runChecks
+} from './check-standards.mjs'
 
 const REPO = fileURLToPath(new URL('..', import.meta.url))
 
@@ -48,4 +58,35 @@ test("this repo's file-level standards are met (git-index checks are CI's job)",
 	])
 	const failing = runChecks(REPO).filter((r) => !r.ok && !gitOnly.has(r.id))
 	assert.deepEqual(failing, [])
+})
+
+test('manifestPermissions ignores a permission that is commented out', () => {
+	const xml = [
+		'<manifest>',
+		'  <uses-permission android:name="android.permission.RECORD_AUDIO"/>',
+		'  <!-- <uses-permission android:name="android.permission.INTERNET"/> -->',
+		'</manifest>'
+	].join('\n')
+	assert.deepEqual(manifestPermissions(xml), ['android.permission.RECORD_AUDIO'])
+})
+
+// QA 51 BUG-1: release APKs had no INTERNET, so AI scoring, voice scoring, sync and sign-in
+// silently fell back to offline in every installed build.
+test('a main manifest without INTERNET fails android-release-permissions', () => {
+	const dir = mkdtempSync(join(tmpdir(), 'standards-manifest-'))
+	const check = CHECKS.find((c) => c.id === 'android-release-permissions')
+	const write = (xml) => {
+		mkdirSync(join(dir, dirname(ANDROID_MAIN_MANIFEST)), { recursive: true })
+		writeFileSync(join(dir, ANDROID_MAIN_MANIFEST), xml)
+	}
+	try {
+		write('<manifest>\n  <uses-permission android:name="android.permission.RECORD_AUDIO"/>\n</manifest>\n')
+		const failing = runChecks(dir).find((r) => r.id === check.id)
+		assert.equal(failing.ok, false)
+		assert.match(failing.failures[0], /android\.permission\.INTERNET/)
+		write('<manifest>\n  <uses-permission android:name="android.permission.INTERNET"/>\n</manifest>\n')
+		assert.equal(runChecks(dir).find((r) => r.id === check.id).ok, true)
+	} finally {
+		rmSync(dir, { recursive: true, force: true })
+	}
 })

@@ -49,7 +49,7 @@ void main() {
       at: DateTime(2026, 11, 3, 18, 5),
       kind: ReminderKind.recallDue,
       title: 'Recall Room',
-      body: '2 traps are waiting in the Recall Room.',
+      body: '2 notes are waiting in the Recall Room.',
       variant: 0,
     );
     expect(line(recall), 'Next: tomorrow at 18:05, from the Recall Room');
