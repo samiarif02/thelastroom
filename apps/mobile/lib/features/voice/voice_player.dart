@@ -16,6 +16,8 @@ import '../mission/scene/epilogue_scene.dart';
 import '../mission/scene/mission_card.dart';
 import '../mission/scene/room_layout.dart';
 import '../mission/widgets/leave_control.dart';
+import '../tips/tip_overlay.dart';
+import '../tips/tips.dart';
 import 'recorder/recorder_panel.dart';
 import 'recorder/take_recorder.dart';
 import 'speech/interviewer_voice.dart';
@@ -112,6 +114,14 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
   int _lineToken = 0;
   TakeRecorder? _recorder;
 
+  /// Kept from the start: `dispose` hands back a tip still up, when `ref` can't be read.
+  late final TipsController _tips = ref.read(tipsProvider.notifier);
+
+  /// The first voice room's tip over the record tile, and where the tile is.
+  Rect? _micAt;
+  final GlobalKey _scene = GlobalKey();
+  final GlobalKey _mic = GlobalKey();
+
   VoiceController get _controller =>
       ref.read(voiceControllerProvider(widget.number).notifier);
   VoiceState get _game =>
@@ -130,12 +140,14 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
     // mission left before a line was spoken used to throw on the way out.
     _voice;
     _sounds;
+    _tips;
     final mission = _game.mission;
     if (mission.opensChapter) _sounds.chapterCard(mission.chapter);
   }
 
   @override
   void dispose() {
+    if (_micAt != null) _tips.release(Tip.voiceMic);
     _recorder?.dispose();
     unawaited(_voice.stop());
     _typer.dispose();
@@ -265,8 +277,42 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
       log: ref.read(logProvider),
     );
     _recorder = recorder;
+    recorder.addListener(_recorderMoved);
     unawaited(_voice.stop());
     unawaited(recorder.start());
+  }
+
+  /// The recorder is ready to record: the first time, a tip on the record tile. Anything else
+  /// it does (recording, a sheet, the explainer) takes the tip away unseen, or never shows it.
+  void _recorderMoved() {
+    final ready = _recorder?.phase == RecorderPhase.empty;
+    if (!ready) {
+      if (_micAt != null) {
+        _tips.release(Tip.voiceMic);
+        setState(() => _micAt = null);
+      }
+      return;
+    }
+    if (_micAt != null || !_tips.canShow(Tip.voiceMic)) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final scene = _scene.currentContext;
+      if (!mounted ||
+          scene == null ||
+          _micAt != null ||
+          _leaving ||
+          _recorder?.phase != RecorderPhase.empty) {
+        return;
+      }
+      final at = tipTarget(_mic, scene);
+      if (at == null || !_tips.shown(Tip.voiceMic)) return;
+      setState(() => _micAt = at);
+    });
+  }
+
+  void _endMicTip(TipAction action) {
+    if (_micAt == null) return;
+    setState(() => _micAt = null);
+    unawaited(_tips.done(Tip.voiceMic, action));
   }
 
   void _answered(Take? take) {
@@ -392,6 +438,7 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
                   grade: grade,
                   onDone: _stage == VoiceStage.answer ? _answered : _replied,
                   onWithoutMicrophone: _withoutMicrophone,
+                  recordKey: _mic,
                 )
               : SpokenAloudPanel(
                   grade: grade,
@@ -409,6 +456,7 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
         color: f.tint,
         floor: f,
         child: Stack(
+          key: _scene,
           fit: StackFit.expand,
           children: [
             Positioned.fill(
@@ -478,6 +526,14 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
                   onTap: _cardDone,
                   child: MissionCard(mission: mission, onFinished: _cardDone),
                 ),
+              ),
+            if (_micAt case final at? when !_leaving && recorder != null)
+              TipOverlay(
+                voice: TipVoice.inRoom(CastPeople.byId(_speaker(game).id), f),
+                line: Tip.voiceMic.line,
+                target: at,
+                onTarget: () => _endMicTip(TipAction.followed),
+                onDismiss: () => _endMicTip(TipAction.dismissed),
               ),
             if (recorder != null)
               ListenableBuilder(
