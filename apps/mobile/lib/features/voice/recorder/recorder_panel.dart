@@ -19,9 +19,13 @@ class RecorderPanel extends StatelessWidget {
     required this.onDone,
     required this.onWithoutMicrophone,
     this.grade = ChapterGrade.lobby,
+    this.recordKey,
   });
 
   final TakeRecorder recorder;
+
+  /// On the record tile, so the first voice room's tip can find it.
+  final Key? recordKey;
 
   /// "Done": the take is submitted.
   final ValueChanged<Take> onDone;
@@ -89,7 +93,12 @@ class RecorderPanel extends StatelessWidget {
       primary: deniedAction,
       onPrimary: onWithoutMicrophone,
     ),
-    _ => _Recording(recorder: recorder, grade: grade, onDone: onDone),
+    _ => _Recording(
+      recorder: recorder,
+      grade: grade,
+      onDone: onDone,
+      recordKey: recordKey,
+    ),
   };
 }
 
@@ -194,11 +203,13 @@ class _Recording extends StatelessWidget {
     required this.recorder,
     required this.grade,
     required this.onDone,
+    this.recordKey,
   });
 
   final TakeRecorder recorder;
   final ChapterGrade grade;
   final ValueChanged<Take> onDone;
+  final Key? recordKey;
 
   Future<void> _submit() async {
     final take = await recorder.submit();
@@ -311,6 +322,7 @@ class _Recording extends StatelessWidget {
                 if (!full) ...[
                   const SizedBox(width: DaylightSpace.s16),
                   RecordButton(
+                    key: recordKey,
                     phase: phase,
                     onPressed: () => unawaited(recorder.toggle()),
                   ),

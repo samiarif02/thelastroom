@@ -16,6 +16,8 @@ import '../../ui/daylight/daylight_kit.dart'
 import '../../ui/film_kit.dart';
 import '../mission/mission_lookup.dart';
 import '../progression/debrief_rewards.dart';
+import '../tips/tip_overlay.dart';
+import '../tips/tips.dart';
 import 'ai_score.dart';
 import 'ai_score_store.dart';
 import 'ai_verdict_cards.dart';
@@ -95,9 +97,20 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
   GameSounds get _sounds => ref.read(gameSoundsProvider);
   Analytics get _analytics => ref.read(analyticsProvider);
 
+  /// Kept from the start: `dispose` hands back a tip still up, when `ref` can't be read.
+  late final TipsController _tips = ref.read(tipsProvider.notifier);
+
+  /// The first result's tip is up, in its bubble under the sheet (never on it).
+  bool _tipUp = false;
+  Timer? _tipTimer;
+  final GlobalKey _tipKey = GlobalKey();
+  final GlobalKey _basisKey = GlobalKey();
+  Offset? _down;
+
   @override
   void initState() {
     super.initState();
+    _tips;
     final request = widget.scoreRequest;
     final scorer = ref.read(aiScorerProvider);
     final unavailable = request == null
@@ -118,6 +131,8 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
 
   @override
   void dispose() {
+    _tipTimer?.cancel();
+    if (_tipUp) _tips.release(Tip.firstResult);
     unawaited(_verdicts?.cancel());
     super.dispose();
   }
@@ -166,6 +181,62 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
     _sounds.result(strong: _shownTotal >= DebriefFacts.strongFrom);
   }
 
+  /// The sheet's whole timeline (slide, stamps, seal, pen) has played: the first time, once the
+  /// cards under it have faded up, a tip under the sheet says how to read it.
+  void _offerTip() {
+    if (_tipTimer != null || !_tips.canShow(Tip.firstResult)) return;
+    _tipTimer = Timer(
+      MediaQuery.disableAnimationsOf(context) ? Duration.zero : _tipAfter,
+      () {
+        if (!mounted || !_tips.shown(Tip.firstResult)) return;
+        setState(() => _tipUp = true);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final bubble = _tipKey.currentContext;
+          if (!mounted || bubble == null) return;
+          unawaited(
+            Scrollable.ensureVisible(
+              bubble,
+              alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : DaylightMotion.move,
+              curve: DaylightMotion.ease,
+            ),
+          );
+        });
+      },
+    );
+  }
+
+  /// After the cards fade up under the sheet.
+  static const Duration _tipAfter = Duration(milliseconds: 600);
+
+  void _endTip(TipAction action) {
+    if (!_tipUp) return;
+    setState(() => _tipUp = false);
+    unawaited(_tips.done(Tip.firstResult, action));
+  }
+
+  bool _within(GlobalKey key, Offset global) {
+    final box = key.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return false;
+    return (box.localToGlobal(Offset.zero) & box.size).contains(global);
+  }
+
+  /// A tap anywhere but the bubble and "How we scored this" puts the tip away (a drag scrolls).
+  void _tapped(PointerUpEvent up) {
+    final down = _down;
+    _down = null;
+    if (!_tipUp || down == null) return;
+    if ((up.position - down).distance > _slop) return;
+    if (_within(_tipKey, up.position) || _within(_basisKey, up.position)) {
+      return;
+    }
+    _endTip(TipAction.dismissed);
+  }
+
+  static const double _slop = 18;
+
   @override
   Widget build(BuildContext context) {
     final grade = widget.mission.grade;
@@ -190,147 +261,206 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
     // was, then the cards under it.
     return DaylightGround(
       floor: grade.floor,
-      child: SafeArea(
-        child: AnchoredScroll(
-          alignment: MainAxisAlignment.center,
-          padding: const EdgeInsets.all(DaylightSpace.s16),
-          children: [
-            Text(
-              DebriefView.kicker(widget.mission),
-              style: DaylightType.caption4.copyWith(color: DaylightColors.ink2),
-            ),
-            Semantics(
-              header: true,
-              child: Text(widget.mission.title, style: DaylightType.heading5),
-            ),
-            const SizedBox(height: DaylightSpace.s12),
-            Wrap(
-              spacing: DaylightSpace.s8,
-              runSpacing: DaylightSpace.s8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                ScoreSourceLabel(ai: ai != null, grade: grade),
-                // Brief 36: on what basis, and how we know it's sound (the reviewer's questions).
-                TactileButton(
-                  label: ScoringBasisSheet.open,
-                  icon: PhosphorBold.bookOpen,
-                  tone: TactileTone.quiet,
-                  compact: true,
-                  expand: false,
-                  onPressed: () {
-                    _analytics.track(AnalyticsEvent.scoreBasisViewed, {
-                      'mission_id': EventValue.id(widget.mission),
-                      'source': EventValue.name(
-                        ai == null ? ScoreSource.offline : ScoreSource.ai,
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (e) => _down = e.position,
+        onPointerUp: _tapped,
+        child: SafeArea(
+          child: AnchoredScroll(
+            alignment: MainAxisAlignment.center,
+            padding: const EdgeInsets.all(DaylightSpace.s16),
+            children: [
+              Text(
+                DebriefView.kicker(widget.mission),
+                style: DaylightType.caption4.copyWith(
+                  color: DaylightColors.ink2,
+                ),
+              ),
+              Semantics(
+                header: true,
+                child: Text(widget.mission.title, style: DaylightType.heading5),
+              ),
+              const SizedBox(height: DaylightSpace.s12),
+              Wrap(
+                spacing: DaylightSpace.s8,
+                runSpacing: DaylightSpace.s8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  ScoreSourceLabel(ai: ai != null, grade: grade),
+                  // Brief 36: on what basis, and how we know it's sound (the reviewer's questions).
+                  _TipRing(
+                    key: _basisKey,
+                    on: _tipUp,
+                    child: TactileButton(
+                      label: ScoringBasisSheet.open,
+                      icon: PhosphorBold.bookOpen,
+                      tone: TactileTone.quiet,
+                      compact: true,
+                      expand: false,
+                      onPressed: () {
+                        _endTip(TipAction.followed);
+                        _analytics.track(AnalyticsEvent.scoreBasisViewed, {
+                          'mission_id': EventValue.id(widget.mission),
+                          'source': EventValue.name(
+                            ai == null ? ScoreSource.offline : ScoreSource.ai,
+                          ),
+                        });
+                        unawaited(
+                          ScoringBasisSheet.show(
+                            context,
+                            mission: widget.mission,
+                            engine: widget.score,
+                            ai: ai,
+                            grade: grade,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: DaylightSpace.s16),
+              // The kit's ledger row has no room for a three-digit stamp at 2x text (its score
+              // doesn't shrink), so the sheet clamps its own text, as the title card does.
+              // Asked of 06b in docs/status/10.md.
+              MediaQuery.withClampedTextScaling(
+                maxScaleFactor: DebriefView.maxSheetTextScale,
+                child: Dossier(
+                  title: DebriefView.title,
+                  subtitle:
+                      '${widget.mission.title} · with ${widget.mission.lead.name}',
+                  scores: [
+                    for (final d in _facts.dimensions)
+                      DossierScore(
+                        label: dimensionLabel(d.dimension),
+                        value: ai?.dimensions[d.dimension]!.score ?? d.value,
                       ),
-                    });
-                    unawaited(
-                      ScoringBasisSheet.show(
-                        context,
-                        mission: widget.mission,
-                        engine: widget.score,
-                        ai: ai,
-                        grade: grade,
-                      ),
-                    );
+                  ],
+                  total: _shownTotal,
+                  note: lesson?.title,
+                  markedIndex: _facts.markedDimensionIndex,
+                  onStamp: (_) => _sounds.scoreStamped(),
+                  onSeal: _result,
+                  onFinished: () {
+                    _result();
+                    if (!mounted) return;
+                    setState(() => _settled = true);
+                    _offerTip();
                   },
                 ),
+              ),
+              // The first result's tip: under the sheet, never on it, once its timeline is done.
+              if (_tipUp) ...[
+                const SizedBox(height: DaylightSpace.s16),
+                KeyedSubtree(
+                  key: _tipKey,
+                  child: TipBubble(
+                    voice: TipVoice.inRoom(
+                      CastPeople.byId(widget.mission.lead.id),
+                      grade.floor,
+                    ),
+                    line: Tip.firstResult.line,
+                    onGotIt: () => _endTip(TipAction.dismissed),
+                  ),
+                ),
               ],
-            ),
-            const SizedBox(height: DaylightSpace.s16),
-            // The kit's ledger row has no room for a three-digit stamp at 2x text (its score
-            // doesn't shrink), so the sheet clamps its own text, as the title card does.
-            // Asked of 06b in docs/status/10.md.
-            MediaQuery.withClampedTextScaling(
-              maxScaleFactor: DebriefView.maxSheetTextScale,
-              child: Dossier(
-                title: DebriefView.title,
-                subtitle:
-                    '${widget.mission.title} · with ${widget.mission.lead.name}',
-                scores: [
-                  for (final d in _facts.dimensions)
-                    DossierScore(
-                      label: dimensionLabel(d.dimension),
-                      value: ai?.dimensions[d.dimension]!.score ?? d.value,
+              const SizedBox(height: DaylightSpace.s24),
+              _Arrive(
+                shown: _settled,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _TrustLine(trust: widget.trust),
+                    const SizedBox(height: DaylightSpace.s16),
+                    DebriefRewards(
+                      mission: widget.mission,
+                      grade: grade,
+                      ready: _settled,
                     ),
-                ],
-                total: _shownTotal,
-                note: lesson?.title,
-                markedIndex: _facts.markedDimensionIndex,
-                onStamp: (_) => _sounds.scoreStamped(),
-                onSeal: _result,
-                onFinished: () {
-                  _result();
-                  if (mounted) setState(() => _settled = true);
-                },
+                    const SizedBox(height: DaylightSpace.s16),
+                    if (ai != null) ...[
+                      AiBasisSlip(score: ai, grade: grade),
+                      const SizedBox(height: DaylightSpace.s16),
+                    ],
+                    if (_facts.markedLine case final line?)
+                      RedPenSlip(
+                        line: line.text,
+                        lesson: lesson!,
+                        play: _settled,
+                      )
+                    else if (widget.score.guessed)
+                      GuessedSlip(beats: widget.score.guessedBeats)
+                    else if (CostSlip.applies(widget.reasoning))
+                      CostSlip(beats: widget.reasoning)
+                    else
+                      const CleanRunSlip(),
+                    if (widget.reasoning.any(
+                      (b) => b.guessed || b.given != null,
+                    )) ...[
+                      const SizedBox(height: DaylightSpace.s16),
+                      ReasoningSlip(beats: widget.reasoning),
+                    ],
+                    if (widget.firstTry case final words?) ...[
+                      const SizedBox(height: DaylightSpace.s16),
+                      FirstTrySlip(
+                        firstTry: words,
+                        stronger: strongestOpening(widget.mission).text,
+                      ),
+                    ],
+                    if (widget.baselineDraft case final then?) ...[
+                      const SizedBox(height: DaylightSpace.s16),
+                      ThenNowSlip(
+                        then: then,
+                        now: [for (final b in widget.reasoning) b.line.text]
+                            .join(' '),
+                        nowMission: widget.mission.number,
+                      ),
+                    ],
+                    const SizedBox(height: DaylightSpace.s24),
+                    TactileButton(
+                      label: widget.mission.leadsToReport
+                          ? DebriefView.reportLabel
+                          : DebriefView.continueLabel,
+                      icon: widget.mission.leadsToReport
+                          ? PhosphorBold.bookOpen
+                          : PhosphorBold.buildings,
+                      onPressed: _settled ? widget.onContinue : null,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: DaylightSpace.s24),
-            _Arrive(
-              shown: _settled,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _TrustLine(trust: widget.trust),
-                  const SizedBox(height: DaylightSpace.s16),
-                  DebriefRewards(
-                    mission: widget.mission,
-                    grade: grade,
-                    ready: _settled,
-                  ),
-                  const SizedBox(height: DaylightSpace.s16),
-                  if (ai != null) ...[
-                    AiBasisSlip(score: ai, grade: grade),
-                    const SizedBox(height: DaylightSpace.s16),
-                  ],
-                  if (_facts.markedLine case final line?)
-                    RedPenSlip(line: line.text, lesson: lesson!, play: _settled)
-                  else if (widget.score.guessed)
-                    GuessedSlip(beats: widget.score.guessedBeats)
-                  else if (CostSlip.applies(widget.reasoning))
-                    CostSlip(beats: widget.reasoning)
-                  else
-                    const CleanRunSlip(),
-                  if (widget.reasoning.any(
-                    (b) => b.guessed || b.given != null,
-                  )) ...[
-                    const SizedBox(height: DaylightSpace.s16),
-                    ReasoningSlip(beats: widget.reasoning),
-                  ],
-                  if (widget.firstTry case final words?) ...[
-                    const SizedBox(height: DaylightSpace.s16),
-                    FirstTrySlip(
-                      firstTry: words,
-                      stronger: strongestOpening(widget.mission).text,
-                    ),
-                  ],
-                  if (widget.baselineDraft case final then?) ...[
-                    const SizedBox(height: DaylightSpace.s16),
-                    ThenNowSlip(
-                      then: then,
-                      now: [for (final b in widget.reasoning) b.line.text]
-                          .join(' '),
-                      nowMission: widget.mission.number,
-                    ),
-                  ],
-                  const SizedBox(height: DaylightSpace.s24),
-                  TactileButton(
-                    label: widget.mission.leadsToReport
-                        ? DebriefView.reportLabel
-                        : DebriefView.continueLabel,
-                    icon: widget.mission.leadsToReport
-                        ? PhosphorBold.bookOpen
-                        : PhosphorBold.buildings,
-                    onPressed: _settled ? widget.onContinue : null,
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+/// A honey ring round "How we scored this" while the first result's tip points at it, drawn
+/// over the button's edge so nothing moves.
+class _TipRing extends StatelessWidget {
+  const _TipRing({super.key, required this.on, required this.child});
+
+  final bool on;
+  final Widget child;
+
+  static const double _ring = 2;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    position: DecorationPosition.foreground,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(DaylightRadius.inner),
+      border: Border.all(
+        color: on
+            ? DaylightColors.honey
+            : DaylightColors.honey.withValues(alpha: 0),
+        width: _ring,
+      ),
+    ),
+    child: child,
+  );
 }
 
 /// Fades its child up once [shown]; until then it holds its space, so the dossier doesn't jump.
