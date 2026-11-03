@@ -257,7 +257,8 @@ waitlist measures the same thing: demand for what comes next.
 - More reminder types from FR-50 (the cliffhanger, the weekly win), and reminders tested on iOS.
 - A hosted backend, so AI scoring works away from the laptop.
 - Validating the scoring weights against human-rated answers.
-- A recorded frame-timing pass on a real phone (NFR-3): the harness is built ([#63](https://github.com/samiarif02/thelastroom/pull/63)) and installs as its own app; only the device run is left.
+- Smoothing the door → room transition, the one path that drops frames on the realme (15 of 245;
+  every path's p90 is under 16.6 ms, [status 56](status/56.md)).
 - A store build: a release signing key, then Play Store and TestFlight.
 - Metrics: a PostHog sink for the events (cut for v1 by the owner, 1 Nov; every event is already
   defined, registered and logged on the device).

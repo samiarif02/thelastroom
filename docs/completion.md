@@ -44,8 +44,8 @@ missing**.
     superseded by ADR 0006's AI scoring.
   - FR-50's extra reminder types: brief 26. iOS reminders: cut line #5.
 - **Still missing:**
-  - a recorded frame-timing pass on a device (NFR-3). #63 built the harness (8 paths, its own app
-    id) and cut idle repaints (the tower at rest 394 → 11 objects a frame); the realme run is left.
+  - NFR-3's one soft spot: the door → room transition drops 15 of 245 frames on the realme
+    (every other path ≤ 8 over budget; [status 56](status/56.md)).
 
 ## Closing the gaps (the lead's plan, 2026-11-01; briefs 30–32 landed as #37, #38, #39)
 
@@ -104,7 +104,7 @@ missing**.
 | --- | --- | --- | --- | --- |
 | NFR-1 | Cinematic design, no stock Material, tokens only | Built | #6, #10, #11, #16, #20, #21, #32, #35 | |
 | NFR-2 | Accessibility: AA, 44 pt, 2x text, reduced motion, labels | Built | #11 (contrast tests), widget tests at 2x text and reduced motion across features | |
-| NFR-3 | 60 fps mid-range Android; web first frame < 3 s | Partly | Branded web loader (#11, #24); #37 (a profile web bundle measured in Chrome, idle faces stilled); #63 (the device harness, idle repaint cuts, every p90 build time under 16.6 ms on the test runner) | **Still missing:** the run on a device |
+| NFR-3 | 60 fps mid-range Android; web first frame < 3 s | Partly | Branded web loader (#11, #24); #37 (a profile web bundle measured in Chrome, idle faces stilled); #63 (the device harness, idle repaint cuts); the realme run, 3 Nov ([status 56](status/56.md)): every path's p90 under 16.6 ms on build and raster, 38 of 3,108 frames over budget (1.2%) | The door → room transition drops 15 of 245 frames (raster p99 33 ms); web first frame not re-measured since #37 |
 | NFR-4 | Chapter 1 offline; designed offline states | Built | #12, #17, #30 (every store failure has a designed card) | |
 | NFR-5 | No secret in the app | Built | #1, #17, #25; `check:secrets` in CI | |
 | NFR-6 | Honesty | Built | #29 (README "Honest limits") | |
@@ -128,5 +128,5 @@ missing**.
 | 11 | Notifications | Partly | #33 | iOS untested, extra types (FR-50): deliberate cuts |
 | 12 | AI coach | Not built | (#25 instead) | Deliberate cut, cut line #1; replaced by AI scoring (ADR 0006) |
 | 13 | Tower, elevator, Recall Room, report | Built | #15, #20, #23, #30, #38, #39, then the Daylight tower #56, #57 | |
-| 14 | Dogfood, APK, release | Partly | #29 (release workflow, draft `v0.1.0`), #39 (Chapter 1 playthrough), status 51 + #59 (Chapter 1 to the end on the realme, release build) | No device frame-timing pass (NFR-3); the APK release waits for the owner; metrics (FR-71) cut for v1 |
+| 14 | Dogfood, APK, release | Partly | #29 (release workflow, draft `v0.1.0`), #39 (Chapter 1 playthrough), status 51 + #59 (Chapter 1 to the end on the realme, release build) | The NFR-3 run done on the realme (status 56); the APK release waits for the owner; metrics (FR-71) cut for v1 |
 | 15 | Submission | Built | #29, #36, #49, the wave-6 docs PR; the demo video submitted by the owner | |
