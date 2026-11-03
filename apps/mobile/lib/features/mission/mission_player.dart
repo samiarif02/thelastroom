@@ -968,6 +968,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                 text: before.option.text,
                 grade: mission.grade,
               );
+        final whyAsked = _phase != BeatPhase.reaction || !game.awaitingWhy;
         if (_phase == BeatPhase.cards) {
           return [
             asked(question),
@@ -1006,7 +1007,10 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
           ];
         }
         // "Why that line?": the interviewer beside the question, the line said, the reasons.
-        final why = beat.why;
+        // A guess is called out *before* she asks why (the feedback sheet over the room): her
+        // why line must not start typing under that sheet, or it finishes while nobody is
+        // listening for it and the reasons never come (the owner's stuck "Why that example?").
+        final why = whyAsked ? beat.why : null;
         final said = game.plays.length > _beatShown
             ? game.plays[_beatShown].option.text
             : _locked?.text;
