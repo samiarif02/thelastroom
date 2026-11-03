@@ -46,15 +46,14 @@ This worker: `docs/53-wave-6-final` in `../thelastroom-w18`, from `origin/main` 
    transcript and committed (the #45 method), one PR, green CI.
 3. **The APK release only when the owner asks:** run the Release APK workflow (or tag `v*`),
    which makes a draft release; the owner publishes it.
-4. Owner: add the demo video link to `docs/SUBMISSION.md` and the README.
-5. Known small leftovers (not blocking): XP per sound reason and the shareable floor card are
+4. Known small leftovers (not blocking): XP per sound reason and the shareable floor card are
    designed, not built; no device frame-timing pass (NFR-3); BUG-2 from status 51 (a resumed
    room once skipped a why step) was hardened but never reproduced.
 
 ## Open decisions
 
-- None blocking. The owner chooses when to publish the APK release and adds the demo video
-  link.
+- None blocking. The owner chooses when to publish the APK release. The demo video was
+  submitted by the owner directly (3 Nov), so the docs carry no link.
 
 ## Owner decisions that still hold
 

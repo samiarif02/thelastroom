@@ -3,8 +3,8 @@
 An interview-practice game that plays like a film, built in Flutter for an 8x product
 assessment. Repo: https://github.com/samiarif02/thelastroom
 
-**Demo video:** _the owner's recording, link to be added here_ (TODO: owner). The shot list
-is [`demo-script.md`](demo-script.md).
+**Demo video:** submitted by the owner with the assessment. Its shot list is
+[`demo-script.md`](demo-script.md).
 
 **What's built and what isn't:** every requirement and plan phase, checked, in
 [`completion.md`](completion.md).

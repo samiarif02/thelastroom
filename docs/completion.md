@@ -128,4 +128,4 @@ missing**.
 | 12 | AI coach | Not built | (#25 instead) | Deliberate cut, cut line #1; replaced by AI scoring (ADR 0006) |
 | 13 | Tower, elevator, Recall Room, report | Built | #15, #20, #23, #30, #38, #39, then the Daylight tower #56, #57 | |
 | 14 | Dogfood, APK, release | Partly | #29 (release workflow, draft `v0.1.0`), #39 (Chapter 1 playthrough), status 51 + #59 (Chapter 1 to the end on the realme, release build) | No device frame-timing pass (NFR-3); the APK release waits for the owner; metrics (FR-71) cut for v1 |
-| 15 | Submission | Partly | #29, #36, #49, the wave-6 docs PR | The demo video link (owner) |
+| 15 | Submission | Built | #29, #36, #49, the wave-6 docs PR; the demo video submitted by the owner | |
