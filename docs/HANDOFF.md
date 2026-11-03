@@ -46,9 +46,10 @@ This worker: `docs/53-wave-6-final` in `../thelastroom-w18`, from `origin/main` 
    transcript and committed (the #45 method), one PR, green CI.
 3. **The APK release only when the owner asks:** run the Release APK workflow (or tag `v*`),
    which makes a draft release; the owner publishes it.
-4. Known small leftovers (not blocking): XP per sound reason and the shareable floor card are
-   designed, not built; no device frame-timing pass (NFR-3); BUG-2 from status 51 (a resumed
-   room once skipped a why step) was hardened but never reproduced.
+4. Known small leftovers (not blocking): the NFR-3 device run (harness built in #63, separate
+   app id `com.thelastroom.app.perf`; command in `docs/status/56.md`), run when the owner's phone is
+   free. XP per reason (#61), the floor card (#62) and BUG-2's cause (#63: a tip's tap picked a
+   card) are done.
 
 ## Open decisions
 

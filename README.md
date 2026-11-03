@@ -187,8 +187,9 @@ standards to Flutter (the divergences are listed there).
   realme 8) and in Chrome; iOS hasn't been tested.
 - **Predictive back** (the page scrubbing with the back gesture) only exists on Android 14 and
   later; older phones get the same reverse transition on a normal back.
-- **Not built:** XP per sound reason on the feedback sheet (XP comes from rooms and Recall
-  rounds), the shareable floor card, typed free-text answers.
+- **Not built:** typed free-text answers. (XP for each explained reason and the shareable
+  floor card landed in [#61](https://github.com/samiarif02/thelastroom/pull/61) and
+  [#62](https://github.com/samiarif02/thelastroom/pull/62).)
 - **Reminders are Android-first.** The local "notes waiting" and in-character nudges are built
   and tested; on iOS they're wired but untested, and the web has none (FR-50–53). They come the
   day after you play, then on days 3 and 5, then day 8, never after 21:00 and at most one a
