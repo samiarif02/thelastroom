@@ -26,6 +26,7 @@ import 'package:the_last_room/features/voice/voice_player.dart';
 import 'package:the_last_room/features/voice/voice_providers.dart';
 import 'package:the_last_room/features/voice/voice_scoring.dart';
 import 'package:the_last_room/features/voice/widgets/self_check_panel.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart' show TactileButton;
 import 'package:the_last_room/ui/film_kit.dart';
 
 import '../../core/backend/fakes.dart' show FakeBackend, keyedEnv;
@@ -352,7 +353,7 @@ Future<void> _afterDebrief(
     await _playEpilogue(rig, m);
     final done = find.descendant(
       of: find.byType(EpilogueScene),
-      matching: find.byType(VividButton),
+      matching: find.byType(TactileButton),
     );
     await rig.until(done);
     await rig.tester.tap(done);
@@ -409,8 +410,15 @@ Future<void> _playEpilogue(MissionRig rig, Mission m) async {
   }
 }
 
-Future<void> _tapButton(MissionRig rig, String label) =>
-    _tap(rig, find.widgetWithText(VividButton, label));
+/// A labelled button: the debrief's (vivid) or a Daylight one (the epilogue, the report).
+Future<void> _tapButton(MissionRig rig, String label) => _tap(
+  rig,
+  find.byWidgetPredicate(
+    (w) =>
+        (w is VividButton && w.label == label) ||
+        (w is TactileButton && w.label == label),
+  ),
+);
 
 Future<void> _tap(MissionRig rig, Finder finder) async {
   await rig.until(finder);

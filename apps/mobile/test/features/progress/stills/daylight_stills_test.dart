@@ -1,15 +1,19 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
+import 'package:the_last_room/core/audio/game_sounds.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/features/debrief/ai_score.dart';
 import 'package:the_last_room/features/debrief/ai_score_store.dart';
 import 'package:the_last_room/features/intro/character_screen.dart';
+import 'package:the_last_room/features/mission/mission_lookup.dart';
+import 'package:the_last_room/features/mission/scene/epilogue_scene.dart';
 import 'package:the_last_room/features/onboarding/onboarding_copy.dart';
 import 'package:the_last_room/features/onboarding/onboarding_screen.dart';
 import 'package:the_last_room/features/progress/chapter_report_screen.dart';
@@ -17,7 +21,6 @@ import 'package:the_last_room/features/progress/past_result_screen.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
 import 'package:the_last_room/features/progression/interview_date_choices.dart';
 import 'package:the_last_room/features/progression/progression_store.dart';
-import 'package:the_last_room/features/title/title_screen.dart';
 import 'package:the_last_room/ui/paper/dossier.dart';
 
 import '../../mission/mission_harness.dart';
@@ -233,11 +236,31 @@ void main() {
     await _done(tester);
   });
 
-  testWidgets('the returning title', (tester) async {
-    final rig = _rig(tester);
-    await rig.boot(Routes.home, size: large, reduceMotion: true);
-    await rig.run(const Duration(milliseconds: 600));
-    expect(find.byType(TitleScreen), findsNothing);
+  testWidgets('the epilogue', (tester) async {
+    final review = missions.lastWhere((m) => m.chapter == 1);
+    tester.view.physicalSize = small * tester.view.devicePixelRatio;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: small),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EpilogueScene(
+            lines: [
+              for (final line in review.epilogue) line.addressedTo('Sami'),
+            ],
+            grade: ChapterGrade.lobby,
+            sounds: const SilentGameSounds(),
+            doneLabel: 'See your Chapter 1 report',
+            onDone: () {},
+          ),
+        ),
+      ),
+    );
+    for (var i = 0; i < 60; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await still(tester, 'epilogue-360', small);
     await _done(tester);
   });
 }

@@ -3,9 +3,10 @@ import 'package:engine/engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/features/debrief/debrief_facts.dart';
+import 'package:the_last_room/features/progress/past_result_screen.dart';
 import 'package:the_last_room/features/progress/progress_facts.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
-import 'package:the_last_room/features/tower/tower_rooms.dart';
+import 'package:the_last_room/ui/daylight/daylight_kit.dart' show Tactile;
 
 import '../mission/mission_harness.dart';
 import '../tower/played_attempt.dart';
@@ -71,20 +72,13 @@ void main() {
     await rig.run(const Duration(milliseconds: 300));
     final report = ProgressReport.of(missions, attempts, first);
     expect(
-      find.bySemanticsLabel('2 of ${missions.length} missions done'),
+      find.bySemanticsLabel(ProgressScreen.roomsLit(2, missions.length)),
       findsOneWidget,
     );
-    expect(find.bySemanticsLabel('AVERAGE: ${report.average}'), findsOneWidget);
+    expect(find.bySemanticsLabel('Average: ${report.average}'), findsOneWidget);
     final delta = report.sinceBaseline!.totalDelta;
     expect(
-      find.bySemanticsLabel(
-        'SINCE MISSION 1: ${delta > 0 ? '+$delta' : delta}',
-      ),
-      findsOneWidget,
-    );
-    final best = report.missions[0].best!;
-    expect(
-      find.bySemanticsLabel('${starsFor(best)} of 3 stars, best $best'),
+      find.bySemanticsLabel('Since room 1: ${delta > 0 ? '+$delta' : delta}'),
       findsOneWidget,
     );
     // The radar: each skill averaged over the latest attempts.
@@ -96,23 +90,28 @@ void main() {
       ),
       findsOneWidget,
     );
+    // Each played room: its latest score, its best and its tries, and it opens its result.
+    final one = report.missions[0];
+    final room = find.byWidgetPredicate(
+      (w) =>
+          w is Tactile &&
+          w.label.startsWith('Room ${m1.number}, ') &&
+          w.label.contains(
+            'Latest ${second.score.total}, Best ${one.best} · 2 tries',
+          ),
+    );
+    expect(room, findsOneWidget);
+    expect(find.text('${second.score.total}'), findsWidgets);
+    // The room up next, then the rest of floor 1 locked; floors 2 and 3 fold away.
+    expect(find.text(ProgressScreen.upNext), findsOneWidget);
     expect(
-      find.bySemanticsLabel('LATEST ${second.score.total}'),
+      find.text(ProgressScreen.opensAfter(missions[6].number)),
       findsOneWidget,
     );
-    expect(find.bySemanticsLabel('ATTEMPTS 2'), findsOneWidget);
-    for (final d in Dimension.values) {
-      expect(
-        find.bySemanticsLabel(
-          '${dimensionLabel(d).toUpperCase()} ${second.score.dimensions[d]}',
-        ),
-        findsWidgets,
-      );
-    }
-    expect(
-      find.text(ProgressScreen.notPlayed),
-      findsNWidgets(missions.length - 2),
-    );
+    await tester.ensureVisible(room);
+    await tester.pump();
+    await tester.tap(room);
+    await rig.until(find.byType(PastResultScreen));
   });
 
   testWidgets('auto-advance and calm mode switch from the file', (
