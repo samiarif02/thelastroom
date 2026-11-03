@@ -27,6 +27,7 @@ import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/features/progression/floor_cleared_screen.dart';
 import 'package:the_last_room/features/recall/recall_store.dart';
+import 'package:the_last_room/features/tower/tower_tour.dart';
 import 'package:the_last_room/ui/daylight/daylight_kit.dart' show TactileButton;
 import 'package:the_last_room/ui/film_kit.dart';
 
@@ -191,6 +192,9 @@ class MissionRig {
 
   static const Size phone = Size(375, 667);
 
+  /// The tower tour's flag; seen by default, so a test's taps on the tower aren't under it.
+  final InMemoryTowerTourStore tour = InMemoryTowerTourStore(isSeen: true);
+
   Future<void> boot(
     String location, {
     Size size = phone,
@@ -213,6 +217,7 @@ class MissionRig {
         aiScoreStoreProvider.overrideWithValue(aiScores),
         recallStoreProvider.overrideWithValue(recall),
         routerProvider.overrideWithValue(router),
+        towerTourStoreProvider.overrideWithValue(tour),
         if (scorer case final s?) aiScorerProvider.overrideWithValue(s),
         ...overrides,
       ],
@@ -530,4 +535,20 @@ class MissionRig {
 
   /// Plays the whole dossier through (stamps, seal, pen) and the slip arriving.
   Future<void> settleDossier() => run(BrandMotion.dossier + BrandMotion.pen);
+}
+
+/// The tower tour's flag in memory.
+class InMemoryTowerTourStore implements TowerTourStore {
+  InMemoryTowerTourStore({this.isSeen = false});
+
+  bool isSeen;
+
+  @override
+  Future<bool> seen() async => isSeen;
+
+  @override
+  Future<void> markSeen() async => isSeen = true;
+
+  @override
+  Future<void> reset() async => isSeen = false;
 }

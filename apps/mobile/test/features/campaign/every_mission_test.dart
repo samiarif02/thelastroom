@@ -375,12 +375,12 @@ Future<void> _afterDebrief(
   );
   if (m.next case final next?) {
     expect(
-      find.bySemanticsLabel('Room ${next.number}, ${next.title}, up next'),
+      find.bySemanticsLabel('Room ${next.number}, ${next.title}. Play.'),
       findsOneWidget,
     );
   } else {
     // The last room: every room is done, none is locked, the top floor is lit.
-    expect(find.bySemanticsLabel(RegExp(r', locked$')), findsNothing);
+    expect(find.bySemanticsLabel(RegExp(r', locked: ')), findsNothing);
     expect(
       find.bySemanticsLabel(RegExp('^Floor 3 · .* 7 of 7 rooms lit')),
       findsOneWidget,

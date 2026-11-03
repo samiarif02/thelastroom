@@ -6,13 +6,16 @@ import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/features/debrief/debrief_view.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
+import 'package:the_last_room/features/settings/settings_screen.dart';
 import 'package:the_last_room/features/tower/elevator.dart';
 import 'package:the_last_room/features/tower/floor_sheet.dart';
 import 'package:the_last_room/features/tower/northstar_tower.dart';
+import 'package:the_last_room/features/tower/tower_door.dart';
 import 'package:the_last_room/features/tower/tower_extras.dart';
 import 'package:the_last_room/features/tower/tower_hero.dart';
 import 'package:the_last_room/features/tower/tower_rooms.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
+import 'package:the_last_room/features/tower/tower_tour.dart';
 import 'package:the_last_room/ui/daylight/daylight_kit.dart'
     show FloatingTabBar;
 
@@ -83,9 +86,11 @@ void main() {
   });
 
   String roomLabel(Mission m, RoomState state, [int? best]) => switch (state) {
-    RoomState.done => 'Room ${m.number}, ${m.title}, lit, best $best',
-    RoomState.current => 'Room ${m.number}, ${m.title}, up next',
-    RoomState.locked => 'Room ${m.number}, ${m.title}, locked',
+    RoomState.done =>
+      'Room ${m.number}, ${m.title}, lit, best $best. Play again.',
+    RoomState.current => 'Room ${m.number}, ${m.title}. Play.',
+    RoomState.locked =>
+      'Room ${m.number}, ${m.title}, locked: opens after room ${m.number - 1}.',
   };
 
   testWidgets('the Tower shows done, current and locked after Missions 1–2', (
@@ -245,7 +250,7 @@ void main() {
     expect(tester.getRect(tabs), before);
   });
 
-  testWidgets('a locked room says what opens it, and plays its sound', (
+  testWidgets('a locked door opens its floor, which says what opens it', (
     tester,
   ) async {
     final rig = MissionRig(tester);
@@ -258,12 +263,123 @@ void main() {
     );
     await tester.ensureVisible(locked);
     await tester.tap(locked);
-    await tester.pump();
-    expect(find.text(TowerScreen.lockedNotice(missions[1])), findsOneWidget);
-    expect(rig.sounds.count('lockedRoomTapped'), 1);
+    await rig.run(const Duration(milliseconds: 600));
+    expect(find.byType(FloorSheet), findsOneWidget);
     expect(find.byType(Elevator), findsNothing);
-    await rig.run(const Duration(seconds: 4));
-    expect(find.text(TowerScreen.lockedNotice(missions[1])), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byType(FloorSheet),
+        matching: find.bySemanticsLabel(
+          'Room ${missions[2].number}, ${missions[2].title}, locked',
+        ),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the doors: lit with a check, the next one ajar with a play cue, '
+      'the rest closed; floors ahead locked', (tester) async {
+    final rig = MissionRig(tester);
+    await rig.progress.recordAttempt(playedAttempt(missions[0]));
+    await rig.boot(Routes.tower(), reduceMotion: true);
+    await rig.until(find.byType(TowerScreen));
+    await rig.run(const Duration(milliseconds: 300));
+    await toTheTower(tester);
+    final doors = tester.widgetList<TowerDoor>(find.byType(TowerDoor)).toList();
+    expect(doors, hasLength(missions.length));
+    // The facade reads top floor first: floor 3, floor 2, then floor 1's rooms 1 → 7.
+    final floor1 = doors.skip(14).toList();
+    expect(floor1.first.state, DoorState.done);
+    expect(floor1[1].state, DoorState.next);
+    expect(floor1[2].state, DoorState.closed);
+    expect(doors.where((d) => d.state == DoorState.locked), hasLength(13));
+    expect(doors[6].state, DoorState.waiting);
+    expect(find.byType(PlayCue), findsOneWidget);
+    // Every door is at least a thumb tall, and says what a tap does.
+    expect(
+      find.bySemanticsLabel(roomLabel(missions[1], RoomState.current)),
+      findsOneWidget,
+    );
+    expect(
+      find.bySemanticsLabel(
+        'Room 8, ${missions[7].title}, locked: opens after floor 1.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  group('the tower tour', () {
+    Future<MissionRig> firstVisit(
+      WidgetTester tester, {
+      double textScale = 1,
+    }) async {
+      final rig = MissionRig(tester)..tour.isSeen = false;
+      await rig.boot(Routes.tower(), textScale: textScale, reduceMotion: true);
+      await rig.until(find.byType(TowerTour));
+      await rig.run(const Duration(milliseconds: 600));
+      return rig;
+    }
+
+    testWidgets('shows once, round the door to play; tapping it starts the '
+        'room', (tester) async {
+      final rig = await firstVisit(tester);
+      expect(find.text(TowerTour.line), findsOneWidget);
+      expect(rig.analytics.only(AnalyticsEvent.towerTourShown).wire, {
+        'replay': false,
+      });
+      await tester.tap(find.bySemanticsLabel(TowerTour.doorLabel));
+      await rig.run(const Duration(milliseconds: 300));
+      expect(find.byType(TowerTour), findsNothing);
+      expect(rig.tour.isSeen, isTrue);
+      expect(rig.analytics.only(AnalyticsEvent.towerTourDone).wire, {
+        'action': 'started',
+      });
+      await rig.until(find.byType(MissionPlayer));
+    });
+
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('"Got it" puts it away for good (${scale}x text)', (
+        tester,
+      ) async {
+        final rig = await firstVisit(tester, textScale: scale);
+        expect(tester.takeException(), isNull);
+        await tester.ensureVisible(find.text(TowerTour.gotIt));
+        await tester.pump();
+        await tester.tap(find.text(TowerTour.gotIt));
+        await rig.run(const Duration(milliseconds: 300));
+        expect(find.byType(TowerTour), findsNothing);
+        expect(rig.tour.isSeen, isTrue);
+        expect(rig.analytics.only(AnalyticsEvent.towerTourDone).wire, {
+          'action': 'dismissed',
+        });
+        expect(find.byType(MissionPlayer), findsNothing);
+      });
+    }
+
+    testWidgets('never over a return from a room, nor once seen', (
+      tester,
+    ) async {
+      final rig = MissionRig(tester)..tour.isSeen = false;
+      await rig.progress.recordAttempt(playedAttempt(missions[0]));
+      await rig.boot(Routes.tower(lit: 1), reduceMotion: true);
+      await rig.until(find.byType(TowerScreen));
+      await rig.run(const Duration(seconds: 2));
+      expect(find.byType(TowerTour), findsNothing);
+    });
+
+    testWidgets('Settings shows it again', (tester) async {
+      final rig = MissionRig(tester);
+      await rig.boot(Routes.settings, reduceMotion: true);
+      await rig.until(find.text(SettingsScreen.tour));
+      await tester.ensureVisible(find.text(SettingsScreen.tour));
+      await tester.pump();
+      await tester.tap(find.text(SettingsScreen.tour));
+      await rig.until(find.byType(TowerTour));
+      expect(rig.tour.isSeen, isFalse);
+      expect(rig.analytics.only(AnalyticsEvent.towerTourShown).wire, {
+        'replay': true,
+      });
+    });
   });
 
   testWidgets('a locked floor opens to show what is ahead', (tester) async {
