@@ -206,8 +206,14 @@ void main() {
                 hinted: false,
               ),
             );
-            expect(now, old);
+            // The same score; only the reasons' XP differs (brief 55): none were given before.
+            expect(now.total, old.total);
+            expect(now.dimensions, old.dimensions);
+            expect(now.optionIdsByCost, old.optionIdsByCost);
+            expect(now.beatCredits, old.beatCredits);
             expect(old.beatCredits, everyElement(PickCredit.full));
+            expect(old.reasonVerdicts, isEmpty);
+            expect(now.reasonVerdicts, List.filled(3, ReasonVerdict.sound));
           }
         }
       }

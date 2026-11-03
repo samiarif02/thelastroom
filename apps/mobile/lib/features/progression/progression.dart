@@ -13,6 +13,7 @@ class Progression {
   const Progression({
     required this.xp,
     required this.lastXp,
+    this.lastReasonXp = 0,
     required this.unlocked,
     required this.uncelebrated,
     required this.sessionsThisWeek,
@@ -27,8 +28,15 @@ class Progression {
 
   final int xp;
 
-  /// What the latest mission attempt earned (the debrief's "+N XP").
+  /// What the latest mission attempt earned (the debrief's "+N XP"): its room and its reasons.
   final int lastXp;
+
+  /// The part of [lastXp] its reasons earned (or, in a voice room, the points said out loud):
+  /// the debrief's "… 22 for your reasons".
+  final int lastReasonXp;
+
+  /// The part of [lastXp] the room itself earned.
+  int get lastRoomXp => lastXp - lastReasonXp;
   final Set<Skill> unlocked;
 
   /// Unlocked but not yet celebrated: the debrief shows each one's card once.
@@ -80,9 +88,11 @@ final progressionProvider = FutureProvider.autoDispose<Progression>((
     for (final a in stored) dayOf((a.completedAt ?? DateTime.now()).toLocal()),
   };
   final profile = ref.watch(profileProvider).value;
+  final last = lastAttemptXp(played);
   return Progression(
     xp: totalXp(played, recallRoundXp: record.recallXp),
-    lastXp: lastAttemptXp(played),
+    lastXp: last.total,
+    lastReasonXp: last.reasons,
     unlocked: unlocked,
     uncelebrated: unlocked.difference(record.celebrated),
     sessionsThisWeek: sessionsThisWeek(days, today: today),

@@ -129,6 +129,8 @@ void main() {
         );
         await rig.until(find.text(line.text));
         expect(face(rig), CastExpression.hmm);
+        // A guess earns no XP: no tag on its sheet.
+        expect(find.textContaining(' XP'), findsNothing);
         // She still asks why, and the reasons come: the why step never sticks after a guess
         // (the owner's "Why that example?" on the realme: her line typed under the feedback
         // sheet, finished unheard, and the reasons never came).
@@ -209,6 +211,9 @@ void main() {
         find.text(openBeat.reaction!.strong.addressedTo(name).text),
       );
       expect(face(rig), CastExpression.smile);
+      // The sound reason's XP pops on the sheet, counted up to +10 (brief 55).
+      await rig.run(DaylightMotion.countUp);
+      expect(find.text(FeedbackSheet.xpLabel(reasonSoundXp)), findsOneWidget);
     });
 
     testWidgets('the right line for the wrong reason lands as weak', (
@@ -223,6 +228,10 @@ void main() {
       expect(rig.state(1).plays.single.pick(openBeat).reason!.sound, isFalse);
       expect(face(rig), CastExpression.hmm);
       expect(find.byType(TrustPips), findsOneWidget);
+      // Close, but not quite: half the XP of the right principle.
+      await rig.run(DaylightMotion.countUp);
+      expect(find.text(FeedbackSheet.xpLabel(reasonCloseXp)), findsOneWidget);
+      expect(find.text(FeedbackSheet.xpLabel(reasonSoundXp)), findsNothing);
     });
   });
 

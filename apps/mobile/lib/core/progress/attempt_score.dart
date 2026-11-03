@@ -35,7 +35,14 @@ MissionScore? scoreFromPicks({
         beat: beat.kind,
         choice: option.scored,
         decidedIn: play.decidedIn,
-        reason: reason == null ? null : beat.reasonPick(reason, option.id),
+        reason: switch (reason) {
+          null => null,
+          // A built beat asks no why; an older build could still store a reason on one (QA 51).
+          // It scores as it did, so the past result never changes, but earns no reason XP.
+          final r when beat.build != null =>
+            beat.reasonPick(r, option.id).unasked(),
+          final r => beat.reasonPick(r, option.id),
+        },
       ),
     );
   }

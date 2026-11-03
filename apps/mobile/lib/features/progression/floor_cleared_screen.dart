@@ -12,6 +12,7 @@ import '../../app/router.dart';
 import '../../ui/daylight/daylight_kit.dart';
 import '../../ui/haptics.dart';
 import '../mission/mission_lookup.dart';
+import '../share/share_floor_card_link.dart';
 import '../tower/tower_header.dart';
 import 'progression.dart';
 import 'skill_badges.dart' show SkillCopy;
@@ -332,6 +333,11 @@ class _FloorClearedScreenState extends ConsumerState<FloorClearedScreen>
                             ),
                           ),
                         ],
+                        const SizedBox(height: DaylightSpace.s8),
+                        Opacity(
+                          opacity: at(0.8, 0.95),
+                          child: ShareFloorCardLink(floor: n),
+                        ),
                       ],
                     ),
                   ),

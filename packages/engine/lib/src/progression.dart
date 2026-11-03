@@ -1,4 +1,5 @@
 import 'calendar_day.dart';
+import 'reason_verdict.dart';
 import 'recall.dart';
 import 'scoring.dart';
 import 'skill.dart';
@@ -7,7 +8,7 @@ import 'skill.dart';
 /// functions of what the player did. The app stores attempts and recall rounds; everything here
 /// is recomputed from them, so it's the same on every device and after a restore.
 
-/// XP for one mission attempt: a base for playing, half the score on top, and a bonus the first
+/// The room XP for one mission attempt: a base for playing, half the score on top, and a bonus the first
 /// time the mission is finished. A 0 still earns the base (showing up counts); a 100 on a first
 /// clear earns 100.
 ///
@@ -56,30 +57,81 @@ class PlayedMission {
   final List<SkillRequirement> requirements;
 }
 
-/// Total XP from every attempt, in the order they were played, plus [recallRoundXp] (the sum of
-/// [recallXp] over the rounds played).
+/// XP for the explaining in one attempt (brief 55): each "why that line?" earns its
+/// [ReasonVerdict.xp] (sound [reasonSoundXp], close [reasonCloseXp], a guess 0; a built beat
+/// asks no why and earns nothing), and each point a spoken answer makes earns [voicePointXp].
+///
+/// ```text
+/// reasonXp = Σ verdict.xp over the beats that asked why + pointsMade × voicePointXp
+/// ```
+///
+/// A pure function of the attempt's final picks (stored, never the XP itself), so it's the
+/// same after a resume, a restore or a rescore, and an attempt stored before wave 5 (no
+/// reasons) earns 0 here and exactly its room XP, as before.
+int reasonXp(MissionScore score) =>
+    score.reasonVerdicts.fold(0, (sum, v) => sum + v.xp) +
+    score.pointsMade * voicePointXp;
+
+/// What one attempt earned, in its two parts: the debrief's "+62 XP · 40 for the room, 22 for
+/// your reasons".
+class AttemptXp {
+  const AttemptXp({required this.room, required this.reasons});
+
+  /// [missionXp]: playing, the score, a first clear.
+  final int room;
+
+  /// [reasonXp]: the reasons given, or the points said out loud.
+  final int reasons;
+
+  int get total => room + reasons;
+
+  static const AttemptXp none = AttemptXp(room: 0, reasons: 0);
+
+  @override
+  bool operator ==(Object other) =>
+      other is AttemptXp && other.room == room && other.reasons == reasons;
+
+  @override
+  int get hashCode => Object.hash(room, reasons);
+
+  @override
+  String toString() => 'AttemptXp(room: $room, reasons: $reasons)';
+}
+
+/// [attempt]'s XP: [missionXp] for the room plus [reasonXp].
+AttemptXp attemptXp(PlayedMission attempt, {required bool firstClear}) =>
+    AttemptXp(
+      room: missionXp(total: attempt.score.total, firstClear: firstClear),
+      reasons: reasonXp(attempt.score),
+    );
+
+/// Total XP from every attempt, in the order they were played (each [attemptXp]: the room and
+/// its reasons), plus [recallRoundXp] (the sum of [recallXp] over the rounds played). Every term
+/// is zero or more, so playing more never lowers it.
 int totalXp(List<PlayedMission> attempts, {int recallRoundXp = 0}) {
   final cleared = <String>{};
   var xp = recallRoundXp;
   for (final a in attempts) {
-    xp += missionXp(total: a.score.total, firstClear: cleared.add(a.missionId));
+    xp += attemptXp(a, firstClear: cleared.add(a.missionId)).total;
   }
   return xp;
 }
 
-/// The XP the last of [attempts] earned (the debrief's "+N"), or 0 with none.
-int lastAttemptXp(List<PlayedMission> attempts) {
-  if (attempts.isEmpty) return 0;
+/// What the last of [attempts] earned (the debrief's "+N", and its breakdown), or
+/// [AttemptXp.none] with none.
+AttemptXp lastAttemptXp(List<PlayedMission> attempts) {
+  if (attempts.isEmpty) return AttemptXp.none;
   final last = attempts.last;
   final before = attempts.take(attempts.length - 1).map((a) => a.missionId);
-  return missionXp(
-    total: last.score.total,
-    firstClear: !before.contains(last.missionId),
-  );
+  return attemptXp(last, firstClear: !before.contains(last.missionId));
 }
 
 /// Every skill the player has demonstrated, attempt by attempt ([newlyUnlockedSkills]: only
 /// unhinted attempts that reach a requirement). A skill, once unlocked, stays unlocked.
+///
+/// Skills read dimension scores, never XP. XP is shown and summed, never a gate: rooms and
+/// floors open by clearing the room before, and the weekly goal counts days. So reason XP
+/// (brief 55) moves no unlock.
 Set<Skill> unlockedSkills(List<PlayedMission> attempts) {
   final unlocked = <Skill>{};
   for (final a in attempts) {

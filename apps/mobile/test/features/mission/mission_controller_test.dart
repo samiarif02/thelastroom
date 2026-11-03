@@ -72,7 +72,22 @@ void main() {
         AttemptInput(
           picks: [
             for (final b in m.beats)
-              BeatPick(beat: b.kind, choice: b.options.first.scored),
+              BeatPick(
+                beat: b.kind,
+                choice: b.options.first.scored,
+                reason: switch (b.why) {
+                  final why? => b.reasonPick(
+                    why.reasons.firstWhere(
+                      (r) =>
+                          r.isSoundFor(b.options.first.id) ||
+                          r.tempts.contains(b.options.first.id),
+                      orElse: () => why.reasons.first,
+                    ),
+                    b.options.first.id,
+                  ),
+                  null => null,
+                },
+              ),
           ],
           followUpReply: s.followUp!.replies.first.scored,
           hinted: m.hinted,

@@ -28,7 +28,21 @@ MissionScore _expected() {
   const m = missionTheOpportunity;
   final picks = [
     for (var i = 0; i < _beats.length; i++)
-      BeatPick(beat: m.beats[i].kind, choice: m.optionById(_beats[i])!.scored),
+      BeatPick(
+        beat: m.beats[i].kind,
+        choice: m.optionById(_beats[i])!.scored,
+        // The harness explains each line with its sound reason, or the first one.
+        reason: switch (m.beats[i].why) {
+          final why? => m.beats[i].reasonPick(
+            why.reasons.firstWhere(
+              (r) => r.isSoundFor(_beats[i]),
+              orElse: () => why.reasons.first,
+            ),
+            _beats[i],
+          ),
+          null => null,
+        },
+      ),
   ];
   return scoreAttempt(
     AttemptInput(

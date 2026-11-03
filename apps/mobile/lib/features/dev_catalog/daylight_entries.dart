@@ -1,4 +1,5 @@
 import 'package:brand/brand.dart';
+import 'package:engine/engine.dart' show reasonCloseXp, reasonSoundXp;
 import 'package:flutter/widgets.dart';
 
 import '../../ui/daylight/daylight_kit.dart';
@@ -78,18 +79,20 @@ abstract final class DaylightEntries {
     name: 'Room, bubble, sheet',
     note:
         'RoomStage (168, and the 96 strip at large text), SpeechBubble (tail up, tail left, '
-        'flat), FeedbackSheet (sound, close).',
+        'flat), FeedbackSheet (sound +10 XP, close +5 XP, each counted up).',
     shots: [
       CatalogShot(id: 'stage', label: 'Stage', build: (_) => const _Stage()),
       CatalogShot(
         id: 'sheet-sound',
         label: 'Sound pick',
         build: (_) => const _Sheet(tone: FeedbackTone.sound),
+        settle: _xpCounted,
       ),
       CatalogShot(
         id: 'sheet-close',
         label: 'Close pick',
         build: (_) => const _Sheet(tone: FeedbackTone.close),
+        settle: _xpCounted,
       ),
     ],
   );
@@ -589,6 +592,9 @@ class _Stage extends StatelessWidget {
   );
 }
 
+/// The feedback sheet's XP has counted up (and its sheet risen) before the golden is taken.
+final Duration _xpCounted = DaylightMotion.countUp + DaylightMotion.move;
+
 class _Sheet extends StatelessWidget {
   const _Sheet({required this.tone});
 
@@ -606,7 +612,8 @@ class _Sheet extends StatelessWidget {
         note: sound
             ? 'Marcus nods. Trust goes up one.'
             : 'Modesty tempts, but he asked what you did.',
-        xp: sound ? 10 : null,
+        // The reason's XP (brief 55): sound +10, close +5.
+        xp: sound ? reasonSoundXp : reasonCloseXp,
         lesson: sound
             ? 'An actual number and your own action prove more than a summary of what '
                   'the team found.'
