@@ -17,7 +17,7 @@ reviews and merges (only on the owner's explicit "merge #N"); up to four workers
   The lead owns HANDOFF and lands its docs in one small `docs/lead-wave-N` PR per wave.
 - Merge in dependency order; after each merge the other open branches rebase on `main`; the lead
   removes the merged worktree. The lead reviews in a detached `../thelastroom-review`.
-- There is no hosted preview: the lead reviews by running the branch locally (ADR 0005).
+- There is no hosted preview of the game: the lead reviews by running the branch locally (ADR 0005). Only the landing page (`web/`) is hosted, by Vercel (ADR 0007).
 
 **Why:** parallel workers finish the 7-day build sooner; ownership and status files stop two
 sessions from editing the same file.

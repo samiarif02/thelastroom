@@ -3,7 +3,12 @@
 > **The bar:** someone should screenshot it because it looks like a film, not like an app. If a
 > screen could belong to any other quiz app, it isn't done. (Brief §9)
 
-This is the design direction from the brief. The look is **Morning Office** (owner's pick,
+> **Current look (since 3 Nov, wave 6): the Daylight Tower**, specified in
+> [`docs/design/direction.md`](docs/design/direction.md) and shipped in #55–#58. The sections
+> below are the history that led to it (Boardroom, Morning Office, the vivid layer); the debrief's
+> *Candidate assessment* sheet (`ui/paper/**`) is the one part kept exactly as it was.
+
+This was the design direction from the brief. The look was **Morning Office** (owner's pick,
 2026-10-30, brief 16; see "Chosen direction"): bright, warm and friendly, with an illustrated
 interviewer. It replaced **C, The Boardroom** (chosen earlier the same day), whose film kit
 (brief 06a, `apps/mobile/lib/ui/`) and every animation stay; only the palette, the set and the

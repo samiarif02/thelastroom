@@ -9,8 +9,14 @@ is [`demo-script.md`](demo-script.md).
 **What's built and what isn't:** every requirement and plan phase, checked, in
 [`completion.md`](completion.md).
 
-**Landing page:** a static Next.js site in [`web/`](../web/), deployed on Vercel from `main`
-([ADR 0007](decisions/0007-landing-page-on-vercel.md), [#43](https://github.com/samiarif02/thelastroom/pull/43)).
+**Landing page:** [thelastroom-ten.vercel.app](https://thelastroom-ten.vercel.app), a static
+Next.js site in [`web/`](../web/) that Vercel builds from `main`
+([ADR 0007](decisions/0007-landing-page-on-vercel.md); [#43](https://github.com/samiarif02/thelastroom/pull/43),
+[#48](https://github.com/samiarif02/thelastroom/pull/48), [#53](https://github.com/samiarif02/thelastroom/pull/53)).
+It is the only hosted thing: the game itself stays zero-setup and unhosted (ADR 0005).
+
+**Screenshots:** the README's grid ([`screenshots/`](screenshots/)), widget-test stills of the
+real screens in the Daylight Tower look.
 
 **Android APK:** the draft release on [Releases](https://github.com/samiarif02/thelastroom/releases)
 (published by the owner). It installs directly, needs no keys and plays offline.
@@ -29,7 +35,7 @@ it starts.
 - **Chapter 1, Get Through the Door:** you build the answer from lines (below).
 - **Chapter 2, Under Pressure:** you answer **out loud**. The interviewer's lines are spoken,
   you record your answer and your reply to the follow-up; recording pauses by itself after 5
-  seconds of silence, Continue picks up where you stopped, Delete starts the take again. The
+  seconds of silence, Continue picks up where you stopped, Start again throws the take away. The
   AI recruiter scores what you said, never your accent or how you sound, and shows which of the
   mission's points you made. Offline, you listen back and tick the points yourself.
 - **Chapter 3, The Final Round:** both: three missions built from lines, four spoken.
@@ -43,14 +49,80 @@ In Chapter 1:
   principle keeps 60%.
 - **Get challenged.** The interviewer reacts in character, then asks a follow-up aimed at the
   weakest part of your answer.
-- **Debrief.** A dossier with four scored dimensions, each with its basis, then "You said",
+- **Debrief.** The *Candidate assessment* sheet: four scored dimensions, each with its basis, then "You said",
   "You fell for: …" and "What holds" for every beat, and the costliest line in red pen.
 - **Recall Room.** Every trap you fell for comes back as a one-minute round of active cards on a
   Leitner schedule (1, 3, 7 days), until it stops catching you.
-- **Progress.** A tower to climb, stars per mission, a skills radar, and your Mission 1 baseline
-  beside your latest.
+- **Progress.** The Northstar tower with a door per room (played, ajar, closed, locked), XP, a
+  weekly ring instead of a streak, skills earned without hints, Your file with every past
+  result, a floor-cleared reward, and the Chapter 1 report with your first try beside your
+  latest.
+- **Help when it's needed.** First-time tips one at a time (the first door, the answer cards,
+  the why step, the first result, the microphone), and reminders in character on days 1, 3, 5
+  and 8.
 
 It plays fully offline with zero setup. The backend (sign-in, sync, AI scoring) is optional.
+
+## Wave 6: what changed after the reviewer's feedback (2 to 3 Nov)
+
+The reviewer said the app was good but looked like a children's game in places, that two looks
+disagreed, and asked for a landing page, answers out loud from Chapter 2, and a justification
+for every score. This is what came of it, PR by PR.
+
+- **Three chapters, 21 rooms, all playable.** Chapter 2 is seven voice rooms
+  ([#41](https://github.com/samiarif02/thelastroom/pull/41)), Chapter 3 mixes three built from
+  lines and four spoken ([#42](https://github.com/samiarif02/thelastroom/pull/42)), both opened
+  for the demo ([#47](https://github.com/samiarif02/thelastroom/pull/47)); the report starts
+  Chapter 2 ([#49](https://github.com/samiarif02/thelastroom/pull/49)). A test plays every
+  mission to its debrief and fixed what it found
+  ([#54](https://github.com/samiarif02/thelastroom/pull/54)), and the tap-label check came
+  back on ([#40](https://github.com/samiarif02/thelastroom/pull/40)).
+- **Voice.** The interviewer's lines are spoken; you record; recording pauses after 5 s of
+  silence; Continue and Start again; scored on content only, never accent; audio sent for
+  scoring and never stored; a self-check offline
+  ([#44](https://github.com/samiarif02/thelastroom/pull/44)).
+- **Scoring you can trust.** The live Gemini recruiter, its basis on every result, "How we
+  scored this", and a published evaluation that found two leniencies and fixed them
+  ([#46](https://github.com/samiarif02/thelastroom/pull/46), [scoring-eval.md](scoring-eval.md)).
+- **One professional look: the Daylight Tower.** Research and three directions, then one
+  ([#52](https://github.com/samiarif02/thelastroom/pull/52), [design/direction.md](design/direction.md));
+  the brand, type and the drawn cast ([#55](https://github.com/samiarif02/thelastroom/pull/55));
+  every screen, the tower with a door per room and floor sheets, the reward and retention
+  surfaces ([#56](https://github.com/samiarif02/thelastroom/pull/56)); Your file with past
+  results, the report, onboarding, the title and first-time tips
+  ([#57](https://github.com/samiarif02/thelastroom/pull/57)); route transitions and animated
+  back controls ([#58](https://github.com/samiarif02/thelastroom/pull/58)). One thing was
+  kept on purpose: the debrief's *Candidate assessment* sheet, which the reviewer liked.
+- **Retention.** "Send a test reminder", the next reminder's day and sender shown in
+  Settings, a welcome-back card, and reminders on days 1, 3, 5 and 8
+  ([#51](https://github.com/samiarif02/thelastroom/pull/51)); a weekly ring instead of a
+  streak, XP, skills and a floor-cleared reward (#56).
+- **The landing page** ([#43](https://github.com/samiarif02/thelastroom/pull/43),
+  [#48](https://github.com/samiarif02/thelastroom/pull/48),
+  [#53](https://github.com/samiarif02/thelastroom/pull/53)), and the design skills used for it
+  ([#50](https://github.com/samiarif02/thelastroom/pull/50)).
+- **Logs.** Every session's log regenerated and enforced by the pre-push hook
+  ([#45](https://github.com/samiarif02/thelastroom/pull/45), below).
+
+### The phone QA, and the lesson in it
+
+On 3 Nov an agent played Chapter 1 to the end on the owner's realme 8 with a release build and
+the local backend over USB ([status 51](status/51-phone-qa.md),
+[#59](https://github.com/samiarif02/thelastroom/pull/59)). AI scoring worked live (rooms 2, 5,
+6 and 7: 92, 90, 85, 82, each logged by the function with its model and latency), and so did
+the floor-cleared reward, the report, Recall, reminders and the floor sheets.
+
+Before any of that, it found a **P0 bug that every earlier test had missed: release APKs had
+no `INTERNET` permission.** Flutter's template only declares it in the debug and profile
+manifests, and no plugin merged it in. So every installed APK was offline-only: AI scoring,
+voice scoring, sync and sign-in could never work, and because the game falls back to the
+offline score by design (ADR 0005), nothing looked broken. It just looked like "no backend".
+
+The lesson: **a graceful fallback hides failures, so test the real artefact, not just the
+debug build.** The fix added the permission and a `check:standards` rule
+(`android-release-permissions`) that fails CI if the main manifest ever loses it. The same
+pass fixed a P2 where Your file mixed the AI's latest score with the engine's best, hardened
+resuming a half-played room, and cleaned up several copy and layout details.
 
 ## Key decisions
 
@@ -68,7 +140,9 @@ It plays fully offline with zero setup. The backend (sign-in, sync, AI scoring) 
 | Android back returns to the tower and asks before exiting; leaving a mission keeps your place | [#22](https://github.com/samiarif02/thelastroom/pull/22) |
 | Answer out loud from Chapter 2: spoken lines, a recorder that pauses on silence, scored on content only, a self-check offline; audio is never stored | [brief 35](briefs/35-voice-mission.md), [#44](https://github.com/samiarif02/thelastroom/pull/44), [#41](https://github.com/samiarif02/thelastroom/pull/41), [#42](https://github.com/samiarif02/thelastroom/pull/42), [#47](https://github.com/samiarif02/thelastroom/pull/47) |
 | Prove the AI scores well: a published evaluation, the basis on every result, and the fixes it led to | [brief 36](briefs/36-scoring-trust.md), [scoring-eval.md](scoring-eval.md), [#46](https://github.com/samiarif02/thelastroom/pull/46) |
-| A marketing landing page, hosted, while the game stays zero-setup | [ADR 0007](decisions/0007-landing-page-on-vercel.md), [#43](https://github.com/samiarif02/thelastroom/pull/43) |
+| A marketing landing page, hosted, while the game stays zero-setup | [ADR 0007](decisions/0007-landing-page-on-vercel.md), [#43](https://github.com/samiarif02/thelastroom/pull/43), [#53](https://github.com/samiarif02/thelastroom/pull/53) |
+| One professional look, the Daylight Tower, with the Candidate assessment sheet kept as it was | [design/direction.md](design/direction.md), [#52](https://github.com/samiarif02/thelastroom/pull/52), [#55](https://github.com/samiarif02/thelastroom/pull/55)–[#58](https://github.com/samiarif02/thelastroom/pull/58) |
+| Bring players back on days 3 and 5 without guilt: visible reminders, a welcome back, a weekly ring | [brief 42](briefs/42-retention.md), [#51](https://github.com/samiarif02/thelastroom/pull/51), [#56](https://github.com/samiarif02/thelastroom/pull/56) |
 
 **How it was built.** Work ran in waves of parallel Claude Code sessions. A lead session wrote a
 brief per feature (`docs/briefs/`) with file ownership, and each worker took one worktree and
@@ -84,8 +158,11 @@ flutter pub get
 cd apps/mobile && flutter run        # add -d chrome for the web
 ```
 
-Flutter 3.47.8; no keys, no network. For AI scoring on a laptop, see the README section
-"Optional: the backend and AI scoring".
+Flutter 3.47.8; no keys, no network. For live AI scoring: `supabase start`,
+`supabase functions serve --env-file <your .env>` (with your own `GEMINI_API_KEY`), then
+`flutter run --dart-define-from-file=env/dev.json` with the local URL and anon key; on an
+Android phone over USB, `adb reverse tcp:54321 tcp:54321` first. The README section "Optional:
+the backend and AI scoring" has the details.
 
 ## What the score is based on
 
@@ -108,6 +185,8 @@ Flutter 3.47.8; no keys, no network. For AI scoring on a laptop, see the README 
   lenient on guesses (60) and on a blaming answer with good-sounding reasons (65); two prompt
   rules fixed both. Every result screen has "How we scored this": the weights, the recruiter's
   basis beside the game's own score, and what the recruiter is and isn't told.
+- **On a phone:** live on a release build over USB, four rooms scored 82 to 92 by
+  `gemini-3.5-flash-lite` in about 2 s each (status 51).
 - **Voice (Chapters 2–3):** the same recruiter transcribes and scores the spoken answer on
   content only. Live: a strong spoken answer 95, a weak one 5, transcripts word for word. The
   audio is sent for scoring and never stored.
@@ -178,6 +257,8 @@ waitlist measures the same thing: demand for what comes next.
 - More reminder types from FR-50 (the cliffhanger, the weekly win), and reminders tested on iOS.
 - A hosted backend, so AI scoring works away from the laptop.
 - Validating the scoring weights against human-rated answers.
+- The rest of the Daylight design: XP for a sound reason on the feedback sheet and a shareable
+  floor card (designed in [direction.md](design/direction.md), not built).
 - A store build: a release signing key, then Play Store and TestFlight.
 - Metrics: a PostHog sink for the events (cut for v1 by the owner, 1 Nov; every event is already
   defined, registered and logged on the device).
