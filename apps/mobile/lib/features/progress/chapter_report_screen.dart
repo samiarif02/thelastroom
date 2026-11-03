@@ -14,6 +14,8 @@ import '../../ui/daylight/daylight_kit.dart';
 import '../../ui/daylight/daylight_radar.dart';
 import '../debrief/debrief_facts.dart';
 import '../debrief/then_now_slip.dart';
+import '../mission/mission_lookup.dart' show reportedChapter;
+import '../share/share_floor_card_link.dart';
 import 'chapter_report.dart';
 import 'file_trouble.dart';
 import 'progress_screen.dart';
@@ -346,6 +348,13 @@ class _Report extends ConsumerWidget {
                       .number,
                 ),
               ),
+            ),
+          ),
+        if (next.isNotEmpty)
+          enter(
+            const ShareFloorCardLink(
+              floor: reportedChapter,
+              ink: DaylightColors.ink,
             ),
           ),
         Entrance(

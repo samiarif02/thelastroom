@@ -6,6 +6,8 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Voice missions record your spoken answer so it can be scored. The audio is sent for scoring and never stored.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>"Save Image" in the share sheet adds your floor card to your photos. Nothing else is read or saved.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
