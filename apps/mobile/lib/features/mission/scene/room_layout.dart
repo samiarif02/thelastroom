@@ -165,49 +165,55 @@ class TimerLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final f = ChapterTint.floorOf(context);
     final left = secondsLeft;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        DaylightSpace.s16,
-        DaylightSpace.s4,
-        DaylightSpace.s16,
-        0,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(_height),
-              child: SizedBox(
-                height: _height,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    const ColoredBox(color: DaylightColors.raised),
-                    FractionallySizedBox(
-                      alignment: Alignment.centerLeft,
-                      widthFactor: (1 - elapsed).clamp(0.0, 1.0),
-                      child: ColoredBox(
-                        color: left == null ? f.base : DaylightColors.honeyEdge,
+    // It changes every frame for a minute: its own layer, so the room and the cards under it
+    // aren't repainted with it (NFR-3).
+    return RepaintBoundary(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          DaylightSpace.s16,
+          DaylightSpace.s4,
+          DaylightSpace.s16,
+          0,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(_height),
+                child: SizedBox(
+                  height: _height,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      const ColoredBox(color: DaylightColors.raised),
+                      FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: (1 - elapsed).clamp(0.0, 1.0),
+                        child: ColoredBox(
+                          color: left == null
+                              ? f.base
+                              : DaylightColors.honeyEdge,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          if (left != null) ...[
-            const SizedBox(width: DaylightSpace.s8),
-            Semantics(
-              liveRegion: true,
-              label: '$left seconds',
-              excludeSemantics: true,
-              child: Text(
-                '$left',
-                style: DaylightType.tabular(DaylightType.body4),
+            if (left != null) ...[
+              const SizedBox(width: DaylightSpace.s8),
+              Semantics(
+                liveRegion: true,
+                label: '$left seconds',
+                excludeSemantics: true,
+                child: Text(
+                  '$left',
+                  style: DaylightType.tabular(DaylightType.body4),
+                ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

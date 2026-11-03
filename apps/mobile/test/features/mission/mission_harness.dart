@@ -196,15 +196,19 @@ class MissionRig {
   /// A test of the tips clears them first (`rig.tips.flags.clear()`).
   final InMemoryTipStore tips = InMemoryTipStore.allSeen();
 
+  /// Boots the app at [location] on a [size] screen; a null [size] keeps the device's own
+  /// screen, insets and pixel ratio (the frame-timing run on a phone, integration_test/).
   Future<void> boot(
     String location, {
-    Size size = phone,
+    Size? size = phone,
     double textScale = 1,
     bool reduceMotion = false,
     EdgeInsets viewPadding = EdgeInsets.zero,
   }) async {
-    tester.view.physicalSize = size * tester.view.devicePixelRatio;
-    addTearDown(tester.view.reset);
+    if (size != null) {
+      tester.view.physicalSize = size * tester.view.devicePixelRatio;
+      addTearDown(tester.view.reset);
+    }
     final router = GoRouter(initialLocation: location, routes: appRoutes());
     addTearDown(router.dispose);
     container = ProviderContainer(
@@ -226,13 +230,18 @@ class MissionRig {
     addTearDown(container.dispose);
     await tester.pumpWidget(
       MediaQuery(
-        data: MediaQueryData(
-          size: size,
-          textScaler: TextScaler.linear(textScale),
-          disableAnimations: reduceMotion,
-          padding: viewPadding,
-          viewPadding: viewPadding,
-        ),
+        data: size == null
+            ? MediaQueryData.fromView(tester.view).copyWith(
+                textScaler: TextScaler.linear(textScale),
+                disableAnimations: reduceMotion,
+              )
+            : MediaQueryData(
+                size: size,
+                textScaler: TextScaler.linear(textScale),
+                disableAnimations: reduceMotion,
+                padding: viewPadding,
+                viewPadding: viewPadding,
+              ),
         child: UncontrolledProviderScope(
           container: container,
           child: const TheLastRoomApp(),

@@ -307,7 +307,7 @@ void main() {
 
     for (final scale in [1.0, 2.0]) {
       testWidgets('answer_cards: over the first cards and "Lock in"; a tap on '
-          'a card picks it (${scale}x text)', (tester) async {
+          'a card only puts the tip away (${scale}x text)', (tester) async {
         final rig = await toCards(tester, Tip.answerCards, textScale: scale);
         await rig.until(_overlay);
         expect(find.text(Tip.answerCards.line), findsOneWidget);
@@ -342,12 +342,20 @@ void main() {
           'tip': 'answerCards',
           'action': 'followed',
         });
+        // QA 51, BUG-2: a tap meant for the tip never picks (nor, 2 s later, says) a line.
+        await rig.run(MissionPlayer.changeWindow + const Duration(seconds: 1));
+        expect(
+          find.text(MissionPlayer.lockLabel(null)),
+          findsOneWidget,
+          reason: 'the tap stopped at the tip: no line is picked',
+        );
+        expect(rig.state(1).plays, isEmpty);
+        // Picked on purpose, said, explained, and on to the next beat: no tip again.
+        await rig.tapOnce(option);
         expect(
           find.text(MissionPlayer.lockLabel(ChoiceCard.letterFor(0))),
           findsOneWidget,
-          reason: 'the tap went through: line A is picked',
         );
-        // Said, explained, and on to the next beat: no tip again.
         await rig.tapOnce(option);
         await rig.pick(first.why!.reasons.first);
         await rig.until(find.text(beatLabel(BeatKind.evidence, 1, 3)));

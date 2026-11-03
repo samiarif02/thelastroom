@@ -863,6 +863,8 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                 ),
                 line: tip.line,
                 target: at,
+                // Cards to choose between: a tap on them only puts the tip away (BUG-2).
+                kind: TipTarget.choice,
                 onTarget: () => _endTip(TipAction.followed),
                 onDismiss: () => _endTip(TipAction.dismissed),
               ),

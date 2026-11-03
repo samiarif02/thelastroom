@@ -30,7 +30,12 @@ dependencies:
 
 dev_dependencies:
   fake_async: ^1.3.3
+  flutter_driver:
+    sdk: flutter
   flutter_test:
+    sdk: flutter
+  # NFR-3's frame timing on a device (integration_test/perf_test.dart, docs/status/56.md).
+  integration_test:
     sdk: flutter
 
 flutter:

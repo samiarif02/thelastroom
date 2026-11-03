@@ -37,6 +37,13 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
+        // NFR-3's frame-timing runs (`flutter drive --profile`, docs/status/56.md): a profile
+        // build is its own app, com.thelastroom.app.perf, installed beside the player's release
+        // app and never over it (a phone holds real progress in com.thelastroom.app). Created
+        // by the Flutter Gradle plugin, applied above.
+        getByName("profile") {
+            applicationIdSuffix = ".perf"
+        }
     }
 }
 
