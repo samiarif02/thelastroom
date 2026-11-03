@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 /// Who an interviewer is, and the box they're drawn in: the handle a scene passes to
-/// [InterviewerSilhouette]. Each is drawn as a friendly, illustrated person
-/// (`FriendlyFigure`, brief 16); the rim-lit silhouettes are gone. The name dates from them and
+/// [InterviewerSilhouette]. Each is drawn as one of the Daylight cast (`CastFigure`); the
+/// rim-lit silhouettes are long gone. The name dates from them and
 /// stays because the mission scene uses it (a rename is a follow-up for the lead).
 ///
 /// Designed on a [designSize] box; the head (and its idle) pivots at [neck].
@@ -50,10 +50,17 @@ class SilhouetteFigure {
     neck: Offset(50, 68),
   );
 
+  /// Sam, the head of product (the top floor).
+  static const SilhouetteFigure sam = SilhouetteFigure._(
+    id: 'sam',
+    neck: Offset(50, 68),
+  );
+
   /// Every figure, by content id.
   static final Map<String, SilhouetteFigure> byId = {
     priya.id: priya,
     marcus.id: marcus,
     lena.id: lena,
+    sam.id: sam,
   };
 }

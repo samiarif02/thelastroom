@@ -1,6 +1,10 @@
+// Retired by Daylight Tower (docs/design/direction.md): kept, unchanged, only so the screens
+// that still use it compile until WS2 restyles them. New code uses daylight*.dart and cast/;
+// this file is deleted with its last user.
+
 import 'package:flutter/painting.dart';
 
-import 'typography.dart';
+import '../typography.dart';
 import 'vivid.dart';
 
 /// The vivid layer's type (brief 17): Manrope ExtraBold for titles that feel like a game's,

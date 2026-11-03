@@ -10,22 +10,18 @@ void main() {
     test('there is a figure for each interviewer', () {
       expect(
         SilhouetteFigure.byId.keys,
-        containsAll(['priya', 'marcus', 'lena']),
+        containsAll(['priya', 'marcus', 'lena', 'sam']),
       );
     });
 
     test('the idle is deterministic, gentle and bounded', () {
       for (var s = 0.0; s < 60; s += 0.37) {
-        final p = FaceGesture.pose(s);
-        expect(p.breath.abs(), lessThanOrEqualTo(1));
-        expect(p.turn.abs(), lessThanOrEqualTo(1));
-        expect(FaceGesture.pose(s), p);
+        expect(CastIdle.breath(s), inInclusiveRange(1, 1.01 + 1e-9));
+        expect(CastIdle.sway(s).abs(), lessThanOrEqualTo(1));
+        expect(CastIdle.sway(s), CastIdle.sway(s));
       }
-      // It really moves: the head is somewhere else ten seconds on.
-      expect(
-        FaceGesture.pose(3).turn,
-        isNot(closeTo(FaceGesture.pose(13).turn, 0.05)),
-      );
+      // It really moves: the head is somewhere else a few seconds on.
+      expect(CastIdle.sway(2), isNot(closeTo(CastIdle.sway(6), 0.1)));
     });
 
     for (final figure in SilhouetteFigure.byId.values) {
@@ -92,7 +88,7 @@ void main() {
           matching: find.byType(CustomPaint),
         ),
       );
-      expect((paint.painter! as FriendlyPainter).clock, isNull);
+      expect((paint.painter! as CastPainter).clock, isNull);
     });
   });
 

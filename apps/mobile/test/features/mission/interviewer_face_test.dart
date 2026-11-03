@@ -72,7 +72,7 @@ void main() {
   test('the recap is AA on the panel over every colour of the cast', () {
     // SpeechPanel: void at 94% (packages/brand/test/contrast_test.dart tests every text).
     const panelAlpha = 0.94;
-    for (final cast in [BrandCast.priya, BrandCast.marcus, BrandCast.lena]) {
+    for (final cast in CastPeople.all.map((p) => p.palette)) {
       for (final under in [cast.outer, cast.inner, cast.skin, cast.hair]) {
         final panel = Color.alphaBlend(
           BrandColors.void_.withValues(alpha: panelAlpha),

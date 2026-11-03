@@ -2,7 +2,7 @@ import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
 import '../camera/camera_shot.dart';
-import '../figure/face.dart';
+import '../figure/interviewer_expression.dart';
 import '../figure/interviewer_silhouette.dart';
 import '../figure/silhouette_figure.dart';
 import '../light/spotlight.dart';

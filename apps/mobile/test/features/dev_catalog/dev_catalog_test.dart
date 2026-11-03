@@ -131,6 +131,7 @@ void main() {
     tester,
   ) async {
     await _pumpAt(tester, DevCatalogRoutes.catalog);
+    await _scrollTo(tester, 'Title card');
     await tester.tap(find.text('Title card'));
     await tester.pump();
     await tester.pump(BrandMotion.cinematic);

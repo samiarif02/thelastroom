@@ -1,9 +1,13 @@
+// Retired by Daylight Tower (docs/design/direction.md): kept, unchanged, only so the screens
+// that still use it compile until WS2 restyles them. New code uses daylight*.dart and cast/;
+// this file is deleted with its last user.
+
 import 'dart:ui' show Color, Offset;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show BoxShadow;
 
-import 'colors.dart';
+import '../colors.dart';
 
 /// One chapter's colours on the building: the card's lit side, its shaded side, and its light.
 @immutable

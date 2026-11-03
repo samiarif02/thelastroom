@@ -1,14 +1,14 @@
 import 'package:brand/brand.dart';
 import 'package:flutter/widgets.dart';
 
-import 'face.dart';
 import 'friendly_figure.dart';
 import 'friendly_interviewer.dart';
+import 'interviewer_expression.dart';
 import 'silhouette_figure.dart';
 
-/// An interviewer in a scene: the friendly, illustrated person for [figure] (brief 16), with
-/// a face that shows [expression] and an idle (breath, blink, a little sway) that stands still
-/// under reduced motion. The name dates from the rim-lit silhouettes it replaced and stays
+/// An interviewer in a scene: the Daylight cast member for [figure], with a face that shows
+/// [expression] and an idle (breath, blink, a little sway) that stands still under reduced
+/// motion. The name dates from the rim-lit silhouettes it replaced and stays
 /// because the mission scene uses it.
 ///
 /// Sized by its parent at [SilhouetteFigure.aspectRatio].
