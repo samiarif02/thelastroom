@@ -24,10 +24,12 @@ import '../recall/recall_controller.dart';
 import 'elevator.dart';
 import 'floor_sheet.dart';
 import 'northstar_tower.dart';
+import 'tower_door.dart' show PlayCue;
 import 'tower_extras.dart';
 import 'tower_header.dart';
 import 'tower_hero.dart';
 import 'tower_rooms.dart';
+import 'tower_tour.dart';
 import 'welcome_back.dart';
 import 'welcome_back_card.dart';
 
@@ -85,6 +87,12 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
   /// Motion 5: the window fills (700 ms), the ring flares (500 ms), the check lands.
   static const Duration _lightUp = Duration(milliseconds: 1200);
 
+  /// Where the door to play is scrolled to under the tour: mid-screen, or near the top when
+  /// the text is large (above [_largeText]).
+  static const double _doorMiddle = 0.5;
+  static const double _doorHigh = 0.12;
+  static const double _largeText = 1.3;
+
   /// The week's sessions the tower last showed, so a mission that closes the week is seen as
   /// it happens (motion 6) and `weekly_goal_closed` fires once.
   int? _seenSessions;
@@ -102,6 +110,69 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
   void initState() {
     super.initState();
     ref.invalidate(towerRoomsProvider);
+  }
+
+  /// The door to play, and where it is once the tour has scrolled to it.
+  final GlobalKey _nextDoor = GlobalKey();
+  Rect? _tourAt;
+  bool _placing = false;
+
+  /// The tour is due and nothing else is: the first visit (not back from a room, so not under
+  /// the reminder explainer), no welcome-back card, no ride, the tower on top, a room to play.
+  bool _tourDue(List<TowerRoom>? rooms, {required bool welcomeUp}) =>
+      ref.read(towerTourProvider) &&
+      widget.lit == null &&
+      !welcomeUp &&
+      _riding == null &&
+      _isCurrent &&
+      rooms != null &&
+      rooms.any((r) => r.state == RoomState.current);
+
+  /// Scrolls the door to play into view, then measures it for the spotlight.
+  void _placeTour() {
+    if (_placing || _tourAt != null) return;
+    _placing = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final door = _nextDoor.currentContext;
+      if (!mounted || door == null) {
+        _placing = false;
+        return;
+      }
+      // Large text makes Priya's bubble tall: the door goes near the top so the bubble
+      // has the screen below it, "Got it" in view.
+      final large = MediaQuery.textScalerOf(context).scale(1) > _largeText;
+      await Scrollable.ensureVisible(
+        door,
+        alignment: large ? _doorHigh : _doorMiddle,
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : DaylightMotion.move,
+        curve: DaylightMotion.ease,
+      );
+      if (!mounted) return;
+      final box = _nextDoor.currentContext?.findRenderObject() as RenderBox?;
+      final screen = context.findRenderObject() as RenderBox?;
+      _placing = false;
+      if (box == null || screen == null || !box.hasSize) return;
+      final topLeft = box.localToGlobal(Offset.zero, ancestor: screen);
+      // The spotlight takes in the play cue over the door too.
+      final shape = topLeft & box.size;
+      setState(
+        () => _tourAt = Rect.fromLTRB(
+          shape.left,
+          shape.top - PlayCue.size - DaylightSpace.s4,
+          shape.right,
+          shape.bottom,
+        ),
+      );
+      ref.read(towerTourProvider.notifier).shown();
+    });
+  }
+
+  void _endTour(TourAction action, {TowerRoom? start, List<TowerRoom>? rooms}) {
+    setState(() => _tourAt = null);
+    unawaited(ref.read(towerTourProvider.notifier).done(action));
+    if (start != null && rooms != null) _tapRoom(start, rooms);
   }
 
   /// Whether the tower was the route on top at the last dependency change.
@@ -267,6 +338,13 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     final recallDue = ref.watch(recallDueCountProvider).value ?? 0;
     final progression = ref.watch(progressionProvider).value;
     final welcomeUp = ref.watch(welcomeBackProvider) != null;
+    ref.watch(towerTourProvider);
+    final tourDue = _tourDue(rooms, welcomeUp: welcomeUp);
+    if (tourDue) _placeTour();
+    final tourAt = _tourAt;
+    final tourRoom = rooms
+        ?.where((r) => r.state == RoomState.current)
+        .firstOrNull;
     final name =
         ref.watch(profileProvider).value?.displayName ??
         PlayerProfile.fallbackName;
@@ -295,6 +373,7 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
                 },
                 onTapRoom: (r) => _tapRoom(r, value),
                 onFloor: (c) => unawaited(_showFloor(c, value)),
+                nextDoorKey: _nextDoor,
               )
             else
               const _TowerLoading(),
@@ -328,6 +407,13 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
             ),
             if (_notice case final notice?)
               _Notice(key: ValueKey(notice), text: notice),
+            if (tourDue && tourAt != null && tourRoom != null && rooms != null)
+              TowerTour(
+                target: tourAt,
+                onDoor: () =>
+                    _endTour(TourAction.started, start: tourRoom, rooms: rooms),
+                onDismiss: () => _endTour(TourAction.dismissed),
+              ),
             if (_riding case final room?)
               Elevator(
                 floor: room.mission.number,
@@ -355,9 +441,13 @@ class _Tower extends StatefulWidget {
     required this.onReady,
     required this.onTapRoom,
     required this.onFloor,
+    this.nextDoorKey,
   });
 
   final ValueChanged<Chapter> onFloor;
+
+  /// On the door to play, for the tower tour.
+  final Key? nextDoorKey;
   final List<TowerRoom> rooms;
   final String name;
   final Progression? progression;
@@ -480,6 +570,7 @@ class _TowerState extends State<_Tower> {
                       lit: widget.lit,
                       lighting: widget.lighting.value,
                       litKey: _litFloor,
+                      nextDoorKey: widget.nextDoorKey,
                       onTapRoom: widget.onTapRoom,
                       onFloor: widget.onFloor,
                     ),

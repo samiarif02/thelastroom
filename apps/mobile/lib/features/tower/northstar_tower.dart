@@ -4,7 +4,7 @@ import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../ui/daylight/daylight_kit.dart';
+import 'tower_door.dart';
 import 'tower_rooms.dart';
 
 /// Northstar tower (direction.md §1, mockup `01b`): the illustration is the progress bar.
@@ -25,7 +25,11 @@ class NorthstarTower extends StatelessWidget {
     this.lit,
     this.lighting = 1,
     this.litKey,
+    this.nextDoorKey,
   });
+
+  /// On the door to play (the tower tour points at it).
+  final Key? nextDoorKey;
 
   final List<TowerRoom> rooms;
   final ValueChanged<TowerRoom> onTapRoom;
@@ -104,6 +108,7 @@ class NorthstarTower extends StatelessWidget {
                         lighting: lighting,
                         onTapRoom: onTapRoom,
                         onFloor: onFloor == null ? null : () => onFloor!(c),
+                        nextDoorKey: nextDoorKey,
                       ),
                     const SizedBox(
                       height: _ground,
@@ -244,6 +249,10 @@ abstract final class _TowerInk {
     DaylightColors.ink.withValues(alpha: 0.35),
     DaylightColors.dusk,
   );
+  static final Color duskPanel = Color.alphaBlend(
+    DaylightColors.raised.withValues(alpha: 0.12),
+    DaylightColors.dusk,
+  );
   static final Color duskText = Color.alphaBlend(
     DaylightColors.raised.withValues(alpha: 0.85),
     DaylightColors.dusk,
@@ -265,10 +274,12 @@ class _Floor extends StatelessWidget {
     required this.lighting,
     required this.onTapRoom,
     this.onFloor,
+    this.nextDoorKey,
   });
 
   final Chapter chapter;
   final VoidCallback? onFloor;
+  final Key? nextDoorKey;
   final List<TowerRoom> rooms;
 
   /// The floor below's rooms; null for floor 1.
@@ -342,11 +353,16 @@ class _Floor extends StatelessWidget {
                           last: i == rooms.length - 1,
                           window: w,
                           lighting: r.mission.number == lit ? lighting : 1,
-                          // On a floor not open yet a window shows the floor; on an open one
-                          // a locked window says what opens it.
-                          onTap: !open && onFloor != null
+                          // A locked door shows its floor: what's on it and what opens it.
+                          onTap: r.state == RoomState.locked && onFloor != null
                               ? onFloor!
                               : () => onTapRoom(r),
+                          opensAfter: open
+                              ? 'room ${r.mission.number - 1}'
+                              : 'floor ${chapter.number - 1}',
+                          doorKey: r.state == RoomState.current
+                              ? nextDoorKey
+                              : null,
                         ),
                       ),
                   ],
@@ -402,8 +418,9 @@ class _Floor extends StatelessWidget {
   }
 }
 
-/// One room's window. 28 × 44 (the current room's ring takes 36 × 48), in a cell at least as
-/// tall as a thumb, so the whole column is the target.
+/// One room's door (see [TowerDoor]): 28 wide where there's room, in a cell a seventh of the
+/// facade wide and tall enough for the play cue over the door to play. A screen reader hears
+/// what a tap does.
 class _Room extends StatelessWidget {
   const _Room({
     required this.room,
@@ -414,6 +431,8 @@ class _Room extends StatelessWidget {
     required this.window,
     required this.lighting,
     required this.onTap,
+    this.opensAfter,
+    this.doorKey,
   });
 
   final TowerRoom room;
@@ -422,42 +441,80 @@ class _Room extends StatelessWidget {
   final bool open;
   final bool last;
 
-  /// This window's width (28 where there's room); its height keeps the 28 × 44 arch.
+  /// This door's width (28 where there's room); its height keeps the 28 × 44 arch.
   final double window;
   final double lighting;
   final VoidCallback onTap;
 
+  /// What opens this room when it's locked ("floor 1", "room 4").
+  final String? opensAfter;
+
+  /// On the door to play, so the tower tour can point at it.
+  final Key? doorKey;
+
   static const double width = 28;
   static const double minWidth = 20;
-  static const double _aspect = 44 / 28;
-  double get height => window * _aspect;
-  static const double _ring = 4;
-  static const double _check = 16;
+  double get height => window * TowerDoor.aspect;
 
-  /// When in the lighting moment the check lands and the ring flares.
-  static const double _checkFrom = 0.75;
-  static const double _ringFrom = 0.55;
-
-  String get _semantics {
+  /// The label: the room, then what a tap does.
+  String get semantics {
     final m = room.mission;
-    final what = switch (room.state) {
-      RoomState.done => 'lit${room.best == null ? '' : ', best ${room.best}'}',
-      RoomState.current => room.inProgress ? 'in progress' : 'up next',
-      RoomState.locked => 'locked',
+    return switch (room.state) {
+      RoomState.done =>
+        'Room ${m.number}, ${m.title}, lit${room.best == null ? '' : ', best ${room.best}'}. '
+            'Play again.',
+      RoomState.current =>
+        'Room ${m.number}, ${m.title}. ${room.inProgress ? 'Continue' : 'Play'}.',
+      RoomState.locked =>
+        'Room ${m.number}, ${m.title}, locked: opens after ${opensAfter ?? 'the room before'}.',
     };
-    return 'Room ${m.number}, ${m.title}, $what';
   }
 
   @override
   Widget build(BuildContext context) {
-    final shape = switch (room.state) {
-      RoomState.done => _lit(),
-      RoomState.current => _current(),
-      RoomState.locked => _closed(),
-    };
+    final waiting = top && last && !open;
+    final state = waiting
+        ? DoorState.waiting
+        : switch (room.state) {
+            RoomState.done => DoorState.done,
+            RoomState.current => DoorState.next,
+            RoomState.locked => open ? DoorState.closed : DoorState.locked,
+          };
+    final (leaf, panel, frame) = top
+        ? (_TowerInk.duskWindow, _TowerInk.duskPanel, _TowerInk.roof)
+        : open
+        ? (
+            floor.deep,
+            Color.alphaBlend(floor.base.withValues(alpha: 0.7), floor.deep),
+            floor.deep,
+          )
+        : (
+            _TowerInk.paleWindow(floor),
+            _TowerInk.paleFrame(floor),
+            _TowerInk.paleFrame(floor),
+          );
+    final door = TowerDoor(
+      key: doorKey,
+      state: state,
+      width: window,
+      leaf: state == DoorState.done && lighting >= 1
+          ? DaylightColors.honey
+          : leaf,
+      panel: state == DoorState.locked
+          ? (top ? _TowerInk.duskText : floor.deep)
+          : panel,
+      frame: frame,
+      person: room.state == RoomState.current
+          ? CastPeople.byId(room.mission.question.speakerId)
+          : null,
+      lighting: lighting,
+    );
     // A seventh of the facade is 42–48 wide on a phone; for a screen reader each room is
-    // announced over a 48 target (it overlaps its neighbours' margins, never their windows).
-    final tall = math.max(height + DaylightSpace.s8, DaylightSize.hit);
+    // announced over a 48 target (it overlaps its neighbours' margins, never their doors).
+    final tall = math.max(
+      height + PlayCue.size + DaylightSpace.s8,
+      DaylightSize.hit,
+    );
     return SizedBox(
       height: tall,
       child: LayoutBuilder(
@@ -469,14 +526,23 @@ class _Room extends StatelessWidget {
             minHeight: tall,
             maxHeight: tall,
             child: Semantics(
-              button: room.enterable,
-              label: _semantics,
+              button: true,
+              label: semantics,
               excludeSemantics: true,
               onTap: onTap,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: onTap,
-                child: Align(alignment: Alignment.bottomCenter, child: shape),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (state == DoorState.next) ...[
+                      const PlayCue(),
+                      const SizedBox(height: DaylightSpace.s4),
+                    ],
+                    door,
+                  ],
+                ),
               ),
             ),
           );
@@ -484,183 +550,4 @@ class _Room extends StatelessWidget {
       ),
     );
   }
-
-  Widget _arch(Color ground, {Widget? child, Color? frame}) => SizedBox(
-    width: window,
-    height: height,
-    child: ArchFrame(
-      ground: ground,
-      bottomRadius: 0,
-      border: frame == null ? 0 : 2,
-      borderColor: frame ?? DaylightColors.raised,
-      child: child ?? const SizedBox.shrink(),
-    ),
-  );
-
-  Color get _unlit => top ? _TowerInk.duskWindow : floor.deep;
-
-  Widget _lit() {
-    final t = lighting.clamp(0.0, 1.0);
-    if (t >= 1) {
-      return _arch(
-        DaylightColors.honey,
-        child: const Icon(
-          PhosphorBold.check,
-          size: _check,
-          color: DaylightColors.onHoney,
-        ),
-      );
-    }
-    // The moment: honey rises from the sill, the ring flares and fades, the check lands.
-    final fill = Curves.easeOut.transform(t);
-    final ringT = ((t - _ringFrom) / (1 - _ringFrom)).clamp(0.0, 1.0);
-    final checkT = ((t - _checkFrom) / (1 - _checkFrom)).clamp(0.0, 1.0);
-    return SizedBox(
-      width: window,
-      height: height,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.bottomCenter,
-        children: [
-          if (ringT > 0)
-            Positioned.fill(
-              child: Transform.scale(
-                scale: 1 + ringT * 0.5,
-                alignment: Alignment.bottomCenter,
-                child: Opacity(
-                  opacity: 1 - ringT,
-                  child: const ArchFrame(
-                    ground: BrandColors.clear,
-                    border: 2,
-                    borderColor: DaylightColors.honey,
-                    bottomRadius: 0,
-                    child: SizedBox.shrink(),
-                  ),
-                ),
-              ),
-            ),
-          ArchFrame(
-            ground: _unlit,
-            bottomRadius: 0,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: FractionallySizedBox(
-                heightFactor: fill,
-                widthFactor: 1,
-                child: const ColoredBox(color: DaylightColors.honey),
-              ),
-            ),
-          ),
-          if (checkT > 0)
-            Positioned.fill(
-              child: Opacity(
-                opacity: checkT,
-                child: Transform.scale(
-                  scale: 0.6 + 0.4 * checkT,
-                  child: const Icon(
-                    PhosphorBold.check,
-                    size: _check,
-                    color: DaylightColors.onHoney,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _current() {
-    final person = CastPeople.byId(room.mission.question.speakerId);
-    final inside = SizedBox(
-      width: window,
-      height: height,
-      child: ArchFrame(
-        ground: DaylightColors.honeyTint,
-        bottomRadius: 0,
-        child: OverflowBox(
-          alignment: Alignment.bottomCenter,
-          minWidth: window * 1.5,
-          maxWidth: window * 1.5,
-          minHeight: window * 1.5,
-          maxHeight: window * 1.5,
-          child: CastFigure(person: person, idle: false),
-        ),
-      ),
-    );
-    return SizedBox(
-      width: window + _ring * 2,
-      height: height + _ring,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          Positioned.fill(
-            child: ArchFrame(
-              ground: BrandColors.clear,
-              border: 2,
-              borderColor: DaylightColors.raised.withValues(alpha: 0.7),
-              bottomRadius: 0,
-              child: const SizedBox.shrink(),
-            ),
-          ),
-          inside,
-        ],
-      ),
-    );
-  }
-
-  Widget _closed() {
-    if (top && last && !open) {
-      // The last room, lit from day one: someone is waiting at the top.
-      return _arch(
-        DaylightColors.honey,
-        child: const Align(
-          alignment: Alignment.bottomCenter,
-          child: _Silhouette(),
-        ),
-      );
-    }
-    if (top || open) return _arch(_unlit);
-    return _arch(
-      _TowerInk.paleWindow(floor),
-      frame: _TowerInk.paleFrame(floor),
-    );
-  }
-}
-
-/// Sam in the lit window at the top: a head and shoulders in the dusk colour.
-class _Silhouette extends StatelessWidget {
-  const _Silhouette();
-
-  static const double _head = 10;
-  static const double _shoulders = 20;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      const SizedBox.square(
-        dimension: _head,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: DaylightColors.dusk,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
-      const SizedBox(height: 2),
-      SizedBox(
-        width: _shoulders,
-        height: _shoulders / 2,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: DaylightColors.dusk,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(math.max(_shoulders / 2, 1)),
-            ),
-          ),
-        ),
-      ),
-    ],
-  );
 }
