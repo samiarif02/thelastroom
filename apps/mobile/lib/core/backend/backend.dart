@@ -90,6 +90,11 @@ abstract interface class Backend {
   /// ([AccountFailure.noAccount]). Throws [AccountException].
   Future<void> sendSignInLink(String email);
 
+  /// "Sign out" (FR-3): ends this device's session. The device is signed out even when the
+  /// server can't be told (offline): the local session goes first. Throws only when the session
+  /// couldn't be ended here.
+  Future<void> signOut();
+
   /// What the sign-in links opened on this device did: the account signed in, or the link was
   /// refused (expired or already used). Broadcast; nothing is replayed.
   Stream<AccountLinkEvent> get accountLinks;

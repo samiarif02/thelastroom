@@ -5,6 +5,9 @@ import 'package:drift/drift.dart';
 
 import '../db/app_database.dart';
 
+/// What hasn't reached the server yet: [rooms] finished attempts, and [other] rows (the profile).
+typedef PendingUploads = ({int rooms, int other});
+
 /// What an outbox row sends.
 enum OutboxKind {
   /// One attempt, by its `attempt_id`.
@@ -95,6 +98,28 @@ class Outbox {
         .getSingle();
     return row.read<int>('n');
   }
+
+  /// What still waits, by kind ("Sign out" refuses while anything does).
+  Future<PendingUploads> pending() async {
+    final rows = await _db
+        .customSelect('select kind, count(*) as n from outbox group by kind')
+        .get();
+    var rooms = 0;
+    var other = 0;
+    for (final r in rows) {
+      final n = r.read<int>('n');
+      if (_kind(r.read<String>('kind')) == OutboxKind.attempt) {
+        rooms += n;
+      } else {
+        other += n;
+      }
+    }
+    return (rooms: rooms, other: other);
+  }
+
+  /// Every waiting row is due now, whatever its backoff: a send the player asked for.
+  Future<void> makeAllDue() =>
+      _db.customStatement('update outbox set next_try_at = 0');
 
   /// When the next waiting row is due, or null when the outbox is empty.
   Future<DateTime?> nextDue() async {

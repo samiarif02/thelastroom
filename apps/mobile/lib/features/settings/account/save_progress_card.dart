@@ -2,9 +2,12 @@ import 'package:brand/brand.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/providers.dart';
+import '../../../app/router.dart';
 import '../../../core/backend/backend.dart';
+import '../../../core/sync/outbox.dart';
 import '../../../ui/daylight/daylight_kit.dart';
 import 'save_progress_controller.dart';
 
@@ -90,6 +93,31 @@ class SaveProgressCard extends ConsumerStatefulWidget {
       'Signed in. Your saved progress is coming down to this device and joining what you '
       'played here.';
 
+  static const String signOut = 'Sign out';
+  static const String signingOut = 'Backing up, then signing out…';
+  static const String switchEmail = 'Use a different email';
+  static const String cancel = 'Cancel';
+
+  static String signOutTitle(String email) => 'Sign out of $email?';
+  static const String signOutLine =
+      'Your progress stays saved to this email. This phone starts fresh as a guest; sign in '
+      'again any time with “Saved on another device? Sign in”.';
+  static const String switchTitle = 'Use a different email?';
+  static String switchLine(String email) =>
+      'First sign out of $email: your progress stays saved to it. This phone starts fresh as a '
+      'guest; then choose “Saved on another device? Sign in” with the other email, or save the '
+      'new guest’s progress to it.';
+
+  /// "Sign out" refused: what hasn't backed up yet.
+  static String unsyncedLine(PendingUploads left) => switch (left.rooms) {
+    0 => 'Your latest changes haven’t backed up yet. Connect to the internet, then sign out.',
+    1 => '1 room hasn’t backed up yet. Connect to the internet, then sign out.',
+    final n =>
+      '$n rooms haven’t backed up yet. Connect to the internet, then sign out.',
+  };
+  static const String signOutFailed =
+      'The save desk didn’t answer properly, so you’re still signed in. Try again in a moment.';
+
   static const String invalidEmail = 'That doesn’t look like an email address.';
   static const String linkExpired =
       'That link expired or was already used. Request a new one here, and open the latest email '
@@ -169,6 +197,12 @@ class _SaveProgressCardState extends ConsumerState<SaveProgressCard> {
     final session = ref.watch(sessionProvider);
     final flow = ref.watch(saveProgressProvider);
     ref.listen(saveProgressProvider, (before, now) {
+      // Signed out: the front door, as a new player (the title, then onboarding).
+      if (now.signedOutHere && before?.signedOutHere != true) {
+        _controller.signOutSeen();
+        GoRouter.maybeOf(context)?.go(Routes.home);
+        return;
+      }
       // Back on the email step, the address the controller settled on is shown.
       if (before?.step != now.step && now.step == AccountStep.enterEmail) {
         if (_email.text != now.email && now.email.isNotEmpty) {
@@ -259,6 +293,34 @@ class _SaveProgressCardState extends ConsumerState<SaveProgressCard> {
           _line(SaveProgressCard.linkedLine(email), color: DaylightColors.ink),
           const SizedBox(height: DaylightSpace.s8),
           _line(SaveProgressCard.linkedHow),
+          if (flow.unsynced case final left?) ...[
+            const SizedBox(height: DaylightSpace.s12),
+            _note(SaveProgressCard.unsyncedLine(left)),
+          ] else if (failure != null) ...[
+            const SizedBox(height: DaylightSpace.s12),
+            _note(SaveProgressCard.signOutFailed),
+          ],
+          const SizedBox(height: DaylightSpace.s16),
+          TactileButton(
+            label: flow.signingOut
+                ? SaveProgressCard.signingOut
+                : SaveProgressCard.signOut,
+            icon: flow.signingOut ? PhosphorBold.hourglass : PhosphorBold.door,
+            tone: TactileTone.quiet,
+            compact: true,
+            onPressed: flow.signingOut
+                ? null
+                : () => _confirmSignOut(email, switching: false),
+          ),
+          const SizedBox(height: DaylightSpace.s8),
+          TactileButton(
+            label: SaveProgressCard.switchEmail,
+            tone: TactileTone.quiet,
+            compact: true,
+            onPressed: flow.signingOut
+                ? null
+                : () => _confirmSignOut(email, switching: true),
+          ),
         ];
       case SaveProgressFace.enterEmail:
       case SaveProgressFace.sending:
@@ -354,6 +416,32 @@ class _SaveProgressCardState extends ConsumerState<SaveProgressCard> {
           ),
         ];
     }
+  }
+
+  /// The Daylight confirm sheet: "Sign out" or "Cancel". Cancel (or back) changes nothing.
+  Future<void> _confirmSignOut(String email, {required bool switching}) async {
+    final title = switching
+        ? SaveProgressCard.switchTitle
+        : SaveProgressCard.signOutTitle(email);
+    final confirmed = await showGeneralDialog<bool>(
+      context: context,
+      barrierLabel: title,
+      // The sheet draws its own scrim.
+      barrierColor: DaylightColors.ink.withValues(alpha: 0),
+      transitionDuration: Duration.zero,
+      pageBuilder: (sheet, _, _) => ChoiceSheet(
+        title: title,
+        line: switching
+            ? SaveProgressCard.switchLine(email)
+            : SaveProgressCard.signOutLine,
+        primary: SaveProgressCard.signOut,
+        primaryIcon: PhosphorBold.door,
+        onPrimary: () => Navigator.of(sheet).pop(true),
+        secondary: SaveProgressCard.cancel,
+        onSecondary: () => Navigator.of(sheet).pop(false),
+      ),
+    );
+    if (confirmed == true && mounted) await _controller.signOut();
   }
 
   Widget _line(String text, {Color color = DaylightColors.ink2}) =>
