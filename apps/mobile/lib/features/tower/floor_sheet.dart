@@ -55,6 +55,14 @@ class FloorSheet extends StatelessWidget {
     return 'Both: some rooms by choices, some out loud.';
   }
 
+  /// The interviewers met on a floor, in the order they first speak.
+  static List<String> faces(List<Mission> floor) => <String>{
+    for (final m in floor) ...[
+      m.question.speakerId,
+      for (final l in m.scene) l.speakerId,
+    ],
+  }.where((id) => interviewers.any((i) => i.id == id)).toList();
+
   /// What opens a floor that isn't open yet.
   static String opensWhen(Mission last) =>
       'Opens when you finish room ${last.number}, “${last.title}”.';
@@ -67,15 +75,10 @@ class FloorSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final f = ChapterGrade.values[chapter.number - 1].floor;
-    final open = rooms.any((r) => r.state != RoomState.locked);
+    final open = floorIsOpen(rooms);
     final lit = rooms.where((r) => r.state == RoomState.done).length;
     final floorMissions = [for (final r in rooms) r.mission];
-    final faces = <String>{
-      for (final m in floorMissions) ...[
-        m.question.speakerId,
-        for (final l in m.scene) l.speakerId,
-      ],
-    }.where((id) => interviewers.any((i) => i.id == id)).toList();
+    final faces = FloorSheet.faces(floorMissions);
     final before = missions
         .where((m) => m.chapter == chapter.number - 1)
         .lastOrNull;

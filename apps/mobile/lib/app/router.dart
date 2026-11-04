@@ -16,6 +16,7 @@ import '../features/progression/floor_cleared_screen.dart';
 import '../features/recall/recall_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/title/wrong_floor_screen.dart';
+import '../features/tower/all_chapters_screen.dart';
 import '../features/tower/tower_screen.dart';
 import '../ui/daylight/daylight_route.dart';
 
@@ -47,6 +48,9 @@ abstract final class Routes {
   static const String settings = '$_towerPath/$_settings';
   static const String character = '$_towerPath/$_character';
 
+  /// Every chapter, floor by floor, from "View all chapters" under the tower.
+  static const String chapters = '$_towerPath/$_chapters';
+
   /// The Recall Room (brief 21).
   static const String recall = '$_towerPath/$_recall';
 
@@ -64,6 +68,7 @@ abstract final class Routes {
   static const String _mission = 'mission';
   static const String _recall = 'recall';
   static const String _floor = 'floor';
+  static const String _chapters = 'chapters';
 }
 
 /// Dev tools (`/dev/...`) exist in debug and profile builds only. In a release build this is a
@@ -134,6 +139,11 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
           const SettingsScreen(),
           DaylightTransition.through,
         ),
+      ),
+      GoRoute(
+        path: Routes._chapters,
+        pageBuilder: (context, state) =>
+            daylightPage(state, const AllChaptersScreen()),
       ),
       GoRoute(
         path: Routes._character,
