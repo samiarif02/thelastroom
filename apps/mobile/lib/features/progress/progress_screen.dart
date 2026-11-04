@@ -21,6 +21,7 @@ import '../progression/progression.dart';
 import '../progression/progression_card.dart';
 import '../progression/skill_badges.dart' show SkillCopy;
 import '../progression/skills_shelf.dart';
+import '../tower/tower_door.dart';
 import 'chapter_report.dart';
 import 'chapter_report_screen.dart';
 import 'file_trouble.dart';
@@ -32,7 +33,7 @@ enum ProgressSource { tower, chapterReport }
 
 /// Your file (FR-16, FR-41; Daylight in brief 48), the tower's Skills tab: a profile you'd want
 /// to open. On paper, from the top: the progress hero (XP, the weekly ring, rooms lit, the
-/// average and the change since room 1), the skills shelf with the next one to earn, the four
+/// average and the best gain on a replayed room), the skills shelf with the next one to earn, the four
 /// scores as a radar, the Chapter 1 report, every room grouped by floor in its floor's colour
 /// (a played room shows its latest score and opens its last result), and how you play. Every
 /// state is drawn: loading (a skeleton of the hero and rooms), nothing played (an empty hero
@@ -116,7 +117,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     } else {
       final skills = report.skills;
       body = [
-        enter(_Hero(report: report)),
+        enter(_Hero(report: report, aiScores: aiScores)),
         enter(_Skills(unlocked: unlocked)),
         enter(
           _Section(
@@ -231,26 +232,30 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 }
 
-String _signed(int n) => n > 0 ? '+$n' : '$n';
-
 /// The hero: the progression card with the file's three numbers under it, and on an empty
 /// file the way into room 1.
 class _Hero extends StatelessWidget {
-  const _Hero({required this.report});
+  const _Hero({required this.report, required this.aiScores});
 
   final ProgressReport report;
+  final Map<String, SavedAiScore> aiScores;
 
   static const String litLabel = 'Rooms lit';
   static const String averageLabel = 'Average';
-  static const String sinceLabel = 'Since room 1';
   static const String none = '–';
   static const String noneYet = 'none yet';
 
   @override
   Widget build(BuildContext context) {
-    final delta = report.sinceBaseline?.totalDelta;
     final average = report.average;
     final first = missions.first.number;
+    final gain = bestGain([
+      for (final line in report.missions)
+        (
+          room: line.mission.number,
+          totals: shownTotalsAll(line, aiFor(line, aiScores)),
+        ),
+    ]);
     return ProgressionCard(
       stats: [
         HeroStat(
@@ -265,10 +270,10 @@ class _Hero extends StatelessWidget {
           semanticLabel: '$averageLabel: ${average ?? noneYet}',
         ),
         HeroStat(
-          label: sinceLabel,
-          value: delta == null ? none : _signed(delta),
-          semanticLabel:
-              '$sinceLabel: ${delta == null ? noneYet : _signed(delta)}',
+          label: GainWords.label,
+          value: GainWords.value(gain),
+          after: GainWords.after(gain),
+          semanticLabel: GainWords.spoken(gain),
         ),
       ],
       footer: report.done > 0
@@ -598,42 +603,48 @@ class _FloorGroup extends StatelessWidget {
   }
 }
 
-/// The room's number in a small arch: honey once played, the floor's colour for the room up
-/// next, sand with a lock for one still closed.
-class _RoomArch extends StatelessWidget {
-  const _RoomArch({required this.number, required this.stand});
+/// The room's door, exactly as on the tower (the owner, 4 Nov: "here also the door images
+/// should show"): honey with a check once played, ajar with the interviewer in it for the room
+/// up next, closed and pale with a lock for one not open yet. Its number sits under it.
+class _RoomDoor extends StatelessWidget {
+  const _RoomDoor({required this.mission, required this.stand});
 
-  final int number;
+  final Mission mission;
   final _RoomStand stand;
 
-  static const double _w = 36;
-  static const double _h = 44;
-  static const double _lock = 16;
+  static const double _door = 28;
 
   @override
   Widget build(BuildContext context) {
     final f = ChapterTint.floorOf(context);
-    final (ground, ink) = switch (stand) {
-      _RoomStand.played => (DaylightColors.honey, DaylightColors.onHoney),
-      _RoomStand.next => (f.base, DaylightColors.raised),
-      _RoomStand.locked => (DaylightColors.sand2, DaylightColors.ink2),
-    };
-    return SizedBox(
-      width: _w,
-      height: _h,
-      child: ArchFrame(
-        ground: ground,
-        bottomRadius: DaylightRadius.tag,
-        child: Align(
-          alignment: const Alignment(0, 0.4),
-          child: stand == _RoomStand.locked
-              ? Icon(PhosphorBold.lockSimple, size: _lock, color: ink)
-              : Text(
-                  '$number',
-                  style: DaylightType.tabular(DaylightType.body4)
-                      .copyWith(color: ink),
-                ),
-        ),
+    final locked = stand == _RoomStand.locked;
+    final ink = locked ? DoorInk.pale(f) : DoorInk.open(f);
+    return ExcludeSemantics(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TowerDoor(
+            state: switch (stand) {
+              _RoomStand.played => DoorState.done,
+              _RoomStand.next => DoorState.next,
+              _RoomStand.locked => DoorState.locked,
+            },
+            width: _door,
+            leaf: stand == _RoomStand.played ? DaylightColors.honey : ink.leaf,
+            panel: locked ? f.deep : ink.panel,
+            frame: ink.frame,
+            person: stand == _RoomStand.next
+                ? CastPeople.byId(mission.question.speakerId)
+                : null,
+          ),
+          // Clear of the light the open door spills on its sill.
+          const SizedBox(height: DaylightSpace.s8),
+          Text(
+            '${mission.number}',
+            style: DaylightType.tabular(DaylightType.caption4)
+                .copyWith(color: locked ? DaylightColors.ink2 : f.deep),
+          ),
+        ],
       ),
     );
   }
@@ -674,7 +685,7 @@ class _PlayedRoom extends StatelessWidget {
         padding: const EdgeInsets.all(DaylightSpace.s12),
         child: Row(
           children: [
-            _RoomArch(number: m.number, stand: _RoomStand.played),
+            _RoomDoor(mission: m, stand: _RoomStand.played),
             const SizedBox(width: DaylightSpace.s12),
             Expanded(
               child: Column(
@@ -750,7 +761,7 @@ class _NextRoom extends StatelessWidget {
         padding: const EdgeInsets.all(DaylightSpace.s12),
         child: Row(
           children: [
-            _RoomArch(number: mission.number, stand: _RoomStand.next),
+            _RoomDoor(mission: mission, stand: _RoomStand.next),
             const SizedBox(width: DaylightSpace.s12),
             Expanded(
               child: Column(
@@ -806,7 +817,7 @@ class _LockedRoom extends StatelessWidget {
           padding: const EdgeInsets.all(DaylightSpace.s12),
           child: Row(
             children: [
-              _RoomArch(number: mission.number, stand: _RoomStand.locked),
+              _RoomDoor(mission: mission, stand: _RoomStand.locked),
               const SizedBox(width: DaylightSpace.s12),
               Expanded(
                 child: Column(
@@ -962,12 +973,56 @@ class _Skeleton extends StatelessWidget {
   }
 }
 
+/// The hero's "Best gain" tile in words, so it's never a bare number: "+30 on room 1",
+/// "−5 on room 3 vs first try", or, before any replay, how to get one.
+abstract final class GainWords {
+  static const String label = 'Best gain';
+
+  /// Before any replay the tile is only words: a dash beside them read as a number.
+  static const String none = '';
+  static const String replay = 'Replay a room to see your gain';
+
+  /// The real minus sign, not a hyphen.
+  static const String minus = '\u2212';
+
+  static String value(RoomGain? g) => switch (g?.points) {
+    null => none,
+    final p when p > 0 => '+$p',
+    final p when p < 0 => '$minus${-p}',
+    _ => '0',
+  };
+
+  static String? after(RoomGain? g) => switch (g) {
+    null => replay,
+    RoomGain(:final room, :final points) when points > 0 => 'on room $room',
+    RoomGain(:final room, points: 0) => 'on room $room, same as first try',
+    RoomGain(:final room) => 'on room $room vs first try',
+  };
+
+  static String spoken(RoomGain? g) => switch (g) {
+    null => '$label: none yet. $replay.',
+    RoomGain(:final room, :final points) when points > 0 =>
+      '$label: up $points on room $room, against its first try',
+    RoomGain(:final room, points: 0) =>
+      '$label: level with room $room\'s first try',
+    RoomGain(:final room, :final points) =>
+      '$label: down ${-points} on room $room, against its first try',
+  };
+}
+
+/// Every attempt's total on [line] as it was shown, oldest first: the AI's for the latest when
+/// [ai] scored it, the game's own for the rest (only the latest verdict is kept).
+List<int> shownTotalsAll(MissionProgress line, SavedAiScore? ai) {
+  final shown = [for (final a in line.attempts) a.score.total];
+  if (ai != null && shown.isNotEmpty) shown.last = ai.score.overall.score;
+  return shown;
+}
+
 /// [line]'s latest and best totals as each attempt was shown: the AI's for the latest when [ai]
 /// scored it, the game's own for the rest (only the latest verdict is kept). Both read the same
 /// scores, so the best is never below the latest (QA 51, BUG-4: "Best 85 · 1 try" beside 90).
 ({int latest, int best}) shownTotals(MissionProgress line, SavedAiScore? ai) {
-  final shown = [for (final a in line.attempts) a.score.total];
-  if (ai != null) shown.last = ai.score.overall.score;
+  final shown = shownTotalsAll(line, ai);
   return (latest: shown.last, best: shown.reduce(math.max));
 }
 

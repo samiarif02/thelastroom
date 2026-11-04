@@ -8,7 +8,7 @@ import 'progression.dart';
 /// The player's progress as the hero of Your file (brief 32; Daylight in brief 48): a floor 1
 /// panel, the up-next card's colour, with the XP large, the soft weekly goal as a honey ring on
 /// the floor's deep track, the week in words and the interview countdown when a date is set.
-/// [stats] sit under it as deep tiles (rooms lit, average, the change since room 1), and
+/// [stats] sit under it as deep tiles (rooms lit, average, the best gain on a replayed room), and
 /// [footer] at the foot (the empty file's "Start room 1"). Never punishing: a quiet week is
 /// just "so far".
 class ProgressionCard extends ConsumerWidget {
@@ -288,7 +288,8 @@ class HeroStat extends StatelessWidget {
                     ),
                     if (a != null)
                       TextSpan(
-                        text: ' $a',
+                        // No number (the file's "Best gain" before a replay): just the words.
+                        text: value.isEmpty ? a : ' $a',
                         style: DaylightType.body5.copyWith(color: f.on),
                       ),
                   ],
