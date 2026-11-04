@@ -7,9 +7,11 @@ import '../../app/router.dart';
 import '../../core/notifications/reminder_settings_row.dart';
 import '../../ui/daylight/daylight_kit.dart';
 import '../tips/tips.dart';
+import 'account/save_progress_card.dart';
 import 'audio/audio_settings_section.dart';
 
-/// Settings (brief 20; Daylight in brief 46), from the tower's "You" tab: sound and reminders on
+/// Settings (brief 20; Daylight in brief 46), from the tower's "You" tab: "Save your progress"
+/// (FR-3), sound and reminders on
 /// white cards over the paper, under a top bar with the way back. The theme picker is gone (one
 /// considered look). The system back button also returns to the tower (the route is the
 /// tower's child).
@@ -54,16 +56,21 @@ class SettingsScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Entrance(
-                        child: DaylightPanel(child: AudioSettingsSection()),
+                        child: DaylightPanel(child: SaveProgressCard()),
                       ),
                       const SizedBox(height: DaylightSpace.s24),
                       const Entrance(
                         index: 1,
+                        child: DaylightPanel(child: AudioSettingsSection()),
+                      ),
+                      const SizedBox(height: DaylightSpace.s24),
+                      const Entrance(
+                        index: 2,
                         child: DaylightPanel(child: ReminderSettingsRow()),
                       ),
                       const SizedBox(height: DaylightSpace.s24),
                       Entrance(
-                        index: 2,
+                        index: 3,
                         child: DaylightPanel(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
