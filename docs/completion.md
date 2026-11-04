@@ -19,7 +19,7 @@ missing**.
 | Chapters 2 and 3 playable: Chapter 2 all voice, Chapter 3 mixed | Built | #41 (7 voice rooms), #42 (3 built + 4 voice), #47 (opened), #49 (report → Chapter 2), #54 (every mission played to its debrief in a test) | |
 | Answer out loud: spoken interviewer, record, pause on 5 s of silence, Continue, delete and retake | Built | #44 (`features/voice/`, `score-voice`), restyled in #56 | Offline, a spoken answer is scored by the player's self-check, not by the AI |
 | "On what basis do you score, and how do you know it scores well?" | Built | #46: the basis on every result, "How we scored this", [scoring-eval.md](scoring-eval.md) (92 % in band, r = 0.91 with the engine) | The weights are still a hypothesis: no human-rated set yet |
-| Live AI scoring on a real phone | Built | Status 51: release build on the realme over USB, rooms 2, 5, 6, 7 scored 92, 90, 85, 82 by Gemini | **Needs the backend running on a laptop:** no hosted Supabase by design (ADR 0005); without it the offline score shows. The free-tier key rate-limits heavy use |
+| Live AI scoring on a real phone | Built | Status 51: release build on the realme over USB, rooms 2, 5, 6, 7 scored 92, 90, 85, 82 by Gemini | Since 4 Nov the owner's builds use a hosted Supabase project (ADR 0008), so it works off USB; a clone stays offline until a backend is configured (ADR 0005). The free-tier key rate-limits heavy use |
 | What the player learns from each mission | Built | `Mission.practises` shown before every room and on the debrief (wave-6 contract, #44, #46, #56) | |
 | Bring players back on days 3 and 5 | Built | #51 (test reminder, the next reminder shown, welcome back, plan days 1/3/5/8), #56 (weekly ring, XP, skills, floor-cleared reward) | iOS reminders wired, untested; web has none (FR-53) |
 | A floor sheet and doors on the tower | Built | #56 (doors, `FloorSheet`, `floor_previewed`) | |
@@ -77,7 +77,7 @@ missing**.
 | FR-21 | Flags lower dimensions, drive the follow-up | Built | #5 | |
 | FR-22 | Structure is the weakest beat | Built | #5 | |
 | FR-23 | Weights documented as a hypothesis | Built | #29 (README "How the score works", "Honest limits") | |
-| FR-24 | AI senior recruiter scores (Gemini) | Built | #25, #26 (Deno tests in CI), #46 (live eval), status 51 (live on the realme) | Needs the local backend: no hosted Supabase (ADR 0005) |
+| FR-24 | AI senior recruiter scores (Gemini) | Built | #25, #26 (Deno tests in CI), #46 (live eval), status 51 (live on the realme) | Hosted for the owner's builds (ADR 0008); a clone needs its own backend (ADR 0005) |
 | FR-25 | A guessed beat scores 0 | Built | #18 | |
 | FR-26 | The reason counts (principles, 60 %) | Built | #18 | |
 | FR-30 | Chapter 1 as specified (baseline, M3 checkpoint, M6 continuity, M7 review, badge, cliffhanger, teaser) | Built | #5, #9 (all seven missions, continuity, M3 unhinted), #30 (report, teaser), #38 (the badge), #39 (the cliffhanger epilogue), #56 (floor-cleared reward) | |

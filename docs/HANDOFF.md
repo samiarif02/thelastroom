@@ -58,7 +58,9 @@ This worker: `docs/53-wave-6-final` in `../thelastroom-w18`, from `origin/main` 
 
 ## Owner decisions that still hold
 
-- Zero setup (ADR 0005): clone → `flutter run`, no keys, offline. No hosted Supabase.
+- Zero setup (ADR 0005): clone → `flutter run`, no keys, offline. The owner's builds use the hosted
+  project `eeanpdlqxmatuidrhoht` (ADR 0008): build with a define file holding its URL and anon key
+  (kept outside the repo). Auth email templates for the 6-digit code are set in its dashboard.
 - Landing page on Vercel (ADR 0007); the game's web build is a CI compile check only.
 - No APK release until the owner asks; the owner sees UI before a merge.
 - Free-tier Gemini key: heavy use rate-limits and falls back to the offline score.

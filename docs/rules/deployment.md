@@ -11,8 +11,8 @@ hosted thing is the marketing landing page in `web/` (ADR 0007).
 | **Landing page** (`web/`) | Static Next.js export, built and served by **Vercel's Git integration** (root directory `web`) at https://thelastroom-ten.vercel.app. No token or secret in the repo, no deploy job in CI; CI's `web` job lints, typechecks and builds it. | Every push to `main` (Vercel). ADR 0007. |
 | **Android APK** | `flutter build apk --release`, attached to a GitHub Release (`gh release create`). | At milestones. Signing keys never in git (`docs/rules/secrets.md`). |
 | **iOS** | Xcode archive → TestFlight. | Only if needed for the demo. |
-| **Supabase migrations** | Today: replayed locally by `supabase start` / `supabase db reset`; there's no hosted project (ADR 0005). With one: `supabase db push` from `main`, after the PR that adds them merges. | `docs/rules/migrations.md`. |
-| **Edge Functions** (`score`, `score-voice`) | Today: `supabase functions serve --env-file <your .env>` on a laptop; a phone reaches it over USB (`adb reverse tcp:54321 tcp:54321`) or the same Wi-Fi. With a hosted project: `supabase functions deploy`, secrets via `supabase secrets set --env-file .env`. | After merge. |
+| **Supabase migrations** | Locally: replayed by `supabase start` / `supabase db reset`. Hosted (the owner's project, ADR 0008): `supabase db push --linked` from `main`, after the PR that adds them merges; dry-run first. | `docs/rules/migrations.md`. |
+| **Edge Functions** (`score`, `score-voice`) | Locally: `supabase functions serve --env-file <your .env>` on a laptop; a phone reaches it over USB (`adb reverse tcp:54321 tcp:54321`) or the same Wi-Fi. Hosted (ADR 0008): `supabase functions deploy score score-voice --use-api`; `GEMINI_API_KEY` is set by the owner in the dashboard's function secrets, never via the CLI from a shared `.env`. | After merge. |
 
 ## Rules
 
