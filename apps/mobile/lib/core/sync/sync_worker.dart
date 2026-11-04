@@ -94,6 +94,16 @@ class SyncWorker {
     return _running = _flushAll().whenComplete(() => _running = null);
   }
 
+  /// Sends everything waiting now, retry waits ignored, and says what's still left: "Sign out"
+  /// (FR-3) asks this before it lets the device go.
+  Future<PendingUploads> flushEverything() async {
+    if (!_disposed) {
+      await _outbox.makeAllDue();
+      await flush();
+    }
+    return _outbox.pending();
+  }
+
   Future<void> _flushAll() async {
     // Batch after batch while rows are due; a failed batch is pushed into the future by its
     // backoff, so this always ends.

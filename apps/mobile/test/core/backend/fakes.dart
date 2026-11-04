@@ -30,11 +30,8 @@ const Env emptyEnv = Env(
 /// Its tables behave like the server's: attempts are insert-or-skip on `attempt_id`, the
 /// profile is one row. [online] false makes every data call fail, like a dropped network.
 class FakeBackend implements Backend {
-  FakeBackend({
-    Future<BackendSession> Function()? restore,
-    Future<GuestSession> Function()? signIn,
-  }) : _restore = restore ?? (() async => const NoSession()),
-       _signIn = signIn ?? (() async => const GuestSession(userId: guestId));
+  FakeBackend({Future<BackendSession> Function()? restore, this._signIn})
+    : _restore = restore ?? (() async => const NoSession());
 
   /// The server's `mission_attempts`, by `attempt_id`.
   final Map<String, RemoteAttempt> attempts = {};
@@ -213,11 +210,26 @@ class FakeBackend implements Backend {
     );
   }
 
+  /// The new guest a "Sign out" leaves this device as.
+  static const String nextGuestId = '00000000-0000-4000-8000-000000000002';
+
+  int signOuts = 0;
+
+  @override
+  Future<void> signOut() async {
+    await _auth('signOut');
+    signOuts++;
+    currentUserId = nextGuestId;
+    confirmedEmail = null;
+  }
+
   /// An expired or already used sign-in link opens this app (`#error=access_denied…`).
   void openRefusedLink() => _links.add(const AccountLinkRefused('otp_expired'));
 
   final Future<BackendSession> Function() _restore;
-  final Future<GuestSession> Function() _signIn;
+
+  /// Null: a new anonymous user, the id this device is on now (a new one after [signOut]).
+  final Future<GuestSession> Function()? _signIn;
   int restoreCalls = 0;
   int signInCalls = 0;
 
@@ -232,7 +244,10 @@ class FakeBackend implements Backend {
   @override
   Future<GuestSession> signInAnonymously() {
     signInCalls++;
-    return _signIn();
+    final signIn = _signIn;
+    return signIn == null
+        ? Future.value(GuestSession(userId: currentUserId))
+        : signIn();
   }
 }
 

@@ -79,6 +79,12 @@ new email form.**
   - An expired or already used link, too many emails (resend waits a minute), no network, an
     email another account holds and an email nobody saved to each have their own written state;
     none shows the server's message.
+  - Given a saved account, when the player taps "Sign out" (or "Use a different email") and
+    confirms, then everything waiting in the outbox is sent first; if anything can't be (offline,
+    an error) the sign-out is refused with how many rooms haven't backed up. Otherwise the
+    session ends, this device's player data is cleared (device settings like sound and reminders
+    stay), a new guest starts, the app returns to the title as a new player, and
+    `account_signed_out` fires, never with the email (status 68).
   - With no backend configured (ADR 0005), the card says saving needs the online backend and
     that offline play is unaffected; nothing on it can be pressed.
 - **FR-4** **[08]** Short onboarding after Mission 1: target role (v1: general entry-level/product),

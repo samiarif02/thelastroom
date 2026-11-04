@@ -7,8 +7,14 @@ import '../../../app/providers.dart';
 import '../../../core/analytics/analytics_event.dart';
 import '../../../core/analytics/event_value.dart';
 import '../../../core/backend/backend.dart';
+import '../../../core/notifications/reminders.dart';
+import '../../../core/profile/profile_repository.dart';
 import '../../../core/sync/account_merge.dart';
+import '../../../core/sync/outbox.dart';
 import '../../recall/recall_store.dart';
+import '../../tips/tips.dart';
+import '../../tower/welcome_back.dart';
+import 'player_data.dart';
 
 /// Which of the card's two paths the player is on (FR-3).
 enum AccountMode {
@@ -45,6 +51,9 @@ class AccountFlow {
     this.resent = false,
     this.canResend = true,
     this.signedInHere = false,
+    this.signingOut = false,
+    this.unsynced,
+    this.signedOutHere = false,
   });
 
   final AccountMode mode;
@@ -65,6 +74,17 @@ class AccountFlow {
 
   /// This device just signed in to a saved account (the linked card says the file is coming).
   final bool signedInHere;
+
+  /// "Sign out" is backing everything up, then signing out.
+  final bool signingOut;
+
+  /// "Sign out" was refused: this is what hadn't reached the server (the card says how many
+  /// rooms, and to get online first). Null when nothing was refused.
+  final PendingUploads? unsynced;
+
+  /// This device just signed out: its player data is gone and a new guest is on the way. The
+  /// card takes the player to the front door.
+  final bool signedOutHere;
 
   bool get busy => step == AccountStep.sending;
 
@@ -127,6 +147,30 @@ final accountDevicePrepProvider = Provider<Future<bool> Function()>(
     }
     return hadProgress;
   },
+);
+
+/// "Sign out"'s backup (FR-3): sends everything waiting now and returns what's still left.
+/// Nothing left is the only way out; a slow answer counts what's left at that moment. Tests
+/// override it.
+final signOutBackupProvider = Provider<Future<PendingUploads> Function()>(
+  (ref) => () async {
+    final db = ref.read(databaseProvider);
+    final worker = ref.read(syncWorkerProvider);
+    if (worker != null) {
+      try {
+        return await worker.flushEverything().timeout(accountCallTimeout);
+      } on TimeoutException {
+        // Still sending: whatever hasn't gone yet blocks the sign-out.
+      }
+    }
+    return Outbox(db).pending();
+  },
+);
+
+/// Forgets the signed-out player on this device ([PlayerData.clear]). Tests override it.
+final playerDataWipeProvider = Provider<Future<void> Function()>(
+  (ref) =>
+      () => PlayerData.clear(ref.read(databaseProvider)),
 );
 
 /// The "Save your progress" card's controller (FR-3). Every backend call goes through
@@ -338,6 +382,71 @@ class SaveProgressController extends Notifier<AccountFlow> {
                 failure: AccountFailure.linkExpired,
               );
     }
+  }
+
+  /// "Sign out" (FR-3), after the player confirmed it. Backs everything up first: anything that
+  /// can't reach the server (offline, an error) blocks it, so no progress is ever lost. Then the
+  /// session ends, this device's player data is cleared ([PlayerData]), and a new guest signs
+  /// in: the next person on this phone starts fresh. The account stays saved to its email.
+  Future<void> signOut() async {
+    final session = ref.read(sessionProvider);
+    if (state.signingOut || session is! GuestSession || !session.isLinked) {
+      return;
+    }
+    _stopWaiting();
+    _cooldown?.cancel();
+    state = const AccountFlow(signingOut: true);
+    final log = ref.read(logProvider);
+    PendingUploads left;
+    try {
+      left = await ref.read(signOutBackupProvider)();
+    } on Object catch (error) {
+      log.warn('sign out backup failed', {'error': '${error.runtimeType}'});
+      left = (rooms: 0, other: 1);
+    }
+    if (!ref.mounted) return;
+    if (left.rooms + left.other > 0) {
+      log.warn('sign out blocked', {'rooms': left.rooms, 'other': left.other});
+      state = AccountFlow(unsynced: left);
+      return;
+    }
+    try {
+      await ref.read(backendProvider).signOut().timeout(accountCallTimeout);
+    } on Object catch (error) {
+      log.warn('sign out failed', {'error': '${error.runtimeType}'});
+      if (ref.mounted) {
+        state = const AccountFlow(failure: AccountFailure.unavailable);
+      }
+      return;
+    }
+    if (!ref.mounted) return;
+    // The old session (and its sync worker) go first, so nothing writes while the data clears.
+    final sessions = ref.read(sessionProvider.notifier)..signedOut();
+    try {
+      await ref.read(playerDataWipeProvider)();
+    } on Object catch (error, stack) {
+      // Signed out either way; a store that wouldn't clear is a bug to see, not a dead end.
+      log.error('player data not cleared', error: error, stackTrace: stack);
+    }
+    if (!ref.mounted) return;
+    // Everything read from the old player's data is read again, as a new player's.
+    ref
+      ..invalidate(profileProvider)
+      ..invalidate(tipsProvider)
+      ..invalidate(welcomeBackProvider);
+    // The old player's reminders ("Room 5 is waiting") make way for a new player's.
+    unawaited(ref.read(remindersProvider).reschedule());
+    ref.read(analyticsProvider).track(AnalyticsEvent.accountSignedOut, {
+      'had_unsynced': const EventValue.flag(false),
+    });
+    log.info('account signed out');
+    state = const AccountFlow(signedOutHere: true);
+    unawaited(sessions.start());
+  }
+
+  /// The card has taken the player on after a sign-out: back to a plain flow.
+  void signOutSeen() {
+    if (state.signedOutHere) state = const AccountFlow();
   }
 
   void _linked(GuestSession session) {

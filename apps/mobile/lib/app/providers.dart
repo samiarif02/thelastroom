@@ -65,6 +65,14 @@ class SessionNotifier extends Notifier<BackendSession> {
   /// The player saved their progress, or signed in on this device (FR-3): [session] is the
   /// linked account (the same id after a link, the account's id after a sign-in).
   void signedIn(GuestSession session) => state = session;
+
+  /// "Sign out" (FR-3): this device has no session until [start] signs a new guest in. The
+  /// sync worker goes with the old session.
+  void signedOut() {
+    _signIn?.cancel();
+    _signIn = null;
+    state = const NoSession();
+  }
 }
 
 /// The device's database. `main.dart` overrides it with [AppDatabase.onDevice]; nothing reads it

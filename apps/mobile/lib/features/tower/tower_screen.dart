@@ -24,9 +24,11 @@ import '../progression/skills_shelf.dart';
 import '../recall/recall_controller.dart';
 import '../tips/tip_overlay.dart';
 import '../tips/tips.dart';
+import 'all_chapters_screen.dart';
 import 'elevator.dart';
 import 'floor_sheet.dart';
 import 'northstar_tower.dart';
+import 'room_entry.dart';
 import 'tower_door.dart' show PlayCue;
 import 'tower_extras.dart';
 import 'tower_header.dart';
@@ -345,13 +347,7 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
       _say(TowerScreen.lockedNotice(rooms[i - 1].mission));
       return;
     }
-    _sounds
-      ..roomEntered()
-      ..elevator();
-    ref.read(analyticsProvider).track(AnalyticsEvent.roomEntered, {
-      'mission_id': EventValue.id(room.mission),
-      'replay': EventValue.flag(room.state == RoomState.done),
-    });
+    announceRoomEntered(ref, room);
     setState(() => _riding = room);
   }
 
@@ -383,6 +379,12 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     );
     final room = chosen;
     if (room != null && mounted) _tapRoom(room, rooms);
+  }
+
+  void _allChapters() {
+    if (_riding != null) return;
+    _sounds.uiTap();
+    context.go(Routes.chapters);
   }
 
   void _arrived() {
@@ -469,6 +471,7 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
                 },
                 onTapRoom: (r) => _tapRoom(r, value),
                 onFloor: (c) => unawaited(_showFloor(c, value)),
+                onAllChapters: _allChapters,
                 nextDoorKey: _nextDoor,
               )
             else
@@ -551,10 +554,14 @@ class _Tower extends StatefulWidget {
     required this.onReady,
     required this.onTapRoom,
     required this.onFloor,
+    required this.onAllChapters,
     this.nextDoorKey,
   });
 
   final ValueChanged<Chapter> onFloor;
+
+  /// "View all chapters" under the tower.
+  final VoidCallback onAllChapters;
 
   /// On the door to play, for its first-time tip.
   final Key? nextDoorKey;
@@ -685,6 +692,10 @@ class _TowerState extends State<_Tower> {
                       onFloor: widget.onFloor,
                     ),
                   ),
+                  gap: DaylightSpace.s12,
+                ),
+                enter(
+                  AllChaptersLink(onTap: widget.onAllChapters),
                   gap: DaylightSpace.s24,
                 ),
                 enter(SkillsShelf(unlocked: p.unlocked)),

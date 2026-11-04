@@ -313,6 +313,8 @@ void main() {
     await rig.run(const Duration(milliseconds: 300));
     await toTheTower(tester);
     final floor2 = chapters[1];
+    await tester.ensureVisible(find.text(NorthstarTower.floorLine(floor2)));
+    await tester.pump();
     await tester.tap(find.text(NorthstarTower.floorLine(floor2)));
     await rig.run(const Duration(milliseconds: 600));
     expect(find.byType(FloorSheet), findsOneWidget);
