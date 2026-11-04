@@ -34,15 +34,14 @@ class MissionProgress {
 
 /// The Chapter 1 summary at the top of the file, and every mission's line.
 class ProgressReport {
-  const ProgressReport({required this.missions, required this.sinceBaseline});
+  const ProgressReport({required this.missions});
 
   /// Built from [attempts] over the playable [missions].
   factory ProgressReport.of(
     List<Mission> missions,
     List<AttemptRecord> attempts,
-    AttemptRecord? baseline,
-  ) {
-    final lines = [
+  ) => ProgressReport(
+    missions: [
       for (final m in missions)
         MissionProgress(
           mission: m,
@@ -51,21 +50,10 @@ class ProgressReport {
               if (a.missionId == m.id) a,
           ],
         ),
-    ];
-    final latest = attempts.isEmpty ? null : attempts.last;
-    return ProgressReport(
-      missions: lines,
-      sinceBaseline: baseline == null || latest == null || latest == baseline
-          ? null
-          : compareToBaseline(baseline: baseline.score, latest: latest.score),
-    );
-  }
+    ],
+  );
 
   final List<MissionProgress> missions;
-
-  /// The latest attempt against the Mission 1 baseline (FR-30); null until there's an attempt
-  /// after the baseline.
-  final BaselineComparison? sinceBaseline;
 
   int get done => missions.where((m) => m.played).length;
   int get total => missions.length;
@@ -94,14 +82,46 @@ extension ProgressSkills on ProgressReport {
   }
 }
 
+/// The hero's "Best gain" (owner, 4 Nov: "what's −39?"): the biggest change on a room the player
+/// has replayed, its best replay against that same room's first try. It replaces "Since room 1",
+/// which set room 1's first try against the latest room, a different and harder one (a Chapter 2
+/// voice room on self-check went to −39 and meant nothing). Same room, same questions, so the
+/// comparison is fair.
+class RoomGain {
+  const RoomGain({required this.room, required this.points});
+
+  /// The room's number.
+  final int room;
+
+  /// Best replay minus first try; negative when every replay scored lower.
+  final int points;
+}
+
+/// One room's totals as the player saw them, oldest first: the input to [bestGain].
+typedef RoomTotals = ({int room, List<int> totals});
+
+/// The biggest [RoomGain] over [rooms]: for each room played at least twice, its best total
+/// after the first try minus the first try. The largest wins; a tie goes to the lower room.
+/// Null when no room has been replayed.
+RoomGain? bestGain(Iterable<RoomTotals> rooms) {
+  RoomGain? best;
+  for (final (:room, :totals) in rooms) {
+    if (totals.length < 2) continue;
+    final replays = totals.skip(1).reduce((a, b) => a > b ? a : b);
+    final gain = RoomGain(room: room, points: replays - totals.first);
+    if (best == null ||
+        gain.points > best.points ||
+        (gain.points == best.points && gain.room < best.room)) {
+      best = gain;
+    }
+  }
+  return best;
+}
+
 /// The report from the progress store.
 final progressReportProvider = FutureProvider.autoDispose<ProgressReport>((
   ref,
 ) async {
   final store = ref.read(progressRepositoryProvider);
-  return ProgressReport.of(
-    missions,
-    await store.attempts(),
-    await store.baseline(),
-  );
+  return ProgressReport.of(missions, await store.attempts());
 });

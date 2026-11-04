@@ -83,7 +83,11 @@ abstract final class FileEntries {
                   ),
                   SizedBox(width: DaylightSpace.s8),
                   Expanded(
-                    child: HeroStat(label: 'Since room 1', value: '+19'),
+                    child: HeroStat(
+                      label: 'Best gain',
+                      value: '+19',
+                      after: 'on room 3',
+                    ),
                   ),
                 ],
               ),

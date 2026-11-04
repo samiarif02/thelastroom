@@ -25,6 +25,36 @@ enum DoorState {
   waiting,
 }
 
+/// A door's colours off its floor, the same on the tower, the share card and your file: on a
+/// floor that's open, the leaf and frame in the floor's deep colour with the panels a step
+/// lighter; on a floor not open yet, pale.
+abstract final class DoorInk {
+  static const double _openPanel = 0.7;
+  static const double _paleLeaf = 0.65;
+  static const double _paleFrame = 0.2;
+
+  static ({Color leaf, Color panel, Color frame}) open(FloorColours f) => (
+    leaf: f.deep,
+    panel: Color.alphaBlend(f.base.withValues(alpha: _openPanel), f.deep),
+    frame: f.deep,
+  );
+
+  static ({Color leaf, Color panel, Color frame}) pale(FloorColours f) {
+    final frame = Color.alphaBlend(
+      f.base.withValues(alpha: _paleFrame),
+      f.soft,
+    );
+    return (
+      leaf: Color.alphaBlend(
+        DaylightColors.raised.withValues(alpha: _paleLeaf),
+        f.soft,
+      ),
+      panel: frame,
+      frame: frame,
+    );
+  }
+}
+
 /// One door of the tower, drawn in the arch motif (a 28 × 44 arch, flat sill): a frame, a leaf
 /// with two panels and a knob, and for the room to play, the leaf swung in, honey light inside
 /// and the interviewer in the doorway. [leaf] and [panel] are the floor's colours for a closed

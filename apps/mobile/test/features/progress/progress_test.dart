@@ -20,7 +20,7 @@ void main() {
   final attempts = [first, second, other];
 
   group('report (pure)', () {
-    final report = ProgressReport.of(missions, attempts, first);
+    final report = ProgressReport.of(missions, attempts);
 
     test(
       'per mission: best, latest, dimensions and attempts are the engine\'s',
@@ -45,20 +45,94 @@ void main() {
       expect(report.total, missions.length);
       final bests = [report.missions[0].best!, other.score.total];
       expect(report.average, ((bests[0] + bests[1]) / 2).round());
+    });
+
+    test('nothing played: no average', () {
+      final empty = ProgressReport.of(missions, const []);
+      expect(empty.done, 0);
+      expect(empty.average, isNull);
+    });
+  });
+
+  group('best gain (pure)', () {
+    RoomTotals room(int n, List<int> totals) => (room: n, totals: totals);
+
+    test('no replays: none, and the tile says how to get one', () {
+      expect(bestGain(const []), isNull);
+      final g = bestGain([
+        room(1, [40]),
+        room(2, [70]),
+        room(3, []),
+      ]);
+      expect(g, isNull);
+      expect(GainWords.value(g), isEmpty);
+      expect(GainWords.after(g), 'Replay a room to see your gain');
       expect(
-        report.sinceBaseline!.totalDelta,
-        compareToBaseline(
-          baseline: first.score,
-          latest: other.score,
-        ).totalDelta,
+        GainWords.spoken(g),
+        'Best gain: none yet. Replay a room to see your gain.',
       );
     });
 
-    test('nothing played: no average, no change', () {
-      final empty = ProgressReport.of(missions, const [], null);
-      expect(empty.done, 0);
-      expect(empty.average, isNull);
-      expect(empty.sinceBaseline, isNull);
+    test('one replay: its best try against its own first try', () {
+      // Room 1 went 40 → 55 → 70 (best 70): +30. Room 8 (another room) never compares.
+      final g = bestGain([
+        room(1, [40, 55, 70]),
+        room(8, [12]),
+      ])!;
+      expect((g.room, g.points), (1, 30));
+      expect(GainWords.value(g), '+30');
+      expect(GainWords.after(g), 'on room 1');
+      expect(
+        GainWords.spoken(g),
+        'Best gain: up 30 on room 1, against its first try',
+      );
+    });
+
+    test('a later dip keeps the best replay', () {
+      final g = bestGain([
+        room(2, [50, 80, 60]),
+      ])!;
+      expect(g.points, 30);
+    });
+
+    test('the biggest wins; a tie goes to the lower room', () {
+      expect(
+        bestGain([
+          room(3, [60, 70]),
+          room(1, [40, 50]),
+          room(2, [30, 55]),
+        ])!.room,
+        2,
+      );
+      expect(
+        bestGain([
+          room(4, [40, 60]),
+          room(2, [50, 70]),
+        ])!.room,
+        2,
+      );
+    });
+
+    test('every replay lower: negative, and never without words', () {
+      final g = bestGain([
+        room(3, [80, 75]),
+        room(5, [70, 50]),
+      ])!;
+      expect((g.room, g.points), (3, -5));
+      expect(GainWords.value(g), '\u22125');
+      expect(GainWords.after(g), 'on room 3 vs first try');
+      expect(
+        GainWords.spoken(g),
+        'Best gain: down 5 on room 3, against its first try',
+      );
+    });
+
+    test('level: zero, said as the same', () {
+      final g = bestGain([
+        room(6, [64, 64]),
+      ])!;
+      expect(GainWords.value(g), '0');
+      expect(GainWords.after(g), 'on room 6, same as first try');
     });
   });
 
@@ -70,15 +144,18 @@ void main() {
     await rig.boot(Routes.progress);
     await rig.until(find.byType(ProgressScreen));
     await rig.run(const Duration(milliseconds: 300));
-    final report = ProgressReport.of(missions, attempts, first);
+    final report = ProgressReport.of(missions, attempts);
     expect(
       find.bySemanticsLabel(ProgressScreen.roomsLit(2, missions.length)),
       findsOneWidget,
     );
     expect(find.bySemanticsLabel('Average: ${report.average}'), findsOneWidget);
-    final delta = report.sinceBaseline!.totalDelta;
+    // Room 1 was replayed: its best replay against its own first try.
+    final gain = second.score.total - first.score.total;
     expect(
-      find.bySemanticsLabel('Since room 1: ${delta > 0 ? '+$delta' : delta}'),
+      find.bySemanticsLabel(
+        GainWords.spoken(RoomGain(room: m1.number, points: gain)),
+      ),
       findsOneWidget,
     );
     // The radar: each skill averaged over the latest attempts.
