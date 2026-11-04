@@ -62,7 +62,8 @@ class PlannedReminder {
 ///   the game wants the player back, brief 42); if those three went unanswered the player
 ///   hasn't opened the game since (any open re-plans), so after them a three-day gap (day 8),
 ///   then silence until they come back. [planDays].
-/// - **Recall first:** a day with cards due in the Recall Room gets "N notes are waiting";
+/// - **Recall first:** a day with cards due in the Recall Room gets "N notes are waiting" (then
+///   the next room, if there is one);
 ///   otherwise the next mission's interviewer nudges, in character. With nothing due and no
 ///   mission left, that day is quiet.
 /// - Off ([enabled] false, or no permission): nothing.
@@ -100,7 +101,7 @@ List<PlannedReminder> planReminders({
           at: at,
           kind: ReminderKind.recallDue,
           title: ReminderCopy.recallTitle,
-          body: ReminderCopy.recallBody(due, variant),
+          body: _recallBody(due, variant, at, nextMission, interviewDate),
           variant: variant,
         ),
       );
@@ -122,13 +123,33 @@ List<PlannedReminder> planReminders({
   return plan;
 }
 
+/// "2 notes are waiting in the Recall Room. Then room 3." (brief 61: a day-3 or day-7 reminder
+/// says everything that's waiting, the notes, the next room and the interview countdown).
+String _recallBody(
+  int due,
+  int variant,
+  DateTime at,
+  NextMission? next,
+  DateTime? interviewDate,
+) {
+  final notes = ReminderCopy.recallBody(due, variant);
+  final line = next == null ? notes : ReminderCopy.thenRoom(notes, next.number);
+  return _countedDown(line, at, interviewDate);
+}
+
 String _nudgeBody(
   NextMission next,
   int variant,
   DateTime at,
   DateTime? interviewDate,
-) {
-  final line = ReminderCopy.nudgeBody(next.interviewerId, variant);
+) => _countedDown(
+  ReminderCopy.nudgeBody(next.interviewerId, variant),
+  at,
+  interviewDate,
+);
+
+/// [line], led by the countdown to [interviewDate] while it's still ahead (FR-4).
+String _countedDown(String line, DateTime at, DateTime? interviewDate) {
   if (interviewDate == null) return line;
   final day = DateTime.utc(at.year, at.month, at.day);
   final interview = DateTime.utc(

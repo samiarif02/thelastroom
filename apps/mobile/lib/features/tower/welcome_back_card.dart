@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:brand/brand.dart';
+import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
 import '../../ui/daylight/daylight_kit.dart';
+import '../debrief/room_promise.dart' show PromiseCopy;
 import '../progression/progression.dart';
 import '../recall/recall_controller.dart';
 import 'tower_rooms.dart';
@@ -69,20 +71,37 @@ class _WelcomeBackCardState extends ConsumerState<WelcomeBackCard> {
     });
   }
 
+  DateTime get _now => ref.read(welcomeBackClockProvider)();
+
+  String? _when(CalendarDay? day) => day == null
+      ? null
+      : PromiseCopy.when(day, CalendarDay(_now.year, _now.month, _now.day));
+
+  int? _daysTo(CalendarDay? interview) => interview == null
+      ? null
+      : CalendarDay(_now.year, _now.month, _now.day).daysUntil(interview);
+
   @override
   Widget build(BuildContext context) {
     final away = ref.watch(welcomeBackProvider);
     final rooms = ref.watch(towerRoomsProvider).value;
     final due = ref.watch(recallDueCountProvider).value;
     final progress = ref.watch(progressionProvider).value;
+    final nextNote = ref.watch(nextRecallDayProvider);
     // Up only once everything it names is known, so it never changes its mind on screen.
     final welcome =
-        away == null || rooms == null || due == null || progress == null
+        away == null ||
+            rooms == null ||
+            due == null ||
+            progress == null ||
+            !nextNote.hasValue && !nextNote.hasError
         ? null
         : welcomeBackFor(
             recallDue: due,
             next: heroRoom(rooms),
             progress: progress,
+            nextNote: _when(nextNote.value),
+            interviewIn: _daysTo(progress.interviewDate),
           );
     if (welcome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -144,6 +163,7 @@ class _Card extends StatelessWidget {
     WaitingKind.recall => PhosphorFill.cards,
     WaitingKind.room => PhosphorFill.door,
     WaitingKind.week => PhosphorFill.circleHalf,
+    WaitingKind.interview => PhosphorFill.calendarBlank,
   };
 
   @override

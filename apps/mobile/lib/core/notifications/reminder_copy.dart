@@ -15,6 +15,9 @@ abstract final class ReminderCopy {
     };
   }
 
+  /// A Recall reminder that also names the next room: "… Then room 3."
+  static String thenRoom(String notes, int room) => '$notes Then room $room.';
+
   static const Map<String, String> _names = {
     'priya': 'Priya',
     'marcus': 'Marcus',

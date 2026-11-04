@@ -79,6 +79,27 @@ final recallDueCountProvider = FutureProvider.autoDispose<int>((ref) async {
   }
 });
 
+/// When the next note comes back, from tomorrow on (the engine's [nextRecallDay], the day the
+/// reminders first count it); null with no notes. The welcome-back card names it on a day with
+/// nothing due (brief 61). A store that can't be read counts as no notes.
+final nextRecallDayProvider = FutureProvider.autoDispose<CalendarDay?>((
+  ref,
+) async {
+  final today = _dayOf(ref.watch(recallClockProvider)());
+  try {
+    final schedule = await syncRecallSchedule(
+      store: ref.watch(recallStoreProvider),
+      progress: ref.watch(progressRepositoryProvider),
+      deck: ref.watch(recallDeckProvider),
+      today: today,
+    );
+    return nextRecallDay(schedule.cards, today: today);
+  } on Object {
+    // Unreadable: the card simply leaves the line out.
+    return null;
+  }
+});
+
 /// One Recall Room round.
 sealed class RecallRoomState {
   const RecallRoomState();

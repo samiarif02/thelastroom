@@ -12,13 +12,13 @@ import '../../app/router.dart';
 import '../../core/analytics/analytics_event.dart';
 import '../../core/analytics/event_value.dart';
 import '../../core/audio/game_sounds.dart';
-import '../../core/notifications/reminder_primer.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
 import '../../ui/daylight/daylight_route.dart';
 import '../../ui/daylight/daylight_sheet.dart';
 import '../../ui/haptics.dart';
 import '../mission/mission_lookup.dart';
+import '../progression/first_day.dart';
 import '../progression/progression.dart';
 import '../progression/skills_shelf.dart';
 import '../recall/recall_controller.dart';
@@ -308,11 +308,12 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
       _say(TowerScreen.litNotice(lit));
       if (_lighting.value < 1) unawaited(_lighting.forward());
     }
-    if (widget.lit == 1) {
-      // The explainer comes after the room lights up; the tips wait for it to be answered.
+    if (widget.lit == 1 && lit != null) {
+      // The first-day moment (brief 61, once), then the reminder explainer, after the room
+      // lights up; the tips wait for both to be answered.
       _primerPending = true;
       unawaited(
-        offerReminders(context, ref).whenComplete(() {
+        offerFirstDay(context, ref, lit).whenComplete(() {
           if (mounted) setState(() => _primerPending = false);
         }),
       );
