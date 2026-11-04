@@ -242,18 +242,9 @@ class _RoofPainter extends CustomPainter {
 
 /// The facade's colours: every one a token or a token mixed with ink or white.
 abstract final class _TowerInk {
-  static final Color roof = Color.alphaBlend(
-    DaylightColors.ink.withValues(alpha: 0.3),
-    DaylightColors.dusk,
-  );
-  static final Color duskWindow = Color.alphaBlend(
-    DaylightColors.ink.withValues(alpha: 0.35),
-    DaylightColors.dusk,
-  );
-  static final Color duskPanel = Color.alphaBlend(
-    DaylightColors.raised.withValues(alpha: 0.12),
-    DaylightColors.dusk,
-  );
+  static final Color roof = DoorInk.dusk.frame;
+  static final Color duskWindow = DoorInk.dusk.leaf;
+  static final Color duskPanel = DoorInk.dusk.panel;
   static final Color duskText = Color.alphaBlend(
     DaylightColors.raised.withValues(alpha: 0.85),
     DaylightColors.dusk,

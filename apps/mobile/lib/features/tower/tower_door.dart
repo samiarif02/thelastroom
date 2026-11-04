@@ -24,6 +24,9 @@ enum DoorState {
 
   /// The last room, from day one: lit, with Sam waiting in it.
   waiting,
+
+  /// A room lit on the title's tower: a honey door, nothing on it (nobody has played yet).
+  lit,
 }
 
 /// How [room]'s door stands, the one rule for the tower and the chapters list: played is done,
@@ -70,13 +73,29 @@ abstract final class DoorInk {
       frame: frame,
     );
   }
+
+  /// The top floor's doors, at dusk until Sam's lights: the tower and the title share them.
+  static final ({Color leaf, Color panel, Color frame}) dusk = (
+    leaf: Color.alphaBlend(
+      DaylightColors.ink.withValues(alpha: 0.35),
+      DaylightColors.dusk,
+    ),
+    panel: Color.alphaBlend(
+      DaylightColors.raised.withValues(alpha: 0.12),
+      DaylightColors.dusk,
+    ),
+    frame: Color.alphaBlend(
+      DaylightColors.ink.withValues(alpha: 0.3),
+      DaylightColors.dusk,
+    ),
+  );
 }
 
 /// One door of the tower, drawn in the arch motif (a 28 × 44 arch, flat sill): a frame, a leaf
 /// with two panels and a knob, and for the room to play, the leaf swung in, honey light inside
 /// and the interviewer in the doorway. [leaf] and [panel] are the floor's colours for a closed
-/// door. [lighting] (0 → 1) is the moment a finished room lights up: the leaf turns honey and
-/// the check lands.
+/// door. [lighting] (0 → 1) is the moment a room lights up: the leaf turns honey (and on a
+/// finished room the check lands).
 class TowerDoor extends StatelessWidget {
   const TowerDoor({
     super.key,
@@ -109,15 +128,16 @@ class TowerDoor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = lighting.clamp(0.0, 1.0);
-    final leafColour = switch (state) {
-      DoorState.done => Color.lerp(leaf, DaylightColors.honey, t)!,
-      DoorState.waiting => DaylightColors.honey,
-      _ => leaf,
+    final honey = switch (state) {
+      DoorState.done || DoorState.waiting || DoorState.lit => true,
+      _ => false,
     };
-    final panelColour = switch (state) {
-      DoorState.done || DoorState.waiting => DaylightColors.honeyEdge,
-      _ => panel,
-    };
+    final leafColour = honey
+        ? Color.lerp(leaf, DaylightColors.honey, t)!
+        : leaf;
+    final panelColour = honey
+        ? Color.lerp(panel, DaylightColors.honeyEdge, t)!
+        : panel;
     final who = person;
     final checkT = ((t - _checkFrom) / (1 - _checkFrom)).clamp(0.0, 1.0);
     return SizedBox(
@@ -164,8 +184,12 @@ class TowerDoor extends StatelessWidget {
                   leaf: leafColour,
                   panel: panelColour,
                   frame: frame,
-                  knob: state == DoorState.done || state == DoorState.waiting
-                      ? DaylightColors.onHoney
+                  knob: honey
+                      ? Color.lerp(
+                          DaylightColors.honey,
+                          DaylightColors.onHoney,
+                          t,
+                        )!
                       : DaylightColors.honey,
                   // A finished door carries its check where the upper panel was.
                   upperPanel: state != DoorState.done,
@@ -193,10 +217,10 @@ class TowerDoor extends StatelessWidget {
                 color: panel,
               ),
             ),
-          if (state == DoorState.waiting)
-            const Align(
+          if (state == DoorState.waiting && t > 0)
+            Align(
               alignment: Alignment.bottomCenter,
-              child: _Silhouette(),
+              child: Opacity(opacity: t, child: const _Silhouette()),
             ),
         ],
       ),

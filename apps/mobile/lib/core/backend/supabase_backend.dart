@@ -177,6 +177,20 @@ class SupabaseBackend implements Backend {
   });
 
   @override
+  Future<void> signOut() async {
+    try {
+      // gotrue drops the local session (and the PKCE verifier) first, then tells the server.
+      await (await _client()).auth.signOut();
+    } on AuthException catch (error) {
+      // Offline, or the server refused the logout: this device is signed out all the same, and
+      // the old refresh token simply expires.
+      _log.warn('sign out not confirmed by the server', {
+        'reason': error.code ?? error.statusCode,
+      });
+    }
+  }
+
+  @override
   Stream<AccountLinkEvent> get accountLinks => _links.stream;
 
   /// Runs an auth call, turning what the server says into an [AccountFailure].

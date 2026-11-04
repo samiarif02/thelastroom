@@ -13,6 +13,10 @@ enum AnalyticsEvent {
   /// "Sign in on another device" (FR-3): a player who saved their progress on one device signs
   /// in on this one with an emailed code, and their saved file comes down. Never the email.
   accountSignedIn('account_signed_in'),
+
+  /// "Sign out" on a saved account (FR-3): everything had backed up, the account stays saved
+  /// to its email, and this phone starts again as a new guest. Never the email.
+  accountSignedOut('account_signed_out'),
   onboardingCompleted('onboarding_completed'),
   towerOpened('tower_opened'),
   roomEntered('room_entered'),
