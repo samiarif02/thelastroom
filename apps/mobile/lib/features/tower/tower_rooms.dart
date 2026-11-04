@@ -65,6 +65,15 @@ TowerRoom? heroRoom(List<TowerRoom> rooms) {
   return weakest;
 }
 
+/// Whether a floor is open: one of its rooms can be entered (the floor below is finished).
+bool floorIsOpen(Iterable<TowerRoom> floor) =>
+    floor.any((r) => r.state != RoomState.locked);
+
+/// What opens a locked room, the tower's rule said the same on every screen: the room before it
+/// on an open floor ("room 4"), else the floor below ("floor 1").
+String opensAfter(Mission m, {required bool floorOpen}) =>
+    floorOpen ? 'room ${m.number - 1}' : 'floor ${m.chapter - 1}';
+
 /// The rooms of the playable missions, in campaign order, from the stored attempts. A mission
 /// is done once it has any attempt (any score unlocks the next); the first one not done is
 /// current; the rest are locked. Pure, so the Tower's states are tested without a screen.

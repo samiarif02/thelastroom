@@ -292,7 +292,7 @@ class _Floor extends StatelessWidget {
     final f = ChapterGrade.values[chapter.number - 1].floor;
     final below = before;
     // A floor is open once a room on it can be entered: the floor below is finished.
-    final open = rooms.any((r) => r.state != RoomState.locked);
+    final open = floorIsOpen(rooms);
     final done = rooms.where((r) => r.state == RoomState.done).length;
     final ground = _top
         ? DaylightColors.dusk
@@ -354,9 +354,7 @@ class _Floor extends StatelessWidget {
                           onTap: r.state == RoomState.locked && onFloor != null
                               ? onFloor!
                               : () => onTapRoom(r),
-                          opensAfter: open
-                              ? 'room ${r.mission.number - 1}'
-                              : 'floor ${chapter.number - 1}',
+                          opensAfter: opensAfter(r.mission, floorOpen: open),
                           doorKey: r.state == RoomState.current
                               ? nextDoorKey
                               : null,
@@ -469,14 +467,7 @@ class _Room extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final waiting = top && last && !open;
-    final state = waiting
-        ? DoorState.waiting
-        : switch (room.state) {
-            RoomState.done => DoorState.done,
-            RoomState.current => DoorState.next,
-            RoomState.locked => open ? DoorState.closed : DoorState.locked,
-          };
+    final state = doorStateOf(room, floorOpen: open, topLast: top && last);
     final (leaf, panel, frame) = top
         ? (_TowerInk.duskWindow, _TowerInk.duskPanel, _TowerInk.roof)
         : switch (open ? DoorInk.open(floor) : DoorInk.pale(floor)) {
