@@ -24,7 +24,7 @@ models or the content; publish the result as it comes, good or bad.
 | Missions ranked right | 7 of 7 | Strong scored above both weak and guessed |
 | Spread between repeat runs | median 5, max 15 points | Consistency: the same answer gets (nearly) the same score |
 | Agreement with the engine | r = 0.91, mean gap 9.2 points | The AI and the offline rules agree on what's good |
-| Latency | median 2090 ms, p90 4030 ms | Inside the app's 8 s wait (a later verdict replaces the offline score) |
+| Latency | median 2090 ms, p90 4030 ms | Inside the app's 8 s wait (a later verdict is offered in a banner over the offline score) |
 | Models that graded | gemini-3.5-flash-lite ×63 | The fallback chain at work |
 
 ## Per answer
@@ -62,7 +62,7 @@ models or the content; publish the result as it comes, good or bad.
 
 - **Every verdict timed out on the first live run.** `gemini-3.8-flash` answered 503 "high demand"
   or took 30 s+ and allows no minimal thinking. The function now tries a chain of faster models
-  with minimal thinking, and the app swaps a late verdict in for the offline score (ADR 0006).
+  with minimal thinking, and the app offers a late verdict in place of the offline score, on a tap (ADR 0006).
 - **Guessed answers scored too high** (60 for an answer whose three lines were all guessed, against
   a band of 0–50). The prompt now caps an all-guessed answer at 40 overall and 20 specificity;
   re-scored: 25–40.
