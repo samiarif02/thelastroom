@@ -9,6 +9,10 @@ enum AnalyticsEvent {
   introCompleted('intro_completed'),
   guestStarted('guest_started'),
   accountLinked('account_linked'),
+
+  /// "Sign in on another device" (FR-3): a player who saved their progress on one device signs
+  /// in on this one with an emailed code, and their saved file comes down. Never the email.
+  accountSignedIn('account_signed_in'),
   onboardingCompleted('onboarding_completed'),
   towerOpened('tower_opened'),
   roomEntered('room_entered'),
