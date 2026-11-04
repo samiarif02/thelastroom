@@ -10,6 +10,7 @@ import '../profile/drift_profile_repository.dart';
 import '../profile/profile_repository.dart';
 import '../progress/drift_progress_repository.dart';
 import '../progress/progress_repository.dart';
+import 'account_merge.dart';
 import 'outbox.dart';
 
 /// Sends the outbox to the backend, and restores a fresh install once (FR-60, FR-61).
@@ -47,6 +48,9 @@ class SyncWorker {
   bool _again = false;
   bool _disposed = false;
 
+  /// No account merge is pending (or it's done), so flushes stop checking.
+  bool _merged = false;
+
   /// The one-time restore has run on this database.
   static const String restoredKey = 'restored';
 
@@ -58,8 +62,25 @@ class SyncWorker {
   /// Restores if this is a fresh install, then sends what's waiting, and keeps listening.
   Future<void> start() async {
     _queued ??= _signal.queued.listen((_) => unawaited(flush()));
+    await _mergeAccount();
     await _restoreOnce();
     await flush();
+  }
+
+  /// After "Sign in on another device" (FR-3): brings the account's rows down and unions them
+  /// with this device's ([pullAccountMerge]). Until it succeeds, every flush tries again (the
+  /// queued attempts keep a retry timer running).
+  Future<void> _mergeAccount() async {
+    if (_merged) return;
+    try {
+      if (await pullAccountMerge(_db, _backend)) _onRestored?.call();
+      _merged = true;
+    } on Object catch (error) {
+      // Offline or the backend refused: the merge stays pending for the next start.
+      _log.warn('account merge failed, will retry', {
+        'error': '${error.runtimeType}',
+      });
+    }
   }
 
   /// Sends everything due now. Concurrent calls share one run; a call during a run makes it go
@@ -76,6 +97,7 @@ class SyncWorker {
   Future<void> _flushAll() async {
     // Batch after batch while rows are due; a failed batch is pushed into the future by its
     // backoff, so this always ends.
+    await _mergeAccount();
     var more = false;
     do {
       _again = false;

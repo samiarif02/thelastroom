@@ -26,7 +26,7 @@ bool welcomesBack(int? away) => away != null && away >= 1;
 enum WelcomeBackTarget { recall, mission, progress }
 
 /// What a "waiting" line is about, so the card can give it its icon.
-enum WaitingKind { recall, room, week }
+enum WaitingKind { recall, room, week, interview }
 
 /// What the card says and where its button goes, in the voice of the next room's interviewer.
 class WelcomeBack {
@@ -63,6 +63,17 @@ class WelcomeBack {
     _ => "Good to see you again. Here's what's waiting.",
   };
 
+  /// A day with nothing due: when the next note comes back ("on Friday", "tomorrow").
+  static String nextNoteLine(String when) =>
+      'Your next Recall note comes back $when.';
+
+  /// The interview countdown (FR-4), as the day-5 hook in direction.md puts it.
+  static String interviewLine(int days) => switch (days) {
+    0 => 'Interview day. One room makes a good warm-up.',
+    1 => 'Your interview is tomorrow. One room makes a good warm-up.',
+    _ => 'Interview in $days days. One room makes a good warm-up.',
+  };
+
   String get action => switch (target) {
     WelcomeBackTarget.recall => 'Open the Recall Room',
     WelcomeBackTarget.mission => 'Start room $missionNumber',
@@ -72,16 +83,26 @@ class WelcomeBack {
 
 /// The card's content from what the tower already knows. Cards due come first (a minute, and
 /// the memory is fading); then the next room; with neither, the player's file.
+///
+/// Brief 61 (what brings them back on day 3 and day 7): with nothing due today, [nextNote] says
+/// when the next note comes back ("on Friday"); with an interview date ahead, [interviewIn]
+/// (days from today) counts down to it.
 WelcomeBack welcomeBackFor({
   required int recallDue,
   required TowerRoom? next,
   required Progression progress,
+  String? nextNote,
+  int? interviewIn,
 }) {
   final mission = next?.mission;
+  final noteLater = recallDue == 0 && nextNote != null;
+  final countdown = interviewIn != null && interviewIn >= 0;
   return WelcomeBack(
     interviewerId: mission?.question.speakerId ?? _host,
     waiting: [
       if (recallDue > 0) ReminderCopy.recallBody(recallDue, 0),
+      if (noteLater) WelcomeBack.nextNoteLine(nextNote),
+      if (countdown) WelcomeBack.interviewLine(interviewIn),
       if (next != null && mission != null)
         next.state == RoomState.current
             ? 'Room ${mission.number}, “${mission.title}”, is ready for you.'
@@ -91,6 +112,8 @@ WelcomeBack welcomeBackFor({
     ],
     kinds: [
       if (recallDue > 0) WaitingKind.recall,
+      if (noteLater) WaitingKind.recall,
+      if (countdown) WaitingKind.interview,
       if (next != null && mission != null) WaitingKind.room,
       WaitingKind.week,
     ],

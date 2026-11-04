@@ -1,4 +1,5 @@
 import 'package:content/content.dart';
+import 'package:engine/engine.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,6 +43,48 @@ void main() {
     sessionsThisWeek: 1,
     weeklyGoal: 3,
   );
+
+  group("what's waiting on day 3 and day 7 (brief 61, pure)", () {
+    test('notes due today come first; the next-note line is only for a '
+        'day with none', () {
+      final due = welcomeBackFor(
+        recallDue: 2,
+        next: null,
+        progress: week,
+        nextNote: 'tomorrow',
+      );
+      expect(due.waiting.first, '2 notes are waiting in the Recall Room.');
+      expect(
+        due.waiting,
+        isNot(contains(WelcomeBack.nextNoteLine('tomorrow'))),
+      );
+      final later = welcomeBackFor(
+        recallDue: 0,
+        next: null,
+        progress: week,
+        nextNote: 'on Friday',
+      );
+      expect(
+        later.waiting.first,
+        'Your next Recall note comes back on Friday.',
+      );
+      expect(later.kinds.first, WaitingKind.recall);
+      expect(later.target, WelcomeBackTarget.progress);
+    });
+
+    test('the interview countdown while it is ahead, never after it', () {
+      String? line(int days) => welcomeBackFor(
+        recallDue: 0,
+        next: null,
+        progress: week,
+        interviewIn: days,
+      ).waiting.where((l) => l.contains('nterview')).firstOrNull;
+      expect(line(7), 'Interview in 7 days. One room makes a good warm-up.');
+      expect(line(1), startsWith('Your interview is tomorrow.'));
+      expect(line(0), startsWith('Interview day.'));
+      expect(line(-1), isNull);
+    });
+  });
 
   group('when it shows (pure)', () {
     test('calendar days away, not 24-hour spans', () {
@@ -186,6 +229,8 @@ void main() {
       WidgetTester tester, {
       DateTime? lastVisit,
       int due = 2,
+      CalendarDay? nextNote,
+      Progression? progress,
       bool quiet = false,
       double textScale = 1,
       bool reduceMotion = false,
@@ -220,7 +265,8 @@ void main() {
           welcomeBackClockProvider.overrideWithValue(() => now),
           towerRoomsProvider.overrideWith((ref) async => newPlayer),
           recallDueCountProvider.overrideWith((ref) async => due),
-          progressionProvider.overrideWith((ref) async => week),
+          nextRecallDayProvider.overrideWith((ref) async => nextNote),
+          progressionProvider.overrideWith((ref) async => progress ?? week),
         ],
       );
       addTearDown(container.dispose);
@@ -313,6 +359,32 @@ void main() {
         ]);
       });
     }
+
+    testWidgets('a day-3 return with nothing due: when the next note comes '
+        'back, and the interview countdown (brief 61)', (tester) async {
+      await pump(
+        tester,
+        lastVisit: DateTime(2026, 11, 1, 18),
+        due: 0,
+        // `now` is Wednesday 4 November: a note in box three, due Saturday.
+        nextNote: CalendarDay(2026, 11, 7),
+        progress: Progression(
+          xp: 40,
+          lastXp: 0,
+          unlocked: const {},
+          uncelebrated: const {},
+          sessionsThisWeek: 1,
+          weeklyGoal: 3,
+          interviewDate: CalendarDay(2026, 11, 9),
+        ),
+      );
+      expect(
+        find.text(WelcomeBack.nextNoteLine('on Saturday')),
+        findsOneWidget,
+      );
+      expect(find.text(WelcomeBack.interviewLine(5)), findsOneWidget);
+      expect(find.text('Start room 1'), findsOneWidget);
+    });
 
     testWidgets('nothing due: its button starts the next room', (tester) async {
       await pump(tester, lastVisit: DateTime(2026, 11, 2), due: 0);

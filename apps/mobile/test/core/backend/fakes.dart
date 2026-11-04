@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:the_last_room/core/analytics/analytics.dart';
 import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/core/backend/backend.dart';
@@ -116,6 +118,86 @@ class FakeBackend implements Backend {
   }
 
   static const String guestId = '00000000-0000-4000-8000-000000000001';
+
+  /// The saved account a "Sign in on another device" lands in (FR-3).
+  static const String accountId = '00000000-0000-4000-8000-0000000000a1';
+
+  /// The code the fake server "mails" (the one a test types to succeed).
+  static const String goodCode = '123456';
+
+  /// The fake auth server: which addresses hold a saved account, and the user id behind each.
+  final Map<String, String> accounts = {};
+
+  /// The guest this fake device is signed in as; linking keeps this id.
+  String currentUserId = guestId;
+
+  /// A failure the next auth call throws (then it's cleared), to script every card state.
+  AccountFailure? nextAuthFailure;
+
+  /// Links at once, with no code (a server with email confirmations off).
+  bool linksWithoutCode = false;
+
+  /// Every auth call, by name, for assertions.
+  final List<String> authCalls = [];
+
+  /// Holds each auth call until completed, to see the sending / verifying states.
+  Completer<void>? authGate;
+
+  Future<void> _auth(String call) async {
+    authCalls.add(call);
+    final gate = authGate;
+    if (gate != null) await gate.future;
+    final failure = nextAuthFailure;
+    if (failure != null) {
+      nextAuthFailure = null;
+      throw AccountException(failure, 'scripted');
+    }
+  }
+
+  @override
+  Future<GuestSession?> sendLinkCode(String email) async {
+    await _auth('sendLinkCode');
+    if (accounts.containsKey(email)) {
+      throw const AccountException(AccountFailure.emailTaken, 'email_exists');
+    }
+    if (!linksWithoutCode) return null;
+    accounts[email] = currentUserId;
+    return GuestSession(userId: currentUserId, email: email);
+  }
+
+  @override
+  Future<GuestSession> confirmLinkCode({
+    required String email,
+    required String code,
+  }) async {
+    await _auth('confirmLinkCode');
+    if (code != goodCode) {
+      throw const AccountException(AccountFailure.wrongCode, 'otp_expired');
+    }
+    accounts[email] = currentUserId;
+    return GuestSession(userId: currentUserId, email: email);
+  }
+
+  @override
+  Future<void> sendSignInCode(String email) async {
+    await _auth('sendSignInCode');
+    if (!accounts.containsKey(email)) {
+      throw const AccountException(AccountFailure.noAccount, 'otp_disabled');
+    }
+  }
+
+  @override
+  Future<GuestSession> confirmSignInCode({
+    required String email,
+    required String code,
+  }) async {
+    await _auth('confirmSignInCode');
+    if (code != goodCode) {
+      throw const AccountException(AccountFailure.wrongCode, 'otp_expired');
+    }
+    currentUserId = accounts[email]!;
+    return GuestSession(userId: currentUserId, email: email);
+  }
 
   final Future<BackendSession> Function() _restore;
   final Future<GuestSession> Function() _signIn;

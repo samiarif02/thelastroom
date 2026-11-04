@@ -10,6 +10,7 @@ export 'chapter_tint.dart';
 export 'choice_sheet.dart';
 export 'dimension_row.dart';
 export 'entrance.dart';
+export 'entry_field.dart';
 export 'feedback_sheet.dart';
 export 'floating_tab_bar.dart';
 export 'grain.dart';

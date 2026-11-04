@@ -9,6 +9,10 @@ enum AnalyticsEvent {
   introCompleted('intro_completed'),
   guestStarted('guest_started'),
   accountLinked('account_linked'),
+
+  /// "Sign in on another device" (FR-3): a player who saved their progress on one device signs
+  /// in on this one with an emailed code, and their saved file comes down. Never the email.
+  accountSignedIn('account_signed_in'),
   onboardingCompleted('onboarding_completed'),
   towerOpened('tower_opened'),
   roomEntered('room_entered'),
@@ -101,7 +105,16 @@ enum AnalyticsEvent {
   /// "Share your floor card" on the floor-cleared screen: which floor, and how it went (the
   /// share sheet was used, closed without sharing, or sharing isn't available here). Never the
   /// card, never the player's name.
-  floorCardShared('floor_card_shared');
+  floorCardShared('floor_card_shared'),
+
+  /// The debrief's dated promise is shown (brief 61): when the room's lines come back in the
+  /// Recall Room, or, with nothing to recall, the next room. Its kind and how many days ahead,
+  /// never its words.
+  promiseShown('promise_shown'),
+
+  /// The first-day moment ("Day 1 of your prep") is shown on the tower after the player's first
+  /// finished room ever (brief 61), once: whether a Recall note is due tomorrow.
+  firstDayShown('first_day_shown');
 
   const AnalyticsEvent(this.wireName);
 

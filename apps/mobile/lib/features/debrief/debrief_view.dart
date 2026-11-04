@@ -23,6 +23,7 @@ import 'ai_score_store.dart';
 import 'ai_verdict_cards.dart';
 import 'debrief_facts.dart';
 import 'first_try_slip.dart';
+import 'promise_card.dart';
 import 'reasoning_slip.dart';
 import 'red_pen_slip.dart';
 import 'scoring_basis_sheet.dart';
@@ -396,6 +397,9 @@ class _DebriefViewState extends ConsumerState<DebriefView> {
                       CostSlip(beats: widget.reasoning)
                     else
                       const CleanRunSlip(),
+                    // The dated promise (brief 61): outside the sheet, under the line that cost
+                    // the most, once the sheet's timeline has played.
+                    PromiseCard(mission: widget.mission, ready: _settled),
                     if (widget.reasoning.any(
                       (b) => b.guessed || b.given != null,
                     )) ...[

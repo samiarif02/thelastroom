@@ -25,6 +25,7 @@ import 'package:the_last_room/features/mission/widgets/build_panel.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
+import 'package:the_last_room/features/progression/first_day.dart';
 import 'package:the_last_room/features/progression/floor_cleared_screen.dart';
 import 'package:the_last_room/features/recall/recall_store.dart';
 import 'package:the_last_room/features/tips/tips.dart';
@@ -196,6 +197,10 @@ class MissionRig {
   /// A test of the tips clears them first (`rig.tips.flags.clear()`).
   final InMemoryTipStore tips = InMemoryTipStore.allSeen();
 
+  /// The first-day moment (brief 61): already shown by default, so a playthrough back from
+  /// room 1 goes straight to the reminder explainer, as before. Its tests set it unshown.
+  final InMemoryFirstDayStore firstDay = InMemoryFirstDayStore(shown: true);
+
   /// Boots the app at [location] on a [size] screen; a null [size] keeps the device's own
   /// screen, insets and pixel ratio (the frame-timing run on a phone, integration_test/).
   Future<void> boot(
@@ -223,6 +228,7 @@ class MissionRig {
         recallStoreProvider.overrideWithValue(recall),
         routerProvider.overrideWithValue(router),
         tipStoreProvider.overrideWithValue(tips),
+        firstDayStoreProvider.overrideWithValue(firstDay),
         if (scorer case final s?) aiScorerProvider.overrideWithValue(s),
         ...overrides,
       ],
@@ -565,4 +571,17 @@ class InMemoryTipStore implements TipStore {
 
   @override
   Future<void> reset() async => flags.clear();
+}
+
+/// The first-day flag in memory.
+class InMemoryFirstDayStore implements FirstDayStore {
+  InMemoryFirstDayStore({bool shown = false}) : isShown = shown;
+
+  bool isShown;
+
+  @override
+  Future<bool> shown() async => isShown;
+
+  @override
+  Future<void> markShown() async => isShown = true;
 }

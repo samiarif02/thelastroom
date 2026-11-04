@@ -13,12 +13,18 @@ import 'reminders.dart';
 /// Offers reminders once, at the designed moment: back on the tower after the first mission's
 /// debrief (FR-52, brief 26), never at launch. A vivid explainer card first; the system's own
 /// prompt only if the player says yes. Does nothing on the web or once it has been offered.
-Future<void> offerReminders(BuildContext context, WidgetRef ref) async {
+/// [settled]: something already waited for the room to light up (the first-day moment, brief
+/// 61), so the explainer comes straight after it.
+Future<void> offerReminders(
+  BuildContext context,
+  WidgetRef ref, {
+  bool settled = false,
+}) async {
   if (!ref.read(remindersSupportedProvider)) return;
   await ref.read(reminderSettingsProvider.notifier).loaded;
   if (ref.read(reminderSettingsProvider).offered) return;
   // Let the room light up and its notice land before the card comes in.
-  await Future<void>.delayed(ReminderPrimer.settle);
+  if (!settled) await Future<void>.delayed(ReminderPrimer.settle);
   if (!context.mounted) return;
   final reminders = ref.read(remindersProvider);
   if (await showReminderPrimer(context, ref)) unawaited(reminders.enable());
