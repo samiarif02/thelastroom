@@ -224,7 +224,11 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+# On for FR-3 ("Save your progress"): with it off, an anonymous guest's `updateUser(email)` links
+# the address at once, with no code, so anyone could claim any address. On, the address is
+# linked only after the 6-digit code mailed to it is entered (verifyOTP type email_change).
+# The game has no password sign-up, so nothing else changes. A running stack needs a restart.
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
@@ -243,6 +247,17 @@ otp_expiry = 3600
 # pass = "env(SENDGRID_API_KEY)"
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
+
+# FR-3 sends a 6-digit code, not a link (the app has no deep-link handler, and a code works on
+# the web build too): "Save your progress" (email_change) and "Sign in on another device"
+# (magic_link). The hosted project needs the same two templates (Auth, Emails).
+[auth.email.template.email_change]
+subject = "Your code to save your progress"
+content_path = "./supabase/templates/email_change.html"
+
+[auth.email.template.magic_link]
+subject = "Your code to sign in"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]

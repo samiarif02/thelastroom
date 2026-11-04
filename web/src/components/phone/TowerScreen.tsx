@@ -1,14 +1,18 @@
-import { Check, Lightning } from '@phosphor-icons/react/dist/ssr'
+import { Lightning } from '@phosphor-icons/react/dist/ssr'
 import type { CSSProperties } from 'react'
 
-import { Figure } from '@/cast/Figure'
+import type { Person } from '@/cast/people'
 
 import { StatusBar } from './parts'
 import styles from './screens.module.css'
+import { TowerDoor } from './TowerDoor'
 
 const roomsPerFloor = 7
-/** The room this visit lit: room 4, the fourth window on floor 1. */
+/** The room this visit lit: room 4, the fourth door on floor 1. */
 const newRoom = 3
+/** The room to play next, room 5, and who waits in its doorway (mission 5 is Marcus's). */
+const nextRoom = newRoom + 1
+const nextPerson: Person = 'marcus'
 const ringRadius = 22
 const ringLength = 2 * Math.PI * ringRadius
 
@@ -24,8 +28,10 @@ type TowerScreenProps = {
 }
 
 /**
- * The tower, home (01b-home-tower): three floors of seven arched windows. Floor 1's first four
- * are lit honey with a check; floor 2 waits; the dusk top floor has one lit window, Sam's.
+ * The tower, home (01b-home-tower), drawn as the app draws it: three floors of seven doors.
+ * Floor 1's first four are honey with a check, room 5 stands ajar with Marcus in the doorway and
+ * the play cue bobbing over it, rooms 6 and 7 are closed; floors 2 and 3 are locked, and the
+ * dusk top floor's last door is lit, Sam waiting in it.
  */
 export function TowerScreen({ greeting, title, lit, week, sign, floors, overlay }: TowerScreenProps) {
 	const [top, middle, ground] = floors
@@ -64,15 +70,9 @@ export function TowerScreen({ greeting, title, lit, week, sign, floors, overlay 
 					</div>
 					<div className={`${styles.floor} ${styles.floorDusk}`}>
 						<div className={styles.windows}>
-							{Array.from({ length: roomsPerFloor }, (_, i) =>
-								i === roomsPerFloor - 1 ? (
-									<span key={i} className={`${styles.window} ${styles.samWindow}`}>
-										<Figure person="sam" expression="neutral" idle={false} />
-									</span>
-								) : (
-									<span key={i} className={styles.window} />
-								)
-							)}
+							{Array.from({ length: roomsPerFloor }, (_, i) => (
+								<TowerDoor key={i} tone="dusk" state={i === roomsPerFloor - 1 ? 'waiting' : 'locked'} />
+							))}
 						</div>
 						<p className={styles.floorLabel}>
 							<span>{top?.name}</span>
@@ -82,7 +82,7 @@ export function TowerScreen({ greeting, title, lit, week, sign, floors, overlay 
 					<div className={`${styles.floor} ${styles.floorWaiting}`}>
 						<div className={styles.windows}>
 							{Array.from({ length: roomsPerFloor }, (_, i) => (
-								<span key={i} className={styles.window} />
+								<TowerDoor key={i} tone="pale" state="locked" />
 							))}
 						</div>
 						<p className={styles.floorLabel}>
@@ -93,18 +93,13 @@ export function TowerScreen({ greeting, title, lit, week, sign, floors, overlay 
 					<div className={`${styles.floor} ${styles.floorOne}`}>
 						<div className={styles.windows}>
 							{Array.from({ length: roomsPerFloor }, (_, i) => (
-								<span
+								<TowerDoor
 									key={i}
-									className={`${styles.window} ${i <= newRoom ? styles.lit : ''} ${i === newRoom ? styles.newRoom : ''}`}
-								>
-									{i <= newRoom ? (
-										<>
-											<span className={styles.windowFill} />
-											<Check weight="bold" className={styles.check} />
-										</>
-									) : null}
-									{i === newRoom ? <span className={styles.glow} /> : null}
-								</span>
+									tone="open"
+									state={i <= newRoom ? 'done' : i === nextRoom ? 'next' : 'closed'}
+									lighting={i === newRoom}
+									{...(i === nextRoom ? { person: nextPerson } : {})}
+								/>
 							))}
 						</div>
 						<p className={styles.floorLabel}>

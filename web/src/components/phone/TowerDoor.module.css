@@ -1,0 +1,183 @@
+/*
+ * A room's door on the tower (apps/mobile/lib/features/tower/tower_door.dart), in the site's
+ * tokens. A floor sets --floor, --floor-deep and --floor-soft; the tone picks the door's colours
+ * from them the way the app's `_Room` does, every one a token or a token mixed with ink or white.
+ */
+.cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	/* The door (44), the cue over the door to play (18) and the 4 + 4 around it. */
+	height: 70px;
+}
+
+.dusk {
+	--door-frame: color-mix(in srgb, var(--ink) 30%, var(--dusk));
+	--door-leaf: color-mix(in srgb, var(--ink) 35%, var(--dusk));
+	--door-panel: color-mix(in srgb, var(--raised) 12%, var(--dusk));
+}
+.dusk.locked {
+	--door-panel: color-mix(in srgb, var(--raised) 85%, var(--dusk));
+}
+.open {
+	--door-frame: var(--floor-deep);
+	--door-leaf: var(--floor-deep);
+	--door-panel: color-mix(in srgb, var(--floor) 70%, var(--floor-deep));
+}
+.pale {
+	--door-frame: color-mix(in srgb, var(--floor) 20%, var(--floor-soft));
+	--door-leaf: color-mix(in srgb, var(--raised) 65%, var(--floor-soft));
+	--door-panel: color-mix(in srgb, var(--floor) 20%, var(--floor-soft));
+}
+.pale.locked {
+	--door-panel: var(--floor-deep);
+}
+
+.door {
+	position: relative;
+	width: 28px;
+	height: 44px;
+}
+.art {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+.frame {
+	fill: var(--door-frame);
+}
+.leaf {
+	fill: var(--door-leaf);
+}
+.panel {
+	fill: none;
+	stroke: var(--door-panel);
+	stroke-width: 1.4;
+}
+.hinge {
+	stroke-width: 1.2;
+}
+.knob {
+	fill: var(--honey);
+}
+
+/* A played door, and Sam's lit one: honey, its panels in the honey edge, a dark knob. */
+.honey .leaf {
+	fill: var(--honey);
+}
+.honey .panel {
+	stroke: var(--honey-edge);
+}
+.honey .knob {
+	fill: var(--on-honey);
+}
+.check {
+	color: var(--on-honey);
+}
+.lock {
+	color: var(--door-panel);
+}
+.sam {
+	fill: var(--dusk);
+}
+
+/* The door to play: warm light in the doorway, who's waiting in it, the light on the floor. */
+.doorway {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	border-radius: 14px 14px 0 0;
+	background: var(--honey-tint);
+}
+.peek {
+	position: absolute;
+	left: -7px;
+	bottom: 0;
+	width: 42px;
+	height: 42px;
+}
+.spill {
+	fill: color-mix(in srgb, var(--honey) 55%, transparent);
+}
+.cueKnob {
+	fill: var(--honey);
+}
+
+/* The cue over the door to play: a honey tile with a play glyph that bobs, so a first-time
+   player sees where to tap. Reduced motion: it stays still. */
+.cue {
+	display: grid;
+	place-items: center;
+	width: 18px;
+	height: 18px;
+	margin-bottom: 4px;
+	border-radius: 6px;
+	background: var(--honey);
+	box-shadow: 0 2px 0 var(--honey-edge);
+	color: var(--on-honey);
+	font-size: 11px;
+}
+:global(.motion-ready) .cue {
+	animation: bob 1400ms var(--ease) infinite alternate;
+}
+@keyframes bob {
+	to {
+		transform: translateY(-3px);
+	}
+}
+
+/* The hero's last step: the room this visit lit fills with honey from the sill up, one glow ring
+   expands, the check lands. */
+.glow {
+	position: absolute;
+	inset: -8px;
+	border: 4px solid var(--honey);
+	border-radius: 9999px 9999px 8px 8px;
+	opacity: 0;
+}
+.lighting .rise {
+	transform-box: fill-box;
+	transform-origin: 50% 100%;
+}
+.lighting .check {
+	transform-box: fill-box;
+	transform-origin: center;
+}
+:global([data-step]:not([data-step='tower'])) .lighting .rise {
+	transform: scaleY(0);
+}
+:global([data-step]:not([data-step='tower'])) .lighting .check {
+	opacity: 0;
+	transform: scale(0.4);
+}
+:global([data-step='tower']) .lighting .rise {
+	transition: transform 700ms var(--ease) 400ms;
+}
+:global([data-step='tower']) .lighting .check {
+	transition:
+		opacity var(--fade) var(--ease) 1100ms,
+		transform var(--fade) var(--ease) 1100ms;
+}
+:global([data-step='tower']) .lighting .glow {
+	animation: glow var(--move) var(--ease) 1000ms;
+}
+@keyframes glow {
+	from {
+		opacity: 1;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 0;
+		transform: scale(1.35);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:global(.motion-ready) .cue {
+		animation: none;
+	}
+}

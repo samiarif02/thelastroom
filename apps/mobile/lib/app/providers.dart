@@ -61,6 +61,10 @@ class SessionNotifier extends Notifier<BackendSession> {
     );
     return signIn.run();
   }
+
+  /// The player saved their progress, or signed in on this device (FR-3): [session] is the
+  /// linked account (the same id after a link, the account's id after a sign-in).
+  void signedIn(GuestSession session) => state = session;
 }
 
 /// The device's database. `main.dart` overrides it with [AppDatabase.onDevice]; nothing reads it
@@ -80,7 +84,12 @@ final outboxSignalProvider = Provider<OutboxSignal>((ref) {
 /// The sync worker: built only for a signed-in guest, so with no keys (or before the guest
 /// sign-in) it never exists and nothing is sent. `main.dart` keeps it alive by listening.
 final syncWorkerProvider = Provider<SyncWorker?>((ref) {
-  if (ref.watch(sessionProvider) is! GuestSession) return null;
+  // Keyed on the user id: linking an email (FR-3) keeps the worker; signing in as another
+  // account builds a new one, which runs the account merge first.
+  final userId = ref.watch(
+    sessionProvider.select((s) => s is GuestSession ? s.userId : null),
+  );
+  if (userId == null) return null;
   final worker = SyncWorker(
     db: ref.watch(databaseProvider),
     backend: ref.watch(backendProvider),
