@@ -62,7 +62,7 @@ missing**.
 | --- | --- | --- | --- | --- |
 | FR-1 | Splash → intro → Mission 1 as a guest | Built | #12, #24 (vivid splash, first launch to onboarding) | |
 | FR-2 | Anonymous sign-in, offline-safe | Built | #7 (server), #17 (app) | |
-| FR-3 | "Save your progress": link an email | Built | Status 60: Settings' "Save your progress" card links the guest's email with a six-digit code (same user id), "Sign in on another device" merges the account in (attempts a union, the account's profile wins); `account_linked`, `account_signed_in`; a widget test per state | Google sign-in is v2. The local stack needs a restart for the code templates; a hosted project needs them in its dashboard. Not yet offered from the Chapter 2 waitlist |
+| FR-3 | "Save your progress": link an email | Built | Status 60 built the card, the merge and the events; status 67 moved it from a six-digit code to links: "Save your progress" mails a confirmation link (the "You're verified" page on the landing site), and the card notices the tap on return or by a gentle poll (same user id); "Sign in on another device" mails a link that opens the app and merges the account in (attempts a union, the account's profile wins); `account_linked`, `account_signed_in`; a widget test per state | Links because the hosted free-tier project can't edit its email templates without custom SMTP, and its defaults send a link. Its URL configuration (Site URL, Redirect URLs) is set by the owner in the dashboard (status 67). Google sign-in is v2. Not yet offered from the Chapter 2 waitlist |
 | FR-4 | Onboarding: role, nerves (calm mode), interview date | Built | #15 (role, nerves, name; calm mode), brief 32 (an optional interview-date step, kept on the device, counted down in reminders) | |
 | FR-5 | Missions 2–7 → Chapter 1 report → Chapter 2 teaser → D1 (waitlist) | Built | #9, #15, #30 (report, teaser, `joinWaitlist`) | |
 | FR-10 | Scene, typewriter subtitles, tap to complete | Built | #12, #19, #21 | |
@@ -121,7 +121,7 @@ missing**.
 | 05 | Supabase | Built | #7 | |
 | 06 | Design system | Built | #10, #11 | |
 | 07 | Missions 2–7 | Built | #9 | |
-| 08 | Auth and sync | Built | #17, status 60 (FR-3) | |
+| 08 | Auth and sync | Built | #17, status 60 and 67 (FR-3) | |
 | 09 | Sound | Built | #13, #14 | |
 | 10 | Mission player | Built | #12, #19, #21 | |
 | 11 | Notifications | Partly | #33 | iOS untested, extra types (FR-50): deliberate cuts |

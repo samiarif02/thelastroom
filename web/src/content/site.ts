@@ -483,6 +483,25 @@ export const notFound = {
 	back: 'Back to the lobby'
 } as const
 
+/**
+ * Where an emailed link lands (FR-3, status 67). "Save your progress" sends Supabase's default
+ * confirmation email, whose link comes here once the address is confirmed; Supabase sends an
+ * expired or used link here too, with `#error=…`.
+ */
+export const verified = {
+	title: 'You’re verified',
+	kicker: 'Progress saved',
+	heading: 'You’re verified.',
+	body: 'Your progress is saved to your email. Go back to The Last Room: it notices by itself.',
+	open: 'Open the app',
+	desktop:
+		'Opened this on a computer? Your phone is already saved, so just go back to the app there. A sign in link for a new phone works when you open it on that phone.',
+	expiredKicker: 'Link expired',
+	expiredHeading: 'This link expired or was used.',
+	expiredBody: 'Request a new one in the app: Settings, then Save your progress. The newest link is the one that works.',
+	home: 'Back to the lobby'
+} as const
+
 export type LegalSection = {
 	readonly title: string
 	readonly body: readonly string[]

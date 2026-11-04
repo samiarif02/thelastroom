@@ -40,6 +40,18 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- "Sign in on another device" (FR-3): the emailed sign-in link comes back here as
+                 thelastroom://auth-callback?code=…, and supabase_flutter (app_links) exchanges the
+                 code for the account's session. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="thelastroom" android:host="auth-callback"/>
+            </intent-filter>
+            <!-- The link is supabase_flutter's to read, not the router's: without this, Flutter
+                 would also push "/?code=…" as a route. -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
         </activity>
         <!-- flutter_local_notifications: shows scheduled reminders, and re-schedules them after
              a reboot or an app update. -->

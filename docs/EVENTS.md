@@ -20,8 +20,8 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | --- | --- | --- |
 | `intro_completed` | The 3-screen intro finishes (or is skipped) | `skipped` |
 | `guest_started` | Anonymous sign-in succeeds on first launch | |
-| `account_linked` | A guest links an email in Settings ("Save your progress", FR-3) by entering the emailed code; the user id stays the same. Never the email | `provider` (`email`) |
-| `account_signed_in` | "Sign in on another device" (FR-3): a player signs in to their saved account with an emailed code, and this device's progress merges with it. Never the email | `provider` (`email`), `had_progress` |
+| `account_linked` | A guest links an email in Settings ("Save your progress", FR-3): the app sees the emailed link was tapped; the user id stays the same. Never the email | `provider` (`email`) |
+| `account_signed_in` | "Sign in on another device" (FR-3): a player opens the emailed sign-in link on this device, it signs in to their saved account, and this device's progress merges with it. Never the email | `provider` (`email`), `had_progress` |
 | `onboarding_completed` | The first-launch onboarding finishes, before the Tower (brief 13). Never the name | `skipped_steps`, `named`, `experience`, `target_role`, `nerves_level`, `calm_mode`, `weekly_goal` |
 | `tower_opened` | The Tower (home) is shown | `missions_done`, `after_mission` |
 | `room_entered` | The player enters a room on the Tower (the elevator starts) | `mission_id`, `replay` |

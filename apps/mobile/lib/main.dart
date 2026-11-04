@@ -16,6 +16,7 @@ import 'core/profile/drift_profile_repository.dart';
 import 'core/profile/profile_repository.dart';
 import 'core/progress/drift_progress_repository.dart';
 import 'core/progress/progress_repository.dart';
+import 'features/settings/account/save_progress_controller.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -79,6 +80,9 @@ void main() {
 /// The backend is optional (ADR 0005): the guest sign-in starts only once the first frame is on
 /// screen, runs in the background, and is never awaited. With no keys it does nothing.
 void startBackendAfterFirstFrame(ProviderContainer container) {
+  // A sign-in link (FR-3) can open the app at any time, a cold start included: the card's
+  // controller listens for it from launch, so the account merge runs wherever the player is.
+  container.listen(saveProgressProvider, (_, _) {});
   WidgetsBinding.instance.addPostFrameCallback((_) {
     unawaited(container.read(sessionProvider.notifier).start());
   });

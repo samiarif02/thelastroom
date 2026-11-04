@@ -74,29 +74,25 @@ abstract interface class Backend {
   /// to the model and never stores. Throws [ScoreRefused] like [scoreAnswer].
   Future<Object?> scoreVoiceAnswer(Map<String, Object?> request);
 
-  /// "Save your progress" (FR-3), step 1: asks the server to link [email] to the signed-in
-  /// guest, which mails a 6-digit code to it. Returns null when the code is on its way, or the
-  /// linked session when the server links at once (a project with email confirmations off).
-  /// Throws [AccountException].
-  Future<GuestSession?> sendLinkCode(String email);
+  /// "Save your progress" (FR-3): asks the server to link [email] to the signed-in guest, which
+  /// mails a confirmation link to it (Supabase's default email). Returns null when the link is
+  /// on its way, or the linked session when the server links at once (a project with email
+  /// confirmations off). Throws [AccountException].
+  Future<GuestSession?> sendLinkEmail(String email);
 
-  /// Step 2: the code from the email. The same user id, now with its email. Throws
-  /// [AccountException] ([AccountFailure.wrongCode] for a wrong or expired code).
-  Future<GuestSession> confirmLinkCode({
-    required String email,
-    required String code,
-  });
+  /// Re-reads the signed-in user from the server (a token refresh, then the user): the same id,
+  /// with its email once the player has tapped the link ([GuestSession.isLinked]). Throws
+  /// [AccountException].
+  Future<GuestSession> refreshAccount();
 
-  /// "Sign in on another device", step 1: mails a 6-digit code to an address that's already
-  /// saved. Never creates an account ([AccountFailure.noAccount]). Throws [AccountException].
-  Future<void> sendSignInCode(String email);
+  /// "Sign in on another device": mails a sign-in link to an address that's already saved. The
+  /// link opens the app ([accountLinks] then reports the sign-in). Never creates an account
+  /// ([AccountFailure.noAccount]). Throws [AccountException].
+  Future<void> sendSignInLink(String email);
 
-  /// Step 2: signs in as that account; the session is the account's user id from now on, and
-  /// this device's guest is left behind. Throws [AccountException].
-  Future<GuestSession> confirmSignInCode({
-    required String email,
-    required String code,
-  });
+  /// What the sign-in links opened on this device did: the account signed in, or the link was
+  /// refused (expired or already used). Broadcast; nothing is replayed.
+  Stream<AccountLinkEvent> get accountLinks;
 
   /// The signed-in player's AI verdicts (`ai_scores` rows, oldest first), for "Your file" on a
   /// fresh install. Raw rows: the caller parses them.
@@ -130,10 +126,10 @@ enum AccountFailure {
   /// Not an email address (checked on the device, before anything is sent).
   invalidEmail,
 
-  /// The code is wrong or has expired (the server can't tell the two apart).
-  wrongCode,
+  /// The emailed link has expired or was already used (or was opened on another device).
+  linkExpired,
 
-  /// Too many codes asked for, or too many tries: wait a minute.
+  /// Too many emails asked for in a short time: wait a minute.
   rateLimited,
 
   /// "Save your progress" with an address another account already holds.
@@ -161,4 +157,26 @@ class AccountException implements Exception {
 
   @override
   String toString() => 'AccountException(${failure.name}, $reason)';
+}
+
+/// A sign-in link (FR-3) opened in the app.
+sealed class AccountLinkEvent {
+  const AccountLinkEvent();
+}
+
+/// The link signed this device in to [session], a saved account. [previousUserId] is the guest
+/// this device was before (null on a device that had none), so the caller readies the merge.
+class AccountLinkSignedIn extends AccountLinkEvent {
+  const AccountLinkSignedIn(this.session, {this.previousUserId});
+
+  final GuestSession session;
+  final String? previousUserId;
+}
+
+/// The link didn't sign in: it expired, was used already, or was asked for on another device.
+/// [reason] is the server's error code, for the log; it never holds an email.
+class AccountLinkRefused extends AccountLinkEvent {
+  const AccountLinkRefused([this.reason]);
+
+  final String? reason;
 }

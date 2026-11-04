@@ -16,9 +16,9 @@ import '../../core/backend/fakes.dart';
 import '../../ui/harness.dart';
 
 /// FR-3, "Save your progress": every face of the card against a fake auth server: no backend,
-/// offline, the email step, sending, the code step, verifying, each failure, and linked. Linking
-/// keeps the guest's user id; signing in on another device switches to the account's and
-/// readies the merge. No email reaches an event or the log.
+/// offline, the email step, sending, link sent (resume, poll, resend), each failure, and linked.
+/// Linking keeps the guest's user id; a sign-in link opened in the app switches to the account's
+/// and readies the merge. No email reaches an event or the log.
 void main() {
   const email = 'player@example.com';
   late FakeBackend server;
@@ -89,14 +89,9 @@ void main() {
     await tester.pump();
   }
 
-  Future<void> typeCode(WidgetTester tester, String value) async {
-    await tester.enterText(find.byType(EditableText), value);
-    await tester.pump();
-  }
-
-  Future<void> toCodeStep(WidgetTester tester) async {
+  Future<void> toLinkSent(WidgetTester tester) async {
     await typeEmail(tester, '  Player@Example.com ');
-    await tapText(tester, SaveProgressCard.sendCode);
+    await tapText(tester, SaveProgressCard.sendLink);
   }
 
   /// Every log line and every event, as text: none may hold the email.
@@ -136,7 +131,7 @@ void main() {
     expect(find.text(SaveProgressCard.linkLine), findsOneWidget);
     expect(find.text(SaveProgressCard.tagGuest), findsOneWidget);
     final send = tester.widget<TactileButton>(
-      find.widgetWithText(TactileButton, SaveProgressCard.sendCode),
+      find.widgetWithText(TactileButton, SaveProgressCard.sendLink),
     );
     expect(send.onPressed, isNull);
   });
@@ -144,19 +139,36 @@ void main() {
   testWidgets('a malformed address never reaches the server', (tester) async {
     await pump(tester);
     await typeEmail(tester, 'not-an-email');
-    await tapText(tester, SaveProgressCard.sendCode);
+    await tapText(tester, SaveProgressCard.sendLink);
     expect(face(tester), SaveProgressFace.enterEmail);
     expect(find.text(SaveProgressCard.invalidEmail), findsOneWidget);
     expect(server.authCalls, isEmpty);
   });
 
-  testWidgets('link: sending, code sent, verifying, linked with the same id', (
+  /// Leaves the link-sent step's timers (the resend cooldown, the poll window) to run out.
+  Future<void> drain(WidgetTester tester) async {
+    await tester.pump(linkPollWindow + resendCooldown);
+    await settle(tester);
+  }
+
+  /// The player switches to their mail app and back (the app goes inactive, then resumes).
+  Future<void> leaveAndReturn(WidgetTester tester) async {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump();
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await settle(tester);
+  }
+
+  int refreshes() =>
+      server.authCalls.where((c) => c == 'refreshAccount').length;
+
+  testWidgets('link: sending, link sent, tap it, come back: linked, same id', (
     tester,
   ) async {
     await pump(tester);
     server.authGate = Completer<void>();
     await typeEmail(tester, '  Player@Example.com ');
-    await tester.tap(find.text(SaveProgressCard.sendCode));
+    await tester.tap(find.text(SaveProgressCard.sendLink));
     await tester.pump();
     expect(face(tester), SaveProgressFace.sending);
     expect(find.text(SaveProgressCard.sending), findsOneWidget);
@@ -164,23 +176,18 @@ void main() {
     server.authGate!.complete();
     server.authGate = null;
     await settle(tester);
-    expect(face(tester), SaveProgressFace.enterCode);
-    expect(find.text(SaveProgressCard.codeSentLine(email)), findsOneWidget);
-    final save = find.widgetWithText(
-      TactileButton,
-      SaveProgressCard.saveButton,
-    );
-    expect(tester.widget<TactileButton>(save).onPressed, isNull);
+    expect(face(tester), SaveProgressFace.linkSent);
+    expect(find.text(SaveProgressCard.linkSentLine(email)), findsOneWidget);
+    expect(find.text(SaveProgressCard.resendSoon), findsOneWidget);
+    expect(server.pendingEmail, email);
 
-    server.authGate = Completer<void>();
-    await typeCode(tester, FakeBackend.goodCode);
-    await tester.tap(save);
-    await tester.pump();
-    expect(face(tester), SaveProgressFace.verifying);
-    expect(find.text(SaveProgressCard.verifying), findsOneWidget);
+    // Coming back before tapping it: checked, still waiting.
+    await leaveAndReturn(tester);
+    expect(face(tester), SaveProgressFace.linkSent);
+    expect(refreshes(), 1);
 
-    server.authGate!.complete();
-    await settle(tester);
+    server.tapLink();
+    await leaveAndReturn(tester);
     expect(face(tester), SaveProgressFace.linked);
     expect(find.text(SaveProgressCard.linkedLine(email)), findsOneWidget);
     expect(find.text(SaveProgressCard.tagSaved), findsOneWidget);
@@ -189,18 +196,92 @@ void main() {
     final session = container.read(sessionProvider) as GuestSession;
     expect(session.userId, FakeBackend.guestId);
     expect(session.email, email);
-    expect(server.authCalls, ['sendLinkCode', 'confirmLinkCode']);
+    expect(server.authCalls, [
+      'sendLinkEmail',
+      'refreshAccount',
+      'refreshAccount',
+    ]);
     expect(preps, 0);
     expect(analytics.events, [AnalyticsEvent.accountLinked]);
+    expect(container.read(saveProgressProvider.notifier).polling, isFalse);
     expectNoEmailLeaked();
   });
 
-  testWidgets('a server that links without a code goes straight to linked', (
+  testWidgets('link: the gentle poll notices the tap without leaving the app', (
     tester,
   ) async {
     await pump(tester);
-    server.linksWithoutCode = true;
-    await toCodeStep(tester);
+    await toLinkSent(tester);
+    await tester.pump(linkPollInterval);
+    await settle(tester);
+    expect(face(tester), SaveProgressFace.linkSent);
+    server.tapLink();
+    await tester.pump(linkPollInterval);
+    await settle(tester);
+    expect(face(tester), SaveProgressFace.linked);
+    expect(
+      (container.read(sessionProvider) as GuestSession).userId,
+      FakeBackend.guestId,
+    );
+    expect(analytics.events, [AnalyticsEvent.accountLinked]);
+    await drain(tester);
+    expect(analytics.events, [AnalyticsEvent.accountLinked]);
+  });
+
+  testWidgets(
+    'link: the poll stops after its window; coming back checks again',
+    (tester) async {
+      await pump(tester);
+      await toLinkSent(tester);
+      final controller = container.read(saveProgressProvider.notifier);
+      expect(controller.polling, isTrue);
+      await tester.pump(linkPollWindow);
+      await settle(tester);
+      expect(controller.polling, isFalse);
+      final asked = refreshes();
+      expect(
+        asked,
+        linkPollWindow.inMilliseconds ~/ linkPollInterval.inMilliseconds,
+      );
+      await tester.pump(const Duration(minutes: 5));
+      expect(refreshes(), asked);
+
+      server.tapLink();
+      await leaveAndReturn(tester);
+      expect(face(tester), SaveProgressFace.linked);
+    },
+  );
+
+  testWidgets('"I’ve tapped it" checks at once', (tester) async {
+    await pump(tester);
+    await toLinkSent(tester);
+    server.tapLink();
+    await tapText(tester, SaveProgressCard.checkNow);
+    expect(face(tester), SaveProgressFace.linked);
+  });
+
+  testWidgets('offline while waiting: quiet, and the next check links', (
+    tester,
+  ) async {
+    await pump(tester);
+    await toLinkSent(tester);
+    server.tapLink();
+    server.nextAuthFailure = AccountFailure.offline;
+    await tester.pump(linkPollInterval);
+    await settle(tester);
+    expect(face(tester), SaveProgressFace.linkSent);
+    expect(find.text(SaveProgressCard.offline), findsNothing);
+    await tester.pump(linkPollInterval);
+    await settle(tester);
+    expect(face(tester), SaveProgressFace.linked);
+  });
+
+  testWidgets('a server that links at once goes straight to linked', (
+    tester,
+  ) async {
+    await pump(tester);
+    server.linksAtOnce = true;
+    await toLinkSent(tester);
     expect(face(tester), SaveProgressFace.linked);
     expect(
       (container.read(sessionProvider) as GuestSession).userId,
@@ -209,56 +290,62 @@ void main() {
     expect(analytics.events, [AnalyticsEvent.accountLinked]);
   });
 
-  testWidgets('a wrong or expired code: stays on the code step, says so', (
+  testWidgets('resend opens after a minute, then a new link is on its way', (
     tester,
   ) async {
     await pump(tester);
-    await toCodeStep(tester);
-    await typeCode(tester, '000000');
-    await tapText(tester, SaveProgressCard.saveButton);
-    expect(face(tester), SaveProgressFace.enterCode);
-    expect(find.text(SaveProgressCard.wrongCode), findsOneWidget);
-    expect(container.read(sessionProvider), isA<GuestSession>());
-    expect((container.read(sessionProvider) as GuestSession).isLinked, false);
-    expect(analytics.events, isEmpty);
-    expectNoEmailLeaked();
-  });
-
-  testWidgets('a new code on request, then the latest code works', (
-    tester,
-  ) async {
-    await pump(tester);
-    await toCodeStep(tester);
+    await toLinkSent(tester);
+    final soon = tester.widget<TactileButton>(
+      find.widgetWithText(TactileButton, SaveProgressCard.resendSoon),
+    );
+    expect(soon.onPressed, isNull);
+    await tester.pump(resendCooldown);
+    await settle(tester);
     await tapText(tester, SaveProgressCard.resend);
-    expect(face(tester), SaveProgressFace.enterCode);
+    expect(face(tester), SaveProgressFace.linkSent);
     expect(find.text(SaveProgressCard.resentLine), findsOneWidget);
-    await typeCode(tester, FakeBackend.goodCode);
-    await tapText(tester, SaveProgressCard.saveButton);
-    expect(face(tester), SaveProgressFace.linked);
+    expect(find.text(SaveProgressCard.resendSoon), findsOneWidget);
+    expect(server.authCalls.where((c) => c == 'sendLinkEmail').length, 2);
+    await drain(tester);
   });
 
   testWidgets('rate-limited: wait a minute', (tester) async {
     await pump(tester);
     server.nextAuthFailure = AccountFailure.rateLimited;
-    await toCodeStep(tester);
+    await toLinkSent(tester);
     expect(face(tester), SaveProgressFace.enterEmail);
     expect(find.text(SaveProgressCard.rateLimited), findsOneWidget);
   });
 
-  testWidgets('offline mid-flow: try again, progress is safe', (tester) async {
+  testWidgets('a rate-limited resend keeps waiting for the first link', (
+    tester,
+  ) async {
     await pump(tester);
-    await toCodeStep(tester);
+    await toLinkSent(tester);
+    await tester.pump(resendCooldown);
+    server.nextAuthFailure = AccountFailure.rateLimited;
+    await tapText(tester, SaveProgressCard.resend);
+    expect(face(tester), SaveProgressFace.linkSent);
+    expect(find.text(SaveProgressCard.rateLimited), findsOneWidget);
+    server.tapLink();
+    await leaveAndReturn(tester);
+    expect(face(tester), SaveProgressFace.linked);
+  });
+
+  testWidgets('offline when sending: try again, progress is safe', (
+    tester,
+  ) async {
+    await pump(tester);
     server.nextAuthFailure = AccountFailure.offline;
-    await typeCode(tester, FakeBackend.goodCode);
-    await tapText(tester, SaveProgressCard.saveButton);
-    expect(face(tester), SaveProgressFace.enterCode);
+    await toLinkSent(tester);
+    expect(face(tester), SaveProgressFace.enterEmail);
     expect(find.text(SaveProgressCard.offline), findsOneWidget);
   });
 
   testWidgets('the server answering oddly is its own state', (tester) async {
     await pump(tester);
     server.nextAuthFailure = AccountFailure.unavailable;
-    await toCodeStep(tester);
+    await toLinkSent(tester);
     expect(find.text(SaveProgressCard.unavailable), findsOneWidget);
   });
 
@@ -267,7 +354,7 @@ void main() {
   ) async {
     await pump(tester);
     server.accounts[email] = FakeBackend.accountId;
-    await toCodeStep(tester);
+    await toLinkSent(tester);
     expect(face(tester), SaveProgressFace.enterEmail);
     expect(find.text(SaveProgressCard.emailTaken), findsOneWidget);
     expect(find.text(SaveProgressCard.toSignIn), findsOneWidget);
@@ -277,10 +364,12 @@ void main() {
     tester,
   ) async {
     await pump(tester);
-    await toCodeStep(tester);
+    await toLinkSent(tester);
     await tapText(tester, SaveProgressCard.otherEmail);
     expect(face(tester), SaveProgressFace.enterEmail);
     expect(find.text(email), findsOneWidget);
+    expect(container.read(saveProgressProvider.notifier).polling, isFalse);
+    await drain(tester);
   });
 
   group('sign in on another device', () {
@@ -292,23 +381,75 @@ void main() {
       expect(find.text(SaveProgressCard.signInLine), findsOneWidget);
     }
 
-    testWidgets('the account id takes over and the merge is readied first', (
+    testWidgets('the link opens the app: the account takes over, merge first', (
       tester,
     ) async {
       await toSignIn(tester);
-      await toCodeStep(tester);
-      expect(face(tester), SaveProgressFace.enterCode);
-      await typeCode(tester, FakeBackend.goodCode);
-      await tapText(tester, SaveProgressCard.signInButton);
+      await toLinkSent(tester);
+      expect(face(tester), SaveProgressFace.linkSent);
+      expect(find.text(SaveProgressCard.signInSentLine(email)), findsOneWidget);
+      expect(find.text(SaveProgressCard.checkNow), findsNothing);
+      // Nothing to poll: the link itself brings the session.
+      expect(container.read(saveProgressProvider.notifier).polling, isFalse);
+
+      server.openSignInLink(email);
+      await settle(tester);
       expect(face(tester), SaveProgressFace.linked);
       expect(find.text(SaveProgressCard.signedInLine), findsOneWidget);
       final session = container.read(sessionProvider) as GuestSession;
       expect(session.userId, FakeBackend.accountId);
       expect(session.email, email);
       expect(preps, 1);
-      expect(server.authCalls, ['sendSignInCode', 'confirmSignInCode']);
+      expect(server.authCalls, ['sendSignInLink']);
       expect(analytics.events, [AnalyticsEvent.accountSignedIn]);
       expectNoEmailLeaked();
+    });
+
+    testWidgets('a link that cold-starts the app still merges', (tester) async {
+      await pump(tester);
+      server.accounts[email] = FakeBackend.accountId;
+      server.openSignInLink(email);
+      await settle(tester);
+      expect(face(tester), SaveProgressFace.linked);
+      expect(
+        (container.read(sessionProvider) as GuestSession).userId,
+        FakeBackend.accountId,
+      );
+      expect(preps, 1);
+      expect(analytics.events, [AnalyticsEvent.accountSignedIn]);
+    });
+
+    testWidgets('an expired or used link: calm, and a new one is a tap away', (
+      tester,
+    ) async {
+      await toSignIn(tester);
+      await toLinkSent(tester);
+      server.openRefusedLink();
+      await settle(tester);
+      expect(face(tester), SaveProgressFace.linkSent);
+      expect(find.text(SaveProgressCard.linkExpired), findsOneWidget);
+      expect(
+        (container.read(sessionProvider) as GuestSession).userId,
+        FakeBackend.guestId,
+      );
+      expect(preps, 0);
+      expect(analytics.events, isEmpty);
+      expectNoEmailLeaked();
+      await drain(tester);
+      await tapText(tester, SaveProgressCard.resend);
+      expect(find.text(SaveProgressCard.resentLine), findsOneWidget);
+      await drain(tester);
+    });
+
+    testWidgets('an expired link on a cold start lands on the sign-in step', (
+      tester,
+    ) async {
+      await pump(tester);
+      server.openRefusedLink();
+      await settle(tester);
+      expect(face(tester), SaveProgressFace.enterEmail);
+      expect(find.text(SaveProgressCard.signInHeading), findsOneWidget);
+      expect(find.text(SaveProgressCard.linkExpired), findsOneWidget);
     });
 
     testWidgets('an address nobody saved to: save this device instead', (
@@ -316,24 +457,11 @@ void main() {
     ) async {
       await toSignIn(tester);
       server.accounts.clear();
-      await toCodeStep(tester);
+      await toLinkSent(tester);
       expect(face(tester), SaveProgressFace.enterEmail);
       expect(find.text(SaveProgressCard.noAccount), findsOneWidget);
       await tapText(tester, SaveProgressCard.toLink);
       expect(find.text(SaveProgressCard.linkLine), findsOneWidget);
-      expect(preps, 0);
-    });
-
-    testWidgets('a wrong code leaves this device as it was', (tester) async {
-      await toSignIn(tester);
-      await toCodeStep(tester);
-      await typeCode(tester, '999999');
-      await tapText(tester, SaveProgressCard.signInButton);
-      expect(find.text(SaveProgressCard.wrongCode), findsOneWidget);
-      expect(
-        (container.read(sessionProvider) as GuestSession).userId,
-        FakeBackend.guestId,
-      );
       expect(preps, 0);
     });
   });
@@ -351,13 +479,14 @@ void main() {
     expect(find.byType(EditableText), findsNothing);
   });
 
-  testWidgets('2x text and reduced motion: the code step still fits', (
+  testWidgets('2x text and reduced motion: the link-sent step still fits', (
     tester,
   ) async {
     await pump(tester, textScale: 2, reduceMotion: true);
-    await toCodeStep(tester);
-    expect(face(tester), SaveProgressFace.enterCode);
+    await toLinkSent(tester);
+    expect(face(tester), SaveProgressFace.linkSent);
     expect(tester.takeException(), isNull);
+    await drain(tester);
   });
 
   test('the logger redacts an email, by key and by value', () {

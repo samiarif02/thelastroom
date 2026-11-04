@@ -70,5 +70,22 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- "Sign in on another device" (FR-3): the emailed sign-in link opens the app as
+	     thelastroom://auth-callback; supabase_flutter (app_links) reads it, not the router. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>auth-callback</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>thelastroom</string>
+			</array>
+		</dict>
+	</array>
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
 </dict>
 </plist>
