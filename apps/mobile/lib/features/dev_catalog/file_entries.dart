@@ -68,28 +68,31 @@ abstract final class FileEntries {
             DaylightPanel(
               color: DaylightFloors.one.base,
               edge: DaylightFloors.one.deep,
-              child: const Row(
-                children: [
-                  Expanded(
-                    child: HeroStat(
-                      label: 'Rooms lit',
-                      value: '4',
-                      after: 'of 21',
+              // Laid out as ProgressionCard lays them: one height, the tallest's.
+              child: const IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: DaylightSpace.s8,
+                  children: [
+                    Expanded(
+                      child: HeroStat(
+                        label: 'Rooms lit',
+                        value: '4',
+                        after: 'of 21',
+                      ),
                     ),
-                  ),
-                  SizedBox(width: DaylightSpace.s8),
-                  Expanded(
-                    child: HeroStat(label: 'Average', value: '71'),
-                  ),
-                  SizedBox(width: DaylightSpace.s8),
-                  Expanded(
-                    child: HeroStat(
-                      label: 'Best gain',
-                      value: '+19',
-                      after: 'on room 3',
+                    Expanded(
+                      child: HeroStat(label: 'Average', value: '71'),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: HeroStat(
+                        label: 'Best gain',
+                        value: '+19',
+                        after: 'on room 3',
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             Row(
