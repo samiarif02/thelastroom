@@ -295,7 +295,7 @@ export const floors = {
 			points: [
 				'Rooms 15 to 21, with Sam, the head of product',
 				'Then the last room: the offer, and what you do with it',
-				'Every room you clear lights a window in the tower'
+				'Every room you clear lights its door in the tower'
 			],
 			screen: 'tower',
 			tone: 'ch3'
@@ -344,7 +344,8 @@ export const screens = {
 		again: 'Start again'
 	},
 	tower: {
-		label: 'The tower on a phone: floor 1 has four rooms lit, floor 2 opens next, and Sam waits on the dark top floor.'
+		label:
+			'Northstar tower on a phone: floor 1, four rooms done, room 5 next, its door ajar with Marcus in the doorway; floor 2 is locked, and Sam waits behind the lit last door on the dark top floor.'
 	}
 } as const
 
