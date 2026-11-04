@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../ui/daylight/daylight_kit.dart';
+import 'tower_rooms.dart';
 
 /// How a room's door stands on the tower (the owner, 2026-11-03: "these small windows should be
 /// like doors, so the user knows to click here to play").
@@ -23,6 +24,22 @@ enum DoorState {
 
   /// The last room, from day one: lit, with Sam waiting in it.
   waiting,
+}
+
+/// How [room]'s door stands, the one rule for the tower and the chapters list: played is done,
+/// the room to play is ajar, the rest are closed on an open floor and locked on one not open
+/// yet, except the very last room ([topLast]) while its floor is shut: lit, Sam waiting in it.
+DoorState doorStateOf(
+  TowerRoom room, {
+  required bool floorOpen,
+  required bool topLast,
+}) {
+  if (topLast && !floorOpen) return DoorState.waiting;
+  return switch (room.state) {
+    RoomState.done => DoorState.done,
+    RoomState.current => DoorState.next,
+    RoomState.locked => floorOpen ? DoorState.closed : DoorState.locked,
+  };
 }
 
 /// A door's colours off its floor, the same on the tower, the share card and your file: on a
