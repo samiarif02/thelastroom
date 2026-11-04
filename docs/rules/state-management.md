@@ -30,5 +30,9 @@ truth for the player's progress; the server is a backup and a sync target.
 - **Providers are read in `build` with `ref.watch`, and in callbacks with `ref.read`.**
 - **Restore on fresh install**: after sign-in on a new device, progress is pulled from the server
   into drift, then the outbox resumes.
+- **Account sign-in merges, never overwrites** (FR-3, `core/sync/account_merge.dart`): attempts
+  are a union by `attempt_id` (attempts synced under the device's old guest get new ids and are
+  queued again), the account's profile wins over the device's, and the pull retries until it
+  lands. Linking an email keeps the user id, so nothing moves.
 - **Routes are constants** (`Routes` in `lib/app/router.dart`); notification deep links resolve
   to them.

@@ -34,12 +34,11 @@ missing**.
 
 ## Summary (2026-11-01, updated for wave 6)
 
-- **Built:** FR-1, 2, 4, 5, 10–14, 16, 17, 20–26, 30–32, 40–42, 51–53, 60–62, 70 and NFR-1, 2,
+- **Built:** FR-1, 2, 3 (status 60), 4, 5, 10–14, 16, 17, 20–26, 30–32, 40–42, 51–53, 60–62, 70 and NFR-1, 2,
   4–8 (FR-4, 16, 32 and 42 completed by brief 32; FR-30 and 41 by #39).
 - **Deliberate cuts:**
   - FR-71, metrics: the owner, 1 Nov: events are defined and logged on the device; a PostHog sink
     is v2.
-  - FR-3, email linking: the owner, #17.
   - The AI coach (FR-11 grading, FR-15 "Say it your way", FR-63, `coach_usage`): cut line #1,
     superseded by ADR 0006's AI scoring.
   - FR-50's extra reminder types: brief 26. iOS reminders: cut line #5.
@@ -63,7 +62,7 @@ missing**.
 | --- | --- | --- | --- | --- |
 | FR-1 | Splash → intro → Mission 1 as a guest | Built | #12, #24 (vivid splash, first launch to onboarding) | |
 | FR-2 | Anonymous sign-in, offline-safe | Built | #7 (server), #17 (app) | |
-| FR-3 | "Save your progress": link an email | Not built | | **Deliberate cut:** no sign-up, login or email linking in v1 (owner, #17); Google sign-in is v2. `account_linked` stays registered, unfired |
+| FR-3 | "Save your progress": link an email | Built | Status 60: Settings' "Save your progress" card links the guest's email with a six-digit code (same user id), "Sign in on another device" merges the account in (attempts a union, the account's profile wins); `account_linked`, `account_signed_in`; a widget test per state | Google sign-in is v2. The local stack needs a restart for the code templates; a hosted project needs them in its dashboard. Not yet offered from the Chapter 2 waitlist |
 | FR-4 | Onboarding: role, nerves (calm mode), interview date | Built | #15 (role, nerves, name; calm mode), brief 32 (an optional interview-date step, kept on the device, counted down in reminders) | |
 | FR-5 | Missions 2–7 → Chapter 1 report → Chapter 2 teaser → D1 (waitlist) | Built | #9, #15, #30 (report, teaser, `joinWaitlist`) | |
 | FR-10 | Scene, typewriter subtitles, tap to complete | Built | #12, #19, #21 | |
@@ -95,7 +94,7 @@ missing**.
 | FR-61 | Restore on a fresh install | Built | #17 | |
 | FR-62 | Tables with owner-only RLS, tested | Built | #7, #25 | `coach_usage` replaced by `ai_scores` and `ai_score_usage` (ADR 0006) |
 | FR-63 | Coach Edge Function | Not built | | **Deliberate cut** (cut line #1); the `score` function (#25) took its place |
-| FR-70 | Events registered first, no PII | Built | #3, every feature PR; `check:events` in CI | Not yet fired: `account_linked` (FR-3 cut), `skill_unlocked` (FR-16 gap), `coach_feedback_requested` (cut) |
+| FR-70 | Events registered first, no PII | Built | #3, every feature PR; `check:events` in CI | Not yet fired: `skill_unlocked` (FR-16 gap), `coach_feedback_requested` (cut) |
 | FR-71 | Metrics: activation, D1/D3/D7, deltas, open rates | Not built | Every event is defined, registered and logged on the device (`LogAnalytics`) | **Deliberate cut** (owner, 1 Nov): events are defined and logged locally; a PostHog sink is v2 |
 
 ## Non-functional requirements
@@ -122,7 +121,7 @@ missing**.
 | 05 | Supabase | Built | #7 | |
 | 06 | Design system | Built | #10, #11 | |
 | 07 | Missions 2–7 | Built | #9 | |
-| 08 | Auth and sync | Partly | #17 | Email linking: deliberate cut (FR-3) |
+| 08 | Auth and sync | Built | #17, status 60 (FR-3) | |
 | 09 | Sound | Built | #13, #14 | |
 | 10 | Mission player | Built | #12, #19, #21 | |
 | 11 | Notifications | Partly | #33 | iOS untested, extra types (FR-50): deliberate cuts |

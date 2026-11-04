@@ -27,7 +27,14 @@ class SupabaseBackend implements Backend {
   @override
   Future<BackendSession> restoreSession() async {
     final user = (await _client()).auth.currentUser;
-    return user == null ? const NoSession() : GuestSession(userId: user.id);
+    return user == null ? const NoSession() : _session(user);
+  }
+
+  /// The app's view of [user]: a guest, or a guest with its linked email (FR-3).
+  static GuestSession _session(User user) {
+    final email = user.email;
+    final linked = !user.isAnonymous && email != null && email.isNotEmpty;
+    return GuestSession(userId: user.id, email: linked ? email : null);
   }
 
   @override
@@ -101,6 +108,85 @@ class SupabaseBackend implements Backend {
       throw ScoreRefused(error.status, code is String ? code : null);
     }
   }
+
+  @override
+  Future<GuestSession?> sendLinkCode(String email) => _account(() async {
+    final auth = (await _client()).auth;
+    final response = await auth.updateUser(UserAttributes(email: email));
+    final user = response.user;
+    // With email confirmations off the server links at once; on, the code is on its way.
+    return user != null && !user.isAnonymous && user.email == email
+        ? _session(user)
+        : null;
+  });
+
+  @override
+  Future<GuestSession> confirmLinkCode({
+    required String email,
+    required String code,
+  }) => _verify(email, code, OtpType.emailChange);
+
+  @override
+  Future<void> sendSignInCode(String email) => _account(() async {
+    // shouldCreateUser false: this path only finds a saved account, it never makes one.
+    await (await _client()).auth.signInWithOtp(
+      email: email,
+      shouldCreateUser: false,
+    );
+  });
+
+  @override
+  Future<GuestSession> confirmSignInCode({
+    required String email,
+    required String code,
+  }) => _verify(email, code, OtpType.email);
+
+  Future<GuestSession> _verify(String email, String code, OtpType type) =>
+      _account(() async {
+        final auth = (await _client()).auth;
+        final response = await auth.verifyOTP(
+          email: email,
+          token: code,
+          type: type,
+        );
+        final user = response.user ?? auth.currentUser;
+        if (user == null) {
+          throw const AccountException(AccountFailure.unavailable, 'no_user');
+        }
+        return _session(user);
+      });
+
+  /// Runs an auth call, turning what the server says into an [AccountFailure].
+  static Future<T> _account<T>(Future<T> Function() call) async {
+    try {
+      return await call();
+    } on AuthRetryableFetchException catch (error) {
+      // No network, or a 5xx gotrue retries itself: both read as "can't reach us" to a player.
+      throw AccountException(AccountFailure.offline, error.statusCode);
+    } on AuthException catch (error) {
+      throw AccountException(_failure(error), error.code ?? error.statusCode);
+    } on TimeoutException {
+      throw const AccountException(AccountFailure.offline, 'timeout');
+    }
+  }
+
+  /// The gotrue error codes probed against the local stack (status 60).
+  static AccountFailure _failure(AuthException error) => switch (error.code) {
+    'otp_expired' || 'invalid_credentials' => AccountFailure.wrongCode,
+    'over_email_send_rate_limit' ||
+    'over_request_rate_limit' => AccountFailure.rateLimited,
+    'email_exists' || 'user_already_exists' => AccountFailure.emailTaken,
+    'otp_disabled' ||
+    'user_not_found' ||
+    'signup_disabled' => AccountFailure.noAccount,
+    'email_address_invalid' ||
+    'validation_failed' => AccountFailure.invalidEmail,
+    _ => switch (error.statusCode) {
+      '429' => AccountFailure.rateLimited,
+      '403' => AccountFailure.wrongCode,
+      _ => AccountFailure.unavailable,
+    },
+  };
 
   @override
   Future<List<Object?>> fetchAiScores() async {
