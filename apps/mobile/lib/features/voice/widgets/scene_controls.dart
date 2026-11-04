@@ -56,53 +56,6 @@ class MuteControl extends StatelessWidget {
   }
 }
 
-/// While the recruiter listens to the recording (at most `VoiceScorer.timeout`): the
-/// interviewer in an arch, thinking (the delay reads as thought, never a spinner).
-class ListeningCard extends StatelessWidget {
-  const ListeningCard({
-    super.key,
-    this.grade = ChapterGrade.lobby,
-    this.person = CastPeople.marcus,
-  });
-
-  final ChapterGrade grade;
-  final CastPerson person;
-
-  static const String title = 'The recruiter is listening…';
-  static const String line =
-      'Your answer is being transcribed and scored on what you said. If it takes too long, '
-      "you'll tick your own points instead.";
-
-  static const double _arch = 120;
-  static const double _archHeight = 148;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    liveRegion: true,
-    label: title,
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ArchPortrait(
-          person: person,
-          expression: CastExpression.thinking,
-          width: _arch,
-          height: _archHeight,
-          ground: grade.floor.soft,
-        ),
-        const SizedBox(height: DaylightSpace.s24),
-        ExcludeSemantics(child: Text(title, style: DaylightType.heading5)),
-        const SizedBox(height: DaylightSpace.s8),
-        Text(
-          line,
-          style: DaylightType.body6.copyWith(color: DaylightColors.ink2),
-        ),
-      ],
-    ),
-  );
-}
-
 /// Answering with no recording (the microphone refused): say it out loud, then Done.
 class SpokenAloudPanel extends StatelessWidget {
   const SpokenAloudPanel({

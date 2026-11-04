@@ -160,8 +160,9 @@ class AiScorer {
   static const Duration timeout = Duration(seconds: 8);
 
   /// How long a verdict may still arrive after the offline score is showing. Gemini is often
-  /// slower than 8 s under load (measured live, brief 36); a late verdict replaces the offline
-  /// score instead of being thrown away. Longer than the function's own model chain (~24 s).
+  /// slower than 8 s under load (measured live, brief 36); a late verdict is offered over the
+  /// offline score (the debrief's "The recruiter's score is ready") instead of being thrown
+  /// away. Longer than the function's own model chain (~24 s).
   static const Duration lateLimit = Duration(seconds: 30);
 
   /// Why there's no point asking, known at once (so the debrief shows no loading state), or null.

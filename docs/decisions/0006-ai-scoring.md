@@ -87,7 +87,10 @@ always saw the offline score. Measured on the key's model list:
 `gemini-3.1-flash-lite` when the first is overloaded, fails or runs past 14 s; minimal thinking
 on both, temperature 0, the verdict records which model graded. The app still shows something
 to read at 8 s (the offline score), but keeps listening for 30 s, and a late verdict replaces the
-offline score ("Scored by AI" appears; `ai_score_shown` carries `late: true`). With the chain
+offline score ("Scored by AI" appears; `ai_score_shown` carries `late: true`). Since 4 Nov
+(issue 70) the late verdict waits in a "The recruiter's score is ready" banner once the sheet
+has played and swaps in on a tap, without replaying the sheet: a silent swap mid-read looked
+like a flicker on the owner's phone. With the chain
 and the longer window, 8 of 8 live verdicts came back, in 2–6 s. The evaluation of the scores
 themselves is `docs/scoring-eval.md`.
 

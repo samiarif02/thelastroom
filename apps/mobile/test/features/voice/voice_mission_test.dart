@@ -9,6 +9,7 @@ import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/core/backend/backend.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
 import 'package:the_last_room/features/debrief/ai_verdict_cards.dart';
+import 'package:the_last_room/features/debrief/deliberation_scene.dart';
 import 'package:the_last_room/features/voice/recorder/recorder_panel.dart';
 import 'package:the_last_room/features/voice/voice_debrief.dart';
 import 'package:the_last_room/features/voice/voice_player.dart';
@@ -202,7 +203,7 @@ void main() {
     rig.backend.voiceScorer = (_) => never.future;
     await rig.boot();
     await rig.answerBoth();
-    await rig.until(find.text(ListeningCard.title));
+    await rig.until(find.byType(DeliberationScene));
     await rig.until(
       find.text(SelfCheckPanel.title),
       timeout: VoiceScorer.timeout + const Duration(seconds: 2),
