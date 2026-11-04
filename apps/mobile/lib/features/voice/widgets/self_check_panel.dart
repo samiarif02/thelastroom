@@ -6,19 +6,23 @@ import 'package:flutter/widgets.dart';
 
 import '../../../ui/daylight/daylight_kit.dart';
 import '../../../ui/haptics.dart';
+import '../audio/listen_back.dart';
+import '../audio/take_playback.dart';
 import '../recorder/take_recorder.dart';
 import '../voice_scoring.dart';
+import 'listen_tile.dart';
 import 'point_mark.dart';
 
 /// The self-check (brief 35): when the AI can't listen (offline, no backend, a timeout, the
 /// day's scores spent, no microphone), the player listens back and ticks the points they made.
-/// The engine scores the ticks, labelled "Self-check", and the room lights either way.
+/// The engine scores the ticks, labelled "Self-check", and the room lights either way. Each take
+/// plays in a [ListenTile] (one at a time, pause and resume); the sound stops when the panel goes.
 class SelfCheckPanel extends StatefulWidget {
   const SelfCheckPanel({
     super.key,
     required this.reason,
     required this.voice,
-    required this.onListen,
+    required this.playback,
     required this.onScore,
     this.answer,
     this.reply,
@@ -32,8 +36,8 @@ class SelfCheckPanel extends StatefulWidget {
   final Take? answer;
   final Take? reply;
 
-  /// Plays a take back.
-  final ValueChanged<Take> onListen;
+  /// Plays the takes back.
+  final TakePlayback playback;
 
   /// "Score my answer", with the ticked point ids.
   final ValueChanged<Set<String>> onScore;
@@ -45,6 +49,8 @@ class SelfCheckPanel extends StatefulWidget {
   static const String replyHeading = 'Your reply to the follow-up';
   static const String listenAnswer = 'Listen to your answer';
   static const String listenReply = 'Listen to your reply';
+  static const String answerClip = 'your answer';
+  static const String replyClip = 'your reply';
   static const String score = 'Score my answer';
   static const String contentOnly =
       'We score what you said, not how you sound.';
@@ -65,6 +71,28 @@ class SelfCheckPanel extends StatefulWidget {
 
 class _SelfCheckPanelState extends State<SelfCheckPanel> {
   final Set<String> _ticked = {};
+  late final ListenBack _player = ListenBack(widget.playback)
+    ..addListener(_heard);
+
+  void _heard() => setState(() {});
+
+  @override
+  void dispose() {
+    _player
+      ..removeListener(_heard)
+      ..dispose();
+    super.dispose();
+  }
+
+  Widget _listen(Take take, String label, String clip) => ListenTile(
+    label: label,
+    clip: clip,
+    state: _player.stateOf(take),
+    position: _player.positionOf(take),
+    length: take.length,
+    grade: widget.grade,
+    onToggle: () => unawaited(_player.toggle(take)),
+  );
 
   void _flip(ListenFor point) => setState(
     () => _ticked.contains(point.id)
@@ -101,9 +129,10 @@ class _SelfCheckPanelState extends State<SelfCheckPanel> {
             children: [
               const _Heading(SelfCheckPanel.answerHeading),
               if (answer != null)
-                _Listen(
-                  label: SelfCheckPanel.listenAnswer,
-                  onPressed: () => widget.onListen(answer),
+                _listen(
+                  answer,
+                  SelfCheckPanel.listenAnswer,
+                  SelfCheckPanel.answerClip,
                 ),
               for (final p in widget.voice.listenFor)
                 TickRow(
@@ -115,9 +144,10 @@ class _SelfCheckPanelState extends State<SelfCheckPanel> {
               const SizedBox(height: DaylightSpace.s16),
               const _Heading(SelfCheckPanel.replyHeading),
               if (reply != null)
-                _Listen(
-                  label: SelfCheckPanel.listenReply,
-                  onPressed: () => widget.onListen(reply),
+                _listen(
+                  reply,
+                  SelfCheckPanel.listenReply,
+                  SelfCheckPanel.replyClip,
                 ),
               for (final p in widget.voice.followUpListenFor)
                 TickRow(
@@ -133,7 +163,10 @@ class _SelfCheckPanelState extends State<SelfCheckPanel> {
         TactileButton(
           label: SelfCheckPanel.score,
           icon: PhosphorBold.check,
-          onPressed: () => widget.onScore(Set.of(_ticked)),
+          onPressed: () {
+            unawaited(_player.stop());
+            widget.onScore(Set.of(_ticked));
+          },
         ),
         const SizedBox(height: DaylightSpace.s12),
         Row(
@@ -168,25 +201,6 @@ class _Heading extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Semantics(header: true, child: Text(text, style: DaylightType.body1));
-}
-
-class _Listen extends StatelessWidget {
-  const _Listen({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: DaylightSpace.s8),
-    child: TactileButton(
-      label: label,
-      icon: PhosphorFill.play,
-      tone: TactileTone.quiet,
-      compact: true,
-      onPressed: () => unawaited(Future.sync(onPressed)),
-    ),
-  );
 }
 
 /// One point to tick: the whole row is the target, and a screen reader hears a checkbox.

@@ -409,12 +409,8 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
           answer: game.answer,
           reply: game.reply,
           grade: grade,
-          onListen: (take) =>
-              unawaited(ref.read(takePlaybackProvider).play(take.wav)),
-          onScore: (ticked) {
-            unawaited(ref.read(takePlaybackProvider).stop());
-            unawaited(_controller.selfChecked(ticked));
-          },
+          playback: ref.read(takePlaybackProvider),
+          onScore: (ticked) => unawaited(_controller.selfChecked(ticked)),
         ),
       );
     }

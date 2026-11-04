@@ -15,6 +15,7 @@ class SoloudTakePlayback implements TakePlayback {
   final Log _log;
   final SoLoud _soloud;
   AudioSource? _source;
+  SoundHandle? _handle;
   int _loads = 0;
 
   @override
@@ -26,9 +27,49 @@ class SoloudTakePlayback implements TakePlayback {
       // A fresh name per load: SoLoud keys sources by name and hash.
       final source = await _soloud.loadMem('take-${_loads++}.wav', wav);
       _source = source;
-      _soloud.play(source);
+      _handle = _soloud.play(source);
     } on Object catch (error) {
       _log.warn('take playback failed', {'error': '${error.runtimeType}'});
+    }
+  }
+
+  @override
+  Future<void> pause() async => _setPause(true);
+
+  @override
+  Future<void> resume() async => _setPause(false);
+
+  void _setPause(bool pause) {
+    final handle = _live;
+    if (handle == null) return;
+    try {
+      _soloud.setPause(handle, pause);
+    } on Object catch (error) {
+      _log.warn('take playback pause failed', {
+        'error': '${error.runtimeType}',
+      });
+    }
+  }
+
+  /// The voice, while it's still playing or paused (SoLoud drops it at the end of the clip).
+  SoundHandle? get _live {
+    final handle = _handle;
+    if (handle == null || !_soloud.isInitialized) return null;
+    try {
+      return _soloud.getIsValidVoiceHandle(handle) ? handle : null;
+    } on Object {
+      return null;
+    }
+  }
+
+  @override
+  Duration? get position {
+    final handle = _live;
+    if (handle == null) return null;
+    try {
+      return _soloud.getPosition(handle);
+    } on Object {
+      return null;
     }
   }
 
@@ -36,6 +77,7 @@ class SoloudTakePlayback implements TakePlayback {
   Future<void> stop() async {
     final source = _source;
     _source = null;
+    _handle = null;
     if (source == null) return;
     try {
       await _soloud.disposeSource(source);
