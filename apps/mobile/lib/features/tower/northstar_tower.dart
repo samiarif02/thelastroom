@@ -258,10 +258,6 @@ abstract final class _TowerInk {
     DaylightColors.raised.withValues(alpha: 0.85),
     DaylightColors.dusk,
   );
-  static Color paleWindow(FloorColours f) =>
-      Color.alphaBlend(DaylightColors.raised.withValues(alpha: 0.65), f.soft);
-  static Color paleFrame(FloorColours f) =>
-      Color.alphaBlend(f.base.withValues(alpha: 0.2), f.soft);
 }
 
 /// One floor: its windows, then its name and its count (or when it opens).
@@ -483,17 +479,9 @@ class _Room extends StatelessWidget {
           };
     final (leaf, panel, frame) = top
         ? (_TowerInk.duskWindow, _TowerInk.duskPanel, _TowerInk.roof)
-        : open
-        ? (
-            floor.deep,
-            Color.alphaBlend(floor.base.withValues(alpha: 0.7), floor.deep),
-            floor.deep,
-          )
-        : (
-            _TowerInk.paleWindow(floor),
-            _TowerInk.paleFrame(floor),
-            _TowerInk.paleFrame(floor),
-          );
+        : switch (open ? DoorInk.open(floor) : DoorInk.pale(floor)) {
+            (:final leaf, :final panel, :final frame) => (leaf, panel, frame),
+          };
     final door = TowerDoor(
       key: doorKey,
       state: state,

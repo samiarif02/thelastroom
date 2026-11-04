@@ -490,17 +490,9 @@ class _CardTower extends StatelessWidget {
         : f.soft;
     final (leaf, panel, frame) = top
         ? (_CardInk.duskWindow, _CardInk.duskPanel, _CardInk.roof)
-        : open
-        ? (
-            f.deep,
-            Color.alphaBlend(f.base.withValues(alpha: 0.7), f.deep),
-            f.deep,
-          )
-        : (
-            _CardInk.paleWindow(f),
-            _CardInk.paleFrame(f),
-            _CardInk.paleFrame(f),
-          );
+        : switch (open ? DoorInk.open(f) : DoorInk.pale(f)) {
+            (:final leaf, :final panel, :final frame) => (leaf, panel, frame),
+          };
     final rooms = missions.where((m) => m.chapter == n).length;
     return Container(
       foregroundDecoration: n == cleared
@@ -559,10 +551,6 @@ abstract final class _CardInk {
     DaylightColors.raised.withValues(alpha: 0.85),
     DaylightColors.dusk,
   );
-  static Color paleWindow(FloorColours f) =>
-      Color.alphaBlend(DaylightColors.raised.withValues(alpha: 0.65), f.soft);
-  static Color paleFrame(FloorColours f) =>
-      Color.alphaBlend(f.base.withValues(alpha: 0.2), f.soft);
 }
 
 class _Roof extends CustomPainter {
