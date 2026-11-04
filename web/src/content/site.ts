@@ -35,9 +35,8 @@ export const site = {
 	url: productionUrl(),
 	title: 'The Last Room · interview practice game for graduates',
 	description:
-		'Answer 21 real interview questions from four interviewers, say why your answer works, and get a scored debrief with one lesson. Free, offline, no sign up.',
+		'Answer 21 real interview questions from four interviewers, say why your answer works, and get a scored debrief with one lesson. Free, offline, no sign-up needed.',
 	repo,
-	releases: `${repo}/releases`,
 	scoringEval: `${repo}/blob/main/docs/scoring-eval.md`,
 	scoringReadme: `${repo}#how-the-score-works`,
 	year: 2026
@@ -45,11 +44,13 @@ export const site = {
 
 /** The one action on the page, identical at the top and the bottom. */
 export const cta = {
-	label: 'Get the free Android preview',
-	href: site.releases,
-	risk: ['No sign up', 'Plays offline', 'Your voice is never stored'],
+	label: 'Get the app',
+	/** The repo: its README says how to install and run the game. Opens in a new tab. */
+	href: site.repo,
+	newTab: '(opens GitHub in a new tab)',
+	risk: ['No sign-up needed', 'Plays offline', 'Your voice is never stored'],
 	/** The same three, shorter, for a phone's width. */
-	riskShort: ['No sign up', 'Plays offline', 'Voice never stored']
+	riskShort: ['No sign-up', 'Plays offline', 'Voice never stored']
 } as const
 
 /** In page order, so the highlighted link moves along the bar as the page scrolls. */
@@ -413,11 +414,11 @@ export const faq = {
 	items: [
 		{
 			q: 'Is it free?',
-			a: 'Yes. The Android preview is free to download and play, with nothing to buy and no account to make.'
+			a: 'Yes. It’s free to play, with nothing to buy and no account needed.'
 		},
 		{
 			q: 'Do I need an account?',
-			a: 'No. Open the game and play. Nothing asks for your name or email before the first question.'
+			a: 'No. Open the game and play. Nothing asks for your name or email before the first question. Saving your progress with an email is optional.'
 		},
 		{
 			q: 'Does it work offline?',
@@ -449,7 +450,7 @@ export const faq = {
 		},
 		{
 			q: 'Is there an iPhone version?',
-			a: 'Not yet. The game is built for both, and the preview is Android only while the iPhone build is tested.'
+			a: 'Not yet. The game is built for both, and the iPhone build is still being tested.'
 		}
 	] satisfies readonly Faq[]
 } as const
@@ -509,8 +510,8 @@ export type LegalSection = {
 
 export const privacy = {
 	title: 'Privacy',
-	description: 'What The Last Room keeps, and where: no sign up, progress on your phone, your voice never stored.',
-	intro: 'The short version: no sign up, your progress stays on your phone, and your voice isn’t stored.',
+	description: 'What The Last Room keeps, and where: no sign-up needed, progress on your phone, your voice never stored.',
+	intro: 'The short version: no sign-up needed, your progress stays on your phone, and your voice isn’t stored.',
 	sections: [
 		{
 			title: 'What the game keeps',
@@ -529,7 +530,7 @@ export const privacy = {
 		{
 			title: 'The optional backend',
 			body: [
-				'When the app is set up with it, a guest session with no name or email backs up your progress, and the AI recruiter receives your answer (the lines you chose, or your recording), never your name.'
+				'When the app is set up with it, a guest session with no name or email backs up your progress (an email is added only if you choose to save your progress with one), and the AI recruiter receives your answer (the lines you chose, or your recording), never your name.'
 			]
 		},
 		{
@@ -539,7 +540,7 @@ export const privacy = {
 			]
 		}
 	] satisfies readonly LegalSection[],
-	updated: 'Last updated 2 November 2026'
+	updated: 'Last updated 4 November 2026'
 } as const
 
 export const terms = {
@@ -558,9 +559,9 @@ export const terms = {
 			body: ['Northstar Labs and its people are fictional. Any likeness to a real company or person is a coincidence.']
 		},
 		{
-			title: 'The preview',
+			title: 'The app',
 			body: [
-				'The Android preview is an early build, provided as it is, without warranty. Things may change between versions.'
+				'The app is an early release, provided as it is, without warranty. Things may change between versions.'
 			]
 		},
 		{
@@ -568,5 +569,5 @@ export const terms = {
 			body: ['The code is public on GitHub, where issues and questions are welcome.']
 		}
 	] satisfies readonly LegalSection[],
-	updated: 'Last updated 2 November 2026'
+	updated: 'Last updated 4 November 2026'
 } as const

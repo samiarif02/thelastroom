@@ -1,4 +1,4 @@
-import { AndroidLogo, Check } from '@phosphor-icons/react/dist/ssr'
+import { Check, GithubLogo } from '@phosphor-icons/react/dist/ssr'
 
 import { cta } from '@/content/site'
 
@@ -14,9 +14,10 @@ type PrimaryCtaProps = {
 export function PrimaryCta({ className, onDark = false }: PrimaryCtaProps) {
 	return (
 		<div className={`${styles.wrap} ${onDark ? styles.onDark : ''} ${className ?? ''}`}>
-			<a className={`button-lg ${styles.button}`} href={cta.href}>
-				<AndroidLogo weight="bold" aria-hidden="true" />
+			<a className={`button-lg ${styles.button}`} href={cta.href} target="_blank" rel="noopener">
+				<GithubLogo weight="bold" aria-hidden="true" />
 				{cta.label}
+				<span className="visually-hidden"> {cta.newTab}</span>
 			</a>
 			<ul className={`body-5 ${styles.risk}`} aria-label="What you don’t need">
 				{cta.risk.map((item, i) => (
