@@ -43,21 +43,32 @@ String nextReminderLine(ReminderOutlook outlook, DateTime now) {
 
 /// "tomorrow at 19:40", "Thursday at 09:00", or, a week or more ahead, "Tuesday 10 November at
 /// 19:40". A 24-hour clock: the line is short, and the time is never after 21:00 anyway.
-String reminderWhen(DateTime at, DateTime now) {
+String reminderWhen(DateTime at, DateTime now) =>
+    '${dayWords(at, now)} at ${_twoDigits(at.hour)}:${_twoDigits(at.minute)}';
+
+/// [day] as the player says it, from [now]: "today", "tomorrow", "Thursday" within the week,
+/// "Tuesday 10 November" a week or more ahead. The reminders' line and the debrief's dated
+/// promise use the same words, so they never name the same day differently.
+String dayWords(DateTime day, DateTime now) {
   final days = DateTime.utc(
-    at.year,
-    at.month,
-    at.day,
+    day.year,
+    day.month,
+    day.day,
   ).difference(DateTime.utc(now.year, now.month, now.day)).inDays;
-  final weekday = _weekdays[at.weekday - 1];
-  final day = switch (days) {
+  return switch (days) {
     0 => 'today',
     1 => 'tomorrow',
-    < _week => weekday,
-    _ => '$weekday ${at.day} ${_months[at.month - 1]}',
+    < _week => weekdayName(day),
+    _ => fullDate(day),
   };
-  return '$day at ${_twoDigits(at.hour)}:${_twoDigits(at.minute)}';
 }
+
+/// "Thursday".
+String weekdayName(DateTime day) => _weekdays[day.weekday - 1];
+
+/// "Thursday 5 November".
+String fullDate(DateTime day) =>
+    '${weekdayName(day)} ${day.day} ${_months[day.month - 1]}';
 
 /// Who a reminder comes from: the interviewer by name, or the Recall Room.
 String reminderSender(PlannedReminder r) => switch (r.kind) {
