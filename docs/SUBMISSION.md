@@ -260,7 +260,7 @@ waitlist measures the same thing: demand for what comes next.
 - More voice missions, and answering Chapter 1 out loud as a second pass.
 - Billing on the Gemini key, so AI scoring holds up under real use.
 - More reminder types from FR-50 (the cliffhanger, the weekly win), and reminders tested on iOS.
-- A hosted backend, so AI scoring works away from the laptop.
+- Own SMTP for the hosted project (Supabase's built-in sender allows only a few emails an hour).
 - Validating the scoring weights against human-rated answers.
 - Smoothing the door → room transition, the one path that drops frames on the realme (15 of 245;
   every path's p90 is under 16.6 ms, [status 56](status/56.md)).

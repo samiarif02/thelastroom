@@ -174,10 +174,12 @@ standards to Flutter (the divergences are listed there).
   a spoken answer is scored by your own self-check against the mission's points.
 - **The scoring weights are a hypothesis.** They'd need human-rated answers to validate, and
   the AI's score isn't perfectly reproducible (temperature 0 narrows it but doesn't remove it).
-- **AI scoring needs your own backend running.** There's no hosted Supabase project, by
-  design ([ADR 0005](docs/decisions/0005-zero-setup-offline-backend-optional.md)): the AI
-  recruiter runs on a laptop (below) and the phone reaches it over USB or the same Wi-Fi.
-  Without it, the game uses the offline score. Live AI scoring was checked on a release build
+- **AI scoring needs a backend.** A clone still runs with none, fully offline, by design
+  ([ADR 0005](docs/decisions/0005-zero-setup-offline-backend-optional.md)). The owner's builds
+  point at a hosted Supabase project (free tier, since 4 Nov,
+  [ADR 0008](docs/decisions/0008-hosted-backend-for-the-owners-builds.md)), so live AI works on
+  any network; anyone else runs the same backend on a laptop (below). Without one, the game uses
+  the offline score. Live AI scoring was checked on a release build
   on a realme 8 over USB (rooms 2, 5, 6 and 7 scored 92, 90, 85 and 82), and with mocked
   Gemini in 15 Deno tests and the app's fallback tests.
 - **The Gemini key is on the free tier**, so heavy use hits rate limits and the game falls back
