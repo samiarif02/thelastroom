@@ -94,6 +94,10 @@ enum AnalyticsEvent {
   /// answered), open or still locked: the player looking ahead.
   floorPreviewed('floor_previewed'),
 
+  /// "View all chapters" under the tower opens the chapters list: every floor with its rooms,
+  /// played, up next or locked.
+  allChaptersOpened('all_chapters_opened'),
+
   /// A first-time tip is shown (one short line from the cast, once, the first time the player
   /// reaches that moment): which tip, and whether "Show tips again" brought it back.
   tipShown('tip_shown'),
