@@ -198,22 +198,28 @@ class ProgressionCard extends ConsumerWidget {
             ],
             if (stats.isNotEmpty) ...[
               const SizedBox(height: DaylightSpace.s16),
-              LayoutBuilder(
-                builder: (context, box) {
+              Builder(
+                builder: (context) {
                   // Three across; one under the other at large text.
                   final large =
                       MediaQuery.textScalerOf(context)
                           .scale(DaylightSpace.s16) >
                       DaylightSpace.s16 * _largeAt;
-                  final across = large ? 1 : stats.length;
-                  final width =
-                      (box.maxWidth - DaylightSpace.s8 * (across - 1)) / across;
-                  return Wrap(
-                    spacing: DaylightSpace.s8,
-                    runSpacing: DaylightSpace.s8,
-                    children: [
-                      for (final s in stats) SizedBox(width: width, child: s),
-                    ],
+                  if (large) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: DaylightSpace.s8,
+                      children: stats,
+                    );
+                  }
+                  // One row, every tile as tall as the tallest (owner, 4 Nov: "Best gain"
+                  // wrapped to two lines and stood taller than its neighbours).
+                  return IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: DaylightSpace.s8,
+                      children: [for (final s in stats) Expanded(child: s)],
+                    ),
                   );
                 },
               ),
