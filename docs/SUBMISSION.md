@@ -83,7 +83,9 @@ for every score. This is what came of it, PR by PR.
   ([#44](https://github.com/samiarif02/thelastroom/pull/44)).
 - **Scoring you can trust.** The live Gemini recruiter, its basis on every result, "How we
   scored this", and a published evaluation that found two leniencies and fixed them
-  ([#46](https://github.com/samiarif02/thelastroom/pull/46), [scoring-eval.md](scoring-eval.md)).
+  ([#46](https://github.com/samiarif02/thelastroom/pull/46), [scoring-eval.md](scoring-eval.md)). What happens
+  when the AI is wrong or down, and what it costs (≈ $0.0007 a score):
+  [ai-reliability-and-cost.md](ai-reliability-and-cost.md).
 - **One professional look: the Daylight Tower.** Research and three directions, then one
   ([#52](https://github.com/samiarif02/thelastroom/pull/52), [design/direction.md](design/direction.md));
   the brand, type and the drawn cast ([#55](https://github.com/samiarif02/thelastroom/pull/55));
