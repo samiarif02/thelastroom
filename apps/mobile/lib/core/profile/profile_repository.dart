@@ -111,15 +111,16 @@ class LocalProfileRepository implements ProfileRepository {
 
   final SharedPreferencesAsync _prefs;
 
-  static const String _prefix = 'profile.';
-  static const String _name = '${_prefix}first_name';
-  static const String _experience = '${_prefix}experience';
-  static const String _role = '${_prefix}target_role';
-  static const String _nerves = '${_prefix}nerves_level';
-  static const String _calm = '${_prefix}calm_mode';
-  static const String _goal = '${_prefix}weekly_goal';
-  static const String _autoAdvance = '${_prefix}auto_advance';
-  static const String _onboarded = '${_prefix}onboarded';
+  /// Every field's key starts with this.
+  static const String prefix = 'profile.';
+  static const String _name = '${prefix}first_name';
+  static const String _experience = '${prefix}experience';
+  static const String _role = '${prefix}target_role';
+  static const String _nerves = '${prefix}nerves_level';
+  static const String _calm = '${prefix}calm_mode';
+  static const String _goal = '${prefix}weekly_goal';
+  static const String _autoAdvance = '${prefix}auto_advance';
+  static const String _onboarded = '${prefix}onboarded';
 
   @override
   Future<PlayerProfile> load() async => PlayerProfile(

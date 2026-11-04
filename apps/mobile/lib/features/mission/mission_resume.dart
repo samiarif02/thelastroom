@@ -111,7 +111,10 @@ class LocalResumeStore implements ResumeStore {
 
   final SharedPreferencesAsync _prefs;
 
-  static String _key(String missionId) => 'mission_resume.$missionId';
+  /// Every mission's slot starts with this.
+  static const String prefix = 'mission_resume.';
+
+  static String _key(String missionId) => '$prefix$missionId';
 
   @override
   Future<SavedAttempt?> load(String missionId) async {

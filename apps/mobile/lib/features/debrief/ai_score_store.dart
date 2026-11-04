@@ -84,11 +84,11 @@ class LocalAiScoreStore implements AiScoreStore {
 
   final SharedPreferencesAsync _prefs;
 
-  static const String _key = 'ai_scores.latest';
+  static const String key = 'ai_scores.latest';
 
   @override
   Future<Map<String, SavedAiScore>> latest() async {
-    final raw = await _prefs.getString(_key);
+    final raw = await _prefs.getString(key);
     if (raw == null) return const {};
     try {
       final json = jsonDecode(raw);
@@ -106,7 +106,7 @@ class LocalAiScoreStore implements AiScoreStore {
   Future<void> save(SavedAiScore saved) async {
     final all = {...await latest(), saved.missionId: saved};
     await _prefs.setString(
-      _key,
+      key,
       jsonEncode({for (final e in all.entries) e.key: e.value.toJson()}),
     );
   }

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/app.dart';
 import 'package:the_last_room/features/title/daylight_title.dart';
 import 'package:the_last_room/features/title/title_screen.dart';
+import 'package:the_last_room/features/tower/tower_door.dart';
 import 'package:the_last_room/ui/daylight/daylight_kit.dart';
 
 void main() {
@@ -42,12 +43,46 @@ void main() {
     expect(find.byType(ArchPortrait), findsNWidgets(CastPeople.all.length));
     expect(find.text(TitleScreen.title), findsOneWidget);
     expect(find.text(TitleScreen.tagline), findsOneWidget);
-    final tower = tester
-        .widgetList<CustomPaint>(find.byType(CustomPaint))
-        .map((p) => p.painter)
-        .whereType<TitleTowerPainter>()
-        .single;
-    expect(tower.lit, 1);
+    expect(tester.widget<TitleTower>(find.byType(TitleTower)).lit, 1);
+    // The rooms are the tower's own doors: 21, floor 1 and 2 lit, Sam's waiting at the top.
+    final doors = tester.widgetList<TowerDoor>(find.byType(TowerDoor)).toList();
+    expect(doors, hasLength(TitleTowerPainter.across * 3));
+    expect(doors.where((d) => d.state == DoorState.lit), hasLength(14));
+    expect(doors.where((d) => d.state == DoorState.waiting), hasLength(1));
+    expect(doors.where((d) => d.lighting == 1), hasLength(15));
+  });
+
+  testWidgets('the doors light floor by floor, Sam\'s last', (tester) async {
+    expect(TitleTower.doorLighting(0, 0), 0);
+    // Halfway: floor 1 is lit, floor 2 is on its way, Sam's is still closed.
+    expect(TitleTower.doorLighting(0, 0.5), 1);
+    expect(TitleTower.doorLighting(6, 0.5), 1);
+    expect(TitleTower.doorLighting(13, 0.5), 0);
+    expect(TitleTower.doorLighting(14, 0.9), 0);
+    expect(TitleTower.doorLighting(14, 1), 1);
+  });
+
+  testWidgets('the doors stand inside the tower at phone widths', (
+    tester,
+  ) async {
+    for (final width in [360.0, 375.0, 411.0]) {
+      final size = Size(width, width * 0.8);
+      final layout = TitleTowerLayout.of(size);
+      final doorH = layout.doorWidth * TowerDoor.aspect;
+      expect(layout.doorWidth, greaterThanOrEqualTo(20));
+      for (final door in layout.doors) {
+        expect(door.at.dx, greaterThanOrEqualTo(layout.left));
+        expect(
+          door.at.dx + layout.doorWidth,
+          lessThanOrEqualTo(layout.left + layout.bodyWidth),
+        );
+        expect(door.at.dy, greaterThanOrEqualTo(layout.floorsTop));
+        expect(
+          door.at.dy + doorH,
+          lessThanOrEqualTo(size.height - layout.street),
+        );
+      }
+    }
   });
 
   testWidgets('the title lasts about a second and a half', (tester) async {
@@ -58,12 +93,7 @@ void main() {
     tester,
   ) async {
     await boot(tester, reduceMotion: true);
-    final tower = tester
-        .widgetList<CustomPaint>(find.byType(CustomPaint))
-        .map((p) => p.painter)
-        .whereType<TitleTowerPainter>()
-        .single;
-    expect(tower.lit, 1);
+    expect(tester.widget<TitleTower>(find.byType(TitleTower)).lit, 1);
   });
 
   testWidgets('text inherits the brand style, not the debug fallback', (

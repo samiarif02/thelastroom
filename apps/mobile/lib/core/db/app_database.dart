@@ -112,6 +112,23 @@ class AppDatabase extends GeneratedDatabase {
     },
   );
 
+  /// "Sign out" (FR-3): forgets the player on this device: every attempt, the profile, the
+  /// outbox and the meta flags (the restore and merge markers), so the next guest starts on an
+  /// empty database. The schema stays.
+  Future<void> clearPlayerData() => transaction(() async {
+    for (final table in playerTables) {
+      await customStatement('delete from $table');
+    }
+  });
+
+  /// The tables [clearPlayerData] empties: all of them.
+  static const List<String> playerTables = [
+    'attempts',
+    'profile',
+    'outbox',
+    'meta',
+  ];
+
   /// A value from [meta], or null.
   Future<String?> metaValue(String key) async {
     final row = await customSelect(
