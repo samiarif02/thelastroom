@@ -122,7 +122,14 @@ enum AnalyticsEvent {
 
   /// The first-day moment ("Day 1 of your prep") is shown on the tower after the player's first
   /// finished room ever (brief 61), once: whether a Recall note is due tomorrow.
-  firstDayShown('first_day_shown');
+  firstDayShown('first_day_shown'),
+
+  /// The leaderboard opens, or the player switches its tab: which board ("This week" or
+  /// "All time"). Never a name, a tag or a rank.
+  leaderboardOpened('leaderboard_opened'),
+
+  /// "Show me on the leaderboard" is switched in Settings: whether the player is now shown.
+  leaderboardVisibilityChanged('leaderboard_visibility_changed');
 
   const AnalyticsEvent(this.wireName);
 
