@@ -61,8 +61,20 @@ new email form.**
   - A second launch skips the intro and goes to Mission 1 (home arrives in 13).
 - **FR-2** **[05, 08]** First launch signs in anonymously (Supabase) and gets a real user id; offline, the
   game still starts and syncs the guest later.
-- **FR-3** **[08]** After Mission 1: "Save your progress" offers linking an email address (Google sign-in is v2);
-  the linked account keeps all progress.
+- **FR-3** **[08]** "Save your progress" (Settings, the "You" tab) links an email address to the guest
+  with a six-digit emailed code (Google sign-in is v2); the linked account keeps all progress.
+  "Sign in on another device" brings it to a second device.
+  - Given a guest with synced attempts, when they enter their email and then the emailed code,
+    then the same user id now carries the email (no data moves; RLS stays valid), the card
+    shows the linked address, and `account_linked` fires with `provider` and never the email.
+  - Given a saved account, when the player signs in on another device with the emailed code,
+    then the account's attempts come down and this device's go up (a union by `attempt_id`;
+    attempts already synced under this device's guest get new ids so the server accepts them),
+    the account's profile wins, and `account_signed_in` fires.
+  - A wrong or expired code, too many codes, no network, an email another account holds and an
+    email nobody saved to each have their own written state; none shows the server's message.
+  - With no backend configured (ADR 0005), the card says saving needs the online backend and
+    that offline play is unaffected; nothing on it can be pressed.
 - **FR-4** **[08]** Short onboarding after Mission 1: target role (v1: general entry-level/product),
   nerves level 1–5 (sets calm mode), optional interview date.
 - **FR-5** **[13]** Missions 2–7 → Chapter 1 report → Chapter 2 teaser → D1's outcome.
