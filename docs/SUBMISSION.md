@@ -96,7 +96,10 @@ for every score. This is what came of it, PR by PR.
 - **Retention.** "Send a test reminder", the next reminder's day and sender shown in
   Settings, a welcome-back card, and reminders on days 1, 3, 5 and 8
   ([#51](https://github.com/samiarif02/thelastroom/pull/51)); a weekly ring instead of a
-  streak, XP, skills and a floor-cleared reward (#56).
+  streak, XP, skills and a floor-cleared reward (#56). Then activation: a dated promise at the
+  end of every room, from the real Recall schedule, and a once-only "Day 1 of your prep" moment
+  after the first room. The day 1, 3, 5, 7 and 8 loop, and the events that measure it, are in
+  [retention.md](retention.md).
 - **The landing page** ([#43](https://github.com/samiarif02/thelastroom/pull/43),
   [#48](https://github.com/samiarif02/thelastroom/pull/48),
   [#53](https://github.com/samiarif02/thelastroom/pull/53)), and the design skills used for it
