@@ -20,21 +20,19 @@ enum SaveProgressFace {
   /// Typing the email.
   enterEmail,
 
-  /// The code is being mailed.
+  /// The link is being mailed.
   sending,
 
-  /// Typing the code.
-  enterCode,
-
-  /// The code is being checked.
-  verifying,
+  /// The link is on its way: tap it, come back. "Save your progress" checks by itself.
+  linkSent,
 
   /// Saved: the linked email.
   linked,
 }
 
 /// "Save your progress" (FR-3), the first card of Settings: a guest saves their progress to an
-/// email with a six-digit code, or signs in to progress saved on another device. With no backend
+/// email by tapping the link mailed to it, or signs in to progress saved on another device with a
+/// link that opens the app. With no backend
 /// it says, calmly, that saving needs one and that offline play is unaffected.
 class SaveProgressCard extends ConsumerStatefulWidget {
   const SaveProgressCard({super.key});
@@ -55,27 +53,32 @@ class SaveProgressCard extends ConsumerStatefulWidget {
       'can save it to your email once you’re back online.';
   static const String linkLine =
       'You’re playing as a guest. Add your email and your progress follows you to any device. '
-      'We’ll send a six-digit code to check it’s yours.';
+      'We’ll email you a link to check it’s yours.';
   static const String signInLine =
-      'Enter the email you saved with. We’ll send a six-digit code, and your saved progress comes '
-      'to this device, joined with anything you’ve played here.';
+      'Enter the email you saved with. We’ll send a sign-in link: open it on this phone, and your '
+      'saved progress comes here, joined with anything you’ve played here.';
 
   static const String emailLabel = 'Your email';
-  static const String codeLabel = 'Six-digit code';
-  static const String sendCode = 'Send me a code';
-  static const String sending = 'Sending your code…';
-  static const String saveButton = 'Save my progress';
-  static const String signInButton = 'Sign in';
-  static const String verifying = 'Checking your code…';
-  static const String resend = 'Resend code';
-  static const String otherEmail = 'Change email';
+  static const String sendLink = 'Email me a link';
+  static const String sending = 'Sending your link…';
+  static const String checkNow = 'I’ve tapped it';
+  static const String resend = 'Resend link';
+  static const String resendSoon = 'Resend in a minute';
+  static const String otherEmail = 'Use a different email';
   static const String toSignIn = 'Saved on another device? Sign in';
   static const String toLink = 'Save this device instead';
 
-  static String codeSentLine(String email) =>
-      'We sent a six-digit code to $email. It works once and expires in an hour.';
+  static String linkSentLine(String email) =>
+      'We sent a link to $email. Tap it, then come back here.';
+  static String signInSentLine(String email) =>
+      'We sent a sign-in link to $email. Open it on this phone.';
+  static const String waitingLine =
+      'This card notices by itself once you’ve tapped the link. The link works once and '
+      'expires in an hour.';
+  static const String signInWaitingLine =
+      'The link opens The Last Room and signs you in. It works once and expires in an hour.';
   static const String resentLine =
-      'A new code is on its way. Use the latest one.';
+      'A new link is on its way. Use the latest one.';
 
   static String linkedLine(String email) =>
       'Your progress is saved to $email. Every room you play is backed up whenever you’re '
@@ -88,11 +91,11 @@ class SaveProgressCard extends ConsumerStatefulWidget {
       'played here.';
 
   static const String invalidEmail = 'That doesn’t look like an email address.';
-  static const String wrongCode =
-      'That code didn’t work. It may be mistyped or expired: check the latest email, or resend '
-      'the code.';
+  static const String linkExpired =
+      'That link expired or was already used. Request a new one here, and open the latest email '
+      'on this phone.';
   static const String rateLimited =
-      'Too many codes in a short time. Wait a minute, then try again.';
+      'Too many emails in a short time. Wait a minute, then try again.';
   static const String emailTaken =
       'That email already has saved progress. To use it here, choose “Saved on another device? '
       'Sign in”.';
@@ -108,7 +111,7 @@ class SaveProgressCard extends ConsumerStatefulWidget {
   /// The copy for each failure.
   static String failureLine(AccountFailure failure) => switch (failure) {
     AccountFailure.invalidEmail => invalidEmail,
-    AccountFailure.wrongCode => wrongCode,
+    AccountFailure.linkExpired => linkExpired,
     AccountFailure.rateLimited => rateLimited,
     AccountFailure.emailTaken => emailTaken,
     AccountFailure.noAccount => noAccount,
@@ -130,8 +133,7 @@ class SaveProgressCard extends ConsumerStatefulWidget {
     return switch (flow.step) {
       AccountStep.enterEmail => SaveProgressFace.enterEmail,
       AccountStep.sending => SaveProgressFace.sending,
-      AccountStep.enterCode => SaveProgressFace.enterCode,
-      AccountStep.verifying => SaveProgressFace.verifying,
+      AccountStep.linkSent => SaveProgressFace.linkSent,
     };
   }
 
@@ -141,12 +143,10 @@ class SaveProgressCard extends ConsumerStatefulWidget {
 
 class _SaveProgressCardState extends ConsumerState<SaveProgressCard> {
   final TextEditingController _email = TextEditingController();
-  final TextEditingController _code = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _code.addListener(_changed);
     _email.addListener(_changed);
   }
 
@@ -155,16 +155,13 @@ class _SaveProgressCardState extends ConsumerState<SaveProgressCard> {
   @override
   void dispose() {
     _email.dispose();
-    _code.dispose();
     super.dispose();
   }
 
   SaveProgressController get _controller =>
       ref.read(saveProgressProvider.notifier);
 
-  Future<void> _send() => _controller.sendCode(_email.text);
-
-  Future<void> _confirm() => _controller.confirm(_code.text);
+  Future<void> _send() => _controller.sendLink(_email.text);
 
   @override
   Widget build(BuildContext context) {
@@ -172,14 +169,12 @@ class _SaveProgressCardState extends ConsumerState<SaveProgressCard> {
     final session = ref.watch(sessionProvider);
     final flow = ref.watch(saveProgressProvider);
     ref.listen(saveProgressProvider, (before, now) {
-      // A new step starts with an empty code; the email the controller settled on is shown.
+      // Back on the email step, the address the controller settled on is shown.
       if (before?.step != now.step && now.step == AccountStep.enterEmail) {
-        _code.clear();
         if (_email.text != now.email && now.email.isNotEmpty) {
           _email.text = now.email;
         }
       }
-      if (now.resent && before?.resent != true) _code.clear();
     });
     final face = SaveProgressCard.faceOf(
       hasBackend: env.hasSupabase,
@@ -291,7 +286,7 @@ class _SaveProgressCardState extends ConsumerState<SaveProgressCard> {
           TactileButton(
             label: sending
                 ? SaveProgressCard.sending
-                : SaveProgressCard.sendCode,
+                : SaveProgressCard.sendLink,
             icon: sending ? PhosphorBold.hourglass : PhosphorBold.arrowRight,
             compact: true,
             onPressed: sending || _email.text.trim().isEmpty ? null : _send,
@@ -308,72 +303,54 @@ class _SaveProgressCardState extends ConsumerState<SaveProgressCard> {
                   ),
           ),
         ];
-      case SaveProgressFace.enterCode:
-      case SaveProgressFace.verifying:
-        final checking = face == SaveProgressFace.verifying;
+      case SaveProgressFace.linkSent:
         return [
           Semantics(
             liveRegion: true,
-            child: _line(SaveProgressCard.codeSentLine(flow.email)),
-          ),
-          const SizedBox(height: DaylightSpace.s16),
-          EntryField(
-            label: SaveProgressCard.codeLabel,
-            controller: _code,
-            enabled: !checking,
-            error: failure != null,
-            code: true,
-            autofocus: true,
-            keyboardType: TextInputType.number,
-            autofillHints: const [AutofillHints.oneTimeCode],
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(accountCodeLength),
-            ],
-            onSubmitted: (_) => _confirm(),
-          ),
-          if (failure != null) ...[
-            const SizedBox(height: DaylightSpace.s8),
-            _note(SaveProgressCard.failureLine(failure)),
-          ] else if (flow.resent) ...[
-            const SizedBox(height: DaylightSpace.s8),
-            _note(SaveProgressCard.resentLine, tone: _NoteTone.good),
-          ],
-          const SizedBox(height: DaylightSpace.s16),
-          TactileButton(
-            label: checking
-                ? SaveProgressCard.verifying
-                : signIn
-                ? SaveProgressCard.signInButton
-                : SaveProgressCard.saveButton,
-            icon: checking ? PhosphorBold.hourglass : PhosphorBold.check,
-            compact: true,
-            onPressed: checking || _code.text.length != accountCodeLength
-                ? null
-                : _confirm,
+            child: _line(
+              signIn
+                  ? SaveProgressCard.signInSentLine(flow.email)
+                  : SaveProgressCard.linkSentLine(flow.email),
+              color: DaylightColors.ink,
+            ),
           ),
           const SizedBox(height: DaylightSpace.s8),
-          // Side by side at 1x, one under the other when large text needs the room.
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: DaylightSpace.s8,
-            runSpacing: DaylightSpace.s8,
-            children: [
-              TactileButton(
-                label: SaveProgressCard.resend,
-                tone: TactileTone.quiet,
-                compact: true,
-                expand: false,
-                onPressed: checking ? null : _controller.resend,
-              ),
-              TactileButton(
-                label: SaveProgressCard.otherEmail,
-                tone: TactileTone.quiet,
-                compact: true,
-                expand: false,
-                onPressed: checking ? null : _controller.editEmail,
-              ),
-            ],
+          _line(
+            signIn
+                ? SaveProgressCard.signInWaitingLine
+                : SaveProgressCard.waitingLine,
+          ),
+          if (failure != null) ...[
+            const SizedBox(height: DaylightSpace.s12),
+            _note(SaveProgressCard.failureLine(failure)),
+          ] else if (flow.resent) ...[
+            const SizedBox(height: DaylightSpace.s12),
+            _note(SaveProgressCard.resentLine, tone: _NoteTone.good),
+          ],
+          if (!signIn) ...[
+            const SizedBox(height: DaylightSpace.s16),
+            TactileButton(
+              label: SaveProgressCard.checkNow,
+              icon: PhosphorBold.check,
+              compact: true,
+              onPressed: _controller.checkLink,
+            ),
+          ],
+          const SizedBox(height: DaylightSpace.s8),
+          TactileButton(
+            label: flow.canResend
+                ? SaveProgressCard.resend
+                : SaveProgressCard.resendSoon,
+            tone: TactileTone.quiet,
+            compact: true,
+            onPressed: flow.canResend ? _controller.resend : null,
+          ),
+          const SizedBox(height: DaylightSpace.s8),
+          TactileButton(
+            label: SaveProgressCard.otherEmail,
+            tone: TactileTone.quiet,
+            compact: true,
+            onPressed: _controller.editEmail,
           ),
         ];
     }

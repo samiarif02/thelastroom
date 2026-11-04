@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -16,7 +17,7 @@ import '../../mission/mission_harness.dart';
 /// FR-3 in the real Settings screen ("You" tab), at a 390 × 844 phone: every face of the "Save
 /// your progress" card, from no backend to linked, plus the sign-in path and 2x text. Every
 /// still must draw without an exception; with `WRITE_STILLS=1` each is also saved as a PNG at
-/// 2x in `.pr-screenshots/60/`.
+/// 2x in `.pr-screenshots/67/` (the link flow; #68's code flow was `60/`).
 void main() {
   final write = Platform.environment['WRITE_STILLS'] == '1';
   const pixelRatio = 2.0;
@@ -37,7 +38,7 @@ void main() {
         pixelRatio: pixelRatio / dpr,
       );
       final png = await image.toByteData(format: ui.ImageByteFormat.png);
-      File('../../.pr-screenshots/60/$name.png')
+      File('../../.pr-screenshots/67/$name.png')
         ..createSync(recursive: true)
         ..writeAsBytesSync(png!.buffer.asUint8List());
     });
@@ -86,64 +87,78 @@ void main() {
     await still(tester, '04-email-typed');
 
     (rig, _) = await boot(tester);
-    await flow(rig).sendCode('not an email');
+    await flow(rig).sendLink('not an email');
     await still(tester, '05-invalid-email');
     await _done(tester);
   });
 
-  testWidgets('code sent, wrong code, rate-limited, offline, linked', (
+  testWidgets('link sent, resend, rate-limited, offline, linked', (
     tester,
   ) async {
     var (rig, server) = await boot(tester);
-    await flow(rig).sendCode(email);
-    await still(tester, '06-code-sent');
+    final sending = server.authGate = Completer<void>();
+    unawaited(flow(rig).sendLink(email));
+    await still(tester, '06-sending');
+    sending.complete();
+    server.authGate = null;
+    await still(tester, '07-link-sent');
 
-    await tester.enterText(find.byType(EditableText), '000000');
-    await flow(rig).confirm('000000');
-    await still(tester, '07-wrong-code');
+    await tester.pump(resendCooldown);
+    await flow(rig).resend();
+    await still(tester, '08-link-resent');
 
     (rig, server) = await boot(tester);
     server.nextAuthFailure = AccountFailure.rateLimited;
-    await flow(rig).sendCode(email);
-    await still(tester, '08-rate-limited');
+    await flow(rig).sendLink(email);
+    await still(tester, '09-rate-limited');
 
     (rig, server) = await boot(tester);
-    await flow(rig).sendCode(email);
     server.nextAuthFailure = AccountFailure.offline;
-    await flow(rig).confirm(FakeBackend.goodCode);
-    await still(tester, '09-offline-mid-flow');
+    await flow(rig).sendLink(email);
+    await still(tester, '10-offline-sending');
 
     (rig, server) = await boot(tester);
-    await flow(rig).sendCode(email);
-    await flow(rig).confirm(FakeBackend.goodCode);
-    await still(tester, '10-linked');
+    await flow(rig).sendLink(email);
+    server.tapLink();
+    await flow(rig).checkLink();
+    await still(tester, '11-linked');
     await _done(tester);
   });
 
-  testWidgets('sign in on another device, and 2x text', (tester) async {
+  testWidgets('sign in on another device, the expired link, and 2x text', (
+    tester,
+  ) async {
     var (rig, server) = await boot(tester);
     flow(rig).useMode(AccountMode.signIn);
-    await still(tester, '11-sign-in');
+    await still(tester, '12-sign-in');
 
     server.accounts[email] = FakeBackend.accountId;
-    await flow(rig).sendCode(email);
-    await flow(rig).confirm(FakeBackend.goodCode);
-    await still(tester, '12-signed-in-here');
+    await flow(rig).sendLink(email);
+    await still(tester, '13-sign-in-link-sent');
+
+    server.openRefusedLink();
+    await still(tester, '14-link-expired');
+
+    (rig, server) = await boot(tester);
+    server.accounts[email] = FakeBackend.accountId;
+    server.openSignInLink(email);
+    await still(tester, '15-signed-in-here');
 
     (rig, server) = await boot(tester);
     flow(rig).useMode(AccountMode.signIn);
-    await flow(rig).sendCode(email);
-    await still(tester, '13-no-account');
+    await flow(rig).sendLink(email);
+    await still(tester, '16-no-account');
 
     (rig, server) = await boot(tester, textScale: 2);
-    await flow(rig).sendCode(email);
-    await still(tester, '14-code-sent-2x');
+    await flow(rig).sendLink(email);
+    await still(tester, '17-link-sent-2x');
     await _done(tester);
   });
 }
 
-/// Unmounts the app and lets its timers (the tower's idle loops) run out.
+/// Unmounts the app and lets its timers (the tower's idle loops, the link step's poll and
+/// resend cooldown) run out.
 Future<void> _done(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox());
-  await tester.pump(const Duration(seconds: 1));
+  await tester.pump(linkPollWindow + resendCooldown);
 }

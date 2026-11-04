@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/providers.dart';
@@ -26,14 +27,11 @@ enum AccountStep {
   /// Typing the email.
   enterEmail,
 
-  /// Asking the server to mail the code.
+  /// Asking the server to mail the link.
   sending,
 
-  /// The code is on its way; typing it.
-  enterCode,
-
-  /// Checking the code.
-  verifying,
+  /// The link is on its way: the player taps it in their email, then comes back.
+  linkSent,
 }
 
 /// The card's flow state. Whether there's a backend, a session or a linked email is read from
@@ -45,6 +43,7 @@ class AccountFlow {
     this.email = '',
     this.failure,
     this.resent = false,
+    this.canResend = true,
     this.signedInHere = false,
   });
 
@@ -57,13 +56,17 @@ class AccountFlow {
   /// What went wrong on the last step, shown under it; null when nothing did.
   final AccountFailure? failure;
 
-  /// A new code was sent on request ("Send a new code").
+  /// A new link was sent on request ("Resend link").
   final bool resent;
+
+  /// "Resend link" is open: false for [resendCooldown] after each email, so a tap can't run
+  /// into the server's one-email-a-minute limit.
+  final bool canResend;
 
   /// This device just signed in to a saved account (the linked card says the file is coming).
   final bool signedInHere;
 
-  bool get busy => step == AccountStep.sending || step == AccountStep.verifying;
+  bool get busy => step == AccountStep.sending;
 
   AccountFlow copyWith({
     AccountMode? mode,
@@ -72,6 +75,7 @@ class AccountFlow {
     AccountFailure? failure,
     bool clearFailure = false,
     bool? resent,
+    bool? canResend,
     bool? signedInHere,
   }) => AccountFlow(
     mode: mode ?? this.mode,
@@ -79,6 +83,7 @@ class AccountFlow {
     email: email ?? this.email,
     failure: clearFailure ? null : failure ?? this.failure,
     resent: resent ?? this.resent,
+    canResend: canResend ?? this.canResend,
     signedInHere: signedInHere ?? this.signedInHere,
   );
 }
@@ -86,8 +91,16 @@ class AccountFlow {
 /// How long one account call may take before it counts as offline.
 const Duration accountCallTimeout = Duration(seconds: 20);
 
-/// The length of the emailed code (`otp_length` in supabase/config.toml).
-const int accountCodeLength = 6;
+/// While "Save your progress" waits for its link, the server is asked this often whether the
+/// player has tapped it…
+const Duration linkPollInterval = Duration(seconds: 5);
+
+/// …for this long after the email went out (or the app came back to the foreground), then the
+/// app waits for the next return to the foreground.
+const Duration linkPollWindow = Duration(minutes: 3);
+
+/// The wait before "Resend link" opens: the server sends one email a minute (ADR 0008).
+const Duration resendCooldown = Duration(minutes: 1);
 
 /// A plain shape check: something@something.tld. The server has the last word.
 final RegExp _emailShape = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]{2,}$');
@@ -124,18 +137,38 @@ final saveProgressProvider =
     );
 
 class SaveProgressController extends Notifier<AccountFlow> {
+  Timer? _poll;
+  Timer? _cooldown;
+  AppLifecycleListener? _lifecycle;
+  bool _checking = false;
+
   @override
-  AccountFlow build() => const AccountFlow();
+  AccountFlow build() {
+    // Sign-in links arrive whenever they're opened, even on a cold start through the link, so
+    // this listens for the app's lifetime (main.dart reads it at launch).
+    final links = ref.read(backendProvider).accountLinks.listen(_onLink);
+    ref.onDispose(() {
+      unawaited(links.cancel());
+      _stopWaiting();
+      _cooldown?.cancel();
+    });
+    return const AccountFlow();
+  }
 
   /// Switches between saving this device and signing in to a saved account.
-  void useMode(AccountMode mode) => state = AccountFlow(mode: mode);
+  void useMode(AccountMode mode) {
+    _stopWaiting();
+    state = AccountFlow(mode: mode);
+  }
 
-  /// Back to the email step, keeping what was typed.
-  void editEmail() => state = AccountFlow(mode: state.mode, email: state.email);
+  /// "Use a different email": back to the email step, keeping what was typed.
+  void editEmail() {
+    _stopWaiting();
+    state = AccountFlow(mode: state.mode, email: state.email);
+  }
 
-  /// Step 1: mails a code to [raw]. A link the server makes at once (no code) goes straight to
-  /// linked.
-  Future<void> sendCode(String raw) async {
+  /// Mails a link to [raw]. A link the server makes at once (no email) goes straight to linked.
+  Future<void> sendLink(String raw) async {
     if (state.busy) return;
     final email = raw.trim().toLowerCase();
     if (!_emailShape.hasMatch(email)) {
@@ -146,6 +179,7 @@ class SaveProgressController extends Notifier<AccountFlow> {
       );
       return;
     }
+    _stopWaiting();
     state = AccountFlow(
       mode: state.mode,
       step: AccountStep.sending,
@@ -154,9 +188,10 @@ class SaveProgressController extends Notifier<AccountFlow> {
     await _sendTo(email, backToEmail: true);
   }
 
-  /// "Send a new code", from the code step.
+  /// "Resend link", from the link-sent step.
   Future<void> resend() async {
-    if (state.busy || state.step != AccountStep.enterCode) return;
+    if (state.step != AccountStep.linkSent || !state.canResend) return;
+    _stopWaiting();
     state = state.copyWith(step: AccountStep.sending, clearFailure: true);
     await _sendTo(state.email, backToEmail: false, resent: true);
   }
@@ -171,22 +206,25 @@ class SaveProgressController extends Notifier<AccountFlow> {
     try {
       if (mode == AccountMode.link) {
         final linked = await backend
-            .sendLinkCode(email)
+            .sendLinkEmail(email)
             .timeout(accountCallTimeout);
         if (linked != null) {
           _linked(linked);
           return;
         }
       } else {
-        await backend.sendSignInCode(email).timeout(accountCallTimeout);
+        await backend.sendSignInLink(email).timeout(accountCallTimeout);
       }
       if (!ref.mounted) return;
       state = AccountFlow(
         mode: mode,
-        step: AccountStep.enterCode,
+        step: AccountStep.linkSent,
         email: email,
         resent: resent,
+        canResend: false,
       );
+      _startCooldown();
+      if (mode == AccountMode.link) _startWaiting();
     } on AccountException catch (error) {
       _failed(error.failure, error.reason, backToEmail: backToEmail);
     } on TimeoutException {
@@ -194,37 +232,111 @@ class SaveProgressController extends Notifier<AccountFlow> {
     }
   }
 
-  /// Step 2: checks [raw], the code from the email.
-  Future<void> confirm(String raw) async {
-    if (state.busy || state.step != AccountStep.enterCode) return;
-    final code = raw.replaceAll(RegExp(r'\s'), '');
-    if (code.length != accountCodeLength) {
-      state = state.copyWith(failure: AccountFailure.wrongCode, resent: false);
+  /// Asks the server whether the link has been tapped; linked when it has. A failure here
+  /// (offline, a slow answer) is quiet: the next poll or return to the app asks again.
+  Future<void> checkLink() async {
+    if (_checking ||
+        state.mode != AccountMode.link ||
+        state.step != AccountStep.linkSent) {
       return;
     }
-    state = state.copyWith(
-      step: AccountStep.verifying,
-      clearFailure: true,
-      resent: false,
-    );
-    final backend = ref.read(backendProvider);
-    final email = state.email;
+    _checking = true;
     try {
-      if (state.mode == AccountMode.link) {
-        final session = await backend
-            .confirmLinkCode(email: email, code: code)
-            .timeout(accountCallTimeout);
+      final session = await ref
+          .read(backendProvider)
+          .refreshAccount()
+          .timeout(accountCallTimeout);
+      if (!ref.mounted || state.step != AccountStep.linkSent) return;
+      if (session.isLinked) {
+        _stopWaiting();
         _linked(session);
-      } else {
-        final session = await backend
-            .confirmSignInCode(email: email, code: code)
-            .timeout(accountCallTimeout);
-        await _signedIn(session);
       }
     } on AccountException catch (error) {
-      _failed(error.failure, error.reason, backToEmail: false);
+      if (ref.mounted) {
+        ref.read(logProvider).debug('link check failed', {
+          'failure': error.failure.name,
+          'reason': error.reason,
+        });
+      }
     } on TimeoutException {
-      _failed(AccountFailure.offline, 'timeout', backToEmail: false);
+      if (ref.mounted) {
+        ref.read(logProvider).debug('link check failed', {'reason': 'timeout'});
+      }
+    } finally {
+      _checking = false;
+    }
+  }
+
+  /// Whether the app is asking the server every [linkPollInterval] (tests read it).
+  bool get polling => _poll != null;
+
+  /// Polls for [linkPollWindow], and again each time the app comes back to the foreground
+  /// (the player tapped the link in their mail app or browser and switched back).
+  void _startWaiting() {
+    _lifecycle ??= AppLifecycleListener(
+      onResume: () {
+        _restartPoll();
+        unawaited(checkLink());
+      },
+    );
+    _restartPoll();
+  }
+
+  void _restartPoll() {
+    _poll?.cancel();
+    final polls =
+        linkPollWindow.inMilliseconds ~/ linkPollInterval.inMilliseconds;
+    _poll = Timer.periodic(linkPollInterval, (timer) {
+      unawaited(checkLink());
+      if (timer.tick >= polls) {
+        timer.cancel();
+        _poll = null;
+      }
+    });
+  }
+
+  void _stopWaiting() {
+    _poll?.cancel();
+    _poll = null;
+    _lifecycle?.dispose();
+    _lifecycle = null;
+  }
+
+  void _startCooldown() {
+    _cooldown?.cancel();
+    _cooldown = Timer(resendCooldown, () {
+      if (ref.mounted && state.step == AccountStep.linkSent) {
+        state = state.copyWith(canResend: true);
+      }
+    });
+  }
+
+  /// A sign-in link opened in the app: the account takes over (the merge readied first), or the
+  /// link was refused and the card says so, wherever the flow was (a cold start through the link
+  /// starts with a fresh flow).
+  Future<void> _onLink(AccountLinkEvent event) async {
+    if (!ref.mounted) return;
+    switch (event) {
+      case AccountLinkSignedIn(:final session, :final previousUserId):
+        _stopWaiting();
+        await _signedIn(session, previousUserId: previousUserId);
+      case AccountLinkRefused(:final reason):
+        _stopWaiting();
+        ref.read(logProvider).warn('account step failed', {
+          'mode': AccountMode.signIn.name,
+          'failure': AccountFailure.linkExpired.name,
+          'reason': reason,
+        });
+        final waiting =
+            state.mode == AccountMode.signIn &&
+            state.step == AccountStep.linkSent;
+        state = waiting
+            ? state.copyWith(failure: AccountFailure.linkExpired, resent: false)
+            : AccountFlow(
+                mode: AccountMode.signIn,
+                email: state.email,
+                failure: AccountFailure.linkExpired,
+              );
     }
   }
 
@@ -235,14 +347,18 @@ class SaveProgressController extends Notifier<AccountFlow> {
       'provider': const EventValue.name(AccountProvider.email),
     });
     ref.read(logProvider).info('account linked');
+    _cooldown?.cancel();
     state = const AccountFlow();
   }
 
-  Future<void> _signedIn(GuestSession session) async {
-    final before = ref.read(sessionProvider);
-    final sameUser = before is GuestSession && before.userId == session.userId;
-    // The local half of the merge runs before the session switches, so the new session's sync
-    // worker finds it ready ([prepareAccountMerge]).
+  Future<void> _signedIn(
+    GuestSession session, {
+    required String? previousUserId,
+  }) async {
+    // A link that signs in to the user this device already is moves nothing.
+    final sameUser = previousUserId == session.userId;
+    // The local half of the merge runs before the app's session switches, so the new session's
+    // sync worker finds it ready ([prepareAccountMerge]).
     final hadProgress = sameUser
         ? false
         : await ref.read(accountDevicePrepProvider)();
@@ -255,6 +371,7 @@ class SaveProgressController extends Notifier<AccountFlow> {
     ref.read(logProvider).info('account signed in', {
       'had_progress': hadProgress,
     });
+    _cooldown?.cancel();
     state = const AccountFlow(signedInHere: true);
   }
 
@@ -271,8 +388,14 @@ class SaveProgressController extends Notifier<AccountFlow> {
       'reason': reason,
     });
     state = state.copyWith(
-      step: backToEmail ? AccountStep.enterEmail : AccountStep.enterCode,
+      step: backToEmail ? AccountStep.enterEmail : AccountStep.linkSent,
       failure: failure,
+      canResend: backToEmail,
     );
+    if (!backToEmail) {
+      // A failed resend keeps waiting for the link already sent.
+      _startCooldown();
+      if (state.mode == AccountMode.link) _startWaiting();
+    }
   }
 }

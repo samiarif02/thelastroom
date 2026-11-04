@@ -122,25 +122,28 @@ class FakeBackend implements Backend {
   /// The saved account a "Sign in on another device" lands in (FR-3).
   static const String accountId = '00000000-0000-4000-8000-0000000000a1';
 
-  /// The code the fake server "mails" (the one a test types to succeed).
-  static const String goodCode = '123456';
-
   /// The fake auth server: which addresses hold a saved account, and the user id behind each.
   final Map<String, String> accounts = {};
 
   /// The guest this fake device is signed in as; linking keeps this id.
   String currentUserId = guestId;
 
+  /// The address a "Save your progress" link was mailed to, until [tapLink].
+  String? pendingEmail;
+
+  /// The address this device's user has confirmed (the server's `email`).
+  String? confirmedEmail;
+
   /// A failure the next auth call throws (then it's cleared), to script every card state.
   AccountFailure? nextAuthFailure;
 
-  /// Links at once, with no code (a server with email confirmations off).
-  bool linksWithoutCode = false;
+  /// Links at once, with no email (a server with email confirmations off).
+  bool linksAtOnce = false;
 
   /// Every auth call, by name, for assertions.
   final List<String> authCalls = [];
 
-  /// Holds each auth call until completed, to see the sending / verifying states.
+  /// Holds each auth call until completed, to see the sending state.
   Completer<void>? authGate;
 
   Future<void> _auth(String call) async {
@@ -155,49 +158,63 @@ class FakeBackend implements Backend {
   }
 
   @override
-  Future<GuestSession?> sendLinkCode(String email) async {
-    await _auth('sendLinkCode');
+  Future<GuestSession?> sendLinkEmail(String email) async {
+    await _auth('sendLinkEmail');
     if (accounts.containsKey(email)) {
       throw const AccountException(AccountFailure.emailTaken, 'email_exists');
     }
-    if (!linksWithoutCode) return null;
-    accounts[email] = currentUserId;
-    return GuestSession(userId: currentUserId, email: email);
-  }
-
-  @override
-  Future<GuestSession> confirmLinkCode({
-    required String email,
-    required String code,
-  }) async {
-    await _auth('confirmLinkCode');
-    if (code != goodCode) {
-      throw const AccountException(AccountFailure.wrongCode, 'otp_expired');
+    if (linksAtOnce) {
+      accounts[email] = currentUserId;
+      confirmedEmail = email;
+      return GuestSession(userId: currentUserId, email: email);
     }
+    pendingEmail = email;
+    return null;
+  }
+
+  /// The player taps the "Save your progress" link in their email (on any device).
+  void tapLink() {
+    final email = pendingEmail!;
+    pendingEmail = null;
     accounts[email] = currentUserId;
-    return GuestSession(userId: currentUserId, email: email);
+    confirmedEmail = email;
   }
 
   @override
-  Future<void> sendSignInCode(String email) async {
-    await _auth('sendSignInCode');
+  Future<GuestSession> refreshAccount() async {
+    await _auth('refreshAccount');
+    return GuestSession(userId: currentUserId, email: confirmedEmail);
+  }
+
+  @override
+  Future<void> sendSignInLink(String email) async {
+    await _auth('sendSignInLink');
     if (!accounts.containsKey(email)) {
       throw const AccountException(AccountFailure.noAccount, 'otp_disabled');
     }
   }
 
+  final StreamController<AccountLinkEvent> _links =
+      StreamController<AccountLinkEvent>.broadcast(sync: true);
+
   @override
-  Future<GuestSession> confirmSignInCode({
-    required String email,
-    required String code,
-  }) async {
-    await _auth('confirmSignInCode');
-    if (code != goodCode) {
-      throw const AccountException(AccountFailure.wrongCode, 'otp_expired');
-    }
+  Stream<AccountLinkEvent> get accountLinks => _links.stream;
+
+  /// The sign-in link for [email] opens this app: the client is the account from now on.
+  void openSignInLink(String email) {
+    final before = currentUserId;
     currentUserId = accounts[email]!;
-    return GuestSession(userId: currentUserId, email: email);
+    confirmedEmail = email;
+    _links.add(
+      AccountLinkSignedIn(
+        GuestSession(userId: currentUserId, email: email),
+        previousUserId: before,
+      ),
+    );
   }
+
+  /// An expired or already used sign-in link opens this app (`#error=access_denied…`).
+  void openRefusedLink() => _links.add(const AccountLinkRefused('otp_expired'));
 
   final Future<BackendSession> Function() _restore;
   final Future<GuestSession> Function() _signIn;

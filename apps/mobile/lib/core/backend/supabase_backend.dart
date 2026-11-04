@@ -24,6 +24,26 @@ class SupabaseBackend implements Backend {
   static const String _scoreVoiceFunction = 'score-voice';
   static const String _aiScores = 'ai_scores';
 
+  /// Where "Save your progress"'s confirmation link lands: the landing site's "You're verified"
+  /// page (web/src/app/verified). It must be in the project's Redirect URLs (status 67).
+  static const String verifiedPage =
+      'https://thelastroom-ten.vercel.app/verified';
+
+  /// Where a sign-in link lands: back in the app (AndroidManifest intent filter, iOS URL type).
+  static const String appCallback = 'thelastroom://auth-callback';
+
+  /// Auth errors on the state stream that are a session's, not a sign-in link's.
+  static const Set<String> _sessionErrors = {
+    'session_missing',
+    'session_expired',
+  };
+
+  final StreamController<AccountLinkEvent> _links =
+      StreamController<AccountLinkEvent>.broadcast();
+
+  /// The user the last auth event was about: a sign-in to someone else is a sign-in link.
+  String? _lastUserId;
+
   @override
   Future<BackendSession> restoreSession() async {
     final user = (await _client()).auth.currentUser;
@@ -31,10 +51,18 @@ class SupabaseBackend implements Backend {
   }
 
   /// The app's view of [user]: a guest, or a guest with its linked email (FR-3).
-  static GuestSession _session(User user) {
+  static GuestSession _session(User user) =>
+      GuestSession(userId: user.id, email: linkedEmail(user));
+
+  /// The address [user] has saved to, or null. While the link waits to be tapped the address
+  /// sits in `new_email` and `email` is empty; tapping it moves it to `email`, sets
+  /// `email_confirmed_at`, and ends the anonymous status (gotrue's email-change verify).
+  static String? linkedEmail(User user) {
     final email = user.email;
-    final linked = !user.isAnonymous && email != null && email.isNotEmpty;
-    return GuestSession(userId: user.id, email: linked ? email : null);
+    if (email == null || email.isEmpty) return null;
+    if (!user.isAnonymous) return email;
+    final pending = (user.newEmail ?? '').isNotEmpty;
+    return user.emailConfirmedAt != null && !pending ? email : null;
   }
 
   @override
@@ -110,51 +138,46 @@ class SupabaseBackend implements Backend {
   }
 
   @override
-  Future<GuestSession?> sendLinkCode(String email) => _account(() async {
+  Future<GuestSession?> sendLinkEmail(String email) => _account(() async {
     final auth = (await _client()).auth;
-    final response = await auth.updateUser(UserAttributes(email: email));
+    final response = await auth.updateUser(
+      UserAttributes(email: email),
+      emailRedirectTo: verifiedPage,
+    );
     final user = response.user;
-    // With email confirmations off the server links at once; on, the code is on its way.
+    // With email confirmations off the server links at once; on, the link is on its way.
     return user != null && !user.isAnonymous && user.email == email
         ? _session(user)
         : null;
   });
 
   @override
-  Future<GuestSession> confirmLinkCode({
-    required String email,
-    required String code,
-  }) => _verify(email, code, OtpType.emailChange);
+  Future<GuestSession> refreshAccount() => _account(() async {
+    final auth = (await _client()).auth;
+    // The refresh gives a token minted after the link was tapped (its claims are the linked
+    // user's); the user read is the server's word on the email.
+    await auth.refreshSession();
+    final user = (await auth.getUser()).user ?? auth.currentUser;
+    if (user == null) {
+      throw const AccountException(AccountFailure.unavailable, 'no_user');
+    }
+    return _session(user);
+  });
 
   @override
-  Future<void> sendSignInCode(String email) => _account(() async {
-    // shouldCreateUser false: this path only finds a saved account, it never makes one.
+  Future<void> sendSignInLink(String email) => _account(() async {
+    // shouldCreateUser false: this path only finds a saved account, it never makes one. The
+    // link comes back into the app (the intent filter / URL type for [appCallback]), where
+    // supabase_flutter exchanges its PKCE code for the account's session.
     await (await _client()).auth.signInWithOtp(
       email: email,
       shouldCreateUser: false,
+      emailRedirectTo: appCallback,
     );
   });
 
   @override
-  Future<GuestSession> confirmSignInCode({
-    required String email,
-    required String code,
-  }) => _verify(email, code, OtpType.email);
-
-  Future<GuestSession> _verify(String email, String code, OtpType type) =>
-      _account(() async {
-        final auth = (await _client()).auth;
-        final response = await auth.verifyOTP(
-          email: email,
-          token: code,
-          type: type,
-        );
-        final user = response.user ?? auth.currentUser;
-        if (user == null) {
-          throw const AccountException(AccountFailure.unavailable, 'no_user');
-        }
-        return _session(user);
-      });
+  Stream<AccountLinkEvent> get accountLinks => _links.stream;
 
   /// Runs an auth call, turning what the server says into an [AccountFailure].
   static Future<T> _account<T>(Future<T> Function() call) async {
@@ -172,7 +195,9 @@ class SupabaseBackend implements Backend {
 
   /// The gotrue error codes probed against the local stack (status 60).
   static AccountFailure _failure(AuthException error) => switch (error.code) {
-    'otp_expired' || 'invalid_credentials' => AccountFailure.wrongCode,
+    'otp_expired' ||
+    'flow_state_expired' ||
+    'flow_state_not_found' => AccountFailure.linkExpired,
     'over_email_send_rate_limit' ||
     'over_request_rate_limit' => AccountFailure.rateLimited,
     'email_exists' || 'user_already_exists' => AccountFailure.emailTaken,
@@ -183,7 +208,6 @@ class SupabaseBackend implements Backend {
     'validation_failed' => AccountFailure.invalidEmail,
     _ => switch (error.statusCode) {
       '429' => AccountFailure.rateLimited,
-      '403' => AccountFailure.wrongCode,
       _ => AccountFailure.unavailable,
     },
   };
@@ -200,7 +224,10 @@ class SupabaseBackend implements Backend {
     return [for (final row in rows) row];
   }
 
-  Future<void> dispose() async => _authEvents?.cancel();
+  Future<void> dispose() async {
+    await _authEvents?.cancel();
+    await _links.close();
+  }
 
   Future<SupabaseClient> _client() => _supabase ??= _initialise();
 
@@ -219,13 +246,56 @@ class SupabaseBackend implements Backend {
       rethrow;
     }
     final auth = supabase.client.auth;
-    // Token refreshes fail while offline and arrive here as stream errors. They are expected
-    // and retried by the SDK, so they are a warning, not an uncaught error.
+    _lastUserId = auth.currentUser?.id;
     _authEvents = auth.onAuthStateChange.listen(
-      (_) {},
-      onError: (Object error) =>
-          _log.warn('backend auth refresh failed', {'error': '$error'}),
+      _onAuthState,
+      onError: _onAuthError,
     );
     return supabase.client;
+  }
+
+  /// A sign-in link exchanged by supabase_flutter (`detectSessionInUri`, on by default) arrives
+  /// as `signedIn` for a saved, non-anonymous user other than the one before. The guest's own
+  /// sign-in is anonymous, and a refresh or a link keeps the id, so neither counts.
+  void _onAuthState(AuthState state) {
+    final user = state.session?.user;
+    final before = _lastUserId;
+    _lastUserId = user?.id;
+    if (state.event != AuthChangeEvent.signedIn ||
+        user == null ||
+        user.isAnonymous ||
+        user.id == before) {
+      return;
+    }
+    final session = _session(user);
+    if (!session.isLinked || _links.isClosed) return;
+    _log.info('account link opened');
+    _links.add(AccountLinkSignedIn(session, previousUserId: before));
+  }
+
+  /// Token refreshes fail while offline and arrive here as stream errors: expected, retried by
+  /// the SDK, so a warning. Any other auth error is a sign-in link the server refused (the
+  /// `#error=…` of an expired or used link, or a PKCE code this device can't exchange).
+  void _onAuthError(Object error) {
+    final reason = linkRefusal(error);
+    if (reason != null) {
+      _log.warn('account link refused', {'reason': reason});
+      if (!_links.isClosed) _links.add(AccountLinkRefused(reason));
+      return;
+    }
+    _log.warn('backend auth refresh failed', {'error': '$error'});
+  }
+
+  /// The server's code when [error], on the auth state stream, is a refused sign-in link, or
+  /// null when it's a session's own trouble (an offline refresh, an expired session). The code
+  /// only: the description is the server's prose. Supabase's error redirect puts `otp_expired`
+  /// in `error_code`, which gotrue reads as the status code.
+  static String? linkRefusal(Object error) {
+    if (error is! AuthException ||
+        error is AuthRetryableFetchException ||
+        _sessionErrors.contains(error.code)) {
+      return null;
+    }
+    return error.statusCode ?? error.code ?? 'unknown';
   }
 }
