@@ -3,9 +3,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_last_room/features/debrief/deliberation_scene.dart';
 import 'package:the_last_room/features/voice/recorder/recorder_panel.dart';
 import 'package:the_last_room/features/voice/voice_debrief.dart';
-import 'package:the_last_room/features/voice/widgets/scene_controls.dart';
 import 'package:the_last_room/features/voice/widgets/self_check_panel.dart';
 
 import '../voice_fixture.dart';
@@ -97,7 +97,11 @@ void main() {
     };
     await rig.boot();
     await rig.answerBoth();
-    await rig.until(find.text(ListeningCard.title));
+    await rig.until(find.byType(DeliberationScene));
+    // Past the entrance and into the first ticks.
+    for (var i = 0; i < 16; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
     await still(rig, '11-listening');
     await rig.settleDebrief();
     await still(rig, '12-debrief-ai');

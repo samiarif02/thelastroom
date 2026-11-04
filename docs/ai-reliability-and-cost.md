@@ -17,7 +17,7 @@ was measured. The full accuracy study is [scoring-eval.md](scoring-eval.md).
 | Failure | What the player sees | Where |
 | --- | --- | --- |
 | No network, no backend, or the key is missing | The game's own deterministic score, labelled **"Offline score"**; nothing breaks | `features/debrief/ai_score.dart`, ADR 0005 |
-| Slow model (over 8 s) | The offline score at once; a late AI verdict (up to 30 s) replaces it, and the label changes | `AiScorer.timeout`, `lateLimit` |
+| Slow model (over 8 s) | The interviewer reads the file (the deliberation scene) for up to 8 s, then the offline score; a late AI verdict (up to 30 s) waits in a "The recruiter's score is ready" banner once the sheet has played, and swaps in on a tap (no replay, no restamp) | `AiScorer.timeout`, `lateLimit` |
 | A model errors or rate-limits (429/503) | The next model in the chain answers: 3.5 Flash-Lite → 3.6 Flash → 3.1 Flash-Lite | `supabase/functions/score/gemini.ts` |
 | Malformed output | `parseVerdict` repairs what is safe (a score outside 0–100 is clamped, a decimal rounded, a long basis cut to one sentence); text that isn't JSON or a missing field is an error, and the next model or the offline score answers | `score/scoring.ts` + tests |
 | The AI is generous to guessing | Prompt rules cap an all-guessed room (overall ≤ 40, specificity ≤ 20); a good-sounding reason never rescues a weak line | `score/scoring.ts` |

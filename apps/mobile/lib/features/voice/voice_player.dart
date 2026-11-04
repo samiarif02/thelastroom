@@ -12,6 +12,7 @@ import '../../ui/daylight/daylight_route.dart' show routeSettled;
 import '../../ui/film/film_overlay.dart';
 import '../../ui/subtitle/typewriter_subtitle.dart';
 import '../debrief/debrief_view.dart';
+import '../debrief/deliberation_scene.dart';
 import '../mission/mission_lookup.dart';
 import '../mission/scene/epilogue_scene.dart';
 import '../mission/scene/mission_card.dart';
@@ -417,9 +418,10 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
     if (game.scoring) {
       return _Backdrop(
         grade: grade,
-        child: ListeningCard(
-          grade: grade,
+        child: DeliberationScene(
           person: CastPeople.byId(mission.lead.id),
+          grade: grade,
+          kind: DeliberationKind.listening,
         ),
       );
     }

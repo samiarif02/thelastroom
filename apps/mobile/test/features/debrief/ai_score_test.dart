@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:content/content.dart';
 import 'package:engine/engine.dart';
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/core/analytics/analytics_event.dart';
@@ -11,8 +12,10 @@ import 'package:the_last_room/core/env/env.dart';
 import 'package:the_last_room/core/logging/log.dart';
 import 'package:the_last_room/features/debrief/ai_score.dart';
 import 'package:the_last_room/features/debrief/ai_verdict_cards.dart';
+import 'package:the_last_room/features/debrief/deliberation_scene.dart';
 import 'package:the_last_room/features/debrief/scoring_basis_sheet.dart';
 import 'package:the_last_room/features/mission/mission_controller.dart';
+import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
 import '../../core/backend/fakes.dart';
@@ -288,10 +291,26 @@ void main() {
             () => _verdict,
           );
         final rig = await playToDebrief(tester, _scorer(backend));
-        await rig.until(find.byType(DeliberatingCard));
+        await rig.until(find.byType(DeliberationScene));
         expect(find.byType(Dossier), findsNothing);
-        await rig.until(find.byType(Dossier));
+        // The interviewer reads the file, in their name; never an offline flash first.
+        expect(
+          find.text(
+            DeliberationScene.steps(
+              missionTheOpportunity.lead.name,
+              DeliberationKind.reading,
+            ).first,
+          ),
+          findsOneWidget,
+        );
+        await rig.until(
+          find.byType(Dossier),
+          eachFrame: () =>
+              expect(find.text(ScoreSourceLabel.offlineLabel), findsNothing),
+        );
         expect(find.text(ScoreSourceLabel.aiLabel), findsOneWidget);
+        // The sheet plays once, with the recruiter's numbers.
+        expect(rig.sounds.count('dossierSlides'), 1);
         final dossier = tester.widget<Dossier>(find.byType(Dossier));
         expect(dossier.total, 74);
         expect(dossier.scores.map((s) => s.value), [85, 70, 60, 80]);
@@ -315,7 +334,17 @@ void main() {
         final backend = FakeBackend()
           ..scorer = (_) => Completer<Object?>().future;
         final rig = await playToDebrief(tester, _scorer(backend));
-        await rig.until(find.byType(DeliberatingCard));
+        await rig.until(find.byType(DeliberationScene));
+        // Past 4 s it says it's nearly done, so it never feels stuck.
+        await rig.run(DeliberationScene.longAfter + const Duration(seconds: 1));
+        expect(find.byType(Dossier), findsNothing);
+        final almost = tester.widget<AnimatedOpacity>(
+          find.ancestor(
+            of: find.text(DeliberationScene.almost),
+            matching: find.byType(AnimatedOpacity),
+          ),
+        );
+        expect(almost.opacity, 1);
         await rig.until(
           find.byType(Dossier),
           timeout: AiScorer.timeout + const Duration(seconds: 3),
@@ -332,11 +361,12 @@ void main() {
     );
 
     testWidgets(
-      'a late verdict: "Offline score" at 8 s, then the recruiter\'s score replaces it',
+      'a late verdict: "Offline score" at 8 s; the recruiter\'s score waits for a tap, no restamp',
       (tester) async {
+        // Lands while the offline sheet is still playing.
         final backend = FakeBackend()
           ..scorer = (_) => Future<Object?>.delayed(
-            AiScorer.timeout + const Duration(seconds: 5),
+            AiScorer.timeout + const Duration(seconds: 1),
             () => _verdict,
           );
         final rig = await playToDebrief(tester, _scorer(backend));
@@ -344,16 +374,32 @@ void main() {
           find.text(ScoreSourceLabel.offlineLabel),
           timeout: AiScorer.timeout + const Duration(seconds: 3),
         );
-        await rig.until(
-          find.text(ScoreSourceLabel.aiLabel),
-          timeout: const Duration(seconds: 10),
-        );
+        final offline = rig.state(1).score!.total;
+        final banner = find.text(LateVerdictBanner.title).hitTestable();
+        await rig.run(const Duration(seconds: 2));
+        // Arrived, but the sheet is mid-timeline: nothing changes under the player.
+        expect(banner, findsNothing);
+        expect(tester.widget<Dossier>(find.byType(Dossier)).total, offline);
+        await rig.settleDossier();
+        await rig.until(banner);
+        expect(find.text(ScoreSourceLabel.offlineLabel), findsOneWidget);
+        expect(tester.widget<Dossier>(find.byType(Dossier)).total, offline);
+        expect(rig.analytics.count(AnalyticsEvent.aiScoreShown), 0);
+        final stamps = rig.sounds.count('scoreStamped');
+        final slides = rig.sounds.count('dossierSlides');
+        await tester.tap(banner);
+        await rig.run(const Duration(seconds: 2));
+        expect(find.text(ScoreSourceLabel.aiLabel), findsOneWidget);
         expect(tester.widget<Dossier>(find.byType(Dossier)).total, 74);
+        expect(find.byType(AiBasisSlip), findsOneWidget);
+        expect(banner, findsNothing);
+        // Swapped in place: no second slide, no stamps again.
+        expect(rig.sounds.count('scoreStamped'), stamps);
+        expect(rig.sounds.count('dossierSlides'), slides);
         expect(
           rig.analytics.only(AnalyticsEvent.aiScoreShown).wire['late'],
           isTrue,
         );
-        await rig.settleDossier();
       },
     );
 
@@ -362,7 +408,7 @@ void main() {
       (tester) async {
         final rig = await playToDebrief(tester, null);
         await rig.until(find.byType(Dossier));
-        expect(find.byType(DeliberatingCard), findsNothing);
+        expect(find.byType(DeliberationScene), findsNothing);
         expect(find.text(ScoreSourceLabel.offlineLabel), findsOneWidget);
         expect(rig.analytics.count(AnalyticsEvent.aiScoreRequested), 0);
         expect(
