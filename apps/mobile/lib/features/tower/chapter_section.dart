@@ -50,8 +50,8 @@ class ChapterSection extends StatelessWidget {
   static String headerLabel(Chapter c, {required int lit, required int of}) =>
       '${title(c)}, ${count(lit, of)} rooms lit';
 
-  static const double _swatchW = 16;
-  static const double _swatchH = 20;
+  /// The header's door: icon size.
+  static const double doorIcon = 18;
   static const double _caret = 16;
   static const double _strip = 16;
   static const double _face = 40;
@@ -92,17 +92,9 @@ class ChapterSection extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: DaylightSize.hit),
           child: Row(
             children: [
-              Container(
-                width: _swatchW,
-                height: _swatchH,
-                decoration: BoxDecoration(
-                  color: open ? f.base : f.soft,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(DaylightRadius.archTop),
-                    bottom: Radius.circular(DaylightSpace.s2),
-                  ),
-                ),
-              ),
+              // The floor's door in its colour: shut on an open floor, honey once every
+              // room is lit, pale and locked on a floor not open yet.
+              _floorDoor(f, open: open, allLit: lit == rooms.length),
               const SizedBox(width: DaylightSpace.s12),
               Expanded(
                 child: Column(
@@ -153,7 +145,7 @@ class ChapterSection extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.only(
           top: DaylightSpace.s12,
-          left: _swatchW + DaylightSpace.s12,
+          left: doorIcon + DaylightSpace.s12,
         ),
         child: Wrap(
           spacing: DaylightSpace.s8,
@@ -272,6 +264,23 @@ class ChapterSection extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A floor's header icon: the tower's door at icon size, in the floor's colours.
+Widget _floorDoor(FloorColours f, {required bool open, required bool allLit}) {
+  final ink = open ? DoorInk.open(f) : DoorInk.pale(f);
+  final state = !open
+      ? DoorState.locked
+      : allLit
+      ? DoorState.done
+      : DoorState.closed;
+  return TowerDoor(
+    state: state,
+    width: ChapterSection.doorIcon,
+    leaf: state == DoorState.done ? DaylightColors.honey : ink.leaf,
+    panel: state == DoorState.locked ? f.deep : ink.panel,
+    frame: ink.frame,
+  );
 }
 
 /// [room]'s door at [width], in the tower's colours for its floor: honey once played, ajar with
