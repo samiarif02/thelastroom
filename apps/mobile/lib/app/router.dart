@@ -9,6 +9,7 @@ import '../features/intro/character_screen.dart';
 import '../features/leaderboard/leaderboard_screen.dart';
 import '../features/mission/mission_screen.dart';
 import '../features/onboarding/home_gate.dart';
+import '../features/onboarding/how_it_works_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/progress/chapter_report_screen.dart';
 import '../features/progress/past_result_screen.dart';
@@ -47,6 +48,9 @@ abstract final class Routes {
   /// A played room's last result (brief 48), from Your file: `/tower/progress/room/4`.
   static String result(int number) => '$_towerPath/$_progress/$_room/$number';
   static const String settings = '$_towerPath/$_settings';
+
+  /// "How it works" again (issue 75), from Settings: the explainer without the questions.
+  static const String howItWorks = '$_towerPath/$_settings/$_howItWorks';
   static const String character = '$_towerPath/$_character';
 
   /// Every chapter, floor by floor, from "View all chapters" under the tower.
@@ -68,6 +72,7 @@ abstract final class Routes {
   static const String _report = 'report';
   static const String _room = 'room';
   static const String _settings = 'settings';
+  static const String _howItWorks = 'how-it-works';
   static const String _character = 'character';
   static const String _mission = 'mission';
   static const String _recall = 'recall';
@@ -144,6 +149,13 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
           const SettingsScreen(),
           DaylightTransition.through,
         ),
+        routes: [
+          GoRoute(
+            path: Routes._howItWorks,
+            pageBuilder: (context, state) =>
+                daylightPage(state, const HowItWorksScreen()),
+          ),
+        ],
       ),
       GoRoute(
         path: Routes._chapters,

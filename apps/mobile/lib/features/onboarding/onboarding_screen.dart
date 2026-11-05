@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:brand/brand.dart';
-import 'package:content/content.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,22 +14,24 @@ import '../../core/audio/game_sounds.dart';
 import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
 import '../../ui/film/anchored_scroll.dart';
-import '../mission/mission_lookup.dart';
 import '../progression/interview_date_choices.dart';
+import 'explainer_deck.dart';
 import 'name_field.dart';
 import 'onboarding_copy.dart';
 
-/// The onboarding's steps, in order (brief 17): what the game is, who you'll meet, when your
-/// interview is (optional, brief 32), your name.
-enum OnboardingStep { game, cast, interview, name }
+/// Onboarding's questions, in order, after the "How it works" explainer: when your interview
+/// is (optional, brief 32), then your name.
+enum OnboardingStep { interview, name }
 
-/// First launch only (brief 17; Daylight in brief 48): four short steps, each on a floor's tint
-/// (the ground eases from one to the next), with a step bar, one honey button and Skip. It ends
-/// on the Tower with room 1 ready to play. Only the first name is asked; the rest of the profile
-/// keeps its defaults. Saved once, at the end, with `onboarding_completed` (never the name:
-/// it's not a property).
+/// First launch only (brief 17; Daylight in brief 48; issue 75). First the "How it works"
+/// explainer ([ExplainerDeck]: what the app is, how a room works, how you're scored, how it
+/// sticks, why come back), then the questions, each on a floor's tint with a step bar, one honey
+/// button and Skip. It ends on the Tower with room 1 ready to play. Only the first name is
+/// asked; the rest of the profile keeps its defaults. Saved once, at the end, with
+/// `onboarding_completed` (never the name: it's not a property). Skip on the explainer goes to
+/// the questions, never past the name.
 class OnboardingScreen extends ConsumerStatefulWidget {
-  /// Who hosts each floor, bottom up: the three faces the panel step introduces.
+  /// Who hosts each floor, bottom up.
   static const List<String> floorHosts = ['priya', 'marcus', 'lena'];
 
   const OnboardingScreen({super.key});
@@ -40,7 +41,14 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  OnboardingStep _step = OnboardingStep.game;
+  /// The explainer is showing; the questions come after it.
+  bool _explaining = true;
+
+  /// The explainer's page to open on: the last one when back returns to it from a question.
+  int _explainerPage = 0;
+  final GlobalKey<ExplainerDeckState> _deck = GlobalKey();
+
+  OnboardingStep _step = OnboardingStep.interview;
   int _skipped = 0;
   bool _finished = false;
 
@@ -49,13 +57,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   GameSounds get _sounds => ref.read(gameSoundsProvider);
 
-  /// The step's floor: the game on floor 1, the cast on floor 2, the date on floor 3, the
-  /// name back on floor 1, where room 1 waits.
+  /// The step's floor: the date on floor 3, the name back on floor 1, where room 1 waits.
   FloorColours get _floor => switch (_step) {
-    OnboardingStep.game || OnboardingStep.name => DaylightFloors.one,
-    OnboardingStep.cast => DaylightFloors.two,
+    OnboardingStep.name => DaylightFloors.one,
     OnboardingStep.interview => DaylightFloors.three,
   };
+
+  /// The explainer ended: on to the questions. A Skip counts the pages it passed by.
+  void _explained({required bool skipped}) {
+    if (!mounted) return;
+    if (skipped) {
+      final at = _deckPage;
+      _skipped += ExplainerDeck.length - at;
+    }
+    _sounds.pageTurn();
+    setState(() {
+      _explaining = false;
+      _forward = true;
+      _step = OnboardingStep.interview;
+    });
+  }
+
+  /// Which explainer page is showing (for a Skip's count).
+  int get _deckPage => _deck.currentState?.page ?? 0;
 
   void _go(OnboardingStep step) {
     if (!mounted || step == _step) return;
@@ -71,7 +95,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _go(OnboardingStep.values[_step.index + 1]);
   }
 
-  /// Skip the explanation, straight to the name (the only thing asked).
+  /// Skip the interview date, straight to the name (the only thing asked).
   void _skip() {
     _sounds.uiTap();
     _skipped += OnboardingStep.name.index - _step.index;
@@ -96,16 +120,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (mounted) context.go(Routes.tower());
   }
 
-  /// Android back steps back a step; on the first step it's the root's exit hint.
+  /// Android back steps back: a page in the explainer, a question, or from the first question
+  /// to the explainer's last page. On the explainer's first page it's the root's exit hint.
   bool _stepBack() {
-    if (_step == OnboardingStep.values.first) return false;
+    if (_explaining) return _deck.currentState?.back() ?? false;
+    if (_step == OnboardingStep.values.first) {
+      _sounds.pageTurn();
+      setState(() {
+        _explaining = true;
+        _explainerPage = ExplainerDeck.length - 1;
+      });
+      return true;
+    }
     _go(OnboardingStep.values[_step.index - 1]);
     return true;
   }
 
   @override
-  Widget build(BuildContext context) =>
-      BackToExit(onBack: _stepBack, child: _screen(context));
+  Widget build(BuildContext context) => BackToExit(
+    onBack: _stepBack,
+    child: _explaining
+        ? ExplainerDeck(
+            key: _deck,
+            initialPage: _explainerPage,
+            onDone: _explained,
+          )
+        : _screen(context),
+  );
 
   Widget _screen(BuildContext context) {
     final still = MediaQuery.disableAnimationsOf(context);
@@ -199,8 +240,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const double _slide = 0.25;
 
   Widget _body() => switch (_step) {
-    OnboardingStep.game => const _GameStep(),
-    OnboardingStep.cast => const _CastStep(),
     OnboardingStep.interview => const _Heading(
       kicker: InterviewDateChoices.kicker,
       title: InterviewDateChoices.title,
@@ -264,247 +303,6 @@ class _Heading extends StatelessWidget {
         const SizedBox(height: DaylightSpace.s24),
         below,
       ],
-    );
-  }
-}
-
-/// Step 1: the game in three cards, dealt like a hand, each with its floor's glyph tile.
-class _GameStep extends StatelessWidget {
-  const _GameStep();
-
-  static const List<double> _tilts = [-0.02, 0.016, -0.01];
-  static const List<IconData> _icons = [
-    PhosphorBold.stack,
-    PhosphorBold.chatCircle,
-    PhosphorFill.chartBar,
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    const ideas = OnboardingCopy.gameIdeas;
-    return _Heading(
-      kicker: OnboardingCopy.gameKicker,
-      title: OnboardingCopy.gameTitle,
-      below: Column(
-        children: [
-          for (var i = 0; i < ideas.length; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: DaylightSpace.s12),
-              child: Entrance(
-                index: 3 + i,
-                child: _IdeaCard(
-                  title: ideas[i].title,
-                  line: ideas[i].line,
-                  icon: _icons[i],
-                  floor: DaylightFloors.all[i],
-                  tilt: _tilts[i],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _IdeaCard extends StatelessWidget {
-  const _IdeaCard({
-    required this.title,
-    required this.line,
-    required this.icon,
-    required this.floor,
-    required this.tilt,
-  });
-
-  final String title;
-  final String line;
-  final IconData icon;
-  final FloorColours floor;
-
-  /// A slight hand-dealt angle, in radians. Level under reduced motion.
-  final double tilt;
-
-  static const double _tile = 44;
-
-  @override
-  Widget build(BuildContext context) {
-    final still = MediaQuery.disableAnimationsOf(context);
-    return Transform.rotate(
-      angle: still ? 0 : tilt,
-      child: DaylightPanel(
-        radius: DaylightRadius.card,
-        child: Row(
-          children: [
-            Container(
-              width: _tile,
-              height: _tile,
-              decoration: BoxDecoration(
-                color: floor.base,
-                borderRadius: BorderRadius.circular(DaylightRadius.inner),
-              ),
-              child: Icon(
-                icon,
-                size: DaylightSpace.s24,
-                color: DaylightColors.raised,
-              ),
-            ),
-            const SizedBox(width: DaylightSpace.s16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: DaylightType.body1),
-                  Text(
-                    line,
-                    style: DaylightType.body6.copyWith(
-                      color: DaylightColors.ink2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Step 2: Priya, Marcus and Lena in their arches, each on the colour of the floor they run,
-/// and Sam at dusk, waiting on the top floor.
-class _CastStep extends StatelessWidget {
-  const _CastStep();
-
-  /// The first mission this interviewer leads (they all appear in Chapter 1).
-  static int _firstMet(Interviewer who) =>
-      missions.firstWhere((m) => m.lead.id == who.id).number;
-
-  /// "Hiring Manager" as the screen sets roles: sentence case.
-  static String _role(String role) =>
-      role.isEmpty ? role : role[0] + role.substring(1).toLowerCase();
-
-  static const double _arch = 56;
-  static const double _archHeight = 68;
-
-  @override
-  Widget build(BuildContext context) {
-    final cast = [
-      for (final id in OnboardingScreen.floorHosts)
-        interviewers.firstWhere((i) => i.id == id),
-    ];
-    Widget row({
-      required CastPerson person,
-      required Color arch,
-      required Widget text,
-      Color face = DaylightColors.raised,
-      Color edge = DaylightColors.sand2,
-    }) => DaylightPanel(
-      color: face,
-      edge: edge,
-      radius: DaylightRadius.card,
-      padding: const EdgeInsets.fromLTRB(
-        DaylightSpace.s12,
-        DaylightSpace.s12,
-        DaylightSpace.s16,
-        DaylightSpace.s12,
-      ),
-      child: Row(
-        children: [
-          ArchPortrait(
-            person: person,
-            expression: CastExpression.smile,
-            width: _arch,
-            height: _archHeight,
-            ground: arch,
-            idle: false,
-          ),
-          const SizedBox(width: DaylightSpace.s16),
-          Expanded(child: text),
-        ],
-      ),
-    );
-    return _Heading(
-      kicker: OnboardingCopy.castKicker,
-      title: OnboardingCopy.castTitle,
-      line: OnboardingCopy.castLine,
-      below: Column(
-        children: [
-          for (var i = 0; i < cast.length; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: DaylightSpace.s12),
-              child: Entrance(
-                index: 3 + i,
-                child: Semantics(
-                  label:
-                      '${cast[i].name}, ${_role(cast[i].role)}, ${OnboardingCopy.castFirstMet(_firstMet(cast[i]))}',
-                  excludeSemantics: true,
-                  child: row(
-                    person: CastPeople.byId(cast[i].id),
-                    arch: DaylightFloors.all[i].soft,
-                    text: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(cast[i].name, style: DaylightType.heading6),
-                        Text(
-                          _role(cast[i].role),
-                          style: DaylightType.body6.copyWith(
-                            color: DaylightColors.ink2,
-                          ),
-                        ),
-                        const SizedBox(height: DaylightSpace.s4),
-                        Tag(
-                          label: OnboardingCopy.castFirstMet(
-                            _firstMet(cast[i]),
-                          ),
-                          tone: TagTone.floor(DaylightFloors.all[i]),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          Entrance(
-            index: 3 + cast.length,
-            child: Semantics(
-              label:
-                  '${CastPeople.sam.name}, ${OnboardingCopy.samRole}. '
-                  '${OnboardingCopy.samLine}',
-              excludeSemantics: true,
-              child: row(
-                person: CastPeople.sam,
-                arch: DaylightColors.honey,
-                face: DaylightColors.dusk,
-                edge: DaylightColors.ink,
-                text: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      CastPeople.sam.name,
-                      style: DaylightType.heading6.copyWith(
-                        color: DaylightColors.raised,
-                      ),
-                    ),
-                    Text(
-                      OnboardingCopy.samRole,
-                      style: DaylightType.body6.copyWith(
-                        color: DaylightColors.sky,
-                      ),
-                    ),
-                    const SizedBox(height: DaylightSpace.s4),
-                    Text(
-                      OnboardingCopy.samLine,
-                      style: DaylightType.caption3.copyWith(
-                        color: DaylightColors.honey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
