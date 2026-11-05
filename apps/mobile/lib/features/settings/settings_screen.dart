@@ -9,9 +9,10 @@ import '../../ui/daylight/daylight_kit.dart';
 import '../tips/tips.dart';
 import 'account/save_progress_card.dart';
 import 'audio/audio_settings_section.dart';
+import 'leaderboard_visibility_section.dart';
 
 /// Settings (brief 20; Daylight in brief 46), from the tower's "You" tab: "Save your progress"
-/// (FR-3), sound and reminders on
+/// (FR-3), sound, reminders and "Show me on the leaderboard" on
 /// white cards over the paper, under a top bar with the way back. The theme picker is gone (one
 /// considered look). The system back button also returns to the tower (the route is the
 /// tower's child).
@@ -69,8 +70,15 @@ class SettingsScreen extends ConsumerWidget {
                         child: DaylightPanel(child: ReminderSettingsRow()),
                       ),
                       const SizedBox(height: DaylightSpace.s24),
-                      Entrance(
+                      const Entrance(
                         index: 3,
+                        child: DaylightPanel(
+                          child: LeaderboardVisibilitySection(),
+                        ),
+                      ),
+                      const SizedBox(height: DaylightSpace.s24),
+                      Entrance(
+                        index: 4,
                         child: DaylightPanel(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,

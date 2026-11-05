@@ -53,6 +53,7 @@ class TowerScreen extends ConsumerStatefulWidget {
   static const String towerTab = 'Tower';
   static const String recallTab = 'Recall';
   static const String progress = 'Skills';
+  static const String leaderboardTab = 'Leaderboard';
   static const String settingsTab = 'You';
   static const String towerTitle = 'Northstar tower';
 
@@ -414,6 +415,8 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
       case 2:
         context.go(Routes.progress);
       case 3:
+        context.go(Routes.leaderboard);
+      case 4:
         context.go(Routes.settings);
     }
   }
@@ -498,6 +501,10 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
                     icon: PhosphorRegular.medal,
                     label: TowerScreen.progress,
                     anchor: _skillsTab,
+                  ),
+                  const TabItem(
+                    icon: PhosphorRegular.trophy,
+                    label: TowerScreen.leaderboardTab,
                   ),
                   const TabItem(
                     icon: PhosphorRegular.userCircle,
