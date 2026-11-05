@@ -61,6 +61,17 @@ abstract interface class Backend {
   /// Every attempt of the signed-in player, oldest first (the restore on a fresh install).
   Future<List<RemoteAttempt>> fetchAttempts();
 
+  /// Writes the leaderboard's numbers (issue 72) to the signed-in player's own profile row
+  /// (creating the row if it isn't there yet), and nothing else.
+  Future<void> upsertLeaderboardReport(RemoteLeaderboardReport report);
+
+  /// The shared board (`public.leaderboard()`): the top [limit] of [scope], best first, and the
+  /// caller's own row wherever it ranks.
+  Future<List<RemoteLeaderboardRow>> fetchLeaderboard(
+    LeaderboardScope scope, {
+    int limit = leaderboardSize,
+  });
+
   /// The signed-in player's profile, or null if they've never synced one.
   Future<RemoteProfile?> fetchProfile();
 

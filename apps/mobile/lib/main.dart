@@ -10,12 +10,14 @@ import 'core/audio/audio_providers.dart';
 import 'core/audio/game_sounds.dart';
 import 'core/db/app_database.dart';
 import 'core/env/env.dart';
+import 'core/leaderboard/leaderboard_report.dart';
 import 'core/logging/log.dart';
 import 'core/notifications/reminders.dart';
 import 'core/profile/drift_profile_repository.dart';
 import 'core/profile/profile_repository.dart';
 import 'core/progress/drift_progress_repository.dart';
 import 'core/progress/progress_repository.dart';
+import 'features/leaderboard/leaderboard_controller.dart';
 import 'features/settings/account/save_progress_controller.dart';
 
 void main() {
@@ -60,6 +62,12 @@ void main() {
           signal: ref.watch(outboxSignalProvider),
         ),
       ),
+      leaderboardReportStoreProvider.overrideWith(
+        (ref) => DriftLeaderboardReportStore(
+          db,
+          signal: ref.watch(outboxSignalProvider),
+        ),
+      ),
       gameSoundsProvider.overrideWith(
         (ref) => ref.watch(audioGameSoundsProvider),
       ),
@@ -92,6 +100,8 @@ void startBackendAfterFirstFrame(ProviderContainer container) {
 /// and sends again whenever the app comes back to the foreground (the usual "reconnected").
 void startSync(ProviderContainer container) {
   container.listen(syncWorkerProvider, (_, _) {});
+  // The leaderboard's numbers follow progression into the outbox (issue 72).
+  container.listen(leaderboardReporterProvider, (_, _) {});
   AppLifecycleListener(
     onResume: () => unawaited(container.read(syncWorkerProvider)?.flush()),
   );

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import '../backend/backend.dart';
 import '../db/app_database.dart';
 import '../db/ids.dart';
+import '../leaderboard/leaderboard_report.dart';
 import '../profile/drift_profile_repository.dart';
 import '../progress/drift_progress_repository.dart';
 import 'outbox.dart';
@@ -83,8 +84,14 @@ Future<bool> pullAccountMerge(AppDatabase db, Backend backend) async {
     }
     if (profile != null) {
       await DriftProfileRepository.write(db, playerProfile(profile));
+      await restoreLeaderboardVisibility(db, profile);
     } else if (await DriftProfileRepository.read(db) != null) {
       await Outbox(db).add(OutboxKind.profile, Outbox.profileRef);
+    }
+    // The device's leaderboard numbers go to the account it now is (they're recomputed from the
+    // union of attempts as soon as the app re-reads them).
+    if (await DriftLeaderboardReportStore.read(db) != null) {
+      await Outbox(db).add(OutboxKind.leaderboard, Outbox.leaderboardRef);
     }
     await db.customStatement('delete from meta where key = ?', [
       accountMergeKey,

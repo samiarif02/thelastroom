@@ -22,6 +22,8 @@ NAMES = sorted({
     'arrow-left', 'arrow-up', 'bell', 'book-open', 'caret-right', 'chat-circle', 'clock',
     'flag', 'gear-six', 'hourglass', 'microphone-slash', 'moon', 'notebook', 'sparkle',
     'speaker-high', 'target', 'trophy', 'warning-circle', 'waveform', 'wifi-slash',
+    # The leaderboard (issue 72).
+    'crown-simple', 'fire', 'eye-slash',
 })
 
 

@@ -11,11 +11,16 @@ class ProgressionRecord {
   const ProgressionRecord({
     this.recallXp = 0,
     this.recallDays = const {},
+    this.recallXpByUtcDay = const {},
     this.celebrated = const {},
     this.interviewDate,
   });
 
   final int recallXp;
+
+  /// The Recall Room's XP by the UTC day it was earned (issue 72: the leaderboard's week is a
+  /// UTC week). Kept from this version on; rounds played before count in [recallXp] only.
+  final Map<CalendarDay, int> recallXpByUtcDay;
   final Set<CalendarDay> recallDays;
   final Set<Skill> celebrated;
   final CalendarDay? interviewDate;
@@ -25,11 +30,13 @@ class ProgressionRecord {
   ProgressionRecord copyWith({
     int? recallXp,
     Set<CalendarDay>? recallDays,
+    Map<CalendarDay, int>? recallXpByUtcDay,
     Set<Skill>? celebrated,
     CalendarDay? Function()? interviewDate,
   }) => ProgressionRecord(
     recallXp: recallXp ?? this.recallXp,
     recallDays: recallDays ?? this.recallDays,
+    recallXpByUtcDay: recallXpByUtcDay ?? this.recallXpByUtcDay,
     celebrated: celebrated ?? this.celebrated,
     interviewDate: interviewDate == null ? this.interviewDate : interviewDate(),
   );
@@ -38,6 +45,9 @@ class ProgressionRecord {
     'v': _version,
     'recall_xp': recallXp,
     'recall_days': [for (final d in recallDays) d.toString()]..sort(),
+    'recall_xp_by_utc_day': {
+      for (final e in recallXpByUtcDay.entries) e.key.toString(): e.value,
+    },
     'celebrated': [for (final s in celebrated) s.wireName]..sort(),
     'interview_date': interviewDate?.toString(),
   };
@@ -50,10 +60,23 @@ class ProgressionRecord {
       'recall_days': final List<Object?> days,
       'celebrated': final List<Object?> celebrated,
     }) {
-      final date = (json as Map<String, Object?>)['interview_date'];
+      final map = json as Map<String, Object?>;
+      final date = map['interview_date'];
+      // Optional: records saved before issue 72 have none.
+      final byDay = switch (map['recall_xp_by_utc_day']) {
+        final Map<String, Object?> m => m,
+        _ => const <String, Object?>{},
+      };
       return ProgressionRecord(
         recallXp: xp,
         recallDays: {for (final d in days) _day(d)},
+        recallXpByUtcDay: {
+          for (final e in byDay.entries)
+            _day(e.key): switch (e.value) {
+              final int n => n,
+              _ => throw FormatException('not XP', e.value),
+            },
+        },
         celebrated: {
           for (final s in celebrated)
             Skill.values.firstWhere(

@@ -10,6 +10,7 @@ import 'catalog_backdrops.dart';
 import 'catalog_entry.dart';
 import 'daylight_entries.dart';
 import 'file_entries.dart';
+import 'leaderboard_entries.dart';
 import 'sample_mission.dart';
 import 'vivid_entries.dart';
 
@@ -20,6 +21,7 @@ abstract final class CatalogEntries {
   static final List<CatalogEntry> all = [
     CastEntries.cast,
     ...DaylightEntries.all,
+    LeaderboardEntries.board,
     FileEntries.file,
     _title,
     _scene,

@@ -135,11 +135,14 @@ class FloatingTabBar extends StatelessWidget {
                     ),
                 ],
               ),
-              Text(
-                item.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: DaylightType.caption4.copyWith(color: ink),
+              // A long label ("Leaderboard" in five tabs) shrinks to fit rather than being cut.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  item.label,
+                  maxLines: 1,
+                  style: DaylightType.caption4.copyWith(color: ink),
+                ),
               ),
             ],
           ),

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../core/audio/dev/sound_board_routes.dart';
 import '../features/dev_catalog/dev_catalog_routes.dart';
 import '../features/intro/character_screen.dart';
+import '../features/leaderboard/leaderboard_screen.dart';
 import '../features/mission/mission_screen.dart';
 import '../features/onboarding/home_gate.dart';
 import '../features/onboarding/onboarding_screen.dart';
@@ -54,6 +55,9 @@ abstract final class Routes {
   /// The Recall Room (brief 21).
   static const String recall = '$_towerPath/$_recall';
 
+  /// The leaderboard (issue 72), a tab.
+  static const String leaderboard = '$_towerPath/$_leaderboard';
+
   /// Floor cleared (brief 46): the reward, the first time a floor's last room is finished.
   static String floorCleared(int floor) => '$_towerPath/$_floor/$floor';
 
@@ -67,6 +71,7 @@ abstract final class Routes {
   static const String _character = 'character';
   static const String _mission = 'mission';
   static const String _recall = 'recall';
+  static const String _leaderboard = 'leaderboard';
   static const String _floor = 'floor';
   static const String _chapters = 'chapters';
 }
@@ -168,6 +173,15 @@ List<RouteBase> appRoutes({bool devRoutes = devRoutesEnabled}) => [
         pageBuilder: (context, state) => daylightPage(
           state,
           const RecallScreen(),
+          DaylightTransition.through,
+        ),
+      ),
+      GoRoute(
+        path: Routes._leaderboard,
+        // A tab (Leaderboard): fade-through.
+        pageBuilder: (context, state) => daylightPage(
+          state,
+          const LeaderboardScreen(),
           DaylightTransition.through,
         ),
       ),

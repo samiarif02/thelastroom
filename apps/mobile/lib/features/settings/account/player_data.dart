@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/db/app_database.dart';
 import '../../../core/profile/profile_repository.dart';
 import '../../debrief/ai_score_store.dart';
+import '../../leaderboard/leaderboard_board.dart';
 import '../../mission/mission_resume.dart';
 import '../../progression/first_day.dart';
 import '../../progression/progression_store.dart';
@@ -18,7 +19,8 @@ import '../../tower/welcome_back.dart';
 /// - the database: attempts, the profile, the outbox, the restore and merge flags;
 /// - the Recall Room's schedule, the progression record (XP from recall rounds, celebrated
 ///   skills, the interview date), the first-day moment, the last tower visit, the tips seen;
-/// - the saved AI verdicts, the left-mission slots, and the old pre-database profile keys.
+/// - the saved AI verdicts, the left-mission slots, the old pre-database profile keys, and the
+///   last leaderboard boards seen (and the leaderboard report, which lives in `meta`).
 ///
 /// What stays is the device's, not the player's: sound on/off and volumes, reminders on/off and
 /// whether the permission was asked, and the backend's own session storage (signed out already).
@@ -43,6 +45,7 @@ abstract final class PlayerData {
   static const List<String> asyncPrefixes = [
     LocalProfileRepository.prefix,
     LocalResumeStore.prefix,
+    SharedPreferencesLeaderboardCache.prefix,
   ];
 
   /// Whether [key] holds player data, by [exact] keys or [starts] prefixes.

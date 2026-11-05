@@ -108,13 +108,17 @@ AttemptXp attemptXp(PlayedMission attempt, {required bool firstClear}) =>
 /// Total XP from every attempt, in the order they were played (each [attemptXp]: the room and
 /// its reasons), plus [recallRoundXp] (the sum of [recallXp] over the rounds played). Every term
 /// is zero or more, so playing more never lowers it.
-int totalXp(List<PlayedMission> attempts, {int recallRoundXp = 0}) {
+int totalXp(List<PlayedMission> attempts, {int recallRoundXp = 0}) =>
+    attemptXps(attempts).fold(recallRoundXp, (sum, xp) => sum + xp.total);
+
+/// What each of [attempts] earned, in the order they were played: [attemptXp], with the first
+/// clear of each mission counted once. The leaderboard dates each one to sum a week.
+List<AttemptXp> attemptXps(List<PlayedMission> attempts) {
   final cleared = <String>{};
-  var xp = recallRoundXp;
-  for (final a in attempts) {
-    xp += attemptXp(a, firstClear: cleared.add(a.missionId)).total;
-  }
-  return xp;
+  return [
+    for (final a in attempts)
+      attemptXp(a, firstClear: cleared.add(a.missionId)),
+  ];
 }
 
 /// What the last of [attempts] earned (the debrief's "+N", and its breakdown), or

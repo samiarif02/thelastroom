@@ -63,6 +63,31 @@ class FakeBackend implements Backend {
     profile = p;
   }
 
+  /// The leaderboard numbers on the player's row (issue 72), as last sent.
+  RemoteLeaderboardReport? leaderboardReport;
+  int leaderboardUpserts = 0;
+
+  @override
+  Future<void> upsertLeaderboardReport(RemoteLeaderboardReport report) async {
+    _network();
+    leaderboardUpserts++;
+    leaderboardReport = report;
+  }
+
+  /// What `public.leaderboard()` answers, by scope.
+  final Map<LeaderboardScope, List<RemoteLeaderboardRow>> boards = {};
+  final List<LeaderboardScope> boardFetches = [];
+
+  @override
+  Future<List<RemoteLeaderboardRow>> fetchLeaderboard(
+    LeaderboardScope scope, {
+    int limit = leaderboardSize,
+  }) async {
+    _network();
+    boardFetches.add(scope);
+    return [...?boards[scope]];
+  }
+
   @override
   Future<List<RemoteAttempt>> fetchAttempts() async {
     _network();

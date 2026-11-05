@@ -15,6 +15,10 @@ enum OutboxKind {
 
   /// The profile's current state (one row at most).
   profile,
+
+  /// The leaderboard's numbers and visibility (issue 72; one row at most). A report the device
+  /// recomputes, not progress: "Sign out" doesn't wait for it ([Outbox.pending]).
+  leaderboard,
 }
 
 /// One thing still to send.
@@ -45,6 +49,7 @@ class Outbox {
   final AppDatabase _db;
 
   static const String profileRef = 'profile';
+  static const String leaderboardRef = 'leaderboard';
 
   /// The first retry waits this long; each failure doubles it, up to [maxBackoff].
   static const Duration firstBackoff = Duration(seconds: 5);
@@ -99,7 +104,9 @@ class Outbox {
     return row.read<int>('n');
   }
 
-  /// What still waits, by kind ("Sign out" refuses while anything does).
+  /// What still waits, by kind ("Sign out" refuses while anything does). The leaderboard report
+  /// isn't counted: it's recomputed from the progress on any device, so nothing is lost if it
+  /// never lands.
   Future<PendingUploads> pending() async {
     final rows = await _db
         .customSelect('select kind, count(*) as n from outbox group by kind')
@@ -108,10 +115,13 @@ class Outbox {
     var other = 0;
     for (final r in rows) {
       final n = r.read<int>('n');
-      if (_kind(r.read<String>('kind')) == OutboxKind.attempt) {
-        rooms += n;
-      } else {
-        other += n;
+      switch (_kind(r.read<String>('kind'))) {
+        case OutboxKind.attempt:
+          rooms += n;
+        case OutboxKind.leaderboard:
+          break;
+        case OutboxKind.profile || null:
+          other += n;
       }
     }
     return (rooms: rooms, other: other);

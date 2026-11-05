@@ -273,6 +273,64 @@ void main() {
       },
     );
   });
+
+  group('the leaderboard numbers (issue 72)', () {
+    test('this UTC week\'s XP: rooms since Monday and Recall rounds', () async {
+      // Last Sunday's room is last week; Monday's and today's count.
+      await progress.recordAttempt(
+        attempt(missionTheOpportunity, 40, at: DateTime.utc(2026, 11, 1, 12)),
+      );
+      await progress.recordAttempt(
+        attempt(
+          missionTheOpportunity,
+          60,
+          number: 2,
+          at: DateTime.utc(2026, 11, 2, 8),
+        ),
+      );
+      final c = container();
+      await c.read(progressionActionsProvider).recordRecallRound(const [
+        RecallVerdict.known,
+        RecallVerdict.missed,
+      ]);
+      final p = await read(c);
+      // The second play: 20 + 30, no first clear; the round: 5 + 1.
+      expect(p.weekXp, 50 + 6);
+      expect(p.weekStartUtc, CalendarDay(2026, 11, 2));
+      expect(p.xp, greaterThan(p.weekXp));
+    });
+
+    test('weeks in a row: the ring closed last week and this week', () async {
+      for (final day in [
+        DateTime(2026, 10, 26, 9),
+        DateTime(2026, 10, 27, 9),
+        DateTime(2026, 10, 28, 9),
+        DateTime(2026, 11, 2, 9),
+        DateTime(2026, 11, 3, 9),
+        DateTime(2026, 11, 4, 9),
+      ]) {
+        await progress.recordAttempt(
+          attempt(missionTheOpportunity, 50, at: day),
+        );
+      }
+      final p = await read(container());
+      expect(p.weeksInARow, 2);
+    });
+
+    test('a record saved before issue 72 still reads (no recall by day)', () {
+      final old = ProgressionRecord.fromJson({
+        'v': 1,
+        'recall_xp': 12,
+        'recall_days': ['2026-11-01'],
+        'celebrated': <String>[],
+      });
+      expect(old.recallXpByUtcDay, isEmpty);
+      final now = old.copyWith(recallXpByUtcDay: {CalendarDay(2026, 11, 4): 6});
+      expect(ProgressionRecord.fromJson(now.toJson()).recallXpByUtcDay, {
+        CalendarDay(2026, 11, 4): 6,
+      });
+    });
+  });
 }
 
 class _Corrupt implements ProgressionStore {

@@ -30,6 +30,7 @@ missing**.
 | XP for each sound reason on the feedback sheet | Built | [#61](https://github.com/samiarif02/thelastroom/pull/61): sound +10, close +5, guess 0; +5 per voice point; derived from stored picks, so a resume can't award twice | |
 | A shareable floor card ("Share your floor card") | Built | [#62](https://github.com/samiarif02/thelastroom/pull/62): a 1080 × 1350 card through the system share sheet, on the floor-cleared screen and the Chapter 1 report; `floor_card_shared` | |
 | The resume bug from the phone check (BUG-2) | Fixed | [#63](https://github.com/samiarif02/thelastroom/pull/63): a tip's spotlight passed the tap to the reason card underneath; card tips now only close | |
+| A leaderboard: leagues, a weekly board, streaks (issue 72) | Built | Leaderboard tab: league banner (Bronze 0 to Diamond 3,500+, `packages/engine` `leagueFor`), This week (UTC Monday to Sunday) and All time, podium, ranked list, your pinned row, "Show me on the leaderboard" in Settings; `supabase/migrations/20261104120000_leaderboard.sql` (`public.leaderboard()`, security definer, no ids or emails) with 22 pgTAP tests | **XP is client-reported**: the device sends its engine totals and the server ranks them as given (check constraints keep them sane, not true). A server-side recount from `mission_attempts` is a later step. Needs the migration on the hosted project |
 | The APK release | Partly | The Release APK workflow and a draft release (#29) | Published only when the owner asks |
 
 ## Summary (2026-11-01, updated for wave 6)
