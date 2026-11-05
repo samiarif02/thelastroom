@@ -33,8 +33,8 @@ class BoardNotice extends StatelessWidget {
       ? 'Be the first on the board this week'
       : 'Be the first on the board';
   static const String emptyLine =
-      'Play a room: every answer earns XP, and this week’s board starts again on Monday '
-      '(00:00 UTC).';
+      'Play a room online: once the recruiter scores it, it counts here. This week’s board '
+      'starts again on Monday (00:00 UTC).';
   static const String play = 'Play a room';
 
   static const String noBackendTitle = 'The board lives on the tower’s server';
@@ -44,8 +44,8 @@ class BoardNotice extends StatelessWidget {
 
   static const String offlineTitle = 'Can’t reach the board right now';
   static const String offlineLine =
-      'You’re offline, or the server is busy. Your XP is saved on this phone and joins '
-      'the board when you’re back.';
+      'You’re offline, or the server is busy. Your XP is saved on this phone; the board '
+      'counts the rooms the recruiter scored online.';
   static const String retry = 'Try again';
 
   @override

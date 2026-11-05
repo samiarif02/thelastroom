@@ -17,8 +17,9 @@ void main() {
   final sql = [for (final f in files) f.readAsStringSync()].join('\n');
 
   /// The columns a client holds `<privilege>` on for `public.<table>`: every column grant since
-  /// the last table-wide revoke. Postgres adds column grants up, so a later migration's grant
-  /// (brief 30's `beat_plays`) extends the earlier list rather than replacing it.
+  /// the last table-wide revoke, less any column revoked after (issue 74's XP columns). Postgres
+  /// adds column grants up, so a later migration's grant (brief 30's `beat_plays`) extends the
+  /// earlier list rather than replacing it.
   Set<String> granted(String privilege, String table) {
     final revokes = RegExp(
       'revoke [a-z, ]*$privilege[a-z, ]* on table public\\.$table\\b',
@@ -28,10 +29,16 @@ void main() {
       'grant $privilege \\(([^)]*)\\)\\s*on table public\\.$table\\b',
     ).allMatches(sql.substring(since)).toList();
     expect(grants, isNotEmpty, reason: '$privilege grant on $table');
+    final revoked = {
+      for (final r in RegExp(
+        'revoke $privilege \\(([^)]*)\\)\\s*on table public\\.$table\\b',
+      ).allMatches(sql.substring(since)))
+        for (final c in r.group(1)!.split(',')) c.trim(),
+    };
     return {
       for (final g in grants)
         for (final c in g.group(1)!.split(',')) c.trim(),
-    };
+    }.difference(revoked);
   }
 
   final attempt = RemoteAttempt(
@@ -99,13 +106,7 @@ void main() {
     expect(granted('update', 'profiles'), containsAll(keys));
   });
 
-  const report = RemoteLeaderboardReport(
-    visible: true,
-    totalXp: 940,
-    weekXp: 120,
-    weekStart: '2026-11-02',
-    streakWeeks: 2,
-  );
+  const report = RemoteLeaderboardReport(visible: true);
 
   test('the leaderboard report sends only its own granted columns', () {
     final keys = report.toRow().keys.toSet();
@@ -114,6 +115,16 @@ void main() {
     expect(keys, isNot(contains('total_xp_at')));
     expect(keys, isNot(contains('week_xp_at')));
   });
+
+  test(
+    'no client may write the board\'s XP (issue 74): the server counts it',
+    () {
+      const xp = {'total_xp', 'week_xp', 'week_start', 'streak_weeks'};
+      expect(granted('insert', 'profiles').intersection(xp), isEmpty);
+      expect(granted('update', 'profiles').intersection(xp), isEmpty);
+      expect(report.toRow().keys.toSet().intersection(xp), isEmpty);
+    },
+  );
 
   test('the profile row leaves the leaderboard columns to the report', () {
     // A project without the leaderboard migration still takes the profile.

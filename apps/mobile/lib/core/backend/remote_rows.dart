@@ -158,9 +158,9 @@ class RemoteProfile {
   final bool onboarded;
   final DateTime? chapter2WaitlistAt;
 
-  /// "Show me on the leaderboard" (issue 72), read on a restore. Not in [toRow]: it travels with
-  /// the leaderboard numbers ([RemoteLeaderboardReport]), so a project without that migration
-  /// yet still takes the profile.
+  /// "Show me on the leaderboard" (issue 72), read on a restore. Not in [toRow]: it travels on
+  /// its own ([RemoteLeaderboardReport]), so a project without that migration yet still takes
+  /// the profile.
   final bool leaderboardVisible;
 
   Map<String, Object?> toRow() => {
@@ -176,36 +176,17 @@ class RemoteProfile {
   };
 }
 
-/// The leaderboard's numbers on the player's own `profiles` row (issue 72), as the device's
-/// engine computed them: the same XP "Your file" shows. Sent on their own (an upsert of these
-/// columns only), so the profile's sync never depends on them. Client-reported: the board
-/// trusts the device (docs/completion.md).
+/// What the device still sends to the leaderboard: "Show me on the leaderboard", on the player's
+/// own `profiles` row. Sent on its own (an upsert of this column only), so the profile's sync
+/// never depends on it. Never the XP (issue 74): the board's numbers are the server's, recounted
+/// from the AI recruiter's verdicts (supabase/migrations/20261105120000_verified_leaderboard.sql),
+/// and a client may not write them.
 class RemoteLeaderboardReport {
-  const RemoteLeaderboardReport({
-    required this.visible,
-    required this.totalXp,
-    required this.weekXp,
-    required this.weekStart,
-    required this.streakWeeks,
-  });
+  const RemoteLeaderboardReport({required this.visible});
 
   final bool visible;
-  final int totalXp;
 
-  /// XP in the UTC week starting [weekStart].
-  final int weekXp;
-
-  /// That week's Monday, `yyyy-mm-dd`.
-  final String weekStart;
-  final int streakWeeks;
-
-  Map<String, Object?> toRow() => {
-    'leaderboard_visible': visible,
-    'total_xp': totalXp,
-    'week_xp': weekXp,
-    'week_start': weekStart,
-    'streak_weeks': streakWeeks,
-  };
+  Map<String, Object?> toRow() => {'leaderboard_visible': visible};
 }
 
 /// How many rows the board asks for (the top 50, and the caller's own row wherever it is).
