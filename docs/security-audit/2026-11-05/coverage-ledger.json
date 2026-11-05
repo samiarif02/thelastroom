@@ -1,0 +1,1678 @@
+[
+  {
+    "coverage_id": "apps%2Fmobile%23local%20database%2C%20logs%2C%20analytics%20and%20sign-out::apps%2Fmobile%2Flib%2Fcore%2Flogging%2Fredact.dart%23redaction%20%2B%20sign-out%20clearing::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Cryptography%20and%20secrets",
+    "canonical_refs": {
+      "surface": "apps/mobile#local database, logs, analytics and sign-out",
+      "boundary": "apps/mobile/lib/core/logging/redact.dart#redaction + sign-out clearing",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets"
+    },
+    "surface": "Mobile local state, logging and analytics sinks",
+    "boundary": "Log redaction, analytics PII rules, sign-out data clearing",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Cryptography and secrets",
+    "starting_paths": [
+      "apps/mobile/lib/core/logging",
+      "apps/mobile/lib/core/analytics",
+      "apps/mobile/lib/core/db",
+      "apps/mobile/lib/core/env",
+      "apps/mobile/lib/features/settings"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "selected_companion_blocks": [
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Account switch, logout, and device restore leakage",
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Credential-store and local-secret boundary mismatch",
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Universal moves",
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Analytics, logs, traces, and diagnostics as alternate readers",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "h3-client",
+    "reviewed_paths": [
+      "apps/mobile/lib/core/logging/redact.dart",
+      "apps/mobile/lib/core/logging/log.dart",
+      "apps/mobile/lib/core/analytics/analytics.dart",
+      "apps/mobile/lib/core/analytics/event_value.dart",
+      "apps/mobile/lib/core/analytics/analytics_event.dart",
+      "apps/mobile/lib/core/env/env.dart",
+      "apps/mobile/env/dev.example.json",
+      "apps/mobile/lib/features/settings/account/save_progress_controller.dart",
+      "apps/mobile/lib/features/settings/account/player_data.dart",
+      "apps/mobile/lib/core/db/app_database.dart",
+      "apps/mobile/lib/core/db/ids.dart"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "apps/mobile/lib/core/logging/redact.dart",
+          "apps/mobile/lib/core/logging/log.dart"
+        ],
+        "invariant": "Credentials, emails and answer/draft text never reach a log sink with a broader reader than the device owner.",
+        "method": "source",
+        "result": "Log._emit (log.dart:94-115) redacts message and fields (key regex redact.dart:9-12 covers token/session/email/answer/draft; value regexes :14-23 cover JWT, bearer, email, Supabase secret). The only sink is developerSink -> dart:developer (log.dart:40-48); no remote sink (Sentry/PostHog) is wired anywhere in lib (only Env fields exist, env.dart:15-40). All call sites log runtimeType or enum codes, never rows. No lower-trust reader of logs exists in source. Note: developerSink forwards the raw error object (log.dart:45) unredacted to developer.log, local-only (hardening).",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "apps/mobile/lib/core/analytics/analytics.dart",
+          "apps/mobile/lib/core/analytics/event_value.dart",
+          "apps/mobile/lib/core/analytics/analytics_event.dart",
+          "apps/mobile/lib/core/env/env.dart",
+          "apps/mobile/env/dev.example.json"
+        ],
+        "invariant": "Analytics properties cannot carry PII or free text; no secret is compiled into the app config.",
+        "method": "source",
+        "result": "EventValue (event_value.dart:10-33) is a sealed type with no String wrapper (only content ids, enum names, numbers, flags), so free text cannot be a property. LogAnalytics only writes to the local log (analytics.dart:15-26). Env reads only public values from dart-defines; dev.example.json is empty placeholders; no hardcoded key in lib.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "apps/mobile/lib/features/settings/account/save_progress_controller.dart",
+          "apps/mobile/lib/features/settings/account/player_data.dart",
+          "apps/mobile/lib/core/db/app_database.dart"
+        ],
+        "invariant": "After sign-out, the previous player's local data (DB, prefs, cached AI scores, leaderboard cache, resume slots) does not surface under the next guest.",
+        "method": "source",
+        "result": "signOut (save_progress_controller.dart:391-445) backs up, signs out (server failure tolerated only for AuthException; other errors abort before wipe), drops the session provider before wiping, then PlayerData.clear deletes all four drift tables (app_database.dart:118-130) and every player SharedPreferences/SharedPreferencesAsync key/prefix (player_data.dart:30-49). Cross-checked against every key/prefix declared in lib (recall.schedule, progression.record, firstDay.shown, tower.lastVisit, tips.seen., tower.tourSeen, ai_scores.latest, profile., mission_resume., leaderboard.): all covered; only audio/reminder device settings remain, by design. A wipe exception is logged but sign-out still proceeds (save_progress_controller.dart:425-430); that is a same-device failure mode with no identified attacker. Supabase session storage is cleared by gotrue signOut.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "apps/mobile/lib/core/db/ids.dart"
+        ],
+        "invariant": "Security-relevant identifiers use a CSPRNG.",
+        "method": "source",
+        "result": "newUuid takes Random.secure in the app (account_merge.dart:39, ids.dart:3-5). Other math.Random() uses (typing ticker, mission shuffle) are not security values. No custom crypto in the client.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "_hunter": "h3-client",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [
+      "apps/mobile/lib/core/logging/log.dart:45 forwards the raw, unredacted error object (and stack) to developer.log. Only fields/message/toJson error are redacted. It is local-only today, but would leak if a remote sink (Sentry, planned) reused LogRecord.error.",
+      "AndroidManifest.xml <application> sets no android:allowBackup/dataExtractionRules, so the drift DB (attempts incl. drafts) and the Supabase session in SharedPreferences are included in the user's own cloud backup / device transfer. Same principal, so not a finding; consider excluding the session store.",
+      "PlayerData.clear uses SQL DELETE without VACUUM/secure_delete, so freed SQLite pages may retain the previous player's drafts on disk until overwritten (same-device forensic residue only).",
+      "release-apk.yml (contents: write) uses mutable action tags (actions/checkout@v4, setup-java@v4, subosito/flutter-action@v2, upload-artifact@v4) and flutter-action cache:true. Pin actions to commit SHAs. A dispatch can also --clobber assets on an existing (even published) release for any tag and --target any branch SHA; both are writer-only.",
+      "The web static export defines no CSP, X-Frame-Options or Referrer-Policy (next.config.ts, no vercel.json). There is no state-changing action, so this is hardening only. /verified strips code/error from the URL via replaceState, but a ?code= from the PKCE email-change redirect is still sent to Vercel in the request line/logs (not exchangeable without the device's verifier)."
+    ],
+    "_hunter_uncovered": [],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "apps%2Fmobile%23thelastroom%3A%2F%2Fauth-callback%20deep%20link%20and%20email%20linking::apps%2Fmobile%2Flib%2Fcore%2Fbackend%2Fsupabase_backend.dart%23Supabase%20auth%20session%20%2B%20account_merge::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Chained%20vulnerabilities%20and%20trust%20boundaries",
+    "canonical_refs": {
+      "surface": "apps/mobile#thelastroom://auth-callback deep link and email linking",
+      "boundary": "apps/mobile/lib/core/backend/supabase_backend.dart#Supabase auth session + account_merge",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries"
+    },
+    "surface": "Mobile auth: anonymous guest, email link, deep-link callback, account merge",
+    "boundary": "Supabase auth session handling and device-to-account merge",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Chained vulnerabilities and trust boundaries",
+    "starting_paths": [
+      "apps/mobile/lib/core/backend",
+      "apps/mobile/lib/core/sync/account_merge.dart",
+      "apps/mobile/lib/features/settings/account",
+      "apps/mobile/android/app/src/main/AndroidManifest.xml",
+      "apps/mobile/ios/Runner/Info.plist",
+      "supabase/config.toml"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    "selected_companion_blocks": [
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Custom-scheme and deep-link ambiguity",
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#App and account handoff confusion",
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Universal moves",
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Validation rules",
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#Account linking and identity collision",
+      "WEB-PROTOCOL-AND-AUTH.md#OAuth/OIDC request and callback binding",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "h3-client",
+    "reviewed_paths": [
+      "apps/mobile/lib/core/backend/supabase_backend.dart",
+      "apps/mobile/android/app/src/main/AndroidManifest.xml",
+      "apps/mobile/ios/Runner/Info.plist",
+      "pubspec.lock",
+      "apps/mobile/lib/features/settings/account/save_progress_controller.dart",
+      "apps/mobile/lib/core/sync/account_merge.dart",
+      "apps/mobile/lib/core/sync/sync_worker.dart",
+      "apps/mobile/lib/core/backend/remote_rows.dart",
+      "apps/mobile/lib/main.dart",
+      "docs/status/67.md",
+      "supabase/config.toml",
+      "apps/mobile/lib/core/backend/guest_sign_in.dart"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "apps/mobile/lib/core/backend/supabase_backend.dart",
+          "apps/mobile/android/app/src/main/AndroidManifest.xml",
+          "apps/mobile/ios/Runner/Info.plist",
+          "pubspec.lock"
+        ],
+        "invariant": "A ?code= deep link can only complete a sign-in this device initiated (PKCE verifier binding).",
+        "method": "source",
+        "result": "Holds. Supabase.initialize (supabase_backend.dart:271-276) uses the default PKCE flow; pinned gotrue 2.27.3 (pubspec.lock:378-385) exchangeCodeForSession reads the locally stored code_verifier and fails when absent, so an intercepted or injected code from another app/account cannot be exchanged.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "apps/mobile/lib/core/backend/supabase_backend.dart",
+          "apps/mobile/lib/features/settings/account/save_progress_controller.dart",
+          "apps/mobile/lib/core/sync/account_merge.dart",
+          "apps/mobile/lib/core/sync/sync_worker.dart",
+          "apps/mobile/lib/core/backend/remote_rows.dart",
+          "apps/mobile/lib/main.dart",
+          "apps/mobile/android/app/src/main/AndroidManifest.xml",
+          "apps/mobile/ios/Runner/Info.plist",
+          "pubspec.lock",
+          "docs/status/67.md"
+        ],
+        "invariant": "An auth-callback deep link that the device did not initiate must not replace the session or trigger the account merge.",
+        "method": "source",
+        "result": "Fails in source. The exported thelastroom://auth-callback handler (AndroidManifest.xml:50, Info.plist:84) feeds supabase_flutter's detectSessionInUri with no predicate. In the pinned libraries, the default predicate accepts access_token in query or fragment, and gotrue getSessionFromUrl skips the PKCE requirement whenever access_token is present, validates it only with getUser, saves the session and emits signedIn. _onAuthState (supabase_backend.dart:294-307) turns a non-anonymous different-uid signedIn into AccountLinkSignedIn, and the app-lifetime listener (main.dart:93, save_progress_controller.dart:193, 364-366, 471-475) runs prepareAccountMerge, which queues every local attempt (account_merge.dart:61) and, if the account has no profile, the device profile (account_merge.dart:85-90), all uploaded under the injected session (sync_worker.dart:136-138). Recorded as candidate apps/mobile:supabase_flutter-detectSessionInUri-implicit-token-deeplink-session-injection; behaviour could not be executed (no sandbox).",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "apps/mobile/lib/core/backend/supabase_backend.dart",
+          "supabase/config.toml"
+        ],
+        "invariant": "Linking an email to a guest requires verified ownership of that email.",
+        "method": "source",
+        "result": "sendLinkEmail uses updateUser(email) with emailRedirectTo /verified (supabase_backend.dart:161-172); config.toml has enable_confirmations=true (:240) and double_confirm_changes=true (:234); linkedEmail (:61-67) treats an anonymous user as linked only after email_confirmed_at is set and new_email is empty. email_exists maps to emailTaken. Hosted settings are a deployment fact, but source-visible controls are correct.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "apps/mobile/lib/core/backend/guest_sign_in.dart",
+          "apps/mobile/lib/core/backend/supabase_backend.dart"
+        ],
+        "invariant": "Sign-out failure paths do not leave a usable session.",
+        "method": "source",
+        "result": "signOut (supabase_backend.dart:200-211) relies on gotrue dropping the local session before the server call; an AuthException is tolerated. Refresh tokens stay valid server-side until expiry/rotation (config.toml:175-184). This affects only the same principal; no lower-trust holder of the token was identified.",
+        "artifact": null
+      },
+      {
+        "agent_id": "v4-deeplink-session",
+        "reviewed_paths": [
+          "apps/mobile/android/app/src/main/AndroidManifest.xml",
+          "apps/mobile/lib/core/backend/supabase_backend.dart",
+          "pubspec.lock",
+          "apps/mobile/lib/features/settings/account/save_progress_controller.dart",
+          "apps/mobile/lib/core/sync/account_merge.dart",
+          "apps/mobile/lib/core/sync/sync_worker.dart",
+          "docs/status/67.md",
+          "apps/mobile/lib/core/backend/remote_rows.dart",
+          "supabase/config.toml"
+        ],
+        "invariant": "Independent Phase 3/5 (merged, quick profile) verification of apps/mobile:supabase_flutter-detectSessionInUri-implicit-token-deeplink-session-injection",
+        "method": "source",
+        "result": "Verifier re-read every cited location and returned decision needs_validation; decisive behavioural check blocked: no OS-enforced sandbox and empty promotion allowlist, so no target code executed.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "apps/mobile:supabase_flutter-detectSessionInUri-implicit-token-deeplink-session-injection"
+    ],
+    "unresolved": [],
+    "_hunter": "h3-client",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [],
+    "_hunter_uncovered": [],
+    "_decisions": [
+      {
+        "fingerprint": "apps/mobile:supabase_flutter-detectSessionInUri-implicit-token-deeplink-session-injection",
+        "verdict": "needs_validation",
+        "verifier": "v4-deeplink-session"
+      }
+    ],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "repository%23committed%20files%2C%20CI%20workflows%20and%20dependency%20manifests::.github%2Fworkflows%2Fci.yml%23secret%20scanning%2C%20workflow%20permissions%20and%20release%20path::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Obvious%20things",
+    "canonical_refs": {
+      "surface": "repository#committed files, CI workflows and dependency manifests",
+      "boundary": ".github/workflows/ci.yml#secret scanning, workflow permissions and release path",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Obvious things"
+    },
+    "surface": "Repository contents, CI and release workflows",
+    "boundary": "Secret scanning, workflow permissions, dependency pinning",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Obvious things",
+    "starting_paths": [
+      ".github/workflows",
+      "scripts",
+      "apps/mobile/env",
+      "package.json",
+      "web/package.json",
+      "pubspec.lock",
+      ".gitignore"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Obvious things",
+    "selected_companion_blocks": [
+      "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Untrusted code in a privileged workflow",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Automation identity overreach",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Mutable and unbound build inputs",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Universal moves",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "h3-client",
+    "reviewed_paths": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/release-apk.yml",
+      ".gitignore",
+      ".env.example",
+      "apps/mobile/env/dev.example.json",
+      "scripts/check-commit-message.mjs",
+      "pubspec.lock",
+      "web/package.json"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          ".github/workflows/ci.yml"
+        ],
+        "invariant": "Untrusted PR code never runs with write tokens or secrets.",
+        "method": "source",
+        "result": "ci.yml triggers on pull_request (not pull_request_target) and workflow_dispatch with permissions contents: read (:3-14). No secrets are referenced. The only expression in a run line is github.base_ref (branch filter main), which a PR author cannot control.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          ".github/workflows/release-apk.yml"
+        ],
+        "invariant": "The contents:write release workflow cannot be triggered or steered by a lower-trust actor.",
+        "method": "source",
+        "result": "Triggers are workflow_dispatch and push of v* tags (:9-16), both requiring repository write access. The dispatch input reaches the shell only through the env var TAG and is always double-quoted (:30, :57-75), so there is no expression injection. It drafts a release and never publishes. Floating action tags (@v4/@v2) and the flutter cache are hardening notes; there is no lower-trust writer.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          ".gitignore",
+          ".env.example",
+          "apps/mobile/env/dev.example.json"
+        ],
+        "invariant": "No secret, key or env file is committed, and .gitignore covers secret files.",
+        "method": "source",
+        "result": "git ls-files shows only .env.example (empty values) and env/dev.example.json (empty values). .gitignore covers .env*, **/env/*.json, keystores, *.p8/*.p12, google-services. A grep of every tracked file for JWT, sk-ant-, sb_secret_, sb_publishable_, AIza, ghp_ and BEGIN-key patterns found only the redaction regexes in .claude/hooks/extract-log.py.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "scripts/check-commit-message.mjs",
+          "pubspec.lock",
+          "web/package.json"
+        ],
+        "invariant": "No dynamic code execution with attacker input; dependencies are locked.",
+        "method": "source",
+        "result": "The only shell interpolation is check-commit-message.mjs:104-106 (execSync with the --range argument). Its value comes from the CI invocation or the local hook, not from untrusted input. pubspec.lock pins sha256 for every package, and web has package-lock.json with next 16.4.4. No eval or new Function appears in app/web code. No security TODO/FIXME was found. No debug or admin endpoints exist (static site, two Edge Functions owned by peers).",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "_hunter": "h3-client",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [],
+    "_hunter_uncovered": [],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "supabase%2Fconfig.toml%23GoTrue%20%2Fauth%2Fv1%20endpoints%20reachable%20by%20the%20anon%20role%20%28signup%2C%20otp%2C%20verify%2C%20user%20email%20change%29::supabase%2Fconfig.toml%23%5Bauth%5D%20enable_signup%2C%20%5Bauth.email%5D%20otp_length%2Fotp_expiry%2Fenable_confirmations%2C%20%5Bauth.rate_limit%5D::profile%2Fquick%2Fall-in-scope-subsystems::WEB-PROTOCOL-AND-AUTH.md%23Account%20linking%20and%20identity%20collision",
+    "canonical_refs": {
+      "surface": "supabase/config.toml#GoTrue /auth/v1 endpoints reachable by the anon role (signup, otp, verify, user email change)",
+      "boundary": "supabase/config.toml#[auth] enable_signup, [auth.email] otp_length/otp_expiry/enable_confirmations, [auth.rate_limit]",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "WEB-PROTOCOL-AND-AUTH.md#Account linking and identity collision"
+    },
+    "surface": "GoTrue auth endpoints reachable without a session",
+    "boundary": "Hosted auth config: signup, OTP, confirmations, rate limits, redirect allowlist",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Account linking and identity collision",
+    "starting_paths": [
+      "supabase/config.toml",
+      "apps/mobile/lib/core/backend/supabase_backend.dart",
+      "apps/mobile/lib/features/settings/account/save_progress_controller.dart",
+      "apps/mobile/lib/core/backend/guest_sign_in.dart"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#Account linking and identity collision",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Enumeration and aggregate oracles",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Pre-authentication work imbalance",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Universal moves",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native code"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker or custom protocol"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "GoTrue path does not reach Gemini"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "No build or release input on this path"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "deferred",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "quick_profile_final_critic: critic-1: GoTrue as anon attacker surface (pre-account hijack via password signup, email-existence oracles, 6-digit OTP brute-force bound, email-send abuse, loopback redirect URLs) not reviewed; critic proposed ATTACK-CLASSES.md#Authentication, which is not an ordinary block, so mapped to the WEB-PROTOCOL-AND-AUTH.md companion class"
+    ],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "supabase%2Ffunctions%23POST%20score%20and%20score-voice%20request%20bodies::supabase%2Fmigrations%2F20261031130000_ai_scores.sql%23claim_ai_score%20daily_limit::profile%2Fquick%2Fall-in-scope-subsystems::RESOURCE-EXHAUSTION-AND-AVAILABILITY.md%23Quota-accounting%20scope%20and%20reset%20gaps",
+    "canonical_refs": {
+      "surface": "supabase/functions#POST score and score-voice request bodies",
+      "boundary": "supabase/migrations/20261031130000_ai_scores.sql#claim_ai_score daily_limit",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Quota-accounting scope and reset gaps"
+    },
+    "surface": "Edge Function request bodies and per-user quota",
+    "boundary": "Per-user per-UTC-day quota, payload limits, anonymous sign-in rate limit",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Quota-accounting scope and reset gaps",
+    "starting_paths": [
+      "supabase/functions",
+      "supabase/migrations/20261031130000_ai_scores.sql",
+      "supabase/config.toml",
+      "apps/mobile/lib/features/debrief"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Quota-accounting scope and reset gaps",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Unbounded buffering and cardinality",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Pre-authentication work imbalance",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Retry storm and fail-open amplification",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Universal moves",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "h2-edge",
+    "reviewed_paths": [
+      "supabase/migrations/20261031130000_ai_scores.sql",
+      "supabase/functions/score/handler.ts",
+      "supabase/functions/score-voice/handler.ts",
+      "supabase/functions/score/gemini.ts",
+      "supabase/functions/score-voice/gemini_voice.ts",
+      "supabase/functions/score-voice/voice.ts",
+      "apps/mobile/lib/features/debrief/ai_score.dart",
+      "apps/mobile/lib/features/voice/voice_scoring.dart",
+      "supabase/config.toml",
+      "apps/mobile/lib/core/backend/guest_sign_in.dart",
+      "docs/decisions/0006-ai-scoring.md",
+      "docs/ai-reliability-and-cost.md",
+      "supabase/functions/score/scoring.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h2-edge",
+        "reviewed_paths": [
+          "supabase/migrations/20261031130000_ai_scores.sql"
+        ],
+        "invariant": "claim_ai_score counts atomically per (uid, UTC day) with a server-held limit; no race, overflow or client-raisable limit",
+        "method": "source",
+        "result": "Single INSERT ... ON CONFLICT DO UPDATE ... WHERE used < 30 (lines 95-100) is atomic per row; limit is a constant in SQL (line 88); day comes from server now() in UTC (line 96); ai_score_usage has no write grant (lines 76-77). Within one uid the counter holds. The accounting dimension is the uid, which anonymous sign-in mints for free (config.toml 188, 213), so per-person spend is bounded only by the hosted anonymous sign-in rate limit.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h2-edge",
+        "reviewed_paths": [
+          "supabase/functions/score/handler.ts",
+          "supabase/functions/score-voice/handler.ts",
+          "supabase/functions/score/gemini.ts",
+          "supabase/functions/score-voice/gemini_voice.ts"
+        ],
+        "invariant": "one quota unit buys a bounded amount of Gemini work, weighted for cost",
+        "method": "source",
+        "result": "The quota is claimed once (score handler.ts:72, voice handler.ts:82) before Gemini, so failures still count. But scoreWithFallback / scoreVoiceWithFallback try up to 3 models per claim on any UpstreamError/OutputError including timeout (gemini.ts:153-159, gemini_voice.ts:121-129), and the voice path sends up to 2x4 MB audio per call (voice.ts:68) while costing the same single unit as a text score. A ~3x amplification per unit, bounded.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h2-edge",
+        "reviewed_paths": [
+          "supabase/functions/score/handler.ts",
+          "supabase/functions/score-voice/handler.ts",
+          "supabase/functions/score-voice/voice.ts"
+        ],
+        "invariant": "request bodies are size-capped before buffering and before caller identity is validated",
+        "method": "source",
+        "result": "score: handler.ts:63 calls req.json() with no size cap at all; per-field caps (scoring.ts:57-66) apply only after the whole body is buffered and parsed. score-voice: handler.ts:65 trusts content-length (absent header => 0 passes), then handler.ts:73 req.text() buffers the full body before the raw.length check at :74. Both happen after only a presence check of a Bearer string (handler.ts:47-59) and before the first JWT validation (PostgREST in claimQuota). Whether the platform gateway (verify_jwt, request-size limit) blocks this first is a deployment fact.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h2-edge",
+        "reviewed_paths": [
+          "apps/mobile/lib/features/debrief/ai_score.dart",
+          "apps/mobile/lib/features/voice/voice_scoring.dart"
+        ],
+        "invariant": "no client retry storm against the functions",
+        "method": "source",
+        "result": "The app makes one call per answer with a timeout (ai_score.dart:160-231, voice_scoring.dart:161-186) and falls back to the offline score; there is no retry loop. Not a finding.",
+        "artifact": null
+      },
+      {
+        "agent_id": "v2-ai-quota",
+        "reviewed_paths": [
+          "supabase/config.toml",
+          "supabase/functions/score/handler.ts",
+          "supabase/migrations/20261031130000_ai_scores.sql",
+          "supabase/functions/score/gemini.ts",
+          "supabase/functions/score-voice/gemini_voice.ts",
+          "supabase/functions/score-voice/voice.ts",
+          "apps/mobile/lib/core/backend/guest_sign_in.dart",
+          "docs/decisions/0006-ai-scoring.md",
+          "docs/ai-reliability-and-cost.md"
+        ],
+        "invariant": "Independent Phase 3/5 (merged, quick profile) verification of supabase/functions/claim_ai_score:per-uid-quota-escapable-via-anonymous-uids",
+        "method": "source",
+        "result": "Verifier re-read every cited location and returned decision needs_validation; decisive behavioural check blocked: no OS-enforced sandbox and empty promotion allowlist, so no target code executed.",
+        "artifact": null
+      },
+      {
+        "agent_id": "v3-edge-body",
+        "reviewed_paths": [
+          "supabase/functions/score/handler.ts",
+          "supabase/functions/score-voice/handler.ts",
+          "supabase/functions/score-voice/voice.ts",
+          "supabase/functions/score/scoring.ts",
+          "supabase/config.toml"
+        ],
+        "invariant": "Independent Phase 3/5 (merged, quick profile) verification of supabase/functions/handler:unbounded-body-buffering-before-jwt-validation",
+        "method": "source",
+        "result": "Verifier re-read every cited location and returned decision needs_validation; decisive behavioural check blocked: no OS-enforced sandbox and empty promotion allowlist, so no target code executed.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "supabase/functions/claim_ai_score:per-uid-quota-escapable-via-anonymous-uids",
+      "supabase/functions/handler:unbounded-body-buffering-before-jwt-validation"
+    ],
+    "unresolved": [],
+    "_hunter": "h2-edge",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [
+      "ai_scores can be inserted directly through PostgREST by any authenticated user with arbitrary scores, model and basis (ai_scores.sql:52-55, voice_answers.sql:33), bypassing the Edge Function; impact is limited to the caller's own rows (owner-only RLS) and the grants are owned by the peer migrations unit, so this is a provenance note, not a finding here.",
+      "All prompt context fields (hiring_for, interviewer_role, question, listen_for text) are client-supplied rather than looked up server-side from mission_id (scoring.ts:101-105, voice.ts:180-187); looking them up from packages/content on the server would make verdicts trustworthy as a grader of real content, though today only the requester's own score is affected.",
+      "score-voice compares raw.length (UTF-16 code units) to MAX_BODY_BYTES (handler.ts:74); use a byte count.",
+      "Consider weighting voice claims more than text claims, or a separate voice quota, since one unit buys up to 8 MB of audio and 3 model attempts."
+    ],
+    "_hunter_uncovered": [],
+    "_decisions": [
+      {
+        "fingerprint": "supabase/functions/claim_ai_score:per-uid-quota-escapable-via-anonymous-uids",
+        "verdict": "needs_validation",
+        "verifier": "v2-ai-quota"
+      },
+      {
+        "fingerprint": "supabase/functions/handler:unbounded-body-buffering-before-jwt-validation",
+        "verdict": "needs_validation",
+        "verifier": "v3-edge-body"
+      }
+    ],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "supabase%2Ffunctions%23answer%20text%20and%20audio%20into%20Gemini%20prompt::supabase%2Ffunctions%2Fscore%2Fscoring.ts%23prompt%20assembly%20and%20model-output%20parsing%20into%20scores::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Injection",
+    "canonical_refs": {
+      "surface": "supabase/functions#answer text and audio into Gemini prompt",
+      "boundary": "supabase/functions/score/scoring.ts#prompt assembly and model-output parsing into scores",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Injection"
+    },
+    "surface": "Player-controlled answer text/audio assembled into the Gemini prompt",
+    "boundary": "Prompt assembly and deterministic parsing of model output",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Injection",
+    "starting_paths": [
+      "supabase/functions/score/scoring.ts",
+      "supabase/functions/score/gemini.ts",
+      "supabase/functions/score-voice/voice.ts",
+      "supabase/functions/score-voice/gemini_voice.ts",
+      "apps/mobile/lib/features/debrief"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [
+      "AI-AND-LLM.md#Core discipline",
+      "AI-AND-LLM.md#Prompt role and provenance confusion",
+      "AI-AND-LLM.md#Sensitive context extraction",
+      "AI-AND-LLM.md#Insecure output rendering",
+      "AI-AND-LLM.md#Universal moves",
+      "AI-AND-LLM.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "h2-edge",
+    "reviewed_paths": [
+      "supabase/functions/score/scoring.ts",
+      "supabase/functions/score-voice/voice.ts",
+      "apps/mobile/lib/features/voice/voice_scoring.dart",
+      "supabase/migrations/20261102120000_voice_answers.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h2-edge",
+        "reviewed_paths": [
+          "supabase/functions/score/scoring.ts",
+          "supabase/functions/score-voice/voice.ts",
+          "apps/mobile/lib/features/voice/voice_scoring.dart"
+        ],
+        "invariant": "player-controlled text cannot cross a principal boundary via the prompt",
+        "method": "source",
+        "result": "Every prompt field (hiring_for, interviewer_role, question, listen_for, lines, reasons, reply) is client-supplied (voice_scoring.dart:36-48) and interpolated into systemInstruction/transcript (scoring.ts:112-157, voice.ts:196-251), so a player fully controls the model's instructions. The context contains only that player's own text: no key (header only, gemini.ts:109), no other user's data, no tools. Prompt injection yields only the player's own score, which the player can already write directly (ai_scores insert grant) and which feeds only their own rows/engine (voice points also settable via self_check). No boundary crossed.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h2-edge",
+        "reviewed_paths": [
+          "supabase/functions/score/scoring.ts",
+          "supabase/functions/score-voice/voice.ts",
+          "supabase/migrations/20261102120000_voice_answers.sql"
+        ],
+        "invariant": "model output is deterministically validated before storage",
+        "method": "source",
+        "result": "parseVerdict clamps scores 0-100 (scoring.ts:195-199, voice.ts:295-299), caps basis to 220 chars (scoring.ts:185-193), caps each transcript to 2900 (voice.ts:81, 307-311) so storedTranscript fits the 6000 CHECK, and filters points_made to request ids (voice.ts:329-330, DB cap 7). Model name comes from the server chain. Stored via PostgREST JSON as the caller (index.ts:51-67); logs use JSON.stringify and never the text. No SQL, HTML or log sink found; app-side rendering libraries (markdown/html/webview/launchUrl) not present in debrief/voice/progress features.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "_hunter": "h2-edge",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [],
+    "_hunter_uncovered": [],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "supabase%2Ffunctions%2Fscore%2Findex.ts%23POST%20%2Ffunctions%2Fv1%2Fscore::supabase%2Ffunctions%2Fscore%2Fhandler.ts%23bearer%20JWT%20%2B%20claim_ai_score%20%2B%20saveScore%20as%20caller::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "supabase/functions/score/index.ts#POST /functions/v1/score",
+      "boundary": "supabase/functions/score/handler.ts#bearer JWT + claim_ai_score + saveScore as caller",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "Edge Function score (text answers)",
+    "boundary": "Caller JWT, quota claim and ai_scores write as caller",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Access control",
+    "starting_paths": [
+      "supabase/functions/score",
+      "supabase/config.toml",
+      "supabase/migrations/20261031130000_ai_scores.sql"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+      "CLOUD-AND-DEPLOYMENT.md#Edge/runtime boundary mismatch",
+      "CLOUD-AND-DEPLOYMENT.md#Secret exposure across workload boundaries",
+      "CLOUD-AND-DEPLOYMENT.md#Universal moves",
+      "CLOUD-AND-DEPLOYMENT.md#Validation rules",
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#JWT verification and claim binding",
+      "WEB-PROTOCOL-AND-AUTH.md#API-key scope and resource binding",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "h2-edge",
+    "reviewed_paths": [
+      "supabase/functions/score/handler.ts",
+      "supabase/functions/score/index.ts",
+      "supabase/migrations/20261031130000_ai_scores.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h2-edge",
+        "reviewed_paths": [
+          "supabase/functions/score/handler.ts",
+          "supabase/functions/score/index.ts",
+          "supabase/migrations/20261031130000_ai_scores.sql"
+        ],
+        "invariant": "no Gemini call or write happens for an invalid, expired or anon-role token",
+        "method": "source",
+        "result": "The function checks only Bearer presence (handler.ts:47-59), but the first side effect is claimQuota, a PostgREST RPC sent with the caller JWT (index.ts:16-27, 36-41). PostgREST verifies signature/exp; an invalid token gives 401, and the anon key as bearer runs as anon, whose EXECUTE is revoked (ai_scores.sql:105) and the function raises 42501 for null uid (:92-94), mapped to Unauthorized (index.ts:38-41, handler.ts:76-78). Gemini runs only after a successful claim (handler.ts:84). verify_jwt is not decisive for access control because of this ordering. Only pre-auth body parsing precedes it (reported under the quota unit).",
+        "artifact": null
+      },
+      {
+        "agent_id": "h2-edge",
+        "reviewed_paths": [
+          "supabase/functions/score/index.ts",
+          "supabase/migrations/20261031130000_ai_scores.sql"
+        ],
+        "invariant": "saveScore cannot write another user's row and the key stays server-side",
+        "method": "source",
+        "result": "Insert body has no user_id (index.ts:51-67); user_id defaults to auth.uid() and is not in the insert grant (ai_scores.sql:17, 52-55); RLS WITH CHECK auth.uid()=user_id (:45-47). No service role used. GEMINI_API_KEY read from env only in deps.score (index.ts:31) and sent in a header (gemini.ts:109); error paths log status only (gemini.ts:119-123), never the key or JWT.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "_hunter": "h2-edge",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [],
+    "_hunter_uncovered": [],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "supabase%2Ffunctions%2Fscore-voice%2Findex.ts%23POST%20%2Ffunctions%2Fv1%2Fscore-voice::supabase%2Ffunctions%2Fscore-voice%2Fhandler.ts%23bearer%20JWT%20%2B%20quota%20%2B%20writes%20as%20caller::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "supabase/functions/score-voice/index.ts#POST /functions/v1/score-voice",
+      "boundary": "supabase/functions/score-voice/handler.ts#bearer JWT + quota + writes as caller",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "Edge Function score-voice (spoken answers)",
+    "boundary": "Caller JWT, quota claim and writes as caller",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Access control",
+    "starting_paths": [
+      "supabase/functions/score-voice",
+      "supabase/config.toml",
+      "supabase/migrations/20261102120000_voice_answers.sql",
+      "supabase/migrations/20261031130000_ai_scores.sql"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+      "CLOUD-AND-DEPLOYMENT.md#Edge/runtime boundary mismatch",
+      "CLOUD-AND-DEPLOYMENT.md#Secret exposure across workload boundaries",
+      "CLOUD-AND-DEPLOYMENT.md#Universal moves",
+      "CLOUD-AND-DEPLOYMENT.md#Validation rules",
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#JWT verification and claim binding",
+      "WEB-PROTOCOL-AND-AUTH.md#API-key scope and resource binding",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "h2-edge",
+    "reviewed_paths": [
+      "supabase/functions/score-voice/handler.ts",
+      "supabase/functions/score-voice/index.ts",
+      "supabase/migrations/20261031130000_ai_scores.sql",
+      "supabase/migrations/20261102120000_voice_answers.sql",
+      "supabase/functions/score-voice/gemini_voice.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h2-edge",
+        "reviewed_paths": [
+          "supabase/functions/score-voice/handler.ts",
+          "supabase/functions/score-voice/index.ts",
+          "supabase/migrations/20261031130000_ai_scores.sql"
+        ],
+        "invariant": "same JWT/quota ordering as score: no Gemini call before a valid authenticated claim",
+        "method": "source",
+        "result": "Mirrors score: presence-only bearer (handler.ts:41-63), claimQuota via PostgREST as caller (index.ts:37-48) before scoreVoiceWithFallback (handler.ts:82-94); 401/403 map to Unauthorized. Shares the same claim_ai_score counter as score (one quota for both).",
+        "artifact": null
+      },
+      {
+        "agent_id": "h2-edge",
+        "reviewed_paths": [
+          "supabase/functions/score-voice/index.ts",
+          "supabase/migrations/20261102120000_voice_answers.sql",
+          "supabase/functions/score-voice/gemini_voice.ts"
+        ],
+        "invariant": "voice writes stay owner-only and the audio is not stored or logged",
+        "method": "source",
+        "result": "Insert sends no user_id (index.ts:52-70); transcript/points_made granted with CHECK caps (voice_answers.sql:29-33) and owner-only RLS. Audio goes only to Gemini inlineData (gemini_voice.ts:47,49); log fields are byte counts and token counts (handler.ts:137-147); non-OK Gemini bodies are cancelled unread (gemini_voice.ts:91-95).",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "_hunter": "h2-edge",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [],
+    "_hunter_uncovered": [],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "supabase%2Fmigrations%23PostgREST%20tables%20and%20RPC%20%28profiles%2C%20mission_attempts%2C%20ai_scores%2C%20ai_score_usage%2C%20attempt_beat_plays%2C%20voice_answers%2C%20leaderboard%2C%20claim_ai_score%29::supabase%2Fmigrations%23owner-only%20RLS%20policies%2C%20table%2Fcolumn%20grants%2C%20security%20definer%20functions%20with%20search_path::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "supabase/migrations#PostgREST tables and RPC (profiles, mission_attempts, ai_scores, ai_score_usage, attempt_beat_plays, voice_answers, leaderboard, claim_ai_score)",
+      "boundary": "supabase/migrations#owner-only RLS policies, table/column grants, security definer functions with search_path",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "Every PostgREST-exposed table and RPC function",
+    "boundary": "Owner-only RLS, grants and security-definer functions",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Access control",
+    "starting_paths": [
+      "supabase/migrations",
+      "supabase/tests",
+      "supabase/seed.sql",
+      "supabase/config.toml"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Composite-key and namespace collision",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Migration default and ownership confusion",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "h1-db",
+    "reviewed_paths": [
+      "supabase/migrations/20261029150429_create_profiles.sql",
+      "supabase/migrations/20261029150430_create_mission_attempts.sql",
+      "supabase/migrations/20261031130000_ai_scores.sql",
+      "supabase/migrations/20261030170650_sync_profile_and_attempt_picks.sql",
+      "supabase/migrations/20261102100000_attempt_beat_plays.sql",
+      "supabase/migrations/20261102120000_voice_answers.sql",
+      "supabase/migrations/20261104120000_leaderboard.sql",
+      "apps/mobile/lib/core/db/ids.dart",
+      "apps/mobile/lib/core/progress/drift_progress_repository.dart",
+      "apps/mobile/lib/core/sync/account_merge.dart",
+      "supabase/config.toml",
+      "supabase/seed.sql",
+      "supabase/tests/leaderboard.test.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "supabase/migrations/20261029150429_create_profiles.sql",
+          "supabase/migrations/20261029150430_create_mission_attempts.sql",
+          "supabase/migrations/20261031130000_ai_scores.sql"
+        ],
+        "invariant": "Every PostgREST-exposed table has RLS enabled with owner-only select/insert/update predicates bound to (select auth.uid()) = user_id, and anon/authenticated table-wide default grants (incl. TRUNCATE/REFERENCES/TRIGGER) are revoked",
+        "method": "source",
+        "result": "profiles (create_profiles.sql:40-60), mission_attempts (create_mission_attempts.sql:36-47), ai_scores (ai_scores.sql:39-50) and ai_score_usage (ai_scores.sql:70-77) all enable RLS, use owner-only USING/WITH CHECK, revoke all from anon and authenticated, and re-grant only select plus (later) column-level insert/update. No delete or update policy/grant exists on mission_attempts, ai_scores or ai_score_usage; ai_score_usage has no write grant at all. No views exist that could bypass RLS.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "supabase/migrations/20261030170650_sync_profile_and_attempt_picks.sql",
+          "supabase/migrations/20261102100000_attempt_beat_plays.sql",
+          "supabase/migrations/20261102120000_voice_answers.sql",
+          "supabase/migrations/20261104120000_leaderboard.sql",
+          "supabase/migrations/20261031130000_ai_scores.sql"
+        ],
+        "invariant": "A request body cannot override identity or server-controlled columns (user_id, id, created_at, total_xp_at, week_xp_at)",
+        "method": "source",
+        "result": "Table-wide insert/update on profiles and insert on mission_attempts are revoked (sync_profile...sql:30,40) and replaced by column grants that never include user_id or created_at; ai_scores column grant omits id/user_id/created_at (ai_scores.sql:51-55); leaderboard grants (leaderboard.sql:38-41) omit total_xp_at/week_xp_at, which are also overwritten by trigger (leaderboard.sql:44-73) and covered by a pgTAP 42501 test (leaderboard.test.sql:43-47). created_at is forced by private.set_server_created_at. user_id defaults to auth.uid() and WITH CHECK pins it, so a guest cannot write another player's rows.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "supabase/migrations/20261031130000_ai_scores.sql",
+          "supabase/migrations/20261104120000_leaderboard.sql",
+          "supabase/migrations/20261029150429_create_profiles.sql"
+        ],
+        "invariant": "SECURITY DEFINER functions pin search_path, derive identity from auth.uid() not parameters, and are not executable by anon/public",
+        "method": "source",
+        "result": "claim_ai_score (ai_scores.sql:81-106) and leaderboard (leaderboard.sql:82-154) are security definer with set search_path = '', reject null auth.uid() with 42501, take no identity parameter, and revoke execute from public, anon with execute granted only to authenticated. Trigger functions live in the non-exposed private schema with execute revoked from public. All object references are schema-qualified.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "supabase/migrations/20261029150430_create_mission_attempts.sql",
+          "apps/mobile/lib/core/db/ids.dart",
+          "apps/mobile/lib/core/progress/drift_progress_repository.dart",
+          "apps/mobile/lib/core/sync/account_merge.dart"
+        ],
+        "invariant": "Composite-key collision: the globally unique client-supplied mission_attempts.attempt_id (PK, upsert on conflict do nothing) cannot be used by one player to pre-empt or overwrite another player's attempt",
+        "method": "source",
+        "result": "attempt_id is a global PK without user_id (create_mission_attempts.sql:9), so a pre-inserted id would silently drop a victim's later sync; however ids are v4 UUIDs from Random.secure() (ids.dart:5-12, drift_progress_repository.dart:26) and are never exposed to other players (the leaderboard returns no ids), so an attacker cannot learn or guess a victim's id. No update path exists, so no overwrite. Same-principal guest-to-account re-keying is handled in account_merge.dart:30-61. Not exploitable cross-principal.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "supabase/config.toml",
+          "supabase/seed.sql",
+          "supabase/tests/leaderboard.test.sql"
+        ],
+        "invariant": "Migration defaults and seed do not create cross-owner data or grant gaps; anon principal mapping",
+        "method": "source",
+        "result": "seed.sql is a comment only. config.toml enables anonymous sign-ins (188) at 30/hour/IP (213) with captcha commented out (224), confirming that every grant to authenticated is reachable by the public; no grant in the migrations relies on authenticated being a trusted principal except the leaderboard XP columns (see unit 2). pgTAP tests assert cross-user update/select denial (leaderboard.test.sql:69-78).",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "_hunter": "h1-db",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [
+      "leaderboard_visible defaults to true for every row (20261104120000_leaderboard.sql:30), while 20261030170650_sync_profile_and_attempt_picks.sql:3-5 says owner-only RLS is what keeps first_name private; the opt-out is disclosed in Settings (leaderboard_visibility_section.dart:17-20) and rows only appear once XP > 0 is synced, so this is a consent-default choice, not a boundary failure. Consider opt-in or a first-run notice.",
+      "first_name is length-checked only (sync_profile_and_attempt_picks.sql:14) and the leaderboard trims only trailing punctuation (leaderboard.sql:114); control, zero-width and bidi characters reach every player's board. Consider a character-class CHECK.",
+      "public.leaderboard window-sorts every visible profile per call (leaderboard.sql:110-137) with no rate limit in source; fine at current scale, consider a materialized/indexed top-N if the player count grows.",
+      "streak is counted when week_start >= monday - 7 (leaderboard.sql:117), which also accepts a future Monday; tighten to week_start between monday - 7 and monday.",
+      "ai_scores grants direct column INSERT to authenticated (ai_scores.sql:52-55, voice_answers.sql:33), so a player can store self-authored 'AI verdicts' without the Edge Function or quota; impact is self-only today because nothing cross-player reads ai_scores, but any future feature trusting ai_scores (e.g. leaderboard recount) would inherit forgeable scores. Move the insert to a definer function or service role if that changes."
+    ],
+    "_hunter_uncovered": [
+      {
+        "surface": "Direct PostgREST inserts into ai_scores (basis jsonb, transcript) and mission_attempts (beat_plays, voice_answer jsonb)",
+        "boundary": "Per-row size and per-user row-count bounds on owner-insertable tables (shared database storage)",
+        "subsystem": "All in-scope subsystems (quick profile)",
+        "attack_class": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Database and downstream query amplification",
+        "starting_paths": [
+          "supabase/migrations/20261031130000_ai_scores.sql",
+          "supabase/migrations/20261102100000_attempt_beat_plays.sql",
+          "supabase/migrations/20261102120000_voice_answers.sql",
+          "supabase/config.toml"
+        ],
+        "reason": "ai_scores.basis (ai_scores.sql:28-31), beat_plays elements (attempt_beat_plays.sql:13-16) and voice_answer extra keys (voice_answers.sql:16-25) have no byte-size bound, and guests can insert unlimited rows directly (no claim_ai_score on the PostgREST path). Storage growth from anonymous guests against operator-owned DB disk depends on hosted PostgREST body limits and disk autoscaling; no assigned unit covers resource exhaustion on these table insert paths."
+      }
+    ],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "supabase%2Fmigrations%23direct%20PostgREST%20inserts%20into%20ai_scores%20%28basis%20jsonb%2C%20transcript%29%20and%20mission_attempts%20%28beat_plays%2C%20voice_answer%20jsonb%29::supabase%2Fmigrations%23per-row%20size%20CHECKs%20and%20per-user%20row-count%20bounds%20on%20owner-insertable%20tables::profile%2Fquick%2Fall-in-scope-subsystems::RESOURCE-EXHAUSTION-AND-AVAILABILITY.md%23Database%20and%20downstream%20query%20amplification",
+    "canonical_refs": {
+      "surface": "supabase/migrations#direct PostgREST inserts into ai_scores (basis jsonb, transcript) and mission_attempts (beat_plays, voice_answer jsonb)",
+      "boundary": "supabase/migrations#per-row size CHECKs and per-user row-count bounds on owner-insertable tables",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Database and downstream query amplification"
+    },
+    "surface": "Direct owner inserts into ai_scores and mission_attempts",
+    "boundary": "Per-row size and per-user row-count bounds",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Database and downstream query amplification",
+    "starting_paths": [
+      "supabase/migrations/20261031130000_ai_scores.sql",
+      "supabase/migrations/20261102100000_attempt_beat_plays.sql",
+      "supabase/migrations/20261102120000_voice_answers.sql",
+      "supabase/migrations/20261030170650_sync_profile_and_attempt_picks.sql",
+      "supabase/migrations/20261029150430_create_mission_attempts.sql",
+      "supabase/config.toml"
+    ],
+    "ordinary_attack_class_block": null,
+    "selected_companion_blocks": [
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Database and downstream query amplification",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Unbounded buffering and cardinality",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Universal moves",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native code"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker or custom protocol"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Direct PostgREST path bypasses Gemini"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "No browser sink"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "deferred",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "quick_profile_final_critic: critic-1 + h1-db uncovered: unbounded jsonb sizes and row counts on guest-insertable tables (operator DB storage growth) not reviewed"
+    ],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "supabase%2Fmigrations%2F20261104120000_leaderboard.sql%23PostgREST%20PATCH%2FPOST%20public.profiles%20leaderboard%20columns::supabase%2Fmigrations%2F20261104120000_leaderboard.sql%23grant%20update%20%28leaderboard_visible%2C%20total_xp%2C%20week_xp%2C%20week_start%2C%20streak_weeks%29::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Business%20logic",
+    "canonical_refs": {
+      "surface": "supabase/migrations/20261104120000_leaderboard.sql#PostgREST PATCH/POST public.profiles leaderboard columns",
+      "boundary": "supabase/migrations/20261104120000_leaderboard.sql#grant update (leaderboard_visible, total_xp, week_xp, week_start, streak_weeks)",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Business logic"
+    },
+    "surface": "PostgREST writes to profiles leaderboard columns (total_xp, week_xp, week_start, streak_weeks)",
+    "boundary": "Column grants + owner-only RLS on profiles; no server-side XP recount",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Business logic",
+    "starting_paths": [
+      "supabase/migrations/20261104120000_leaderboard.sql",
+      "supabase/migrations/20261029150429_create_profiles.sql",
+      "supabase/migrations/20261030170650_sync_profile_and_attempt_picks.sql",
+      "supabase/tests/leaderboard.test.sql",
+      "apps/mobile/lib/core/sync",
+      "apps/mobile/lib/core/leaderboard"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Policy and query disagreement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "h1-db",
+    "reviewed_paths": [
+      "supabase/migrations/20261104120000_leaderboard.sql",
+      "supabase/migrations/20261029150429_create_profiles.sql",
+      "supabase/migrations/20261030170650_sync_profile_and_attempt_picks.sql",
+      "supabase/tests/leaderboard.test.sql",
+      "apps/mobile/lib/core/leaderboard/leaderboard_report.dart",
+      "apps/mobile/lib/core/backend/supabase_backend.dart",
+      "supabase/config.toml",
+      "docs/completion.md"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "supabase/migrations/20261104120000_leaderboard.sql",
+          "supabase/migrations/20261029150429_create_profiles.sql",
+          "supabase/migrations/20261030170650_sync_profile_and_attempt_picks.sql",
+          "supabase/tests/leaderboard.test.sql"
+        ],
+        "invariant": "Leaderboard-ranked values (total_xp, week_xp, week_start, streak_weeks) are bounded or derived server-side so a player cannot rank above what they earned",
+        "method": "source",
+        "result": "The owner is granted direct insert/update of all four ranked columns (leaderboard.sql:38-41); the only bounds are >= 0 and Monday CHECKs (leaderboard.sql:31-34). No upper bound, no rate-of-change bound, no cross-check against mission_attempts. leaderboard() ranks these values as given (leaderboard.sql:115-117,126,134). The migration (23-24) and docs/completion.md:33 acknowledge it. Candidate raised as needs_validation (execution blocked).",
+        "artifact": null
+      },
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "supabase/migrations/20261104120000_leaderboard.sql",
+          "supabase/tests/leaderboard.test.sql"
+        ],
+        "invariant": "Time-based logic: week_xp for a non-current week and stale streaks do not count; reached_at tie-break is server time",
+        "method": "source",
+        "result": "this_week_xp is 0 unless week_start = current UTC Monday (leaderboard.sql:116); streak counts only if week_start >= monday - 7 (117), but a future Monday also passes that test, so a streak can be kept alive by setting a future week_start (only meaningful alongside the arbitrary-value root cause). total_xp_at/week_xp_at are trigger-set server time (44-73), tested at leaderboard.test.sql:43-47.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "apps/mobile/lib/core/leaderboard/leaderboard_report.dart",
+          "apps/mobile/lib/core/backend/supabase_backend.dart",
+          "supabase/config.toml",
+          "docs/completion.md"
+        ],
+        "invariant": "Implicit trust: the server trusts client-computed engine totals",
+        "method": "source",
+        "result": "The device computes XP (leaderboard_report.dart:10-12) and upserts the row directly to profiles via PostgREST (supabase_backend.dart:101-104); there is no server component between. Any guest from signInAnonymously (config.toml:188,213) can send the same upsert with arbitrary integers.",
+        "artifact": null
+      },
+      {
+        "agent_id": "v1-leaderboard-xp",
+        "reviewed_paths": [
+          "supabase/config.toml",
+          "supabase/migrations/20261104120000_leaderboard.sql",
+          "supabase/migrations/20261030170650_sync_profile_and_attempt_picks.sql",
+          "supabase/tests/leaderboard.test.sql",
+          "apps/mobile/lib/core/backend/supabase_backend.dart",
+          "docs/completion.md"
+        ],
+        "invariant": "Independent Phase 3/5 (merged, quick profile) verification of supabase/migrations/20261104120000_leaderboard.sql:profiles-client-reported-xp-unbounded",
+        "method": "source",
+        "result": "Verifier re-read every cited location and returned decision needs_validation; decisive behavioural check blocked: no OS-enforced sandbox and empty promotion allowlist, so no target code executed.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "supabase/migrations/20261104120000_leaderboard.sql:profiles-client-reported-xp-unbounded"
+    ],
+    "unresolved": [],
+    "_hunter": "h1-db",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [],
+    "_hunter_uncovered": [],
+    "_decisions": [
+      {
+        "fingerprint": "supabase/migrations/20261104120000_leaderboard.sql:profiles-client-reported-xp-unbounded",
+        "verdict": "needs_validation",
+        "verifier": "v1-leaderboard-xp"
+      }
+    ],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "supabase%2Fmigrations%2F20261104120000_leaderboard.sql%23public.leaderboard%28p_scope%2C%20p_limit%29::supabase%2Fmigrations%2F20261104120000_leaderboard.sql%23security%20definer%20leaderboard%20projection%20%28display_name%2C%20tag%2C%20xp%2C%20is_me%29::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Feature%20abuse%20and%20data%20leakage",
+    "canonical_refs": {
+      "surface": "supabase/migrations/20261104120000_leaderboard.sql#public.leaderboard(p_scope, p_limit)",
+      "boundary": "supabase/migrations/20261104120000_leaderboard.sql#security definer leaderboard projection (display_name, tag, xp, is_me)",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage"
+    },
+    "surface": "RPC public.leaderboard read path",
+    "boundary": "Security-definer projection of other players' rows",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Feature abuse and data leakage",
+    "starting_paths": [
+      "supabase/migrations/20261104120000_leaderboard.sql",
+      "supabase/tests/leaderboard.test.sql",
+      "apps/mobile/lib/features/leaderboard",
+      "apps/mobile/lib/core/backend"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Enumeration and aggregate oracles",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Database and downstream query amplification",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Universal moves",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "h1-db",
+    "reviewed_paths": [
+      "supabase/migrations/20261104120000_leaderboard.sql",
+      "supabase/tests/leaderboard.test.sql",
+      "apps/mobile/lib/features/settings/leaderboard_visibility_section.dart",
+      "apps/mobile/lib/core/backend/remote_rows.dart",
+      "apps/mobile/lib/core/backend/supabase_backend.dart"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "supabase/migrations/20261104120000_leaderboard.sql",
+          "supabase/tests/leaderboard.test.sql"
+        ],
+        "invariant": "The security-definer projection returns only display_name, derived tag, XP figures, streak, rank and is_me; no user_id, email, interview_date or other profile column",
+        "method": "source",
+        "result": "Return type is fixed to (rank, display_name, tag, total_xp, week_xp, streak_weeks, is_me) (leaderboard.sql:83-91); uid is used only internally for ordering and the md5-derived 4-digit tag (142), which is not reversible to the uuid. pgTAP asserts the exact column set (leaderboard.test.sql:131-133). No other profile column is selected.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "supabase/migrations/20261104120000_leaderboard.sql",
+          "apps/mobile/lib/features/settings/leaderboard_visibility_section.dart",
+          "apps/mobile/lib/core/backend/remote_rows.dart"
+        ],
+        "invariant": "Players who switched the board off are not disclosed to others, directly or via rank/count oracles",
+        "method": "source",
+        "result": "Hidden players are filtered in the first CTE (leaderboard.sql:121) before ranking, so they affect neither others' rows nor the caller's place; only the caller's own row is kept (137,148). The default is visible=true (leaderboard.sql:30) and the opt-out is disclosed in Settings (leaderboard_visibility_section.dart:17-20); per the data-isolation discipline this is a privacy preference choice, recorded as hardening, not a boundary failure.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h1-db",
+        "reviewed_paths": [
+          "supabase/migrations/20261104120000_leaderboard.sql",
+          "apps/mobile/lib/core/backend/supabase_backend.dart"
+        ],
+        "invariant": "Database query amplification: p_limit and p_scope cannot widen output or cost beyond the intended board",
+        "method": "source",
+        "result": "p_limit is clamped to 1-100 (leaderboard.sql:101), p_scope is whitelisted (106-108), caller must be signed in (103-105). Each call scans and window-sorts every visible profile (row_number over all players, 133-137), O(N log N) per call, with no rate limit in source; with one row per player this is linear-ish work bounded by the player count and needs sustained volume, so it is recorded as hardening, not a finding.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "_hunter": "h1-db",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [],
+    "_hunter_uncovered": [],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  },
+  {
+    "coverage_id": "web%2Fsrc%2Fapp%2Fverified%2Fpage.tsx%23%2Fverified%20hash%20tokens::web%2Fnext.config.ts%23response%20headers%20and%20CSP::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Injection",
+    "canonical_refs": {
+      "surface": "web/src/app/verified/page.tsx#/verified hash tokens",
+      "boundary": "web/next.config.ts#response headers and CSP",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Injection"
+    },
+    "surface": "Web landing pages incl. /verified hash parsing",
+    "boundary": "Next.js static export headers, CSP and DOM rendering",
+    "subsystem": "All in-scope subsystems (quick profile)",
+    "attack_class": "Injection",
+    "starting_paths": [
+      "web/src/app/verified",
+      "web/next.config.ts",
+      "web/src/app/layout.tsx",
+      "web/src/components"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#DOM-based XSS",
+      "CLIENT-SIDE.md#Clickjacking",
+      "CLIENT-SIDE.md#Client-side navigation confusion",
+      "CLIENT-SIDE.md#Browser-storage disclosure and stale authorization",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "AI-AND-LLM.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "DESKTOP-MOBILE-AND-LOCAL-IPC.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+        "reason": "Companion boundary is assigned to a different coverage unit; this unit's path does not cross it"
+      },
+      {
+        "block": "MEMORY-SAFETY-AND-BINARY.md#Core discipline",
+        "reason": "No native/unsafe code in scope: Dart, TypeScript and SQL only"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Core discipline",
+        "reason": "No broker, gRPC or custom protocol; PostgREST/HTTP covered by WEB-PROTOCOL-AND-AUTH.md and ordinary classes"
+      }
+    ],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "h3-client",
+    "reviewed_paths": [
+      "web/src/app/verified/page.tsx",
+      "web/src/app/layout.tsx",
+      "web/src/components/PrimaryCta.tsx",
+      "web/src/components/SiteNav.tsx",
+      "web/src/components/afterLoad.ts",
+      "web/next.config.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "web/src/app/verified/page.tsx"
+        ],
+        "invariant": "Location hash/query values on /verified never reach an executing or navigating sink.",
+        "method": "source",
+        "result": "The inline readLink script (page.tsx:25) only reads error/error_code/error_description for truthiness and sets a constant data-link='expired' attribute, then calls history.replaceState(null,'',location.pathname). No parameter value is written to the DOM, a URL or storage. The 'Open the app' href is the constant thelastroom:// (:17, :49, :58). No DOM XSS or navigation sink exists.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "web/src/app/layout.tsx",
+          "web/src/components/PrimaryCta.tsx",
+          "web/src/components/SiteNav.tsx",
+          "web/src/components/afterLoad.ts"
+        ],
+        "invariant": "Other dangerouslySetInnerHTML or href sinks carry only static data.",
+        "method": "source",
+        "result": "layout.tsx:75 JSON-LD is JSON.stringify of static site content. Every component href comes from static content constants, and the target=_blank link uses rel=noopener (PrimaryCta.tsx:17). No location, postMessage, localStorage or referrer reads exist under web/src.",
+        "artifact": null
+      },
+      {
+        "agent_id": "h3-client",
+        "reviewed_paths": [
+          "web/next.config.ts"
+        ],
+        "invariant": "A sensitive state-changing action is not frameable without frame-ancestors/XFO.",
+        "method": "source",
+        "result": "next.config.ts defines no headers (static export, so headers() would not apply anyway), and there is no vercel.json. The site has no authenticated or state-changing action (no session, no forms), so the missing CSP/XFO is only a hardening note.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "_hunter": "h3-client",
+    "_priority_note": "Order: lowest-trust surfaces first (anonymous-guest-reachable PostgREST and Edge Functions), then clients; ties by coverage_id",
+    "_hardening": [],
+    "_hunter_uncovered": [],
+    "_critic": "critic-1 final pass (quick): reassign_ids=[], stop=false, 2 missing units accepted as deferred"
+  }
+]

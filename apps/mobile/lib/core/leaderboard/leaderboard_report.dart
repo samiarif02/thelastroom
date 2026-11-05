@@ -7,9 +7,10 @@ import '../backend/remote_rows.dart';
 import '../db/app_database.dart';
 import '../sync/outbox.dart';
 
-/// What this device reports to the shared leaderboard (issue 72): "Show me on the
-/// leaderboard", and the engine's numbers (the same XP "Your file" shows). The device works them
-/// out; the server only ranks them.
+/// What this device keeps for the shared leaderboard (issue 72): "Show me on the leaderboard",
+/// and the engine's numbers (the same XP "Your file" shows). Only the visibility is sent
+/// ([toRemote]): since issue 74 the board ranks the server's own count of verified XP, so these
+/// numbers stay on the phone.
 class LeaderboardReport {
   const LeaderboardReport({
     this.visible = true,
@@ -49,15 +50,9 @@ class LeaderboardReport {
     streakWeeks: streakWeeks ?? this.streakWeeks,
   );
 
-  /// The server row. With nothing reported yet, the week is [fallbackWeek]'s (0 XP in it).
-  RemoteLeaderboardReport toRemote({required CalendarDay fallbackWeek}) =>
-      RemoteLeaderboardReport(
-        visible: visible,
-        totalXp: totalXp,
-        weekXp: weekXp,
-        weekStart: '${weekStart ?? fallbackWeek}',
-        streakWeeks: streakWeeks,
-      );
+  /// The server row: the visibility only. The XP is the server's to count (issue 74).
+  RemoteLeaderboardReport toRemote() =>
+      RemoteLeaderboardReport(visible: visible);
 
   Map<String, Object?> toJson() => {
     'visible': visible,

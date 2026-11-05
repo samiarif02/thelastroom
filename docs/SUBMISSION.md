@@ -209,6 +209,13 @@ the backend and AI scoring" has the details.
   misconception, no reason repeating a line).
 - **Analytics:** events are registered in an enum before a feature ships, with no PII and no
   answer text ([EVENTS.md](EVENTS.md)).
+- **Security and scale (issue 74):** the leaderboard ranks only server-verified XP (only the
+  server writes AI verdicts, and each mission counts once from its best verified score), the
+  sign-in deep link accepts only PKCE codes, and the AI quota has a global daily budget. Every
+  free-tier limit is checked for 1,000 players with real numbers in
+  [scale-and-security.md](scale-and-security.md). An independent audit ran the same day with
+  Cloudflare's security-audit skill; its records and the fix for each lead are in
+  [security-audit/2026-11-05](security-audit/2026-11-05/README.md).
 
 ## The business model: a paywall mock (designed, not built)
 

@@ -8,17 +8,19 @@ import { scoreWithFallback } from './gemini.ts';
 import { type Deps, handle, NotConfigured, Unauthorized } from './handler.ts';
 import type { ScoreInput, ScoreResult } from './scoring.ts';
 
-// Set by the Supabase runtime; the anon key is public, and every database call below runs as
-// the player (their JWT), so RLS applies exactly as it does to the app.
+// Set by the Supabase runtime. The anon key is public: the quota is claimed as the player (their
+// JWT, under RLS). The service role key never leaves this function: only it may insert
+// ai_scores (issue 74), for the user id the auth server read from the player's JWT.
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
-function rest(path: string, jwt: string, body: unknown, prefer?: string): Promise<Response> {
+function rest(path: string, bearer: string, body: unknown, prefer?: string, apikey = anonKey): Promise<Response> {
   return fetch(`${supabaseUrl}/rest/v1/${path}`, {
     method: 'POST',
     headers: {
-      apikey: anonKey,
-      authorization: `Bearer ${jwt}`,
+      apikey,
+      authorization: `Bearer ${bearer}`,
       'content-type': 'application/json',
       ...(prefer ? { prefer } : {}),
     },
@@ -26,7 +28,31 @@ function rest(path: string, jwt: string, body: unknown, prefer?: string): Promis
   });
 }
 
+/** Writes as the server: the service role, which bypasses RLS. Only ever for a verified id. */
+function asServer(path: string, body: unknown): Promise<Response> {
+  if (!serviceKey) return Promise.reject(new Error('no service role key'));
+  return rest(path, serviceKey, body, 'return=minimal', serviceKey);
+}
+
 const deps: Deps = {
+  async callerId(jwt: string) {
+    // The auth server checks the signature, the expiry and that the session still exists.
+    const res = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: { apikey: anonKey, authorization: `Bearer ${jwt}` },
+    });
+    if (res.status >= 400 && res.status < 500) {
+      await res.body?.cancel();
+      throw new Unauthorized();
+    }
+    if (!res.ok) {
+      await res.body?.cancel();
+      throw new Error(`auth user answered ${res.status}`);
+    }
+    const user = (await res.json()) as { id?: unknown };
+    if (typeof user.id !== 'string' || user.id === '') throw new Unauthorized();
+    return user.id;
+  },
+
   score(input: ScoreInput) {
     const key = Deno.env.get('GEMINI_API_KEY');
     if (!key) return Promise.reject(new NotConfigured());
@@ -46,9 +72,10 @@ const deps: Deps = {
     return (await res.json()) === true;
   },
 
-  async saveScore(jwt: string, input: ScoreInput, result: ScoreResult) {
+  async saveScore(userId: string, input: ScoreInput, result: ScoreResult) {
     const d = result.dimensions;
-    const res = await rest('ai_scores', jwt, {
+    const res = await asServer('ai_scores', {
+      user_id: userId,
       attempt_id: input.attemptId,
       mission_id: input.missionId,
       model: result.model,
@@ -64,7 +91,7 @@ const deps: Deps = {
         adaptability: d.adaptability.basis,
         overall: result.overall.basis,
       },
-    }, 'return=minimal');
+    });
     await res.body?.cancel();
     if (!res.ok) throw new Error(`ai_scores insert answered ${res.status}`);
   },

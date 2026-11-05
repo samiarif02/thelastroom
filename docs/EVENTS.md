@@ -24,6 +24,7 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `account_signed_in` | "Sign in on another device" (FR-3): a player opens the emailed sign-in link on this device, it signs in to their saved account, and this device's progress merges with it. Never the email | `provider` (`email`), `had_progress` |
 | `account_signed_out` | "Sign out" on a saved account in Settings (FR-3): every room had backed up (sign-out is blocked otherwise), the account stays saved to its email, and this device's player data is cleared and a new guest starts. Never the email | `had_unsynced` (always `false`: an unsynced device can't sign out) |
 | `onboarding_completed` | The first-launch onboarding finishes, before the Tower (brief 13). Never the name | `skipped_steps`, `named`, `experience`, `target_role`, `nerves_level`, `calm_mode`, `weekly_goal` |
+| `onboarding_explainer_viewed` | The "How it works" explainer (five pages before onboarding's questions, issue 75) ends: "Let's get you ready" on the last page, Skip, or, when replayed from Settings, closed. Once per showing | `page` (the furthest page reached, 1 to 5), `skipped`, `replay` |
 | `tower_opened` | The Tower (home) is shown | `missions_done`, `after_mission` |
 | `room_entered` | The player enters a room on the Tower (its door opens onto the room's intro) | `mission_id`, `replay` |
 | `mission_started` | A mission scene starts | `mission_id`, `chapter`, `attempt_number` |

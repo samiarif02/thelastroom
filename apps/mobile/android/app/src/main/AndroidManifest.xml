@@ -13,11 +13,16 @@
          play still works without the network (ADR 0005). check:standards guards this line. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Predictive back (brief 50): on Android 14+ the back swipe previews the screen behind
-         with the app's own reverse transition; older Androids get the normal back. -->
+         with the app's own reverse transition; older Androids get the normal back.
+         No OS backup (security audit 2026-11-05): a backup would carry the guest's session
+         tokens to another device. Progress comes back through "Save your progress" instead. -->
     <application
         android:label="The Last Room"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"

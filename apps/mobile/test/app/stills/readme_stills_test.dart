@@ -15,7 +15,7 @@ import 'package:the_last_room/features/debrief/ai_score.dart';
 import 'package:the_last_room/features/debrief/ai_score_store.dart';
 import 'package:the_last_room/features/debrief/ai_verdict_cards.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
-import 'package:the_last_room/features/onboarding/onboarding_copy.dart';
+import 'package:the_last_room/features/onboarding/explainer_copy.dart';
 import 'package:the_last_room/features/onboarding/onboarding_screen.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
 import 'package:the_last_room/features/progression/floor_cleared_screen.dart';
@@ -94,16 +94,16 @@ void main() {
     await _done(tester);
   });
 
-  testWidgets('onboarding: meet your interviewers', (tester) async {
+  testWidgets('onboarding: how a room works', (tester) async {
     final rig = _rig(tester, profile: const PlayerProfile());
     await rig.boot(Routes.onboarding, size: phone);
     await rig.until(find.byType(OnboardingScreen));
     await rig.run(const Duration(seconds: 2));
-    final next = find.text(OnboardingCopy.next);
+    final next = find.text(ExplainerCopy.next);
     await tester.ensureVisible(next);
     await tester.pump();
     await tester.tap(next);
-    await rig.until(find.text(OnboardingCopy.castTitle));
+    await rig.until(find.text(ExplainerCopy.pages[1].title));
     await rig.run(const Duration(seconds: 2));
     await still(tester, '12-onboarding');
     await _done(tester);

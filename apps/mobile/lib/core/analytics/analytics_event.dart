@@ -18,6 +18,10 @@ enum AnalyticsEvent {
   /// to its email, and this phone starts again as a new guest. Never the email.
   accountSignedOut('account_signed_out'),
   onboardingCompleted('onboarding_completed'),
+
+  /// The "How it works" explainer ends (issue 75): finished, skipped, or closed. How far the
+  /// player read, and whether Settings brought it back. Never anything typed.
+  onboardingExplainerViewed('onboarding_explainer_viewed'),
   towerOpened('tower_opened'),
   roomEntered('room_entered'),
   missionStarted('mission_started'),

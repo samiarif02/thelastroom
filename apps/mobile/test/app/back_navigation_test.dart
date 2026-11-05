@@ -8,9 +8,10 @@ import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/mission_screen.dart';
 import 'package:the_last_room/features/mission/scene/room_intro.dart';
 import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
-import 'package:the_last_room/features/onboarding/onboarding_copy.dart';
+import 'package:the_last_room/features/onboarding/explainer_copy.dart';
 import 'package:the_last_room/features/onboarding/onboarding_screen.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
+import 'package:the_last_room/features/progression/interview_date_choices.dart';
 import 'package:the_last_room/features/settings/settings_screen.dart';
 import 'package:the_last_room/features/tower/tower_hero.dart';
 import 'package:the_last_room/features/tower/tower_rooms.dart';
@@ -169,10 +170,21 @@ void main() {
     final rig = MissionRig(tester, profile: const PlayerProfile());
     await rig.boot(Routes.onboarding, reduceMotion: true);
     await rig.until(find.byType(OnboardingScreen));
-    await tester.tap(find.text(OnboardingCopy.next));
-    await rig.until(find.text(OnboardingCopy.castTitle));
+    await tester.tap(find.text(ExplainerCopy.next));
+    await rig.until(find.text(ExplainerCopy.pages[1].title));
     await back(rig);
-    await rig.until(find.text(OnboardingCopy.gameTitle));
+    await rig.until(find.text(ExplainerCopy.pages[0].title));
+    expect(find.text(BackToExit.hint), findsNothing);
+    // From the first question, back returns to the explainer's last page.
+    await tester.tap(find.text(ExplainerCopy.skip));
+    await rig.until(find.text(InterviewDateChoices.title));
+    await back(rig);
+    await rig.until(find.text(ExplainerCopy.pages.last.title));
+    expect(find.text(BackToExit.hint), findsNothing);
+    for (var i = 0; i < ExplainerCopy.pages.length - 1; i++) {
+      await back(rig);
+    }
+    await rig.until(find.text(ExplainerCopy.pages[0].title));
     expect(find.text(BackToExit.hint), findsNothing);
     await back(rig);
     expect(find.text(BackToExit.hint), findsOneWidget);

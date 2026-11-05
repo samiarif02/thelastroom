@@ -1,10 +1,11 @@
--- Issue 72: the leaderboard. A player writes only their own XP columns (never another's, never
--- the server's reached-at times); public.leaderboard() ranks this UTC week or all time, hides
+-- Issue 72: the leaderboard. A player writes only their own name and "Show me on the
+-- leaderboard" (issue 74: never an XP column; the server writes those, see
+-- verified_leaderboard.test.sql); public.leaderboard() ranks this UTC week or all time, hides
 -- players who switched it off (except to themselves), always returns the caller, exposes no
 -- user id or email, and is closed to anon.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(22);
+select plan(23);
 
 insert into auth.users (id, email, is_anonymous) values
   ('aaaaaaaa-0000-4000-8000-00000000000a', 'a@example.test', true),
@@ -17,27 +18,30 @@ create function pg_temp.act_as(uid uuid) returns void language sql as $$
          set_config('role', 'authenticated', true);
 $$;
 
--- This UTC week's Monday, as the app sends it.
+-- This UTC week's Monday.
 create function pg_temp.monday() returns date language sql as $$
   select date_trunc('week', now() at time zone 'utc')::date;
 $$;
 
--- The app's profile upsert, with the leaderboard columns (user_id isn't sent).
-prepare upsert_board(text, boolean, int, int, date, int) as
-  insert into public.profiles (
-    first_name, onboarded, leaderboard_visible, total_xp, week_xp, week_start, streak_weeks
-  ) values ($1, true, $2, $3, $4, $5, $6)
+-- The app's leaderboard upsert since issue 74: the name comes from the profile sync, the
+-- visibility from this one; never an XP column (user_id isn't sent).
+prepare upsert_board(text, boolean) as
+  insert into public.profiles (first_name, onboarded, leaderboard_visible) values ($1, true, $2)
   on conflict (user_id) do update set
-    first_name = excluded.first_name, leaderboard_visible = excluded.leaderboard_visible,
-    total_xp = excluded.total_xp, week_xp = excluded.week_xp,
-    week_start = excluded.week_start, streak_weeks = excluded.streak_weeks;
+    first_name = excluded.first_name, leaderboard_visible = excluded.leaderboard_visible;
+
+-- What the server's recount writes (private.recount_verified_xp); set directly here, as the
+-- table owner, so the ranking rules are tested with exact numbers.
+prepare set_xp(uuid, int, int, date, int) as
+  update public.profiles set total_xp = $2, week_xp = $3, week_start = $4, streak_weeks = $5
+  where user_id = $1;
 
 -- A: Sami, 900 in all, 120 this week, 2 weeks in a row.
 select pg_temp.act_as('aaaaaaaa-0000-4000-8000-00000000000a');
 
 select lives_ok(
-  $$ execute upsert_board('Sami', true, 900, 120, pg_temp.monday(), 2) $$,
-  'the owner reports their XP, week and streak'
+  $$ execute upsert_board('Sami', true) $$,
+  'the owner sets their name and whether they show on the board'
 );
 
 select throws_ok(
@@ -45,6 +49,15 @@ select throws_ok(
   '42501', null,
   'a client can''t write when the score was reached (server time)'
 );
+
+select throws_ok(
+  $$ update public.profiles set total_xp = 99999 $$,
+  '42501', null,
+  'a client can''t write its own XP (issue 74)'
+);
+
+reset role;
+execute set_xp('aaaaaaaa-0000-4000-8000-00000000000a', 900, 120, pg_temp.monday(), 2);
 
 select throws_ok(
   $$ update public.profiles set total_xp = -1 $$,
@@ -62,14 +75,18 @@ select throws_ok(
 select pg_temp.act_as('bbbbbbbb-0000-4000-8000-00000000000b');
 
 select lives_ok(
-  $$ execute upsert_board('Ali.', true, 300, 120, pg_temp.monday(), 3) $$,
-  'a second player reports theirs'
+  $$ execute upsert_board('Ali.', true) $$,
+  'a second player sets theirs'
 );
 
+reset role;
+execute set_xp('bbbbbbbb-0000-4000-8000-00000000000b', 300, 120, pg_temp.monday(), 3);
+select pg_temp.act_as('bbbbbbbb-0000-4000-8000-00000000000b');
+
 select is_empty(
-  $$ update public.profiles set total_xp = 99999
+  $$ update public.profiles set leaderboard_visible = false
      where user_id = 'aaaaaaaa-0000-4000-8000-00000000000a' returning 1 $$,
-  'user B can''t touch user A''s XP'
+  'user B can''t touch user A''s row'
 );
 
 select is_empty(
@@ -79,11 +96,15 @@ select is_empty(
 
 -- C: hidden from the board, with the most XP of all.
 select pg_temp.act_as('cccccccc-0000-4000-8000-00000000000c');
-execute upsert_board('Hidden', false, 5000, 500, pg_temp.monday(), 1);
+execute upsert_board('Hidden', false);
 
 -- D: no first name, and last played a month ago (a stale week and streak).
 select pg_temp.act_as('dddddddd-0000-4000-8000-00000000000d');
-execute upsert_board(null, true, 100, 50, pg_temp.monday() - 28, 4);
+execute upsert_board(null, true);
+
+reset role;
+execute set_xp('cccccccc-0000-4000-8000-00000000000c', 5000, 500, pg_temp.monday(), 1);
+execute set_xp('dddddddd-0000-4000-8000-00000000000d', 100, 50, pg_temp.monday() - 28, 4);
 
 -- What B sees.
 select pg_temp.act_as('bbbbbbbb-0000-4000-8000-00000000000b');
