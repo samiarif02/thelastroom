@@ -273,6 +273,9 @@ class SupabaseBackend implements Backend {
         publishableKey: _env.supabaseAnonKey,
         // The SDK's own debug output would bypass the log wrapper (docs/rules/logging.md).
         debug: false,
+        authOptions: const FlutterAuthClientOptions(
+          detectSessionInUriPredicate: isAuthCallback,
+        ),
       );
     } on Object {
       // Let the next attempt initialise again rather than replaying this failure for ever.
@@ -319,6 +322,40 @@ class SupabaseBackend implements Backend {
     }
     _log.warn('backend auth refresh failed', {'error': '$error'});
   }
+
+  /// Whether supabase_flutter may read [uri] as a sign-in link: only a PKCE callback (`code`)
+  /// or the server's error redirect (`error`, `error_code`, `error_description`). A link that
+  /// carries a session itself (`access_token`, `refresh_token`, anywhere in it) is ignored:
+  /// gotrue would install that session with no proof this device asked for it, so a crafted
+  /// `thelastroom://auth-callback#access_token=…` could sign the player into someone else's
+  /// account and upload their progress there (security audit 2026-11-05, deep-link session
+  /// injection). A `code` only signs in with the PKCE verifier this device stored when it sent
+  /// the link, so an unsolicited or someone else's code fails to exchange.
+  static bool isAuthCallback(Uri uri) {
+    final Map<String, String> fragment;
+    try {
+      fragment = uri.fragment.contains('=')
+          ? Uri.splitQueryString(uri.fragment)
+          : const {};
+    } on FormatException {
+      return false;
+    }
+    bool has(String key) =>
+        uri.queryParameters.containsKey(key) || fragment.containsKey(key);
+    if (_sessionParameters.any(has)) return false;
+    return has('code') ||
+        has('error') ||
+        has('error_code') ||
+        has('error_description');
+  }
+
+  /// What a link must never carry: a session (or provider tokens) handed over in the URL.
+  static const List<String> _sessionParameters = [
+    'access_token',
+    'refresh_token',
+    'provider_token',
+    'provider_refresh_token',
+  ];
 
   /// The server's code when [error], on the auth state stream, is a refused sign-in link, or
   /// null when it's a session's own trouble (an offline refresh, an expired session). The code
