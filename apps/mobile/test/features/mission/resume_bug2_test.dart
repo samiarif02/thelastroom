@@ -7,8 +7,8 @@ import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/features/debrief/reasoning_slip.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
+import 'package:the_last_room/features/mission/scene/room_intro.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
-import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
 import 'package:the_last_room/features/tips/tip_overlay.dart';
 import 'package:the_last_room/features/tips/tips.dart';
 import 'package:the_last_room/ui/daylight/trust_pips.dart';
@@ -69,8 +69,8 @@ void main() {
     expect(saved, isNotNull, reason: 'the stored shape still parses');
     await rig.resume.save(saved!);
     await rig.boot(Routes.mission(5), size: size);
-    await rig.until(find.text(ResumeSheet.title));
-    await tester.tap(find.text(ResumeSheet.resume));
+    await rig.until(find.text(RoomIntro.resume));
+    await tester.tap(find.text(RoomIntro.resume));
     await tester.pump();
     return rig;
   }

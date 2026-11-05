@@ -25,7 +25,6 @@ import '../recall/recall_controller.dart';
 import '../tips/tip_overlay.dart';
 import '../tips/tips.dart';
 import 'all_chapters_screen.dart';
-import 'elevator.dart';
 import 'floor_sheet.dart';
 import 'northstar_tower.dart';
 import 'room_entry.dart';
@@ -83,10 +82,11 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
 
   /// The rooms once loaded, kept so the tower can open when it next becomes the visible route.
   List<TowerRoom>? _loaded;
+
+  /// The room being entered: further taps wait until the tower is on top again.
   TowerRoom? _riding;
 
-  /// The ride has arrived and the room is opening: the lift stays shut under the room's door
-  /// transition (brief 50) until the tower is on top again.
+  /// The room is opening through its door (brief 50); cleared when the tower is back on top.
   bool _departed = false;
   String? _notice;
   Timer? _noticeTimer;
@@ -245,7 +245,7 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     // the Recall Room never show what was true before (brief 30's playthrough).
     final current = _isCurrent;
     if (current && !_wasCurrent) {
-      // Back from the room: the lift that took the player there is gone.
+      // Back from the room: the tower takes taps again.
       if (_departed) {
         _riding = null;
         _departed = false;
@@ -350,6 +350,7 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
     }
     announceRoomEntered(ref, room);
     setState(() => _riding = room);
+    _arrived();
   }
 
   /// A floor opened from the facade: its rooms, interviewers and how it's answered, open or
@@ -533,12 +534,6 @@ class _TowerScreenState extends ConsumerState<TowerScreen>
                 shape: tip == Tip.towerDoor ? TipShape.arch : TipShape.card,
                 onTarget: () => _endTip(TipAction.followed),
                 onDismiss: () => _endTip(TipAction.dismissed),
-              ),
-            if (_riding case final room?)
-              Elevator(
-                floor: room.mission.number,
-                grade: room.mission.grade,
-                onArrived: _arrived,
               ),
           ],
         ),

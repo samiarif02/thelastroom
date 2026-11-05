@@ -11,7 +11,7 @@ import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
-import 'package:the_last_room/features/mission/scene/mission_card.dart';
+import 'package:the_last_room/features/mission/scene/room_intro.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
 import 'package:the_last_room/ui/daylight/daylight_kit.dart'
@@ -265,10 +265,10 @@ void main() {
 
         // Back in: continue where you left off, at the evidence beat, same order.
         rig.container.read(routerProvider).go(Routes.mission(1));
-        await rig.until(find.text(ResumeSheet.title));
+        await rig.until(find.text(RoomIntro.resume));
         // The room is still opening through its door (brief 50): tap once it's open.
         await rig.run(DaylightMotion.door);
-        await tester.tap(find.text(ResumeSheet.resume));
+        await tester.tap(find.text(RoomIntro.resume));
         await rig.until(find.byType(ChoiceCard));
         expect(rig.state(1).resumed, isTrue);
         expect(rig.state(1).plays.single.option, strongest);
@@ -292,9 +292,11 @@ void main() {
         ),
       );
       await rig.boot(Routes.mission(1), size: realme8);
-      await rig.until(find.text(ResumeSheet.title));
-      await tester.tap(find.text(ResumeSheet.restart));
-      await rig.until(find.byType(MissionCard));
+      await rig.until(find.text(RoomIntro.resume));
+      await tester.tap(find.text(RoomIntro.startOver));
+      // Straight into the scene: the intro isn't shown a second time.
+      await rig.until(find.byType(TypewriterSubtitle));
+      expect(find.text(RoomIntro.start), findsNothing);
       expect(await rig.resume.load(mission.id), isNull);
       expect(rig.state(1).plays, isEmpty);
     });

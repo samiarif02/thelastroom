@@ -70,6 +70,7 @@ class MissionState {
     this.playerName = PlayerProfile.fallbackName,
     this.plays = const [],
     this.resumed = false,
+    this.introDone = false,
     this.saved,
     this.draft,
     this.earlierDraft,
@@ -113,6 +114,10 @@ class MissionState {
 
   /// This attempt was picked up where the player left it.
   final bool resumed;
+
+  /// The room's intro was already answered (Start over on it): the scene opens at once, the
+  /// intro isn't shown a second time.
+  final bool introDone;
 
   /// A part-played attempt the player left earlier: the screen offers to continue it.
   final SavedAttempt? saved;
@@ -240,6 +245,7 @@ class MissionState {
     baselineDraft: baselineDraft,
     plays: plays ?? this.plays,
     resumed: resumed,
+    introDone: introDone,
     saved: saved,
     draftDone: draftDone ?? this.draftDone,
     followUp: followUp ?? this.followUp,
@@ -431,6 +437,7 @@ class MissionController extends AsyncNotifier<MissionState> {
         playerName: now.playerName,
         earlierDraft: now.earlierDraft,
         baselineDraft: now.baselineDraft,
+        introDone: true,
       ),
     );
     await _guarded(() => ref.read(resumeStoreProvider).clear(now.mission.id));

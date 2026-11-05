@@ -7,11 +7,10 @@ import '../../core/audio/game_sounds.dart';
 import 'tower_rooms.dart';
 
 /// The cues of stepping into an open room, the same from the tower and the chapters list: the
-/// door and the lift sounds, and `room_entered`. The screen then rides its `Elevator` up.
+/// door's sound and `room_entered`. The screen then opens the room through its door, onto the
+/// room's intro (issue 76 retired the lift ride and its sound from this path).
 void announceRoomEntered(WidgetRef ref, TowerRoom room) {
-  ref.read(gameSoundsProvider)
-    ..roomEntered()
-    ..elevator();
+  ref.read(gameSoundsProvider).roomEntered();
   ref.read(analyticsProvider).track(AnalyticsEvent.roomEntered, {
     'mission_id': EventValue.id(room.mission),
     'replay': EventValue.flag(room.state == RoomState.done),

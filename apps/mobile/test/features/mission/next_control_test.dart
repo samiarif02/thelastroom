@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
-import 'package:the_last_room/features/mission/scene/mission_card.dart';
 import 'package:the_last_room/features/mission/widgets/beat_timer.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
@@ -21,8 +20,7 @@ void main() {
   }) async {
     final rig = MissionRig(tester, profile: profile);
     await rig.boot(Routes.mission(1), textScale: textScale);
-    await rig.until(find.byType(MissionCard));
-    await rig.tapScene();
+    await rig.startInterview();
     await rig.until(find.byType(NextControl));
     return rig;
   }

@@ -25,7 +25,7 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `account_signed_out` | "Sign out" on a saved account in Settings (FR-3): every room had backed up (sign-out is blocked otherwise), the account stays saved to its email, and this device's player data is cleared and a new guest starts. Never the email | `had_unsynced` (always `false`: an unsynced device can't sign out) |
 | `onboarding_completed` | The first-launch onboarding finishes, before the Tower (brief 13). Never the name | `skipped_steps`, `named`, `experience`, `target_role`, `nerves_level`, `calm_mode`, `weekly_goal` |
 | `tower_opened` | The Tower (home) is shown | `missions_done`, `after_mission` |
-| `room_entered` | The player enters a room on the Tower (the elevator starts) | `mission_id`, `replay` |
+| `room_entered` | The player enters a room on the Tower (its door opens onto the room's intro) | `mission_id`, `replay` |
 | `mission_started` | A mission scene starts | `mission_id`, `chapter`, `attempt_number` |
 | `mission_completed` | A mission's debrief is shown | `mission_id`, `chapter`, `score_bucket`, `attempt_number` |
 | `baseline_recorded` | Mission 1's first completion stores the baseline | `score_bucket` |

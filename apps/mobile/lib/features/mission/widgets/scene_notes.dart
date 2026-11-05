@@ -62,33 +62,3 @@ class LeaveSheet extends StatelessWidget {
     onSecondary: onLeave,
   );
 }
-
-/// Reopening a mission the player left: continue it, or start again.
-class ResumeSheet extends StatelessWidget {
-  const ResumeSheet({
-    super.key,
-    required this.onContinue,
-    required this.onRestart,
-    this.grade = ChapterGrade.lobby,
-  });
-
-  final VoidCallback onContinue;
-  final VoidCallback onRestart;
-  final ChapterGrade grade;
-
-  static const String title = 'Continue where you left off?';
-  static const String line = 'Your answers so far are kept, in the same order.';
-  static const String resume = 'Continue';
-  static const String restart = 'Start again';
-
-  @override
-  Widget build(BuildContext context) => ChoiceSheet(
-    title: title,
-    line: line,
-    primary: resume,
-    primaryIcon: PhosphorFill.play,
-    onPrimary: onContinue,
-    secondary: restart,
-    onSecondary: onRestart,
-  );
-}

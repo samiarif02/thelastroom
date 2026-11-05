@@ -335,7 +335,15 @@ movement becomes a 300 ms fade and the beats still fire.
 | 7 | **Recall note arrives** | The note slides in at −1.5°, and the honey tape presses down (scaleY 0.6 → 1, 300 ms). | light |
 | 8 | **Floor cleared** | 2.4 s total: rays fade in (300 ms); the badge drops from 0.8 scale (500 ms); the ribbon unfurls (scaleX, 300 ms); the three interviewers' windows pop up 120 ms apart, already smiling; arch-shaped confetti falls for 1.6 s. Tap to skip. | heavy at the badge |
 
-The elevator (1.2 s, skippable) stays as the transition between rooms.
+Into a room, the door is the transition (`DaylightTransition.door`): the room grows out of the
+door onto the **room intro** (issue 76) on the floor's tint: the interviewer smiling in their
+arch, "Floor 1 · room 5", "Room 5 · Something went wrong", "with Marcus, hiring manager", a
+white panel with what the room trains (`Mission.practises`), how it's answered and the tags
+(Choices or Out loud, the beats, Timed, No timer or Calm), "Marcus is ready when you are", and
+one honey button, "Start the interview". Nothing starts by itself; the arrow at the top goes back.
+A room left part-way shows the same card with Resume and Start over. The elevator ride and the
+floor-coloured title card that moved on after 2.8 s are gone: the floor's colour is a tint, never
+a full-screen flash, and no number counts.
 
 ---
 

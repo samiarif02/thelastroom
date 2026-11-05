@@ -12,7 +12,7 @@ import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/core/progress/progress_repository.dart';
 import 'package:the_last_room/features/debrief/ai_score_store.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
-import 'package:the_last_room/features/mission/scene/mission_card.dart';
+import 'package:the_last_room/features/mission/scene/room_intro.dart';
 import 'package:the_last_room/features/recall/recall_store.dart';
 import 'package:the_last_room/features/tips/tips.dart';
 import 'package:the_last_room/features/voice/audio/take_playback.dart';
@@ -124,6 +124,9 @@ class VoiceRig {
   VoiceState get state =>
       container.read(voiceControllerProvider(voiceFixture.number)).requireValue;
 
+  /// "Start the interview" on the room's intro (issue 76).
+  Future<void> startInterview() => tap(find.text(RoomIntro.start));
+
   /// Pumps until [finder] finds something, failing on any frame that throws.
   Future<void> until(
     Finder finder, {
@@ -150,17 +153,13 @@ class VoiceRig {
 
   /// From the title card to the recorder: the lines play (typed and spoken) by themselves.
   Future<void> playToAnswer() async {
-    await until(find.byType(MissionCard));
-    await tester.tapAt(const Offset(8, 140));
-    await tester.pump();
+    await startInterview();
     await until(find.text(RecorderPanel.readyLine).hitTestable());
   }
 
   /// From the title card to the recorder's explainer (the microphone not yet allowed).
   Future<void> playToAnswerExplained() async {
-    await until(find.byType(MissionCard));
-    await tester.tapAt(const Offset(8, 140));
-    await tester.pump();
+    await startInterview();
     await until(find.text(RecorderPanel.allow).hitTestable());
   }
 
