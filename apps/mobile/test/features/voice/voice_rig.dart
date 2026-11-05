@@ -125,7 +125,10 @@ class VoiceRig {
       container.read(voiceControllerProvider(voiceFixture.number)).requireValue;
 
   /// "Start the interview" on the room's intro (issue 76).
-  Future<void> startInterview() => tap(find.text(RoomIntro.start));
+  Future<void> startInterview() async {
+    await until(find.text(RoomIntro.start).hitTestable());
+    await tap(find.text(RoomIntro.start));
+  }
 
   /// Pumps until [finder] finds something, failing on any frame that throws.
   Future<void> until(

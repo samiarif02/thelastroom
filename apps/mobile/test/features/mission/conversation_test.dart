@@ -109,6 +109,7 @@ void main() {
     ) async {
       final rig = MissionRig(tester);
       await rig.boot(Routes.mission(1), size: realme8);
+      await rig.startInterview();
       await rig.until(find.byType(TypewriterSubtitle));
       expect(find.byType(ChoiceCard), findsNothing);
     });

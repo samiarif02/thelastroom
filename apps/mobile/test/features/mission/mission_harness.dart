@@ -348,12 +348,14 @@ class MissionRig {
     await tester.pump();
   }
 
-  /// "Start the interview" on the room's intro (issue 76), once the room has opened.
+  /// "Start the interview" on the room's intro (issue 76), once the room has opened (the
+  /// door transition ignores taps until it lands).
   Future<void> startInterview() async {
     final start = find.text(RoomIntro.start);
     await until(start);
     await tester.ensureVisible(start);
     await tester.pump();
+    await until(start.hitTestable());
     await tester.tap(start);
     await tester.pump();
   }
