@@ -68,8 +68,10 @@ class _Leagues extends StatelessWidget {
   Widget build(BuildContext context) => CatalogPaper(
     children: [
       const CatalogLabel('League badges'),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      Wrap(
+        alignment: WrapAlignment.spaceEvenly,
+        spacing: DaylightSpace.s12,
+        runSpacing: DaylightSpace.s12,
         children: [
           for (final l in League.values)
             Column(
