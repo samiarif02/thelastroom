@@ -35,6 +35,12 @@ function asServer(path: string, body: unknown): Promise<Response> {
   return rest(path, serviceKey, body, 'return=minimal', serviceKey);
 }
 
+/**
+ * A voice answer takes 3 of the player's 30 daily units and of the day's global budget: it sends
+ * up to two 90 s clips (20261105130000_ai_budget_and_clean_names.sql).
+ */
+const VOICE_UNITS = 3;
+
 const deps: Deps = {
   async callerId(jwt: string) {
     // The auth server checks the signature, the expiry and that the session still exists.
@@ -61,7 +67,7 @@ const deps: Deps = {
   },
 
   async claimQuota(jwt: string) {
-    const res = await rest('rpc/claim_ai_score', jwt, {});
+    const res = await rest('rpc/claim_ai_score', jwt, { p_units: VOICE_UNITS });
     if (res.status === 401 || res.status === 403) {
       await res.body?.cancel();
       throw new Unauthorized();

@@ -164,7 +164,7 @@ class RemoteProfile {
   final bool leaderboardVisible;
 
   Map<String, Object?> toRow() => {
-    'first_name': firstName,
+    'first_name': cleanFirstName(firstName),
     'experience': experience,
     'target_role': targetRole,
     'nerves_level': nervesLevel,
@@ -175,6 +175,19 @@ class RemoteProfile {
     'chapter_2_waitlist_at': chapter2WaitlistAt?.toUtc().toIso8601String(),
   };
 }
+
+/// [name] without control, zero-width or direction-override characters, trimmed; null when
+/// nothing visible is left. The first name is shown to other players on the leaderboard, so a
+/// name can't hide in it or flip the text around it (security audit 2026-11-05). The server's
+/// trigger (`private.clean_first_name`) strips the same set, for builds that don't.
+String? cleanFirstName(String? name) {
+  final cleaned = name?.replaceAll(_invisible, '').trim();
+  return cleaned == null || cleaned.isEmpty ? null : cleaned;
+}
+
+final RegExp _invisible = RegExp(
+  r'[\u0000-\u001F\u007F-\u009F\u00AD\u061C\u180E\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]',
+);
 
 /// What the device still sends to the leaderboard: "Show me on the leaderboard", on the player's
 /// own `profiles` row. Sent on its own (an upsert of this column only), so the profile's sync
