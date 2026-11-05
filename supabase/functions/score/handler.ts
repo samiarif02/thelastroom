@@ -3,6 +3,7 @@
 
 import { UpstreamError, type Usage, type Verdict } from './gemini.ts';
 import { InputError, MAX_BODY_BYTES, OutputError, parseInput, type ScoreInput, type ScoreResult } from './scoring.ts';
+import { readCapped } from './body.ts';
 
 /** What the handler needs from outside. */
 export interface Deps {
@@ -79,15 +80,19 @@ async function route(req: Request, deps: Deps): Promise<Response> {
   const jwt = bearer(req);
   if (jwt === null) return fail(401, 'unauthorized');
 
-  if (Number(req.headers.get('content-length') ?? '0') > MAX_BODY_BYTES) {
-    await req.body?.cancel();
-    return fail(413, 'too_large');
+  // Who's calling, before a byte of the body is read (security audit 2026-11-05).
+  let userId: string;
+  try {
+    userId = await deps.callerId(jwt);
+  } catch (error) {
+    if (error instanceof Unauthorized) return fail(401, 'unauthorized');
+    throw error;
   }
 
+  const raw = await readCapped(req, MAX_BODY_BYTES);
+  if (raw === null) return fail(413, 'too_large');
   let input: ScoreInput;
   try {
-    const raw = await req.text();
-    if (raw.length > MAX_BODY_BYTES) return fail(413, 'too_large');
     input = parseInput(JSON.parse(raw));
   } catch (error) {
     if (error instanceof InputError || error instanceof SyntaxError) {
@@ -96,9 +101,7 @@ async function route(req: Request, deps: Deps): Promise<Response> {
     throw error;
   }
 
-  let userId: string;
   try {
-    userId = await deps.callerId(jwt);
     if (!(await deps.claimQuota(jwt))) {
       deps.log({ event: 'ai_score_rate_limited', mission: input.missionId });
       return fail(429, 'daily_limit_reached');

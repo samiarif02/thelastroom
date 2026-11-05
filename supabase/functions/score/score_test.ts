@@ -386,6 +386,31 @@ Deno.test('handle: an invented or voice mission id and an oversized body are ref
   assertEquals((await handle(post(huge), fakeDeps())).status, 413);
 });
 
+Deno.test('handle: a chunked body over the cap is cut off at the cap, never buffered whole', async () => {
+  let pulled = 0;
+  const chunk = new TextEncoder().encode('x'.repeat(4096));
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      pulled++;
+      controller.enqueue(chunk);
+    },
+  });
+  const req = new Request('http://localhost/score', {
+    method: 'POST',
+    headers: { authorization: 'Bearer player.jwt' },
+    body: stream,
+  });
+  assertEquals((await handle(req, fakeDeps())).status, 413);
+  assert(pulled * chunk.byteLength <= MAX_BODY_BYTES + 2 * chunk.byteLength, `read ${pulled} chunks`);
+});
+
+Deno.test('handle: a refused JWT is answered before the body is read', async () => {
+  const req = post(body);
+  const res = await handle(req, fakeDeps({ callerId: () => Promise.reject(new Unauthorized()) }));
+  assertEquals(res.status, 401);
+  assertEquals(req.bodyUsed, false);
+});
+
 Deno.test('handle: an unexpected failure is a bare 500 with CORS, never a stack', async () => {
   const deps = fakeDeps({ claimQuota: () => Promise.reject(new Error('claim_ai_score answered 500')) });
   const res = await handle(post(body), deps);

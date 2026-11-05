@@ -5,6 +5,7 @@
 import { UpstreamError, type Usage } from '../score/gemini.ts';
 import type { VoiceVerdict } from './gemini_voice.ts';
 import { InputError, MAX_BODY_BYTES, OutputError, parseInput, type VoiceInput, type VoiceResult } from './voice.ts';
+import { readCapped } from '../score/body.ts';
 
 export interface Deps {
   /** Transcribes and grades (Gemini in production, a fake in tests). */
@@ -81,25 +82,26 @@ async function route(req: Request, deps: Deps): Promise<Response> {
   const jwt = bearer(req);
   if (jwt === null) return fail(401, 'unauthorized');
 
-  const length = Number(req.headers.get('content-length') ?? '0');
-  if (length > MAX_BODY_BYTES) {
-    await req.body?.cancel();
-    return fail(413, 'too_large');
+  // Who's calling, before a byte of the body is read (security audit 2026-11-05).
+  let userId: string;
+  try {
+    userId = await deps.callerId(jwt);
+  } catch (error) {
+    if (error instanceof Unauthorized) return fail(401, 'unauthorized');
+    throw error;
   }
 
+  const raw = await readCapped(req, MAX_BODY_BYTES);
+  if (raw === null) return fail(413, 'too_large');
   let input: VoiceInput;
   try {
-    const raw = await req.text();
-    if (raw.length > MAX_BODY_BYTES) return fail(413, 'too_large');
     input = parseInput(JSON.parse(raw));
   } catch (error) {
     if (error instanceof InputError || error instanceof SyntaxError) return fail(400, 'invalid_request');
     throw error;
   }
 
-  let userId: string;
   try {
-    userId = await deps.callerId(jwt);
     if (!(await deps.claimQuota(jwt))) {
       deps.log({ event: 'ai_score_rate_limited', mission: input.missionId });
       return fail(429, 'daily_limit_reached');

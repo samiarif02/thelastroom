@@ -417,6 +417,24 @@ Deno.test("handle: saved for the JWT's user only; a bad JWT or made-up room neve
   }
 });
 
+Deno.test('handle: a chunked body with no content-length is cut off at the cap', async () => {
+  const chunk = new Uint8Array(1_000_000);
+  let pulled = 0;
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      pulled++;
+      controller.enqueue(chunk);
+    },
+  });
+  const req = new Request('http://localhost/x', {
+    method: 'POST',
+    headers: { authorization: 'Bearer player.jwt' },
+    body: stream,
+  });
+  assertEquals((await handle(req, fakeDeps())).status, 413);
+  assert(pulled <= 14, `read ${pulled} MB`);
+});
+
 Deno.test('handle: an unexpected failure is a bare 500 with CORS', async () => {
   const res = await handle(post(body), fakeDeps({ claimQuota: () => Promise.reject(new Error('boom')) }));
   assertEquals(res.status, 500);

@@ -56,8 +56,12 @@ export class InputError extends Error {}
 /** The model answered with something unusable, even after repair. Answered with 502. */
 export class OutputError extends Error {}
 
-/** The whole request's cap: 3 beats, a reply and the question at 600 characters each fit many times. */
-export const MAX_BODY_BYTES = 64_000;
+/**
+ * The whole request's cap, in bytes: three beats with reasons, the question, the follow-up and
+ * the reply at 600 characters each come to about 6,000 characters, so this leaves room for
+ * non-ASCII text and nothing more.
+ */
+export const MAX_BODY_BYTES = 20_000;
 
 const MAX_TEXT = 600;
 const MAX_BEATS = 3;
