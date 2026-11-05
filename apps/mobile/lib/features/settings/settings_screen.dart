@@ -26,6 +26,11 @@ class SettingsScreen extends ConsumerWidget {
   static const String tipsLine =
       'See the short tips from the cast again: where to tap, and what to look for.';
   static const String tips = 'Show tips again';
+  static const String howHeading = 'How it works';
+  static const String howLine =
+      'The short tour again: what a room asks, how you’re scored, and how the lines that '
+      'caught you come back.';
+  static const String how = 'Show how it works';
 
   static const double _maxWidth = 520;
 
@@ -80,39 +85,40 @@ class SettingsScreen extends ConsumerWidget {
                       Entrance(
                         index: 4,
                         child: DaylightPanel(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Semantics(
-                                header: true,
-                                child: Text(
-                                  tipsHeading,
-                                  style: DaylightType.heading6,
-                                ),
-                              ),
-                              const SizedBox(height: DaylightSpace.s4),
-                              Text(
-                                tipsLine,
-                                style: DaylightType.body6.copyWith(
-                                  color: DaylightColors.ink2,
-                                ),
-                              ),
-                              const SizedBox(height: DaylightSpace.s16),
-                              TactileButton(
-                                label: tips,
-                                icon: PhosphorBold.lightbulbFilament,
-                                tone: TactileTone.quiet,
-                                compact: true,
-                                onPressed: () async {
-                                  await ref
-                                      .read(tipsProvider.notifier)
-                                      .replayAll();
-                                  if (context.mounted) {
-                                    context.go(Routes.tower());
-                                  }
-                                },
-                              ),
-                            ],
+                          child: _Replay(
+                            heading: howHeading,
+                            line: howLine,
+                            button: TactileButton(
+                              label: how,
+                              icon: PhosphorBold.bookOpen,
+                              tone: TactileTone.quiet,
+                              compact: true,
+                              onPressed: () => context.go(Routes.howItWorks),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: DaylightSpace.s24),
+                      Entrance(
+                        index: 5,
+                        child: DaylightPanel(
+                          child: _Replay(
+                            heading: tipsHeading,
+                            line: tipsLine,
+                            button: TactileButton(
+                              label: tips,
+                              icon: PhosphorBold.lightbulbFilament,
+                              tone: TactileTone.quiet,
+                              compact: true,
+                              onPressed: () async {
+                                await ref
+                                    .read(tipsProvider.notifier)
+                                    .replayAll();
+                                if (context.mounted) {
+                                  context.go(Routes.tower());
+                                }
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -125,5 +131,36 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     ),
+  );
+}
+
+/// A Settings card that brings something back: a heading, a line, and its quiet button.
+class _Replay extends StatelessWidget {
+  const _Replay({
+    required this.heading,
+    required this.line,
+    required this.button,
+  });
+
+  final String heading;
+  final String line;
+  final Widget button;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Semantics(
+        header: true,
+        child: Text(heading, style: DaylightType.heading6),
+      ),
+      const SizedBox(height: DaylightSpace.s4),
+      Text(
+        line,
+        style: DaylightType.body6.copyWith(color: DaylightColors.ink2),
+      ),
+      const SizedBox(height: DaylightSpace.s16),
+      button,
+    ],
   );
 }

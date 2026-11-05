@@ -14,6 +14,7 @@ import 'package:the_last_room/features/debrief/ai_score_store.dart';
 import 'package:the_last_room/features/intro/character_screen.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/scene/epilogue_scene.dart';
+import 'package:the_last_room/features/onboarding/explainer_copy.dart';
 import 'package:the_last_room/features/onboarding/onboarding_copy.dart';
 import 'package:the_last_room/features/onboarding/onboarding_screen.dart';
 import 'package:the_last_room/features/progress/chapter_report_screen.dart';
@@ -210,12 +211,15 @@ void main() {
       await rig.until(find.byType(OnboardingScreen));
       await rig.run(const Duration(seconds: 2));
       await still(tester, 'onboarding-1-$tag', size);
-      for (final (step, finder) in [
-        ('2', find.text(OnboardingCopy.castTitle)),
-        ('3', find.text(InterviewDateChoices.title)),
-        ('4', find.text(OnboardingCopy.nameTitle)),
+      for (final (step, finder, label) in [
+        ('2', find.text(ExplainerCopy.pages[1].title), ExplainerCopy.next),
+        ('3', find.text(ExplainerCopy.pages[2].title), ExplainerCopy.next),
+        ('4', find.text(ExplainerCopy.pages[3].title), ExplainerCopy.next),
+        ('5', find.text(ExplainerCopy.pages[4].title), ExplainerCopy.next),
+        ('6', find.text(InterviewDateChoices.title), ExplainerCopy.ready),
+        ('7', find.text(OnboardingCopy.nameTitle), OnboardingCopy.next),
       ]) {
-        final next = find.text(OnboardingCopy.next);
+        final next = find.text(label);
         await tester.ensureVisible(next);
         await tester.pump();
         await tester.tap(next);
