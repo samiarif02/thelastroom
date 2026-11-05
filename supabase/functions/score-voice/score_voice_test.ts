@@ -72,7 +72,7 @@ const answerAudio = wav(2);
 const replyAudio = wav(1);
 
 const body = {
-  mission_id: 'm08_voice_fixture',
+  mission_id: 'm08_team_conflict',
   hiring_for: 'Product Associate at Northstar Labs (entry level)',
   interviewer_role: 'Hiring Manager',
   question: 'Tell me about a time a plan changed under you.',
@@ -117,7 +117,7 @@ function geminiResponse(text: string): Response {
 
 Deno.test("parseInput accepts the app's request and measures the audio", () => {
   const input = parseInput(body);
-  assertEquals(input.missionId, 'm08_voice_fixture');
+  assertEquals(input.missionId, 'm08_team_conflict');
   assertEquals(input.listenFor.length, 3);
   assertEquals(input.followUpListenFor[0].dimension, 'adaptability');
   assertEquals(input.answer.bytes, 44 + 2 * SAMPLE_RATE * BYTES_PER_SAMPLE);
@@ -303,20 +303,25 @@ Deno.test('scoreVoiceWithGemini: an error status, a block, a cut-off and a timeo
 
 // ---------------------------------------------------------------- handler
 
-type FakeDeps = Deps & { logs: Record<string, unknown>[]; saved: VoiceInput[] };
+type FakeDeps = Deps & { logs: Record<string, unknown>[]; saved: VoiceInput[]; savedFor: string[] };
+
+const CALLER = 'aaaaaaaa-0000-4000-8000-00000000000a';
 
 function fakeDeps(overrides: Partial<Deps> = {}): FakeDeps {
   const deps: FakeDeps = {
     logs: [],
     saved: [],
+    savedFor: [],
+    callerId: () => Promise.resolve(CALLER),
     score: (input: VoiceInput): Promise<VoiceVerdict> =>
       Promise.resolve({
         result: parseVerdict(JSON.stringify(verdictJson), GEMINI_MODEL, input),
         usage: { promptTokens: 10, outputTokens: 5 },
       }),
     claimQuota: () => Promise.resolve(true),
-    saveScore(_jwt, input) {
+    saveScore(userId, input) {
       deps.saved.push(input);
+      deps.savedFor.push(userId);
       return Promise.resolve();
     },
     log: (fields: Record<string, unknown>) => deps.logs.push(fields),
@@ -398,6 +403,25 @@ Deno.test('handle: a failed save still returns the verdict', async () => {
   const res = await handle(post(body), deps);
   assertEquals(res.status, 200);
   assert(deps.logs.some((l) => l.event === 'voice_score_not_saved'));
+});
+
+Deno.test("handle: saved for the JWT's user only; a bad JWT or made-up room never scores", async () => {
+  const deps = fakeDeps();
+  assertEquals((await handle(post({ ...body, user_id: 'bbbbbbbb-0000-4000-8000-00000000000b' }), deps)).status, 200);
+  assertEquals(deps.savedFor, [CALLER]);
+  const refused = fakeDeps({ callerId: () => Promise.reject(new Unauthorized()) });
+  assertEquals((await handle(post(body), refused)).status, 401);
+  assertEquals(refused.saved.length, 0);
+  for (const missionId of ['m99_made_up', 'm01_the_opportunity']) {
+    assertEquals((await handle(post({ ...body, mission_id: missionId }), fakeDeps())).status, 400, missionId);
+  }
+});
+
+Deno.test('handle: an unexpected failure is a bare 500 with CORS', async () => {
+  const res = await handle(post(body), fakeDeps({ claimQuota: () => Promise.reject(new Error('boom')) }));
+  assertEquals(res.status, 500);
+  assertEquals(await res.json(), { error: 'internal_error' });
+  assertEquals(res.headers.get('access-control-allow-origin'), '*');
 });
 
 Deno.test('handle: CORS preflight and other methods', async () => {

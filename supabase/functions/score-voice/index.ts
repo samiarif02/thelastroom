@@ -10,16 +10,18 @@ import { scoreVoiceWithFallback } from './gemini_voice.ts';
 import { type Deps, handle, NotConfigured, Unauthorized } from './handler.ts';
 import { storedTranscript, type VoiceInput, type VoiceResult } from './voice.ts';
 
-// Set by the Supabase runtime; every database call runs as the player (their JWT), under RLS.
+// Set by the Supabase runtime. The quota is claimed as the player (their JWT, under RLS); the
+// verdict is inserted with the service role (issue 74), for the id the auth server read from it.
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
-function rest(path: string, jwt: string, body: unknown, prefer?: string): Promise<Response> {
+function rest(path: string, bearer: string, body: unknown, prefer?: string, apikey = anonKey): Promise<Response> {
   return fetch(`${supabaseUrl}/rest/v1/${path}`, {
     method: 'POST',
     headers: {
-      apikey: anonKey,
-      authorization: `Bearer ${jwt}`,
+      apikey,
+      authorization: `Bearer ${bearer}`,
       'content-type': 'application/json',
       ...(prefer ? { prefer } : {}),
     },
@@ -27,7 +29,31 @@ function rest(path: string, jwt: string, body: unknown, prefer?: string): Promis
   });
 }
 
+/** Writes as the server: the service role, which bypasses RLS. Only ever for a verified id. */
+function asServer(path: string, body: unknown): Promise<Response> {
+  if (!serviceKey) return Promise.reject(new Error('no service role key'));
+  return rest(path, serviceKey, body, 'return=minimal', serviceKey);
+}
+
 const deps: Deps = {
+  async callerId(jwt: string) {
+    // The auth server checks the signature, the expiry and that the session still exists.
+    const res = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: { apikey: anonKey, authorization: `Bearer ${jwt}` },
+    });
+    if (res.status >= 400 && res.status < 500) {
+      await res.body?.cancel();
+      throw new Unauthorized();
+    }
+    if (!res.ok) {
+      await res.body?.cancel();
+      throw new Error(`auth user answered ${res.status}`);
+    }
+    const user = (await res.json()) as { id?: unknown };
+    if (typeof user.id !== 'string' || user.id === '') throw new Unauthorized();
+    return user.id;
+  },
+
   score(input: VoiceInput) {
     const key = Deno.env.get('GEMINI_API_KEY');
     if (!key) return Promise.reject(new NotConfigured());
@@ -47,9 +73,10 @@ const deps: Deps = {
     return (await res.json()) === true;
   },
 
-  async saveScore(jwt: string, input: VoiceInput, result: VoiceResult) {
+  async saveScore(userId: string, input: VoiceInput, result: VoiceResult) {
     const d = result.dimensions;
-    const res = await rest('ai_scores', jwt, {
+    const res = await asServer('ai_scores', {
+      user_id: userId,
       attempt_id: input.attemptId,
       mission_id: input.missionId,
       model: result.model,
@@ -67,7 +94,7 @@ const deps: Deps = {
       },
       transcript: storedTranscript(result),
       points_made: result.pointsMade,
-    }, 'return=minimal');
+    });
     await res.body?.cancel();
     if (!res.ok) throw new Error(`ai_scores insert answered ${res.status}`);
   },

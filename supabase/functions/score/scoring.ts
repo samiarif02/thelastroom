@@ -4,6 +4,8 @@
 // The model is a senior recruiter grading the answer the player built: a score and its basis,
 // never advice (brief 22: "not a coach").
 
+import { CHOICE_MISSION_IDS } from './missions.ts';
+
 /** The four dimensions, in the order the dossier shows them. */
 export const DIMENSIONS = ['relevance', 'specificity', 'structure', 'adaptability'] as const;
 export type Dimension = (typeof DIMENSIONS)[number];
@@ -54,6 +56,9 @@ export class InputError extends Error {}
 /** The model answered with something unusable, even after repair. Answered with 502. */
 export class OutputError extends Error {}
 
+/** The whole request's cap: 3 beats, a reply and the question at 600 characters each fit many times. */
+export const MAX_BODY_BYTES = 64_000;
+
 const MAX_TEXT = 600;
 const MAX_BEATS = 3;
 const MAX_ID = 80;
@@ -72,6 +77,8 @@ export function parseInput(body: unknown): ScoreInput {
   const b = body as Record<string, unknown>;
   const missionId = text(b.mission_id, 'mission_id', MAX_ID);
   if (!ID_PATTERN.test(missionId)) throw new InputError('mission_id is not a content id');
+  // Only a real room is scored: the leaderboard credits each mission id once (issue 74).
+  if (!CHOICE_MISSION_IDS.has(missionId)) throw new InputError('mission_id is not a mission');
   if (!Array.isArray(b.beats) || b.beats.length === 0 || b.beats.length > MAX_BEATS) {
     throw new InputError(`beats must hold 1-${MAX_BEATS} beats`);
   }

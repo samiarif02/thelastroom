@@ -9,10 +9,15 @@ import { InputError, MAX_BODY_BYTES, OutputError, parseInput, type VoiceInput, t
 export interface Deps {
   /** Transcribes and grades (Gemini in production, a fake in tests). */
   score(input: VoiceInput): Promise<VoiceVerdict>;
+  /** The user id the auth server says [jwt] belongs to; [Unauthorized] otherwise (issue 74). */
+  callerId(jwt: string): Promise<string>;
   /** Takes one of the caller's daily AI scores, as the caller; `false` when they're spent. */
   claimQuota(jwt: string): Promise<boolean>;
-  /** Stores the verdict and transcript as the caller (owner-only RLS). Never the audio. */
-  saveScore(jwt: string, input: VoiceInput, result: VoiceResult): Promise<void>;
+  /**
+   * Stores the verdict and transcript for [userId] with the service role (only the server writes
+   * `ai_scores`, issue 74). Never the audio.
+   */
+  saveScore(userId: string, input: VoiceInput, result: VoiceResult): Promise<void>;
   /** One structured log line. Never the key, the JWT, the audio or any transcript. */
   log(fields: Record<string, unknown>): void;
   now(): number;
@@ -55,7 +60,21 @@ function wire(result: VoiceResult): Record<string, unknown> {
   };
 }
 
+/** The function's response for [req]; anything unexpected is a logged 500 with a bare code. */
 export async function handle(req: Request, deps: Deps): Promise<Response> {
+  try {
+    return await route(req, deps);
+  } catch (error) {
+    deps.log({
+      event: 'voice_score_failed',
+      reason: 'internal',
+      detail: error instanceof Error ? error.name : 'error',
+    });
+    return fail(500, 'internal_error');
+  }
+}
+
+async function route(req: Request, deps: Deps): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
   if (req.method !== 'POST') return fail(405, 'method_not_allowed');
 
@@ -78,7 +97,9 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     throw error;
   }
 
+  let userId: string;
   try {
+    userId = await deps.callerId(jwt);
     if (!(await deps.claimQuota(jwt))) {
       deps.log({ event: 'ai_score_rate_limited', mission: input.missionId });
       return fail(429, 'daily_limit_reached');
@@ -123,7 +144,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
 
   logUsage(deps, input, verdict.usage, deps.now() - started, verdict.result);
   try {
-    await deps.saveScore(jwt, input, verdict.result);
+    await deps.saveScore(userId, input, verdict.result);
   } catch (error) {
     deps.log({
       event: 'voice_score_not_saved',

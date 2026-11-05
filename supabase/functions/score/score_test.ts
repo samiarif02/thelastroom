@@ -15,6 +15,7 @@ import {
   answerTranscript,
   InputError,
   MAX_BASIS,
+  MAX_BODY_BYTES,
   OutputError,
   parseInput,
   parseVerdict,
@@ -97,6 +98,7 @@ Deno.test('parseInput rejects missing, malformed and oversized fields', () => {
     null,
     'text',
     { ...body, mission_id: 'Not An Id' },
+    { ...body, mission_id: 'm99_made_up' },
     { ...body, beats: [] },
     { ...body, beats: [...body.beats, body.beats[0]] },
     { ...body, beats: [{ ...body.beats[0], guessed: 'no' }] },
@@ -254,19 +256,26 @@ Deno.test("scoreWithFallback: the whole chain fits inside the app's 30 s late wi
 
 // ---------------------------------------------------------------- handler
 
-function fakeDeps(overrides: Partial<Deps> = {}): Deps & { logs: Record<string, unknown>[]; saved: number } {
+const CALLER = 'aaaaaaaa-0000-4000-8000-00000000000a';
+
+type FakeDeps = Deps & { logs: Record<string, unknown>[]; saved: number; savedFor: string[] };
+
+function fakeDeps(overrides: Partial<Deps> = {}): FakeDeps {
   const logs: Record<string, unknown>[] = [];
   const deps = {
     logs,
     saved: 0,
+    savedFor: [] as string[],
+    callerId: () => Promise.resolve(CALLER),
     score: (): Promise<Verdict> =>
       Promise.resolve({
         result: parseVerdict(JSON.stringify(verdictJson), GEMINI_MODEL),
         usage: { promptTokens: 10, outputTokens: 5 },
       }),
     claimQuota: () => Promise.resolve(true),
-    saveScore() {
+    saveScore(userId: string) {
       deps.saved++;
+      deps.savedFor.push(userId);
       return Promise.resolve();
     },
     log: (fields: Record<string, unknown>) => logs.push(fields),
@@ -341,6 +350,48 @@ Deno.test('handle: a failed save still returns the verdict', async () => {
   const res = await handle(post(body), deps);
   assertEquals(res.status, 200);
   assert(deps.logs.some((l) => l.event === 'ai_score_not_saved'));
+});
+
+Deno.test("handle: the verdict is saved for the JWT's user, never an id from the body (issue 74)", async () => {
+  const deps = fakeDeps();
+  const res = await handle(post({ ...body, user_id: 'bbbbbbbb-0000-4000-8000-00000000000b' }), deps);
+  assertEquals(res.status, 200);
+  assertEquals(deps.savedFor, [CALLER]);
+});
+
+Deno.test('handle: a JWT the auth server refuses is a 401 before the quota or Gemini', async () => {
+  let claimed = 0;
+  let scored = 0;
+  const deps = fakeDeps({
+    callerId: () => Promise.reject(new Unauthorized()),
+    claimQuota: () => {
+      claimed++;
+      return Promise.resolve(true);
+    },
+    score: (input: ScoreInput) => {
+      scored++;
+      return fakeDeps().score(input);
+    },
+  });
+  assertEquals((await handle(post(body), deps)).status, 401);
+  assertEquals([claimed, scored, deps.saved], [0, 0, 0]);
+});
+
+Deno.test('handle: an invented or voice mission id and an oversized body are refused (issue 74)', async () => {
+  for (const missionId of ['m99_made_up', 'm08_team_conflict']) {
+    const res = await handle(post({ ...body, mission_id: missionId }), fakeDeps());
+    assertEquals(res.status, 400, missionId);
+  }
+  const huge = JSON.stringify({ ...body, padding: 'x'.repeat(MAX_BODY_BYTES) });
+  assertEquals((await handle(post(huge), fakeDeps())).status, 413);
+});
+
+Deno.test('handle: an unexpected failure is a bare 500 with CORS, never a stack', async () => {
+  const deps = fakeDeps({ claimQuota: () => Promise.reject(new Error('claim_ai_score answered 500')) });
+  const res = await handle(post(body), deps);
+  assertEquals(res.status, 500);
+  assertEquals(await res.json(), { error: 'internal_error' });
+  assertEquals(res.headers.get('access-control-allow-origin'), '*');
 });
 
 Deno.test('handle: CORS preflight and other methods', async () => {
