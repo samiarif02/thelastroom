@@ -5,6 +5,8 @@
 // transcribes them, says which of the mission's points were made, and grades the CONTENT: never
 // accent, pronunciation or how the candidate sounds.
 
+import { VOICE_MISSION_IDS } from '../score/missions.ts';
+
 /** The four dimensions, in the order the dossier shows them. */
 export const DIMENSIONS = ['relevance', 'specificity', 'structure', 'adaptability'] as const;
 export type Dimension = (typeof DIMENSIONS)[number];
@@ -100,6 +102,13 @@ function id(value: unknown, field: string): string {
   return v;
 }
 
+/** A voice mission's id from the content: an invented room is never scored (issue 74). */
+function voiceMission(value: unknown): string {
+  const v = id(value, 'mission_id');
+  if (!VOICE_MISSION_IDS.has(v)) throw new InputError('mission_id is not a voice mission');
+  return v;
+}
+
 function points(value: unknown, field: string, min: number, max: number): ListenFor[] {
   if (!Array.isArray(value) || value.length < min || value.length > max) {
     throw new InputError(`${field} must hold ${min}-${max} points`);
@@ -178,7 +187,7 @@ export function parseInput(body: unknown): VoiceInput {
     throw new InputError('attempt_id must be a uuid or null');
   }
   return {
-    missionId: id(b.mission_id, 'mission_id'),
+    missionId: voiceMission(b.mission_id),
     hiringFor: text(b.hiring_for, 'hiring_for', 120),
     interviewerRole: text(b.interviewer_role, 'interviewer_role', 80),
     question: text(b.question, 'question'),

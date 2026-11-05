@@ -56,4 +56,16 @@ void main() {
     final log = Log(sink: (_) => throw StateError('sink down'));
     expect(() => log.error('boom'), returnsNormally);
   });
+
+  test('the DevTools sink gets the error redacted, never the raw object', () {
+    // Security audit 2026-11-05: developer.log was handed record.error as is.
+    final error = StateError(
+      // A made-up token, the shape redact.dart must catch.
+      'refused for sami@example.test with Bearer abcdefghijklmnopqrstuvwxyz', // allowlist secret
+    );
+    final shown = developerError(error)!;
+    expect(shown, isNot(contains('sami@example.test')));
+    expect(shown, isNot(contains('abcdefghijklmnopqrstuvwxyz')));
+    expect(developerError(null), isNull);
+  });
 }

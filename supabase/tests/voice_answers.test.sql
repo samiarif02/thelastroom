@@ -13,6 +13,12 @@ create function pg_temp.act_as(uid uuid) returns void language sql as $$
          set_config('role', 'authenticated', true);
 $$;
 
+-- The `score` functions write verdicts with the service role (issue 74).
+create function pg_temp.act_as_server() returns void language sql as $$
+  select set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, true),
+         set_config('role', 'service_role', true);
+$$;
+
 -- What the app's outbox sends for a voice attempt: no picks, the points made.
 prepare voice_attempt(jsonb) as
   insert into public.mission_attempts (
@@ -53,13 +59,15 @@ select throws_ok(
   'made is a list of point ids'
 );
 
--- What the `score-voice` function inserts, as the player.
+-- What the `score-voice` function inserts: as the server (service role), for the caller's id.
+select pg_temp.act_as_server();
+
 select lives_ok(
   $$ insert into public.ai_scores (
-       mission_id, model, relevance_score, specificity_score, structure_score,
+       user_id, mission_id, model, relevance_score, specificity_score, structure_score,
        adaptability_score, overall_score, basis, transcript, points_made
      ) values (
-       'm08_voice', 'gemini-3.8-flash', 70, 60, 50, 80, 64,
+       'aaaaaaaa-0000-4000-8000-00000000000a', 'm08_voice', 'gemini-3.8-flash', 70, 60, 50, 80, 64,
        '{"relevance":"a.","specificity":"b.","structure":"c.","adaptability":"d.","overall":"e."}',
        'Answer: I led the survey. Reply: I would ask first.', array['m08_a', 'm08_c']
      ) $$,
@@ -68,10 +76,10 @@ select lives_ok(
 
 select throws_ok(
   $$ insert into public.ai_scores (
-       mission_id, model, relevance_score, specificity_score, structure_score,
+       user_id, mission_id, model, relevance_score, specificity_score, structure_score,
        adaptability_score, overall_score, basis, transcript
      ) values (
-       'm08_voice', 'x', 1, 1, 1, 1, 1,
+       'aaaaaaaa-0000-4000-8000-00000000000a', 'm08_voice', 'x', 1, 1, 1, 1, 1,
        '{"relevance":"a.","specificity":"b.","structure":"c.","adaptability":"d.","overall":"e."}',
        repeat('x', 6001)
      ) $$,

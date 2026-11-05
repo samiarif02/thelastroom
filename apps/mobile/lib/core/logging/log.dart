@@ -42,10 +42,15 @@ void developerSink(LogRecord record) {
     jsonEncode(record.toJson(), toEncodable: (o) => o.toString()),
     name: 'thelastroom',
     level: _developerLevel[record.level]!,
-    error: record.error,
+    error: developerError(record.error),
     stackTrace: record.stackTrace,
   );
 }
+
+/// The error as [developerSink] hands it to `dart:developer`: redacted text, like the JSON line,
+/// never the raw object (which DevTools would show as is; security audit 2026-11-05).
+String? developerError(Object? error) =>
+    error == null ? null : redactText(error.toString());
 
 const Map<LogLevel, int> _developerLevel = {
   LogLevel.debug: 500,

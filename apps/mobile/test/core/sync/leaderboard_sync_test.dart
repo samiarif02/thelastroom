@@ -12,7 +12,9 @@ import 'package:the_last_room/core/sync/sync_worker.dart';
 import '../backend/fakes.dart';
 import '../db/db_support.dart';
 
-/// Issue 72: the leaderboard's numbers ride the outbox like the profile, on their own row.
+/// Issue 72: the leaderboard report rides the outbox like the profile, on its own row. Issue 74:
+/// only "Show me on the leaderboard" is sent; the XP stays on the phone (the board counts the
+/// server's verified XP).
 void main() {
   late AppDatabase db;
   late FakeBackend server;
@@ -53,13 +55,7 @@ void main() {
     final w = worker();
     await w.flush();
     await w.dispose();
-    expect(server.leaderboardReport?.toRow(), {
-      'leaderboard_visible': true,
-      'total_xp': 940,
-      'week_xp': 120,
-      'week_start': '2026-11-02',
-      'streak_weeks': 2,
-    });
+    expect(server.leaderboardReport?.toRow(), {'leaderboard_visible': true});
     expect(await rows(db, 'outbox'), 0);
     expect(server.profileUpserts, 0, reason: 'the profile row is its own');
   });
@@ -75,19 +71,19 @@ void main() {
     now = now.add(Outbox.maxBackoff);
     await w.flush();
     await w.dispose();
-    expect(server.leaderboardReport?.totalXp, 940);
+    expect(server.leaderboardReport?.visible, isTrue);
   });
 
-  test('saving twice is one row: the latest numbers are sent', () async {
+  test('saving twice is one row: the latest visibility is sent', () async {
     final store = DriftLeaderboardReportStore(db, signal: signal);
     await store.save(report);
-    await store.save(report.copyWith(totalXp: 1000));
+    await store.save(report.copyWith(visible: false));
     expect(await rows(db, 'outbox'), 1);
     final w = worker();
     await w.flush();
     await w.dispose();
     expect(server.leaderboardUpserts, 1);
-    expect(server.leaderboardReport?.totalXp, 1000);
+    expect(server.leaderboardReport?.visible, isFalse);
   });
 
   test('a fresh install restores "Show me on the leaderboard" off', () async {

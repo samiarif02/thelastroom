@@ -32,6 +32,13 @@ class LeaderboardScreen extends ConsumerStatefulWidget {
   static const String weekTab = 'This week';
   static const String allTab = 'All time';
 
+  /// Why the board's XP can be lower than the league's (issue 74): the board counts only what
+  /// the server scored itself, so nobody can type their way to the top.
+  static const String verifiedTitle = 'Verified XP';
+  static const String verifiedLine =
+      'The board counts rooms the recruiter scored online, your best in each room once. '
+      'Offline rooms count in your league, not here.';
+
   /// "Offline · as of Tue 14:05".
   static String asOf(DateTime at) {
     final local = at.toLocal();
@@ -119,6 +126,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                           index: 1,
                           child: _ScopeTabs(scope: _scope, onSelect: _select),
                         ),
+                        const SizedBox(height: DaylightSpace.s8),
+                        const Entrance(index: 1, child: _VerifiedNote()),
                         const SizedBox(height: DaylightSpace.s16),
                         Entrance(
                           index: 2,
@@ -272,6 +281,30 @@ class _SeenState extends ConsumerState<_Seen> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+/// "Verified XP": one quiet line under the tabs on what the board counts.
+class _VerifiedNote extends StatelessWidget {
+  const _VerifiedNote();
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    container: true,
+    child: Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: '${LeaderboardScreen.verifiedTitle} · ',
+            style: DaylightType.body4.copyWith(color: DaylightColors.ink),
+          ),
+          TextSpan(
+            text: LeaderboardScreen.verifiedLine,
+            style: DaylightType.body6.copyWith(color: DaylightColors.ink2),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 /// "This week" | "All time": two segments on a sand track, the current one white. Each is a

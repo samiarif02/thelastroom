@@ -188,11 +188,7 @@ class SyncWorker {
   Future<void> _sendLeaderboard() async {
     final report = await DriftLeaderboardReportStore.read(_db);
     if (report == null) return;
-    final utc = _clock().toUtc();
-    final today = CalendarDay(utc.year, utc.month, utc.day);
-    await _backend.upsertLeaderboardReport(
-      report.toRemote(fallbackWeek: weekStart(today)),
-    );
+    await _backend.upsertLeaderboardReport(report.toRemote());
   }
 
   Future<void> _scheduleRetry() async {
