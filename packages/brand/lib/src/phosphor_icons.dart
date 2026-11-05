@@ -88,6 +88,11 @@ abstract final class PhosphorRegular {
     fontFamily: 'PhosphorRegular',
     fontPackage: 'brand',
   );
+  static const IconData crownSimple = IconData(
+    0xe616,
+    fontFamily: 'PhosphorRegular',
+    fontPackage: 'brand',
+  );
   static const IconData door = IconData(
     0xe61c,
     fontFamily: 'PhosphorRegular',
@@ -100,6 +105,16 @@ abstract final class PhosphorRegular {
   );
   static const IconData elevator = IconData(
     0xecc0,
+    fontFamily: 'PhosphorRegular',
+    fontPackage: 'brand',
+  );
+  static const IconData eyeSlash = IconData(
+    0xe224,
+    fontFamily: 'PhosphorRegular',
+    fontPackage: 'brand',
+  );
+  static const IconData fire = IconData(
+    0xe242,
     fontFamily: 'PhosphorRegular',
     fontPackage: 'brand',
   );
@@ -362,6 +377,11 @@ abstract final class PhosphorBold {
     fontFamily: 'PhosphorBold',
     fontPackage: 'brand',
   );
+  static const IconData crownSimple = IconData(
+    0xe616,
+    fontFamily: 'PhosphorBold',
+    fontPackage: 'brand',
+  );
   static const IconData door = IconData(
     0xe61c,
     fontFamily: 'PhosphorBold',
@@ -374,6 +394,16 @@ abstract final class PhosphorBold {
   );
   static const IconData elevator = IconData(
     0xecc0,
+    fontFamily: 'PhosphorBold',
+    fontPackage: 'brand',
+  );
+  static const IconData eyeSlash = IconData(
+    0xe224,
+    fontFamily: 'PhosphorBold',
+    fontPackage: 'brand',
+  );
+  static const IconData fire = IconData(
+    0xe242,
     fontFamily: 'PhosphorBold',
     fontPackage: 'brand',
   );
@@ -636,6 +666,11 @@ abstract final class PhosphorFill {
     fontFamily: 'PhosphorFill',
     fontPackage: 'brand',
   );
+  static const IconData crownSimple = IconData(
+    0xe616,
+    fontFamily: 'PhosphorFill',
+    fontPackage: 'brand',
+  );
   static const IconData door = IconData(
     0xe61c,
     fontFamily: 'PhosphorFill',
@@ -648,6 +683,16 @@ abstract final class PhosphorFill {
   );
   static const IconData elevator = IconData(
     0xecc0,
+    fontFamily: 'PhosphorFill',
+    fontPackage: 'brand',
+  );
+  static const IconData eyeSlash = IconData(
+    0xe224,
+    fontFamily: 'PhosphorFill',
+    fontPackage: 'brand',
+  );
+  static const IconData fire = IconData(
+    0xe242,
     fontFamily: 'PhosphorFill',
     fontPackage: 'brand',
   );

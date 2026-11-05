@@ -74,6 +74,23 @@ void main() {
     });
   }
 
+  for (final (i, l) in DaylightLeagues.all.indexed) {
+    group('league ${i + 1}', () {
+      holds('white', DaylightColors.raised, 'base', l.base);
+      holds('white', DaylightColors.raised, 'deep', l.deep);
+      holds('deep', l.deep, 'tint', l.tint);
+      holds('deep', l.deep, 'white', DaylightColors.raised);
+      holds('deep', l.deep, 'paper', DaylightColors.paper);
+      holds('ink', DaylightColors.ink, 'tint', l.tint);
+      holds('ink2', DaylightColors.ink2, 'tint', l.tint);
+    });
+  }
+
+  test('five leagues, each its own colour', () {
+    expect(DaylightLeagues.all, hasLength(5));
+    expect({for (final l in DaylightLeagues.all) l.base}, hasLength(5));
+  });
+
   group('what the rules forbid really fails', () {
     test('soft text on a floor is under AA (use on or white)', () {
       expect(
@@ -99,6 +116,7 @@ void main() {
       DaylightColors.trap,
       DaylightColors.recall,
       for (final f in DaylightFloors.all) ...[f.base, f.deep],
+      for (final l in DaylightLeagues.all) ...[l.base, l.deep],
     ];
     for (final colour in colours) {
       expect(HSLColor.fromColor(colour).saturation, lessThan(0.8));

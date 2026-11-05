@@ -133,6 +133,69 @@ abstract final class DaylightFloors {
   static const List<FloorColours> all = [one, two, three];
 }
 
+/// One league's colours on the leaderboard (issue 72): its badge, its banner and its row.
+@immutable
+class LeagueColours {
+  const LeagueColours({
+    required this.base,
+    required this.deep,
+    required this.tint,
+  });
+
+  /// The badge's face, with white ([DaylightColors.raised]) text or glyph on it.
+  final Color base;
+
+  /// The badge's rim, and text on [tint], on white and on paper (the league's name, the bar).
+  final Color deep;
+
+  /// The league banner's ground and the league's quiet fill. [DaylightColors.ink] and
+  /// [DaylightColors.ink2] read on it.
+  final Color tint;
+}
+
+/// The five leagues, lowest first: Bronze, Silver, Gold, Platinum, Diamond. Every text pair is
+/// AA (`test/daylight_contrast_test.dart`). The app maps the engine's `League` to these by
+/// index, so the order is the engine's.
+abstract final class DaylightLeagues {
+  static const LeagueColours bronze = LeagueColours(
+    base: Color(0xFF9A5A2C),
+    deep: Color(0xFF6E3D1A),
+    tint: Color(0xFFF6E6D8),
+  );
+
+  static const LeagueColours silver = LeagueColours(
+    base: Color(0xFF5D6875),
+    deep: Color(0xFF3F4853),
+    tint: Color(0xFFECEFF2),
+  );
+
+  static const LeagueColours gold = LeagueColours(
+    base: Color(0xFF87681C),
+    deep: Color(0xFF654C0E),
+    tint: Color(0xFFF8EDCB),
+  );
+
+  static const LeagueColours platinum = LeagueColours(
+    base: Color(0xFF2D717D),
+    deep: Color(0xFF1D525C),
+    tint: Color(0xFFDFF0F2),
+  );
+
+  static const LeagueColours diamond = LeagueColours(
+    base: Color(0xFF2A69A6),
+    deep: Color(0xFF1A4C7C),
+    tint: Color(0xFFE1EEFA),
+  );
+
+  static const List<LeagueColours> all = [
+    bronze,
+    silver,
+    gold,
+    platinum,
+    diamond,
+  ];
+}
+
 /// A chapter's floor in Daylight.
 extension ChapterFloor on ChapterGrade {
   FloorColours get floor => switch (this) {
