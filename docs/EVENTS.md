@@ -47,7 +47,7 @@ added in brief 02 because the slice couldn't be measured without them (`docs/v1-
 | `recall_room_opened` | The Recall Room opens, from the tower | `due_cards` |
 | `recall_card_answered` | A Recall Room card is answered | `card_kind` (`trap`, `lesson`), `verdict` (`known`, `guessed`, `missed`), `box` (`one`, `three`, `seven`) |
 | `ai_score_requested` | The debrief asks the AI recruiter (the `score` function) to score the answer | `mission_id` |
-| `ai_score_shown` | The AI's verdict is shown on the dossier (`late`: it arrived after the offline score was showing, which it then replaces) | `mission_id`, `score_bucket`, `late` |
+| `ai_score_shown` | The AI's verdict is shown on the dossier (`late`: it arrived after the offline score was showing, and the player tapped "The recruiter's score is ready" to swap it in; a late verdict never replaces the sheet on its own) | `mission_id`, `score_bucket`, `late` |
 | `ai_score_fallback` | No AI verdict, so the dossier shows the engine's "Offline score" | `mission_id`, `reason` (`noBackend`, `noSession`, `timeout`, `limited`, `error`) |
 | `answer_built` | The player locks in an answer built from fragments (brief 27) | `mission_id`, `beat`, `fragments`, `missing`, `out_of_order`, `decoy_used`, `guessed` |
 | `score_basis_viewed` | The player opens "How we scored this" on the debrief (brief 36) | `mission_id`, `source` (`ai`, `offline`) |

@@ -535,8 +535,8 @@ class _FloorGroup extends StatelessWidget {
   final Map<String, _RoomStand> stands;
   final Map<String, SavedAiScore> aiScores;
 
-  static const double _swatchW = 16;
-  static const double _swatchH = 20;
+  /// The header's door: 16 wide, 25 tall, beside a title3 line.
+  static const double _door = 16;
 
   @override
   Widget build(BuildContext context) {
@@ -555,16 +555,18 @@ class _FloorGroup extends StatelessWidget {
             header: true,
             child: Row(
               children: [
-                Container(
-                  width: _swatchW,
-                  height: _swatchH,
-                  decoration: BoxDecoration(
-                    color: f.base,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(DaylightRadius.archTop),
-                      bottom: Radius.circular(DaylightSpace.s2),
+                // A small closed door in the floor's colour (the owner, 4 Nov: doors, not
+                // plain arches), pale with a lock on a floor not reached yet.
+                ExcludeSemantics(
+                  child: switch (reached ? DoorInk.open(f) : DoorInk.pale(f)) {
+                    final ink => TowerDoor(
+                      state: reached ? DoorState.closed : DoorState.locked,
+                      width: _door,
+                      leaf: ink.leaf,
+                      panel: reached ? ink.panel : f.deep,
+                      frame: ink.frame,
                     ),
-                  ),
+                  },
                 ),
                 const SizedBox(width: DaylightSpace.s8),
                 Expanded(
