@@ -6,7 +6,6 @@ import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/features/debrief/debrief_view.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
-import 'package:the_last_room/features/tower/elevator.dart';
 import 'package:the_last_room/features/tower/floor_sheet.dart';
 import 'package:the_last_room/features/tower/northstar_tower.dart';
 import 'package:the_last_room/features/tower/tower_door.dart';
@@ -163,7 +162,7 @@ void main() {
     );
   });
 
-  testWidgets('entering a room: the elevator, then the mission', (
+  testWidgets('entering a room: straight through its door to the intro', (
     tester,
   ) async {
     final rig = MissionRig(tester);
@@ -179,9 +178,9 @@ void main() {
     await tester.pump();
     await tester.tap(room);
     await tester.pump();
-    expect(find.byType(Elevator), findsOneWidget);
+    // No lift ride any more (issue 76): the door's sound, then the room.
     expect(rig.sounds.count('roomEntered'), 1);
-    expect(rig.sounds.count('elevator'), 1);
+    expect(rig.sounds.count('elevator'), 0);
     expect(rig.analytics.only(AnalyticsEvent.roomEntered).wire, {
       'mission_id': missions[1].id,
       'replay': false,
@@ -263,7 +262,7 @@ void main() {
     await tester.tap(locked);
     await rig.run(const Duration(milliseconds: 600));
     expect(find.byType(FloorSheet), findsOneWidget);
-    expect(find.byType(Elevator), findsNothing);
+    expect(find.byType(MissionPlayer), findsNothing);
     expect(
       find.descendant(
         of: find.byType(FloorSheet),

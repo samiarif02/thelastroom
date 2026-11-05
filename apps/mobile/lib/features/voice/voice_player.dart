@@ -15,7 +15,7 @@ import '../debrief/debrief_view.dart';
 import '../debrief/deliberation_scene.dart';
 import '../mission/mission_lookup.dart';
 import '../mission/scene/epilogue_scene.dart';
-import '../mission/scene/mission_card.dart';
+import '../mission/scene/room_intro.dart';
 import '../mission/scene/room_layout.dart';
 import '../mission/widgets/leave_control.dart';
 import '../tips/tip_overlay.dart';
@@ -32,7 +32,7 @@ import 'widgets/voice_sheet.dart';
 
 /// Where a voice mission's scene is. Later stages never go back.
 enum VoiceStage {
-  /// The mission's title card.
+  /// The room's intro: who's asking, what it trains, "Start the interview" (issue 76).
   card,
 
   /// The letterbox bars slide in.
@@ -218,8 +218,9 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
     }
   }
 
+  /// "Start the interview" on the room's intro.
   void _cardDone() {
-    if (_stage != VoiceStage.card) return;
+    if (_stage != VoiceStage.card || !mounted) return;
     _sounds.ambience(_game.mission.chapter);
     _go(VoiceStage.opening);
     unawaited(_after(_beforeLines, _startLines));
@@ -241,8 +242,6 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
   /// A tap on the scene: completes the typing line, or moves on from a typed one.
   void _tap() {
     switch (_stage) {
-      case VoiceStage.card:
-        _cardDone();
       case VoiceStage.opening:
         _startLines();
       case VoiceStage.lines || VoiceStage.followUp when !_typer.isComplete:
@@ -453,7 +452,13 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
     return PopScope<Object?>(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && !_leaving) setState(() => _leaving = true);
+        if (didPop || _leaving) return;
+        // Nothing has started on the intro: back simply goes back.
+        if (_stage == VoiceStage.card) {
+          unawaited(_leave());
+        } else {
+          setState(() => _leaving = true);
+        }
       },
       child: DaylightGround(
         color: f.tint,
@@ -484,7 +489,7 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
                     onLeading: _stage == VoiceStage.card || _leaving
                         ? null
                         : () => setState(() => _leaving = true),
-                    kicker: MissionCard.kicker(mission),
+                    kicker: RoomIntro.kicker(mission),
                     title: mission.title,
                     trailing: MuteControl(muted: muted, onPressed: _toggleMute),
                   ),
@@ -519,15 +524,21 @@ class _VoicePlayerState extends ConsumerState<VoicePlayer> {
               ),
             ),
             if (_stage == VoiceStage.card)
-              Semantics(
-                button: true,
-                label: VoicePlayer.continueLabel,
-                onTap: _cardDone,
-                child: GestureDetector(
+              // Over the room, opaque to taps and to the screen reader: only its buttons act.
+              BlockSemantics(
+                child: Listener(
                   behavior: HitTestBehavior.opaque,
-                  excludeFromSemantics: true,
-                  onTap: _cardDone,
-                  child: MissionCard(mission: mission, onFinished: _cardDone),
+                  child: RoomIntro(
+                    mission: mission,
+                    onStart: () {
+                      _sounds.uiTap();
+                      _cardDone();
+                    },
+                    onBack: () {
+                      _sounds.uiTap();
+                      unawaited(_leave());
+                    },
+                  ),
                 ),
               ),
             if (_micAt case final at? when !_leaving && recorder != null)

@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_last_room/app/app.dart';
 import 'package:the_last_room/app/router.dart';
-import 'package:the_last_room/features/mission/scene/mission_card.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/ui/daylight/daylight_kit.dart';
 import 'package:the_last_room/ui/subtitle/typewriter_subtitle.dart';
@@ -31,8 +30,7 @@ void main() {
           'follow-up', (tester) async {
         final rig = MissionRig(tester);
         await rig.boot(Routes.mission(1), textScale: textScale);
-        await rig.until(find.byType(MissionCard));
-        await rig.tapScene();
+        await rig.startInterview();
         final bubble = find.byType(TypewriterSubtitle);
         var frames = 0;
         void check() {

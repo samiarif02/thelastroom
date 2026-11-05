@@ -232,7 +232,7 @@ void main() {
     final rig = VoiceRig(tester);
     await rig.boot();
     await rig.until(find.byType(VoicePlayer));
-    await rig.tester.tapAt(const Offset(8, 140));
+    await rig.startInterview();
     await rig.until(find.text(MuteControl.on));
     await rig.tap(find.text(MuteControl.on));
     expect(find.text(MuteControl.off), findsOneWidget);

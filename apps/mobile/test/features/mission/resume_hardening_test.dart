@@ -4,8 +4,8 @@ import 'package:the_last_room/app/router.dart';
 import 'package:the_last_room/features/mission/mission_controller.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
+import 'package:the_last_room/features/mission/scene/room_intro.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
-import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
 
 import 'mission_harness.dart';
 
@@ -35,8 +35,8 @@ void main() {
       ),
     );
     await rig.boot(Routes.mission(5));
-    await rig.until(find.text(ResumeSheet.title));
-    await tester.tap(find.text(ResumeSheet.resume));
+    await rig.until(find.text(RoomIntro.resume));
+    await tester.tap(find.text(RoomIntro.resume));
     await tester.pump();
     return rig;
   }
@@ -94,8 +94,8 @@ void main() {
       ),
     );
     await rig.boot(Routes.mission(4));
-    await rig.until(find.text(ResumeSheet.title));
-    await tester.tap(find.text(ResumeSheet.resume));
+    await rig.until(find.text(RoomIntro.resume));
+    await tester.tap(find.text(RoomIntro.resume));
     await tester.pump();
     final plays = rig.state(4).plays;
     expect(plays, hasLength(2));

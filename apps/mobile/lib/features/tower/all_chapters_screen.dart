@@ -13,9 +13,7 @@ import '../../core/analytics/event_value.dart';
 import '../../core/audio/game_sounds.dart';
 import '../../ui/daylight/daylight_kit.dart';
 import '../../ui/daylight/daylight_route.dart';
-import '../mission/mission_lookup.dart';
 import 'chapter_section.dart';
-import 'elevator.dart';
 import 'room_entry.dart';
 import 'tower_rooms.dart';
 
@@ -98,10 +96,11 @@ class _AllChaptersScreenState extends ConsumerState<AllChaptersScreen> {
       _note = null;
       _riding = room;
     });
+    _arrived();
   }
 
-  /// The lift has arrived: into the room through the door that was tapped. The list stays
-  /// under it, shut, so back from the room returns here.
+  /// Into the room through the door that was tapped. The list stays under it, so back from
+  /// the room returns here.
   void _arrived() {
     final room = _riding;
     if (room == null || _departed || !mounted) return;
@@ -199,12 +198,6 @@ class _AllChaptersScreenState extends ConsumerState<AllChaptersScreen> {
               ],
             ),
           ),
-          if (_riding case final room?)
-            Elevator(
-              floor: room.mission.number,
-              grade: room.mission.grade,
-              onArrived: _arrived,
-            ),
         ],
       ),
     );

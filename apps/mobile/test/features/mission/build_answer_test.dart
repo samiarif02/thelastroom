@@ -10,9 +10,9 @@ import 'package:the_last_room/features/debrief/reasoning_slip.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
+import 'package:the_last_room/features/mission/scene/room_intro.dart';
 import 'package:the_last_room/features/mission/widgets/build_panel.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
-import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
 import 'package:the_last_room/features/recall/recall_deck.dart';
 import 'package:the_last_room/ui/film_kit.dart';
 
@@ -214,8 +214,8 @@ void main() {
       ),
     );
     await rig.boot(Routes.mission(4));
-    await rig.until(find.text(ResumeSheet.title));
-    await tester.tap(find.text(ResumeSheet.resume));
+    await rig.until(find.text(RoomIntro.resume));
+    await tester.tap(find.text(RoomIntro.resume));
     await tester.pump();
     expect(rig.state(4).plays, hasLength(2));
     expect(rig.state(4).plays[1].option.text, built.text);

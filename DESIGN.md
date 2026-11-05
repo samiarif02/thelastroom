@@ -21,8 +21,10 @@ the top.**
 
 - **Home is the tower, seen from outside.** Lit windows are completed missions, the current
   floor glows, floors above are dark (locked). Tapping a floor zooms the camera into it.
-- **The elevator is the transition** between missions: doors close, the floor counter ticks, a
-  soft chime, doors open on the next room. About 1.2 s, skippable.
+- **The door is the transition** into a room: the room grows out of the door that was tapped,
+  onto the room's intro (who's asking, what it trains, how you answer), and the player starts
+  when ready. Issue 76 retired the elevator ride (full-screen floor-coloured doors and a
+  counting floor number), which a reviewer found confusing.
 - **The final room** (Chapter 3, the top floor): a dark office, the city skyline behind Sam.
   Visible from the start. That's the curiosity hook.
 

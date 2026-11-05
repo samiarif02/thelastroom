@@ -13,7 +13,7 @@ import 'package:the_last_room/features/debrief/red_pen_slip.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/scene/epilogue_scene.dart';
-import 'package:the_last_room/features/mission/scene/mission_card.dart';
+import 'package:the_last_room/features/mission/scene/room_intro.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/features/progress/chapter_report_screen.dart';
 import 'package:the_last_room/features/progression/debrief_rewards.dart';
@@ -126,7 +126,7 @@ void main() {
       await rig.until(find.byType(VoicePlayer));
       final opened = tester.widget<VoicePlayer>(find.byType(VoicePlayer));
       expect(opened.number, missions.firstWhere((m) => m.chapter == 2).number);
-      await rig.until(find.byType(MissionCard));
+      await rig.until(find.text(RoomIntro.start));
     },
   );
 }
@@ -282,8 +282,7 @@ Future<void> _playVoice(MissionRig rig, Mission m, _VoiceFakes fakes) async {
   final tester = rig.tester;
   final voice = m.voice!;
   await rig.until(find.byType(VoicePlayer));
-  await rig.until(find.byType(MissionCard));
-  await rig.tapScene();
+  await rig.startInterview();
   await _ready(rig);
   await _record(rig, fakes, const Duration(seconds: 3));
   await _until(rig, find.text(RecorderPanel.readyLine), absent: true);

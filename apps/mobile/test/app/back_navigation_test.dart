@@ -6,6 +6,7 @@ import 'package:the_last_room/core/analytics/analytics_event.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/mission_screen.dart';
+import 'package:the_last_room/features/mission/scene/room_intro.dart';
 import 'package:the_last_room/features/mission/widgets/scene_notes.dart';
 import 'package:the_last_room/features/onboarding/explainer_copy.dart';
 import 'package:the_last_room/features/onboarding/onboarding_screen.dart';
@@ -105,12 +106,32 @@ void main() {
       ),
     );
     await rig.until(find.byType(MissionPlayer));
+    await rig.startInterview();
     await rig.run(const Duration(seconds: 1));
     await back(rig);
     expect(find.byType(LeaveSheet), findsOneWidget);
     expect(find.byType(TowerScreen), findsNothing);
     expect(exits, 0);
   });
+
+  testWidgets(
+    'back on a room\'s intro goes back to the tower: nothing started',
+    (tester) async {
+      final rig = await atTower(tester);
+      await tester.tap(
+        find.bySemanticsLabel(
+          TowerHero.playLabel(towerRooms(missions, const []).first),
+        ),
+      );
+      await rig.until(find.text(RoomIntro.start));
+      await rig.run(const Duration(seconds: 1));
+      await back(rig);
+      await rig.until(find.byType(TowerScreen));
+      expect(find.byType(LeaveSheet), findsNothing);
+      expect(rig.analytics.count(AnalyticsEvent.missionStarted), 0);
+      expect(exits, 0);
+    },
+  );
 
   testWidgets('a deep link opens the mission with the tower underneath', (
     tester,

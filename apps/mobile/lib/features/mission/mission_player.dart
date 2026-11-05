@@ -23,7 +23,7 @@ import 'mission_controller.dart';
 import 'mission_lookup.dart';
 import 'scene/epilogue_scene.dart';
 import 'scene/lower_third.dart';
-import 'scene/mission_card.dart';
+import 'scene/room_intro.dart';
 import 'scene/room_layout.dart';
 import 'widgets/beat_timer.dart';
 import 'widgets/build_panel.dart';
@@ -35,7 +35,7 @@ import 'widgets/scene_notes.dart';
 
 /// Where the scene is. The order matters: later stages never go back.
 enum SceneStage {
-  /// The mission's title card.
+  /// The room's intro: who's asking, what it trains, "Start the interview" (issue 76).
   card,
 
   /// The letterbox bars slide in on the wide shot.
@@ -103,7 +103,6 @@ class MissionPlayer extends ConsumerStatefulWidget {
   final VoidCallback onLeave;
 
   static const String continueLabel = 'Continue the scene';
-  static const String cardContinueLabel = 'Continue';
 
   /// After a tap picks a card, another tap can still change it for this long; then it's said.
   /// A tap on the picked card says it at once.
@@ -234,7 +233,12 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
     // Resolved now, not lazily: `dispose` stops the sound, and `ref` can't be read by then.
     _sounds;
     _tips;
-    if (_game.resumed) _resumeScene();
+    if (_game.resumed) {
+      _resumeScene();
+    } else if (_game.introDone) {
+      // Start over on the intro: the room opens straight away, no second intro.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _cardDone());
+    }
     _lifecycle = AppLifecycleListener(
       onPause: () => _sounds.stopAll(),
       onResume: () => _sounds.ambience(_game.mission.chapter),
@@ -302,8 +306,9 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
 
   // The scene's beats, in order.
 
+  /// "Start the interview" on the room's intro.
   void _cardDone() {
-    if (_stage != SceneStage.card) return;
+    if (_stage != SceneStage.card || !mounted) return;
     _sounds.ambience(_game.mission.chapter);
     _go(SceneStage.opening);
     // No letterbox in the daylit room: the lines start after a breath.
@@ -380,8 +385,6 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   /// countdown, or moves on to the next one.
   void _tap() {
     switch (_stage) {
-      case SceneStage.card:
-        _cardDone();
       case SceneStage.opening:
         _startLines();
       case SceneStage.push:
@@ -763,7 +766,13 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
       // Back mid-mission never just closes the scene: it asks first, and keeps the attempt.
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && !_leaving) setState(() => _leaving = true);
+        if (didPop || _leaving) return;
+        // Nothing has started on the intro: back simply goes back.
+        if (_stage == SceneStage.card) {
+          _backOut();
+        } else {
+          setState(() => _leaving = true);
+        }
       },
       child: DaylightGround(
         color: f.tint,
@@ -869,16 +878,19 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
                 onDismiss: () => _endTip(TipAction.dismissed),
               ),
             if (_stage == SceneStage.card)
-              // The card's title stays readable; the tap on it is one labelled button.
-              Semantics(
-                button: true,
-                label: MissionPlayer.cardContinueLabel,
-                onTap: _cardDone,
-                child: GestureDetector(
+              // Over the room, opaque to taps and to the screen reader: only its buttons act.
+              BlockSemantics(
+                child: Listener(
                   behavior: HitTestBehavior.opaque,
-                  excludeFromSemantics: true,
-                  onTap: _cardDone,
-                  child: MissionCard(mission: mission, onFinished: _cardDone),
+                  child: RoomIntro(
+                    mission: mission,
+                    calm: _profile.calmMode,
+                    onStart: () {
+                      _sounds.uiTap();
+                      _cardDone();
+                    },
+                    onBack: _backOut,
+                  ),
                 ),
               ),
             if (_leaving)
@@ -900,6 +912,15 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
   /// height from which they do; on a shorter phone, two.
   static const int _cardsThatFit = 3;
   static const double _roomFitsFrom = 840;
+
+  /// Back from the intro: nothing was played, so nothing is saved.
+  void _backOut() {
+    if (_stage != SceneStage.card) return;
+    _sounds
+      ..uiTap()
+      ..stopAll();
+    widget.onLeave();
+  }
 
   Future<void> _leave() async {
     _changeTimer?.cancel();
@@ -927,7 +948,7 @@ class _MissionPlayerState extends ConsumerState<MissionPlayer>
       onLeading: _stage == SceneStage.card || _leaving
           ? null
           : () => setState(() => _leaving = true),
-      kicker: inBeats ? null : MissionCard.kicker(mission),
+      kicker: inBeats ? null : RoomIntro.kicker(mission),
       title: inBeats ? null : mission.title,
       middle: inBeats
           ? BeatProgress(

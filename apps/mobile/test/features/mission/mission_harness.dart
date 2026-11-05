@@ -20,7 +20,7 @@ import 'package:the_last_room/features/debrief/ai_score_store.dart';
 import 'package:the_last_room/features/mission/mission_controller.dart';
 import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/mission_resume.dart';
-import 'package:the_last_room/features/mission/scene/mission_card.dart';
+import 'package:the_last_room/features/mission/scene/room_intro.dart';
 import 'package:the_last_room/features/mission/widgets/build_panel.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/draft_panel.dart';
@@ -348,12 +348,23 @@ class MissionRig {
     await tester.pump();
   }
 
-  /// Skips the title card and plays the lines (letting each type a little, so the typing
+  /// "Start the interview" on the room's intro (issue 76), once the room has opened (the
+  /// door transition ignores taps until it lands).
+  Future<void> startInterview() async {
+    final start = find.text(RoomIntro.start);
+    await until(start);
+    await tester.ensureVisible(start);
+    await tester.pump();
+    await until(start.hitTestable());
+    await tester.tap(start);
+    await tester.pump();
+  }
+
+  /// Starts from the room's intro and plays the lines (letting each type a little, so the typing
   /// sound fires) up to the question landing and the push in: each line is completed with a
   /// tap, then moved on with one tap on the Next control.
   Future<void> playLines(int number) async {
-    await until(find.byType(MissionCard));
-    await tapScene();
+    await startInterview();
     final lines = state(number).scene.length + 1;
     for (var i = 0; i < lines; i++) {
       await until(find.byType(TypewriterSubtitle));

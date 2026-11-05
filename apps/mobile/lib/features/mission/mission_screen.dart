@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:brand/brand.dart';
 import 'package:content/content.dart';
 import 'package:flutter/widgets.dart';
@@ -6,13 +8,15 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
 import '../../app/router.dart';
+import '../../core/audio/game_sounds.dart';
+import '../../core/profile/profile_repository.dart';
 import '../../ui/daylight/daylight_kit.dart';
 import '../voice/voice_controller.dart';
 import '../voice/voice_player.dart';
 import 'mission_controller.dart';
 import 'mission_lookup.dart';
 import 'mission_player.dart';
-import 'widgets/scene_notes.dart';
+import 'scene/room_intro.dart';
 
 /// The route for mission [number]: the scene once the attempt is ready, a dark room with the
 /// lamp warming while it loads, and a locked door if it can't be played. Nothing here waits on
@@ -26,7 +30,12 @@ class MissionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // A room the tower hasn't opened yet (a deep link): say how it opens, never play it.
     final blocker = ref.watch(missionBlockerProvider(number));
-    if (blocker.isLoading) return const _DarkRoom();
+    final mission = missionByNumber(
+      number,
+      catalog: ref.watch(missionCatalogProvider),
+    );
+    final loading = _DarkRoom(grade: mission?.grade ?? ChapterGrade.lobby);
+    if (blocker.isLoading) return loading;
     if (blocker.value case final before?) {
       return _LockedDoor(
         title: _LockedDoor.notYetTitle,
@@ -34,10 +43,6 @@ class MissionScreen extends ConsumerWidget {
       );
     }
     // A voice mission (brief 35) plays in the voice player: spoken lines, recorded answers.
-    final mission = missionByNumber(
-      number,
-      catalog: ref.watch(missionCatalogProvider),
-    );
     if (mission?.answerMode == AnswerMode.voice) {
       return switch (ref.watch(voiceControllerProvider(number))) {
         AsyncData() => VoicePlayer(
@@ -59,26 +64,30 @@ class MissionScreen extends ConsumerWidget {
                 stackTrace: stackTrace,
               ),
         ),
-        _ => const _DarkRoom(),
+        _ => loading,
       };
     }
     final attempt = ref.watch(missionControllerProvider(number));
     return switch (attempt) {
-      // A mission left part-way: continue it, or start again.
-      AsyncData(:final value) when value.saved != null => Stack(
-        fit: StackFit.expand,
-        children: [
-          _DarkRoom(grade: value.mission.grade),
-          ResumeSheet(
-            grade: value.mission.grade,
-            onContinue: ref
-                .read(missionControllerProvider(number).notifier)
-                .resume,
-            onRestart: () => ref
-                .read(missionControllerProvider(number).notifier)
-                .startAfresh(),
-          ),
-        ],
+      // A mission left part-way: the room's intro, with Resume and Start over (issue 76).
+      AsyncData(:final value) when value.saved != null => RoomIntro(
+        mission: value.mission,
+        calm: ref.watch(profileProvider).value?.calmMode ?? false,
+        beatsDone: value.saved!.plays.length,
+        onStart: () {
+          ref.read(gameSoundsProvider).uiTap();
+          ref.read(missionControllerProvider(number).notifier).resume();
+        },
+        onStartOver: () {
+          ref.read(gameSoundsProvider).uiTap();
+          unawaited(
+            ref.read(missionControllerProvider(number).notifier).startAfresh(),
+          );
+        },
+        onBack: () {
+          ref.read(gameSoundsProvider).uiTap();
+          context.go(Routes.tower());
+        },
       ),
       AsyncData(:final value) => MissionPlayer(
         key: ValueKey(number),
@@ -101,7 +110,7 @@ class MissionScreen extends ConsumerWidget {
               stackTrace: stackTrace,
             ),
       ),
-      _ => const _DarkRoom(),
+      _ => loading,
     };
   }
 }
@@ -122,25 +131,37 @@ String _afterRoom(Mission mission, {required bool firstClear}) {
 bool _firstClear(WidgetRef ref, int number) =>
     ref.read(voiceControllerProvider(number)).value?.attemptNumber == 1;
 
-/// Loading: the room's shape in the floor's colours before it fills in (a skeleton shaped
-/// like the screen, never a spinner).
+/// Loading: the room's intro in sand shapes, on the floor's tint, before it fills in (a
+/// skeleton shaped like what arrives, never a spinner). It's what the door opens onto for the
+/// moment the attempt takes to read from the device.
 class _DarkRoom extends StatelessWidget {
   const _DarkRoom({this.grade = ChapterGrade.lobby});
 
   final ChapterGrade grade;
 
-  static const double _bubble = 88;
-  static const double _card = 72;
+  static const double _arch = 112;
+  static const double _archHeight = 136;
+  static const double _line = 16;
+  static const double _title = 28;
+  static const double _panel = 184;
+  static const double _short = 120;
+  static const double _long = 240;
 
   @override
   Widget build(BuildContext context) {
     final f = grade.floor;
-    Widget block(double height, Color color, double radius) => SizedBox(
+    Widget block(
+      double height,
+      Color color, {
+      double? width,
+      BorderRadius? radius,
+    }) => SizedBox(
       height: height,
+      width: width,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: radius ?? BorderRadius.circular(DaylightRadius.tile),
         ),
       ),
     );
@@ -153,22 +174,36 @@ class _DarkRoom extends StatelessWidget {
           child: SingleChildScrollView(
             physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(
-              DaylightSpace.s16,
+              DaylightSpace.s24,
               DaylightSpace.s64,
-              DaylightSpace.s16,
+              DaylightSpace.s24,
               DaylightSpace.s16,
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                block(RoomStage.defaultHeight, f.soft, DaylightRadius.panel),
+                block(
+                  _archHeight,
+                  f.soft,
+                  width: _arch,
+                  radius: DaylightRadius.arch,
+                ),
                 const SizedBox(height: DaylightSpace.s16),
-                block(_bubble, DaylightColors.raised, DaylightRadius.card),
+                block(_line, f.soft, width: _short),
+                const SizedBox(height: DaylightSpace.s8),
+                block(_title, f.soft, width: _long),
                 const SizedBox(height: DaylightSpace.s24),
-                for (var i = 0; i < 3; i++) ...[
-                  block(_card, DaylightColors.raised, DaylightRadius.card),
-                  const SizedBox(height: DaylightSpace.s8),
-                ],
+                block(
+                  _panel,
+                  DaylightColors.raised,
+                  radius: BorderRadius.circular(DaylightRadius.panel),
+                ),
+                const SizedBox(height: DaylightSpace.s24),
+                block(
+                  DaylightSize.button,
+                  f.soft,
+                  radius: BorderRadius.circular(DaylightRadius.card),
+                ),
               ],
             ),
           ),

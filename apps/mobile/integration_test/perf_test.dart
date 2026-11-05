@@ -11,7 +11,7 @@ import 'package:the_last_room/core/notifications/reminder_settings.dart';
 import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/mission/scene/lower_third.dart';
-import 'package:the_last_room/features/mission/scene/mission_card.dart';
+import 'package:the_last_room/features/mission/scene/room_intro.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/mission/widgets/next_control.dart';
 import 'package:the_last_room/features/progress/progress_screen.dart';
@@ -130,7 +130,9 @@ void main() {
     await measure('mission_beat', () async {
       // The title card, then every line typing out at its own pace, Next after each.
       // (The card may have moved on by itself while the last path's timings flushed.)
-      if (find.byType(MissionCard).evaluate().isNotEmpty) await rig.tapScene();
+      if (find.text(RoomIntro.start).evaluate().isNotEmpty) {
+        await rig.startInterview();
+      }
       final lines = rig.state(5).scene.length;
       for (var i = 0; i < lines; i++) {
         await rig.until(find.byType(NextControl));

@@ -14,7 +14,6 @@ import 'package:the_last_room/core/profile/profile_repository.dart';
 import 'package:the_last_room/features/debrief/ai_score.dart';
 import 'package:the_last_room/features/debrief/ai_score_store.dart';
 import 'package:the_last_room/features/debrief/ai_verdict_cards.dart';
-import 'package:the_last_room/features/mission/scene/mission_card.dart';
 import 'package:the_last_room/features/mission/widgets/choice_card.dart';
 import 'package:the_last_room/features/onboarding/explainer_copy.dart';
 import 'package:the_last_room/features/onboarding/onboarding_screen.dart';
@@ -206,9 +205,7 @@ void main() {
       takePlaybackProvider.overrideWithValue(SilentTakePlayback()),
     ]);
     await rig.boot(Routes.mission(room.number), size: phone);
-    await rig.until(find.byType(MissionCard));
-    await tester.tapAt(const Offset(8, 140));
-    await tester.pump();
+    await rig.startInterview();
     await rig.until(
       find.text(RecorderPanel.readyLine).hitTestable(),
       timeout: _long,

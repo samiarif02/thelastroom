@@ -7,7 +7,6 @@ import 'package:the_last_room/features/mission/mission_lookup.dart';
 import 'package:the_last_room/features/mission/mission_player.dart';
 import 'package:the_last_room/features/tower/all_chapters_screen.dart';
 import 'package:the_last_room/features/tower/chapter_section.dart';
-import 'package:the_last_room/features/tower/elevator.dart';
 import 'package:the_last_room/features/tower/tower_door.dart';
 import 'package:the_last_room/features/tower/tower_rooms.dart';
 import 'package:the_last_room/features/tower/tower_screen.dart';
@@ -161,16 +160,13 @@ void main() {
     expect(find.text(ChapterSection.allLit), findsNWidgets(chapters.length));
   });
 
-  testWidgets('the room up next starts through the lift, like its door', (
-    tester,
-  ) async {
+  testWidgets('the room up next opens through its door', (tester) async {
     final rig = MissionRig(tester);
     await rig.boot(Routes.chapters);
     await settle(rig);
     final rooms = towerRooms(missions, const []);
     await tester.tap(find.bySemanticsLabel(rowLabel(rooms[0], rooms)));
     await tester.pump();
-    expect(find.byType(Elevator), findsOneWidget);
     expect(rig.sounds.count('roomEntered'), 1);
     expect(rig.analytics.only(AnalyticsEvent.roomEntered).wire, {
       'mission_id': missions[0].id,
@@ -211,7 +207,6 @@ void main() {
       lockedNote(missions[3], floorOpen: true),
       startsWith('Opens after room 3'),
     );
-    expect(find.byType(Elevator), findsNothing);
     expect(rig.sounds.count('lockedRoomTapped'), 1);
     expect(find.byType(AllChaptersScreen), findsOneWidget);
     expect(find.byType(MissionPlayer), findsNothing);
