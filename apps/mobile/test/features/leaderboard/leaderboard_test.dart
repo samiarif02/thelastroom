@@ -162,6 +162,7 @@ void main() {
       await rig.until(find.text(BoardNotice.emptyTitle(LeaderboardScope.week)));
       expect(find.text(BoardNotice.play), findsOneWidget);
       expect(find.text(YouRow.startLine), findsOneWidget);
+      expect(find.text(YouRow.notYet), findsOneWidget);
     });
 
     testWidgets('hidden: "You\'re hidden" on the pinned row', (tester) async {

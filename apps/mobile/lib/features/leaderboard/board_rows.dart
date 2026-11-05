@@ -155,6 +155,7 @@ class YouRow extends StatelessWidget {
   final int? seenBefore;
 
   static String headline(int rank) => 'You’re #$rank';
+  static const String notYet = 'Not on the board yet';
   static const String hiddenTag = 'You’re hidden';
   static const String topLine = 'Top of the board. Hold it.';
   static const String startLine = 'Play a room to get on the board';
@@ -177,6 +178,8 @@ class YouRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final line = climbLine(board, me);
     final xp = me.score(board.scope);
+    // With no XP on this board there's no real place to boast about.
+    final head = xp == 0 ? notYet : headline(me.rank);
     final roomy = MediaQuery.textScalerOf(context).scale(1) <= _roomyScale;
     final words = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,7 +189,7 @@ class YouRow extends StatelessWidget {
           runSpacing: DaylightSpace.s4,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Text(headline(me.rank), style: DaylightType.heading6),
+            Text(head, style: DaylightType.heading6),
             if (hidden)
               const Tag(label: hiddenTag, icon: PhosphorBold.eyeSlash),
           ],
@@ -217,7 +220,7 @@ class YouRow extends StatelessWidget {
     return Semantics(
       container: true,
       label:
-          '${headline(me.rank)}, ${groupThousands(xp)} XP. $line.'
+          '$head, ${groupThousands(xp)} XP. $line.'
           '${hidden ? ' $hiddenTag from other players.' : ''}',
       excludeSemantics: true,
       child: DecoratedBox(
