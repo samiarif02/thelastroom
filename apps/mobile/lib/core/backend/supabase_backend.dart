@@ -23,6 +23,7 @@ class SupabaseBackend implements Backend {
   static const String _scoreFunction = 'score';
   static const String _scoreVoiceFunction = 'score-voice';
   static const String _aiScores = 'ai_scores';
+  static const String _leaderboardFunction = 'leaderboard';
 
   /// Where "Save your progress"'s confirmation link lands: the landing site's "You're verified"
   /// page (web/src/app/verified). It must be in the project's Redirect URLs (status 67).
@@ -94,6 +95,25 @@ class SupabaseBackend implements Backend {
     await (await _client())
         .from(_profiles)
         .upsert(profile.toRow(), onConflict: 'user_id');
+  }
+
+  @override
+  Future<void> upsertLeaderboardReport(RemoteLeaderboardReport report) async {
+    await (await _client())
+        .from(_profiles)
+        .upsert(report.toRow(), onConflict: 'user_id');
+  }
+
+  @override
+  Future<List<RemoteLeaderboardRow>> fetchLeaderboard(
+    LeaderboardScope scope, {
+    int limit = leaderboardSize,
+  }) async {
+    final rows = await (await _client()).rpc<List<Object?>>(
+      _leaderboardFunction,
+      params: {'p_scope': scope.wireName, 'p_limit': limit},
+    );
+    return [for (final row in rows) ?RemoteLeaderboardRow.fromRow(row)];
   }
 
   @override

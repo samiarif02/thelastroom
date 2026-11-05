@@ -99,11 +99,90 @@ void main() {
     expect(granted('update', 'profiles'), containsAll(keys));
   });
 
+  const report = RemoteLeaderboardReport(
+    visible: true,
+    totalXp: 940,
+    weekXp: 120,
+    weekStart: '2026-11-02',
+    streakWeeks: 2,
+  );
+
+  test('the leaderboard report sends only its own granted columns', () {
+    final keys = report.toRow().keys.toSet();
+    expect(granted('insert', 'profiles'), containsAll(keys));
+    expect(granted('update', 'profiles'), containsAll(keys));
+    expect(keys, isNot(contains('total_xp_at')));
+    expect(keys, isNot(contains('week_xp_at')));
+  });
+
+  test('the profile row leaves the leaderboard columns to the report', () {
+    // A project without the leaderboard migration still takes the profile.
+    expect(
+      const RemoteProfile().toRow().keys.toSet().intersection(
+        report.toRow().keys.toSet(),
+      ),
+      isEmpty,
+    );
+  });
+
+  test('the board function returns the columns the app reads, and no id', () {
+    final returns = RegExp(
+      r'create function public\.leaderboard\([^)]*\)\s*returns table \(([^)]*)\)',
+    ).firstMatch(sql)!;
+    final columns = [
+      for (final line in returns.group(1)!.split(','))
+        line.trim().split(RegExp(r'\s+')).first,
+    ];
+    expect(columns, [
+      'rank',
+      'display_name',
+      'tag',
+      'total_xp',
+      'week_xp',
+      'streak_weeks',
+      'is_me',
+    ]);
+    final row = RemoteLeaderboardRow.fromRow({
+      for (final c in columns)
+        c: c == 'tag'
+            ? '4821'
+            : (c == 'is_me' ? true : (c == 'display_name' ? 'Sami' : 1)),
+    });
+    expect(row, isNotNull);
+    expect(row!.tag, '4821');
+    expect(row.displayName, 'Sami');
+  });
+
+  test('a board row with a missing or wrong column is skipped', () {
+    expect(RemoteLeaderboardRow.fromRow({'rank': 1}), isNull);
+    expect(RemoteLeaderboardRow.fromRow('x'), isNull);
+    final noName = RemoteLeaderboardRow.fromRow({
+      'rank': 2,
+      'display_name': null,
+      'tag': '0042',
+      'total_xp': 10,
+      'week_xp': 0,
+      'streak_weeks': 0,
+      'is_me': false,
+    });
+    expect(noName?.displayName, isNull);
+  });
+
+  test('visibility is read back from the profile row, on by default', () {
+    expect(RemoteProfile.fromRow(const {}).leaderboardVisible, isTrue);
+    expect(
+      RemoteProfile.fromRow(const {'leaderboard_visible': false})
+          .leaderboardVisible,
+      isFalse,
+    );
+  });
+
   test('nothing the server sets, and never the draft, is in a sent row', () {
     for (final row in [
       attempt.toRow(),
       voiceAttempt.toRow(),
       const RemoteProfile().toRow(),
+      report.toRow(),
     ]) {
       expect(row.keys, isNot(contains('user_id')));
       expect(row.keys, isNot(contains('created_at')));

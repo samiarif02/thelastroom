@@ -5,6 +5,7 @@ import 'package:engine/engine.dart';
 
 import '../backend/backend.dart';
 import '../db/app_database.dart';
+import '../leaderboard/leaderboard_report.dart';
 import '../logging/log.dart';
 import '../profile/drift_profile_repository.dart';
 import '../profile/profile_repository.dart';
@@ -128,8 +129,13 @@ class SyncWorker {
       for (final e in due)
         if (e.kind == OutboxKind.profile) e,
     ];
+    final leaderboard = [
+      for (final e in due)
+        if (e.kind == OutboxKind.leaderboard) e,
+    ];
     await _send(attempts, _sendAttempts);
     await _send(profile, (_) => _sendProfile());
+    await _send(leaderboard, (_) => _sendLeaderboard());
     return true;
   }
 
@@ -179,6 +185,16 @@ class SyncWorker {
     if (profile != null) await _backend.upsertProfile(remoteProfile(profile));
   }
 
+  Future<void> _sendLeaderboard() async {
+    final report = await DriftLeaderboardReportStore.read(_db);
+    if (report == null) return;
+    final utc = _clock().toUtc();
+    final today = CalendarDay(utc.year, utc.month, utc.day);
+    await _backend.upsertLeaderboardReport(
+      report.toRemote(fallbackWeek: weekStart(today)),
+    );
+  }
+
   Future<void> _scheduleRetry() async {
     _retry?.cancel();
     if (_disposed) return;
@@ -210,6 +226,7 @@ class SyncWorker {
         }
         if (profile != null) {
           await DriftProfileRepository.write(_db, playerProfile(profile));
+          await restoreLeaderboardVisibility(_db, profile);
         }
         await _db.setMeta(restoredKey, 'done');
       });
@@ -269,6 +286,22 @@ StoredAttempt storedAttempt(RemoteAttempt a) => StoredAttempt(
   beatPlays: BeatPlayRecord.listFrom(a.beatPlays),
   voice: VoiceAnswerRecord.fromJson(a.voiceAnswer),
 );
+
+/// Carries "Show me on the leaderboard" down from the account's [profile] (a restore, a
+/// sign-in), so a player who hid stays hidden on a new device. The numbers aren't restored: the
+/// device recomputes them from the attempts it now has.
+Future<void> restoreLeaderboardVisibility(
+  AppDatabase db,
+  RemoteProfile profile,
+) async {
+  final stored =
+      await DriftLeaderboardReportStore.read(db) ?? LeaderboardReport.initial;
+  if (stored.visible == profile.leaderboardVisible) return;
+  await DriftLeaderboardReportStore.write(
+    db,
+    stored.copyWith(visible: profile.leaderboardVisible),
+  );
+}
 
 RemoteProfile remoteProfile(PlayerProfile p) => RemoteProfile(
   firstName: p.firstName,

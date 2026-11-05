@@ -129,6 +129,7 @@ class RemoteProfile {
     this.autoAdvance = true,
     this.onboarded = false,
     this.chapter2WaitlistAt,
+    this.leaderboardVisible = true,
   });
 
   factory RemoteProfile.fromRow(Map<String, Object?> row) => RemoteProfile(
@@ -144,6 +145,7 @@ class RemoteProfile {
       final String at => DateTime.parse(at).toUtc(),
       _ => null,
     },
+    leaderboardVisible: row['leaderboard_visible'] != false,
   );
 
   final String? firstName;
@@ -156,6 +158,11 @@ class RemoteProfile {
   final bool onboarded;
   final DateTime? chapter2WaitlistAt;
 
+  /// "Show me on the leaderboard" (issue 72), read on a restore. Not in [toRow]: it travels with
+  /// the leaderboard numbers ([RemoteLeaderboardReport]), so a project without that migration
+  /// yet still takes the profile.
+  final bool leaderboardVisible;
+
   Map<String, Object?> toRow() => {
     'first_name': firstName,
     'experience': experience,
@@ -167,6 +174,101 @@ class RemoteProfile {
     'onboarded': onboarded,
     'chapter_2_waitlist_at': chapter2WaitlistAt?.toUtc().toIso8601String(),
   };
+}
+
+/// The leaderboard's numbers on the player's own `profiles` row (issue 72), as the device's
+/// engine computed them: the same XP "Your file" shows. Sent on their own (an upsert of these
+/// columns only), so the profile's sync never depends on them. Client-reported: the board
+/// trusts the device (docs/completion.md).
+class RemoteLeaderboardReport {
+  const RemoteLeaderboardReport({
+    required this.visible,
+    required this.totalXp,
+    required this.weekXp,
+    required this.weekStart,
+    required this.streakWeeks,
+  });
+
+  final bool visible;
+  final int totalXp;
+
+  /// XP in the UTC week starting [weekStart].
+  final int weekXp;
+
+  /// That week's Monday, `yyyy-mm-dd`.
+  final String weekStart;
+  final int streakWeeks;
+
+  Map<String, Object?> toRow() => {
+    'leaderboard_visible': visible,
+    'total_xp': totalXp,
+    'week_xp': weekXp,
+    'week_start': weekStart,
+    'streak_weeks': streakWeeks,
+  };
+}
+
+/// How many rows the board asks for (the top 50, and the caller's own row wherever it is).
+const int leaderboardSize = 50;
+
+/// Which board `public.leaderboard()` ranks: this UTC week's XP, or total XP.
+enum LeaderboardScope {
+  week('week'),
+  allTime('all');
+
+  const LeaderboardScope(this.wireName);
+
+  /// The function's `p_scope`.
+  final String wireName;
+}
+
+/// One row of `public.leaderboard()`: never a user id or an email (the function returns none).
+class RemoteLeaderboardRow {
+  const RemoteLeaderboardRow({
+    required this.rank,
+    required this.displayName,
+    required this.tag,
+    required this.totalXp,
+    required this.weekXp,
+    required this.streakWeeks,
+    required this.isMe,
+  });
+
+  /// Null when [row] isn't one the function returns.
+  static RemoteLeaderboardRow? fromRow(Object? row) {
+    if (row case {
+      'rank': final num rank,
+      'tag': final String tag,
+      'total_xp': final num total,
+      'week_xp': final num week,
+      'streak_weeks': final num streak,
+      'is_me': final bool me,
+    }) {
+      final name = (row as Map<String, Object?>)['display_name'];
+      return RemoteLeaderboardRow(
+        rank: rank.toInt(),
+        displayName: name is String && name.isNotEmpty ? name : null,
+        tag: tag,
+        totalXp: total.toInt(),
+        weekXp: week.toInt(),
+        streakWeeks: streak.toInt(),
+        isMe: me,
+      );
+    }
+    return null;
+  }
+
+  final int rank;
+
+  /// The player's first name, or null when they gave none.
+  final String? displayName;
+
+  /// Four digits from the user id, computed by the server.
+  final String tag;
+  final int totalXp;
+  final int weekXp;
+  final int streakWeeks;
+  final bool isMe;
 }
 
 int _int(Object? v) => switch (v) {

@@ -20,7 +20,20 @@ class Progression {
     required this.weeklyGoal,
     this.interviewDate,
     this.playedToday = false,
+    this.weekXp = 0,
+    this.weekStartUtc,
+    this.weeksInARow = 0,
   });
+
+  /// XP earned this UTC week (issue 72's leaderboard): the rooms finished since Monday 00:00
+  /// UTC, and the Recall rounds.
+  final int weekXp;
+
+  /// The UTC Monday [weekXp] counts from.
+  final CalendarDay? weekStartUtc;
+
+  /// Weeks in a row the weekly goal was met (the ring closed), this week counting once it has.
+  final int weeksInARow;
 
   /// Today already counts towards the week (a mission or a Recall round today), so another
   /// session today doesn't move the ring.
@@ -69,18 +82,30 @@ CalendarDay dayOf(DateTime t) => CalendarDay(t.year, t.month, t.day);
 final progressionProvider = FutureProvider.autoDispose<Progression>((
   ref,
 ) async {
-  final today = dayOf(ref.watch(progressionClockProvider)());
+  final now = ref.watch(progressionClockProvider)();
+  final today = dayOf(now);
+  final utcToday = dayOf(now.toUtc());
   final record = await loadProgressionRecord(ref);
   final stored = await ref.watch(progressRepositoryProvider).attempts();
-  final played = [
+  final kept = [
     for (final a in stored)
       if (missions.where((m) => m.id == a.missionId).firstOrNull case final m?)
-        PlayedMission(
-          missionId: a.missionId,
-          score: a.score,
-          hinted: a.hinted,
-          requirements: m.skillRequirements,
-        ),
+        (a, m),
+  ];
+  final played = [
+    for (final (a, m) in kept)
+      PlayedMission(
+        missionId: a.missionId,
+        score: a.score,
+        hinted: a.hinted,
+        requirements: m.skillRequirements,
+      ),
+  ];
+  final xps = attemptXps(played);
+  final earned = [
+    for (final (i, (a, _)) in kept.indexed)
+      DatedXp(dayOf((a.completedAt ?? now).toUtc()), xps[i].total),
+    for (final e in record.recallXpByUtcDay.entries) DatedXp(e.key, e.value),
   ];
   final unlocked = unlockedSkills(played);
   final days = {
@@ -88,6 +113,7 @@ final progressionProvider = FutureProvider.autoDispose<Progression>((
     for (final a in stored) dayOf((a.completedAt ?? DateTime.now()).toLocal()),
   };
   final profile = ref.watch(profileProvider).value;
+  final goal = profile?.weeklyGoal ?? defaultWeeklyGoal;
   final last = lastAttemptXp(played);
   return Progression(
     xp: totalXp(played, recallRoundXp: record.recallXp),
@@ -96,9 +122,12 @@ final progressionProvider = FutureProvider.autoDispose<Progression>((
     unlocked: unlocked,
     uncelebrated: unlocked.difference(record.celebrated),
     sessionsThisWeek: sessionsThisWeek(days, today: today),
-    weeklyGoal: profile?.weeklyGoal ?? defaultWeeklyGoal,
+    weeklyGoal: goal,
     interviewDate: record.interviewDate,
     playedToday: days.contains(today),
+    weekXp: weekXp(earned, today: utcToday),
+    weekStartUtc: weekStart(utcToday),
+    weeksInARow: weeksInARow(days, weeklyGoal: goal, today: today),
   );
 });
 
@@ -130,12 +159,18 @@ class ProgressionActions {
 
   final Ref _ref;
 
-  Future<void> recordRecallRound(List<RecallVerdict> verdicts) => _change(
-    (r) => r.copyWith(
-      recallXp: r.recallXp + recallXp(verdicts),
+  Future<void> recordRecallRound(List<RecallVerdict> verdicts) => _change((r) {
+    final xp = recallXp(verdicts);
+    final utc = dayOf(_ref.read(progressionClockProvider)().toUtc());
+    return r.copyWith(
+      recallXp: r.recallXp + xp,
       recallDays: {...r.recallDays, _today},
-    ),
-  );
+      recallXpByUtcDay: {
+        ...r.recallXpByUtcDay,
+        utc: (r.recallXpByUtcDay[utc] ?? 0) + xp,
+      },
+    );
+  });
 
   Future<void> celebrate(Iterable<Skill> skills) =>
       _change((r) => r.copyWith(celebrated: {...r.celebrated, ...skills}));
