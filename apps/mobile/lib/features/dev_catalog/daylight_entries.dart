@@ -770,6 +770,7 @@ class _Skills extends StatelessWidget {
           TabItem(icon: PhosphorBold.buildings, label: 'Tower'),
           TabItem(icon: PhosphorBold.cards, label: 'Recall', badge: 2),
           TabItem(icon: PhosphorBold.medal, label: 'Skills'),
+          TabItem(icon: PhosphorBold.trophy, label: 'Leaderboard'),
           TabItem(icon: PhosphorBold.userCircle, label: 'You'),
         ],
       ),
